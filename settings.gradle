@@ -1,0 +1,4 @@
+rootProject.name='blasterV2'
+include ':app'
+include ':minigl'
+include ':simulator'

@@ -1,0 +1,33 @@
+newmtl lambert5SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd alnilam_Stars_Pattern_Vector_Clipart.png
+Ni 1.00
+newmtl lambert28SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd space_scene.png
+Ni 1.00
+newmtl lambert29SG
+illum 4
+Kd 0.92 0.91 0.49
+Ka 0.00 0.00 0.00
+Tf 0.36 0.36 0.36
+Ni 1.00
+newmtl lunohod1:lambert5SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+newmtl ufo:lambert3SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd ufo.png
+Ni 1.00

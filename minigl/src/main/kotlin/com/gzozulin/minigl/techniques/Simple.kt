@@ -1,0 +1,88 @@
+package com.gzozulin.minigl.techniques
+
+import com.gzozulin.minigl.assets.ShadersLib
+import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.MatrixStack
+import com.gzozulin.minigl.scene.WasdInput
+import org.joml.Matrix4f
+
+class SimpleTechnique(shadersLib: ShadersLib) : GlResource() {
+    private val program = shadersLib.loadProgram(
+        "shaders/simple/no_lighting.vert", "shaders/simple/no_lighting.frag")
+
+    init {
+        addChildren(program)
+    }
+
+    fun draw(viewM: mat4, projectionM: mat4, draw: () -> Unit) {
+        checkReady()
+        glBind(program) {
+            program.setUniform(GlUniform.UNIFORM_VIEW_M, viewM)
+            program.setUniform(GlUniform.UNIFORM_PROJ_M, projectionM)
+            draw.invoke()
+        }
+    }
+
+    fun instance(mesh: GlMesh, diffuse: GlTexture, modelM: Matrix4f) {
+        checkReady()
+        glBind(mesh, diffuse) {
+            program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.draw(indicesCount = mesh.indicesCount)
+        }
+    }
+}
+
+private val shadersLib = ShadersLib()
+private val texturesLib = TexturesLib()
+
+private val window = GlWindow()
+
+private val matrixStack = MatrixStack()
+private val camera = Camera()
+private val controller = Controller(position = vec3().front())
+private val wasdInput = WasdInput(controller)
+
+private val simpleTechnique = SimpleTechnique(shadersLib)
+private val diffuse = texturesLib.loadTexture("textures/utah.jpg")
+private val rectangle = GlMesh.rect()
+
+fun main() {
+    window.create(isHoldingCursor = false) {
+        window.deltaCallback = { delta ->
+            wasdInput.onCursorDelta(delta)
+        }
+        window.keyCallback = { key, pressed ->
+            wasdInput.onKeyPressed(key, pressed)
+        }
+        window.resizeCallback = { width, height ->
+            camera.setPerspective(width, height)
+        }
+        glUse(simpleTechnique, diffuse, rectangle) {
+            window.show {
+                glClear()
+                controller.apply { position, direction ->
+                    camera.setPosition(position)
+                    camera.lookAlong(direction)
+                }
+                simpleTechnique.draw(camera.calculateViewM(), camera.projectionM) {
+                    matrixStack.pushMatrix(mat4().identity().translate(vec3().left())) {
+                        simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
+                    }
+                    matrixStack.pushMatrix(mat4().identity().translate(vec3().right())) {
+                        simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
+                        matrixStack.pushMatrix(mat4().identity().translate(vec3().up())) {
+                            simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
+                        }
+                        matrixStack.pushMatrix(mat4().identity().translate(vec3().down())) {
+                            simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
