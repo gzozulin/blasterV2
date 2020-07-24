@@ -1,5 +1,11 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'application'
+
+//  ./gradlew -PmainClass=com.blaster.impl.SkyboxKt run
+application {
+    mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "NULL"
+}
 
 project.ext.lwjglVersion = "3.0.0a"
 
