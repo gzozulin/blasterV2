@@ -175,7 +175,7 @@ private val meshLib = MeshLib()
 private val console = Console()
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().up().mul(20f), velocity = 1f)
+private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val light = Light(vec3(1f), false)
