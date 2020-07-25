@@ -31,7 +31,7 @@ Each project contains a set of runnables. To try them out, you need to clone the
 ### Soccer
 ```./gradlew -PmainClass=com.gzozulin.sim.simulation.SoccerKt :simulator:run```
 
-<img style="float: right;" width="200px" src="https://pbs.twimg.com/media/EdPHu0dWkAAEIU1?format=png&name=small">
+<img style="align: left;" width="200px" src="https://pbs.twimg.com/media/EdPHu0dWkAAEIU1?format=png&name=small"> 30k of bouncing balls
 
 ### TileMap
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.TileMapKt :minigl:run```
