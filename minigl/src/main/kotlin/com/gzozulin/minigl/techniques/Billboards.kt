@@ -1,7 +1,7 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.shadersLib
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
@@ -17,8 +17,8 @@ abstract class BillboardsProvider {
     abstract fun size(): Int
 }
 
-class BillboardsTechnique(shadersLib: ShadersLib, max: Int) : GlResource() {
-    private val program: GlProgram = shadersLib.loadProgram(
+class BillboardsTechnique(max: Int) : GlResource() {
+    private val program = shadersLib.loadProgram(
         "shaders/billboards/billboards.vert", "shaders/billboards/billboards.frag")
 
     private val positions = GlBuffer(backend.GL_ARRAY_BUFFER, ByteBuffer.allocateDirect(max * 3 * 4)
@@ -93,12 +93,9 @@ class BillboardsTechnique(shadersLib: ShadersLib, max: Int) : GlResource() {
 
 private val window = GlWindow()
 
-private val shadersLib = ShadersLib()
-private val textureLib = TexturesLib()
+private val diffuse = texturesLib.loadTexture("textures/font.png")
 
-private val diffuse = textureLib.loadTexture("textures/font.png")
-
-private val billboardsTechnique = BillboardsTechnique(shadersLib, 1000)
+private val billboardsTechnique = BillboardsTechnique(1000)
 
 private val camera = Camera()
 private val controller = Controller(position = vec3().front(), velocity = 0.1f)

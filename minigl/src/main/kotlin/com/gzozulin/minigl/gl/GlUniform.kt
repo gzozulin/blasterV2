@@ -38,6 +38,8 @@ enum class GlUniform(val label: String) {
 
     UNIFORM_WIDTH               ("uWidth"),
     UNIFORM_HEIGHT              ("uHeight"),
+    UNIFORM_LEFT                ("uLeft"),
+    UNIFORM_TOP                 ("uTop"),
 
     UNIFORM_SCALE_FLAG          ("uScaleFlag"),
     UNIFORM_TRANSPARENCY_FLAG   ("uTransparencyFlag"),

@@ -7,9 +7,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 
-class ShadersLib {
-    private val assetStream = AssetStream()
+val shadersLib = ShadersLib()
 
+class ShadersLib internal constructor() {
     fun loadProgram(vertShaderAsset: String, fragShaderAsset: String) : GlProgram =
         GlProgram(
             GlShader(GlShaderType.VERTEX_SHADER, slurpAsset(vertShaderAsset)),

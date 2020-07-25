@@ -1,13 +1,13 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.MeshLib
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.meshLib
+import com.gzozulin.minigl.assets.shadersLib
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
 
-class PbrTechnique(shadersLib: ShadersLib): GlResource() {
+class PbrTechnique: GlResource() {
     private val program = shadersLib.loadProgram("shaders/pbr/pbr.vert", "shaders/pbr/pbr.frag")
 
     init {
@@ -58,16 +58,12 @@ class PbrTechnique(shadersLib: ShadersLib): GlResource() {
 
 private val window = GlWindow()
 
-private val shadersLib = ShadersLib()
-private val texturesLib = TexturesLib()
-private val meshLib = MeshLib()
-
 private val camera = Camera()
 private val controller = Controller(position = vec3(0f, 2.5f, 4f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = SkyboxTechnique(shadersLib, texturesLib, meshLib, "textures/miramar")
-private val pbrTechnique = PbrTechnique(shadersLib)
+private val skyboxTechnique = SkyboxTechnique("textures/miramar")
+private val pbrTechnique = PbrTechnique()
 
 private val meshData = meshLib.loadMesh("models/mandalorian/mandalorian.obj") { println("loading $it") }
 private val material = texturesLib.loadPbr("models/mandalorian")

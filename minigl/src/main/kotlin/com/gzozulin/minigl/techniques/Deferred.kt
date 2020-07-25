@@ -1,15 +1,15 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.MeshLib
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.meshLib
+import com.gzozulin.minigl.assets.shadersLib
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
 
-class DeferredTechnique(shadersLib: ShadersLib) : GlResource() {
+class DeferredTechnique : GlResource() {
     private val programGeomPass: GlProgram = shadersLib.loadProgram(
         "shaders/deferred/geom_pass.vert", "shaders/deferred/geom_pass.frag")
     private val programLightPass = shadersLib.loadProgram(
@@ -168,10 +168,6 @@ class DeferredTechnique(shadersLib: ShadersLib) : GlResource() {
     }
 }
 
-private val shadersLib = ShadersLib()
-private val textureLib = TexturesLib()
-private val meshLib = MeshLib()
-
 private val console = Console()
 
 private val camera = Camera()
@@ -185,11 +181,11 @@ private val objMatrix = mat4().identity()
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())
 private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
 
-private val deferredTechnique = DeferredTechnique(shadersLib)
-private val skyboxTechnique = SkyboxTechnique(shadersLib, textureLib, meshLib, "textures/miramar")
-private val textTechnique = TextTechnique(shadersLib, textureLib)
+private val deferredTechnique = DeferredTechnique()
+private val skyboxTechnique = SkyboxTechnique("textures/miramar")
+private val textTechnique = TextTechnique()
 private val mesh = meshLib.loadMesh("models/house/low.obj") { println("progress: $it") }.mesh
-private val diffuse = textureLib.loadTexture("models/house/house_diffuse.png")
+private val diffuse = texturesLib.loadTexture("models/house/house_diffuse.png")
 
 private var mouseLook = false
 

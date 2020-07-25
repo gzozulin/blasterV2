@@ -1,12 +1,11 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.shadersLib
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
-import java.lang.IllegalArgumentException
 import java.util.*
 
 private val colorFailure = color().parseColor("ffabab")
@@ -20,14 +19,10 @@ private const val startY = 1 - textScale
 
 private val position = Vector2f()
 
-class TextTechnique(
-    shadersLib: ShadersLib,
-    textureLib: TexturesLib,
-    font: String = "textures/font.png"
-) : GlResource() {
+class TextTechnique(font: String = "textures/font.png") : GlResource() {
 
     private val program = shadersLib.loadProgram("shaders/text/text.vert", "shaders/text/text.frag")
-    private val diffuse = textureLib.loadTexture(font)
+    private val diffuse = texturesLib.loadTexture(font)
     private val rect = GlMesh.rect()
 
     private val startBuf = Vector2f()
@@ -108,12 +103,9 @@ class Console(private val timeout: Long = 1000L) {
 
 private val random = Random()
 
-private val shadersLib = ShadersLib()
-private val texturesLib = TexturesLib()
-
 private val console = Console()
 
-private val technique = TextTechnique(shadersLib, texturesLib)
+private val technique = TextTechnique()
 
 fun main() {
     val window = GlWindow()

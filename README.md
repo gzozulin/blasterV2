@@ -26,7 +26,7 @@ Now I would like to try a different approach. Recently I watched a couple of vid
 I am not bounded by any contracts or restrictions  - it is just **an art form for me**. I can start wherever I want, and I can finish as I am pleased. Since I do not wish to receive any cash from it, I'm also not bound to particular design considerations. I don't have to create one more free-to-play money extracting clone. I'm even **more interested in the simulation** aspect of the game than graphics - similar to Dwarf Fortress.
 
 ## Runnables
-Each project contains a set of runnables. To try them out, you need to clone the repo and run an appropriate [Gradle](https://docs.gradle.org/current/userguide/application_plugin.html) command. In 99% of the cases, you can control the camera with **WASD** and **mouse look**.
+Each project contains a set of runnables. To try them out, you need to clone the repo and run an appropriate [Gradle](https://docs.gradle.org/current/userguide/application_plugin.html) command. In 99% of the cases, you can control the camera with **WASD** and **mouse look**. Don't forget to install [you know what](https://www.oracle.com/ca-en/java/technologies/javase/javase-jdk8-downloads.html) to assemble and run the code.
 
 ### Soccer
 ```./gradlew -PmainClass=com.gzozulin.sim.simulation.SoccerKt :simulator:run```

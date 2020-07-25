@@ -27,9 +27,9 @@ private class Intermediate {
     val indicesList = mutableListOf<Int>()
 }
 
-class MeshLib {
-    private val assetStream = AssetStream()
+val meshLib = MeshLib()
 
+class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
 

@@ -1,22 +1,16 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.MeshLib
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.*
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 
-class SkyboxTechnique(
-    shadersLib: ShadersLib,
-    textureLib: TexturesLib,
-    meshLib: MeshLib,
-    skybox: String) : GlResource() {
+class SkyboxTechnique(skybox: String) : GlResource() {
 
     private val program = shadersLib.loadProgram(
         "shaders/skybox/skybox.vert", "shaders/skybox/skybox.frag")
-    private val diffuse = textureLib.loadSkybox(skybox)
+    private val diffuse = texturesLib.loadSkybox(skybox)
     private val cube = meshLib.loadMesh("models/cube/cube.obj").mesh
 
     init {
@@ -39,15 +33,11 @@ class SkyboxTechnique(
     }
 }
 
-private val shadersLib = ShadersLib()
-private val texturesLib = TexturesLib()
-private val meshLib = MeshLib()
-
 private val camera = Camera()
 private val controller = Controller()
 private val wasdInput = WasdInput(controller)
 
-private val technique = SkyboxTechnique(shadersLib, texturesLib, meshLib, "textures/lmcity")
+private val technique = SkyboxTechnique("textures/lmcity")
 
 fun main() {
     val window = GlWindow()

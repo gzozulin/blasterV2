@@ -11,7 +11,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import javax.imageio.ImageIO
 
-open class PixelDecoder {
+private val pixelDecoder = PixelDecoder()
+
+open class PixelDecoder internal constructor() {
     data class Decoded(val pixels: ByteBuffer, val width: Int, val height: Int)
 
     open fun decodePixels(inputStream: InputStream, mirrorX: Boolean = false, mirrorY: Boolean = false): Decoded {
@@ -46,10 +48,9 @@ open class PixelDecoder {
     }
 }
 
-class TexturesLib {
-    private val assetStream = AssetStream()
-    private val pixelDecoder = PixelDecoder()
+val texturesLib = TexturesLib()
 
+class TexturesLib internal constructor() {
     fun loadTexture(filename: String, unit: Int = 0, mirror: Boolean = false): GlTexture {
         val decoded = pixelDecoder.decodePixels(assetStream.openAsset(filename), mirror)
         return GlTexture(unit = unit, width = decoded.width, height = decoded.height, pixels = decoded.pixels)

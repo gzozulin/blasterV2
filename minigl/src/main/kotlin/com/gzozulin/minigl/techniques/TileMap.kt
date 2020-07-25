@@ -1,8 +1,6 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.MeshLib
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.*
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
@@ -15,7 +13,7 @@ import java.util.*
 private const val SHADER_DIFFUSE_CNT = 32
 private const val SHADER_SIDE_CNT = 8
 
-class TileMapTechnique(shadersLib: ShadersLib) : GlResource() {
+class TileMapTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/tilemap/tilemap.vert", "shaders/tilemap/tilemap.frag")
 
@@ -62,16 +60,12 @@ class TileMapTechnique(shadersLib: ShadersLib) : GlResource() {
     }
 }
 
-private val shadersLib = ShadersLib()
-private val texturesLib = TexturesLib()
-private val meshLib = MeshLib()
-
 private val camera = Camera()
 private val controller = Controller(position = vec3(40f, 10f, 40f), pitch = radf(-90f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = SkyboxTechnique(shadersLib, texturesLib, meshLib, "textures/hills")
-private val tileMapTechnique = TileMapTechnique(shadersLib)
+private val skyboxTechnique = SkyboxTechnique("textures/hills")
+private val tileMapTechnique = TileMapTechnique()
 
 private val rect = GlMesh.rect()
 
