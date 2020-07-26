@@ -6,6 +6,7 @@ import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
+import java.util.*
 
 private class ValueCache<T>(private val setter: (T) -> Unit) {
 
@@ -98,8 +99,6 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front(), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val identityM = mat4().identity()
-
 private val sprite = Sprite(
     frames = listOf(
         Frame(  0f,   0f, .25f, .25f),
@@ -112,14 +111,24 @@ private val sprite = Sprite(
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)),
+        Animation(listOf(
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
+        Animation(listOf(
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3))
     )
 )
 
-private var frame = 0
+private val random = Random()
 
 fun main() {
-    window.create(isFullscreen = false) {
+    window.create(isFullscreen = true) {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
@@ -138,9 +147,13 @@ fun main() {
                 }
                 skyboxTechnique.skybox(camera)
                 spritesTechnique.draw(camera) {
-                    spritesTechnique.instance(identityM, diffuse, sprite, 0, frame, 1f, 1f)
-                    frame++
-                    frame %= 60
+                    val origin = mat4().identity()
+                    for (x in 0..100) {
+                        for (z in 0..100) {
+                            origin.setTranslation(x.toFloat(), 0f, z.toFloat())
+                            spritesTechnique.instance(origin, diffuse, sprite, 0, random.nextInt(60), 1f, 1f)
+                        }
+                    }
                 }
             }
         }
