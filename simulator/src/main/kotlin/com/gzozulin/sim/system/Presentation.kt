@@ -1,9 +1,6 @@
 package com.gzozulin.sim.system
 
-import com.gzozulin.sim.entity.*
-import com.gzozulin.minigl.assets.MeshLib
-import com.gzozulin.minigl.assets.ShadersLib
-import com.gzozulin.minigl.assets.TexturesLib
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
@@ -12,11 +9,8 @@ import com.gzozulin.minigl.techniques.BillboardsProvider
 import com.gzozulin.minigl.techniques.BillboardsTechnique
 import com.gzozulin.minigl.techniques.SimpleTechnique
 import com.gzozulin.minigl.techniques.SkyboxTechnique
+import com.gzozulin.sim.entity.*
 import java.nio.FloatBuffer
-
-private val shadersLib = ShadersLib()
-private val textureLib = TexturesLib()
-private val meshLib = MeshLib()
 
 private val camera = Camera()
 private val controller = Controller(position = vec3().up().mul(3f), velocity = 1f)
@@ -25,12 +19,9 @@ private val wasdInput = WasdInput(controller)
 private val identityM = mat4().identity()
 
 class PresentationSystem : GlResource() {
-    private val simpleTechnique = SimpleTechnique(shadersLib)
-    private val billboardsTechnique = BillboardsTechnique(shadersLib, 10000)
-    private val skyboxTechnique = SkyboxTechnique(
-        shadersLib,
-        textureLib,
-        meshLib, "textures/miramar")
+    private val simpleTechnique = SimpleTechnique()
+    private val billboardsTechnique = BillboardsTechnique(10000)
+    private val skyboxTechnique = SkyboxTechnique("textures/miramar")
 
     init {
         addChildren(simpleTechnique, billboardsTechnique, skyboxTechnique)
@@ -38,11 +29,11 @@ class PresentationSystem : GlResource() {
 
     private val textures = mutableMapOf<BillboardType, GlTexture>()
     init {
-        textures[BillboardType.SOCCER] = textureLib.loadTexture("textures/soccer.png")
+        textures[BillboardType.SOCCER] = texturesLib.loadTexture("textures/soccer.png")
         addChildren(textures.values)
     }
 
-    private val fieldTexture = textureLib.loadTexture("textures/grass.jpg")
+    private val fieldTexture = texturesLib.loadTexture("textures/grass.jpg")
     private val fieldRect = GlMesh.rect(left = -32f, right = 32f, top = 32f, bottom = -32f)
 
     fun onCursorDelta(delta: vec2) {

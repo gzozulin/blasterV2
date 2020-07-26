@@ -4,7 +4,8 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
 
 application {
-    mainClassName = project.hasProperty("mainClass") ? getProperty("mainClass") : "NULL"
+    mainClass.set(project.hasProperty("mainClass") ?
+            (String) project.property("mainClass") : "com.gzozulin.sim.simulation.SoccerKt")
 }
 
 dependencies {
