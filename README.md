@@ -43,11 +43,18 @@ Each project contains a set of runnables. To try them out, you need to clone the
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/tileeeees.png" />
 Since I am planning to work mostly myself, the abstraction is fundamental. I believe that the best balance between detail and the amount of effort for the environment can be achieved with <b>tilemaps</b>. I am not yet decided on the particular technique - I might try <href src="https://www.gog.com/game/fallout_2">hex tiles</href> later on. One crucial point is that each tile field - multiple tiles - should be represented by only two triangles. Therefore most of the blending and UV mapping should be handled on the GPU side.
 
-### Physics
+### PBR
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.PhysicsKt :minigl:run```
+
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/mandalorian.png" />
+This application is my take on the <b>Physically Based Rendering (PBR).</b> I am not planning to use this technique for the simulation from the start, since the approach is complex and demanding. I want to start with primitive graphics to focus mainly on the simulation aspect. Later on, when I have something already working, I might switch to PBR renderer. The approach itself can be expended to include Environment Lighting and Deferred passes.
 
 ### Deferred
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.DeferredKt :minigl:run```
+
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/runhgold1.png" />
+Pretty well known Ambient Diffuse Specular (ADS) shading technique with Deferred lighting. It is not intended to be used now but can be handy to render static geometry for the scene. As with PBR, I might use this technique later on for less exciting parts of the environment. For now, it just allows me to shade 3d objects loaded with Wavefront *.obj format.
+
 
 ### Billboard
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.BillboardKt :minigl:run```

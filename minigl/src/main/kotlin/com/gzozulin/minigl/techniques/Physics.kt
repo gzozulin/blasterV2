@@ -73,13 +73,22 @@ private val light = Light(vec3(25f), true)
 private val objMatrix = mat4().identity().scale(meshData.aabb.scaleTo(5f))
 private val lightMatrix = mat4().identity().translate(vec3(3f))
 
+private var mouseLook = false
+
 fun main() {
-    window.create(isFullscreen = false) {
+    window.create(isFullscreen = false, isHoldingCursor = false) {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
+        window.buttonCallback = { key, pressed ->
+            if (key == 0) {
+                mouseLook = pressed
+            }
+        }
         window.deltaCallback = { delta ->
-            wasdInput.onCursorDelta(delta)
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
