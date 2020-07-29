@@ -26,13 +26,18 @@ Now I would like to try a different approach. Recently I watched a couple of vid
 I am not bounded by any contracts or restrictions  - it is just **an art form for me**. I can start wherever I want, and I can finish as I am pleased. Since I do not wish to receive any cash from it, I'm also not bound to particular design considerations. I don't have to create one more free-to-play money extracting clone. I'm even **more interested in the simulation** aspect of the game than graphics - similar to Dwarf Fortress.
 
 ## Runnables
-Each project contains a set of runnables. To try them out, you need to clone the repo and run an appropriate [Gradle](https://docs.gradle.org/current/userguide/application_plugin.html) command. In 99% of the cases, you can control the camera with **WASD** and **mouse look**. Don't forget to install [you know what](https://www.oracle.com/ca-en/java/technologies/javase/javase-jdk8-downloads.html) to assemble and run the code.
+Each project contains a set of runnables. To try them out, you need to clone the repo and run an appropriate [Gradle](https://docs.gradle.org/current/userguide/application_plugin.html) command. In 99% of the cases, you can control the camera with **WASD** and **mouse look**.
+
+* Don't forget to install [you know what](https://www.oracle.com/ca-en/java/technologies/javase/javase-jdk8-downloads.html) to assemble and run the code
+* For Windows users: [this tool](https://gitforwindows.org/) can simplify life without a console
 
 ### Soccer
 ```./gradlew -PmainClass=com.gzozulin.sim.simulation.SoccerKt :simulator:run```
 
 <img align="left" width="200px" src="https://pbs.twimg.com/media/EdPHu0dWkAAEIU1?format=png&name=small" />
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+**Soccer** was born to work out ideas of simulation of a big world.
+The scenes' physics is straightforward but easily scalable: I am simulating the bouncing of 30k of soccer balls on the field.
+I hope that some of the concepts introduced with this scene will be polished over time, and others will be just replaced.
 
 ### TileMap
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.TileMapKt :minigl:run```
