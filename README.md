@@ -21,7 +21,7 @@ The internal structure consists of:
 ## Simulator
 I always wanted to **create games**. And I did a couple of times and tried many times more. The results are usually pretty shallow - straightforward arcades for mobiles. The problem with game development for me is that I enjoy sleeping. Since most of my free programming happens after working hours, I cannot allocate a year or two of zombie-time to create something a little more involved — sort of a convenience problem.
 
-Now I would like to try a different approach. Recently I watched a couple of videos where the guy was playing [Dwarf Fortress]([http://www.bay12games.com/dwarves/](http://www.bay12games.com/dwarves/)). It is a very involved game with elaborate mechanics - the kind of game I would be very hesitant to start programming. And then an idea came: what if I can **approach that iteratively**? One small and independent addition at a time?
+Now I would like to try a different approach. Recently I watched a couple of videos where the guy was playing [Dwarf Fortress](http://www.bay12games.com/dwarves/). It is a very involved game with elaborate mechanics - the kind of game I would be very hesitant to start programming. And then an idea came: what if I can **approach that iteratively**? One small and independent addition at a time?
 
 I am not bounded by any contracts or restrictions  - it is just **an art form for me**. I can start wherever I want, and I can finish as I am pleased. Since I do not wish to receive any cash from it, I'm also not bound to particular design considerations. I don't have to create one more free-to-play money extracting clone. I'm even **more interested in the simulation** aspect of the game than graphics - similar to Dwarf Fortress.
 
@@ -39,6 +39,9 @@ Each project contains a set of runnables. To try them out, you need to clone the
 
 ### TileMap
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.TileMapKt :minigl:run```
+
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/tileeeees.png" />
+Since I am planning to work mostly myself, the abstraction is fundamental. I believe that the best balance between detail and the amount of effort for the environment can be achieved with <b>tilemaps</b>. I am not yet decided on the particular technique - I might try <href src="https://www.gog.com/game/fallout_2">hex tiles</href> later on. One crucial point is that each tile field - multiple tiles - should be represented by only two triangles. Therefore most of the blending and UV mapping should be handled on the GPU side.
 
 ### Physics
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.PhysicsKt :minigl:run```
