@@ -93,7 +93,7 @@ class BillboardsTechnique(max: Int) : GlResource() {
 
 private val window = GlWindow()
 
-private val diffuse = texturesLib.loadTexture("textures/font.png")
+private val diffuse = texturesLib.loadTexture("textures/smoke.png")
 
 private val billboardsTechnique = BillboardsTechnique(1000)
 
@@ -102,6 +102,8 @@ private val controller = Controller(position = vec3().front(), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val identityM = mat4().identity()
+
+private var mouseLook = false
 
 private val billboardsProvider = object : BillboardsProvider() {
     override fun flushPositions(position: FloatBuffer) {
@@ -116,15 +118,22 @@ private val billboardsProvider = object : BillboardsProvider() {
 }
 
 fun main() {
-    window.create(isFullscreen = false) {
+    window.create(isFullscreen = false, isHoldingCursor = false) {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
         }
+        window.buttonCallback = { key, pressed ->
+            if (key == 0) {
+                mouseLook = pressed
+            }
+        }
         window.deltaCallback = { delta ->
-            wasdInput.onCursorDelta(delta)
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
         }
         glUse(billboardsTechnique, diffuse) {
             window.show {
