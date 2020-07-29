@@ -34,7 +34,7 @@ Each project contains a set of runnables. To try them out, you need to clone the
 ### Soccer
 ```./gradlew -PmainClass=com.gzozulin.sim.simulation.SoccerKt :simulator:run```
 
-<img align="left" width="200px" src="https://pbs.twimg.com/media/EdPHu0dWkAAEIU1?format=png&name=small" />
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/balls.png" />
 <b>Soccer</b> was born to work out ideas of simulation of a big world. The scenes' physics is straightforward but easily scalable: I am simulating the bouncing of 30k of soccer balls on the field. I hope that some of the concepts introduced with this scene will be polished over time, and others will be just replaced. I was primarily interested in trying <href src="https://www.gamasutra.com/view/feature/3355/postmortem_thief_the_dark_project.php?print=1">composition</href> of game objects instead of rigid hierarchy to allow plugin-alike extension of mechanics.
 
 ### TileMap
