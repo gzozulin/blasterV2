@@ -35,9 +35,8 @@ Each project contains a set of runnables. To try them out, you need to clone the
 ```./gradlew -PmainClass=com.gzozulin.sim.simulation.SoccerKt :simulator:run```
 
 <img align="left" width="200px" src="https://pbs.twimg.com/media/EdPHu0dWkAAEIU1?format=png&name=small" />
-**Soccer** was born to work out ideas of simulation of a big world.
-The scenes' physics is straightforward but easily scalable: I am simulating the bouncing of 30k of soccer balls on the field.
-I hope that some of the concepts introduced with this scene will be polished over time, and others will be just replaced.
+<b>Soccer</b> was born to work out ideas of simulation of a big world. The scenes' physics is straightforward but easily scalable: I am simulating the bouncing of 30k of soccer balls on the field. I hope that some of the concepts introduced with this scene will be polished over time, and others will be just replaced.
+<br>
 
 ### TileMap
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.TileMapKt :minigl:run```
