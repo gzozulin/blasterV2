@@ -67,8 +67,9 @@ Pretty well known <b>Ambient Diffuse Specular (ADS)</b> shading technique with d
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/03/skybox.png" />
 <b>Skyboxes</b> are, so far, the most significant revelation for me in Computer Graphics. They allow me to add a great deal of depth and perspective to the environment with minimal effort. It is also the fastest way to create a context and setting for the scene. In Blaster, skyboxes are wrapped into easy to use technique class and are used all across the codebase. As the primary source of inspiration and textures, I use a pack of skyboxes from user-created Quake 3 levels.
 
-### Text
-```./gradlew -PmainClass=com.gzozulin.minigl.techniques.TextKt :minigl:run```
-
 ### Simple
 ```./gradlew -PmainClass=com.gzozulin.minigl.techniques.SimpleKt :minigl:run```
+
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/simple.png" />
+As the name suggests, <b>Simple</b> is a straightforward scene with just a couple of triangles. I developed a liking to start any rendering framework in this manner. Despite its apparent plainness, this setup allows me to engage all of the main components of real-time renderer: shaders, geometry, textures, and matrices operations. When this arrangement is debugged and working, the followup becomes much more manageable.
+

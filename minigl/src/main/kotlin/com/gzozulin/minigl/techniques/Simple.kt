@@ -43,14 +43,24 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
+private val skyboxTechnique = SkyboxTechnique("textures/snowy")
 private val simpleTechnique = SimpleTechnique()
 private val diffuse = texturesLib.loadTexture("textures/utah.jpg")
 private val rectangle = GlMesh.rect()
 
+private var mouseLook = false
+
 fun main() {
     window.create(isHoldingCursor = false) {
+        window.buttonCallback = { key, pressed ->
+            if (key == 0) {
+                mouseLook = pressed
+            }
+        }
         window.deltaCallback = { delta ->
-            wasdInput.onCursorDelta(delta)
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
@@ -58,13 +68,14 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleTechnique, diffuse, rectangle) {
+        glUse(simpleTechnique, skyboxTechnique, diffuse, rectangle) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
                 }
+                skyboxTechnique.skybox(camera)
                 simpleTechnique.draw(camera.calculateViewM(), camera.projectionM) {
                     matrixStack.pushMatrix(mat4().identity().translate(vec3().left())) {
                         simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
