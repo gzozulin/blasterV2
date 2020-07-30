@@ -95,10 +95,11 @@ private val window = GlWindow()
 
 private val diffuse = texturesLib.loadTexture("textures/smoke.png")
 
+private val skyboxTechnique = SkyboxTechnique("textures/nuke")
 private val billboardsTechnique = BillboardsTechnique(1000)
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().front(), velocity = 0.1f)
+private val controller = Controller(position = vec3().front().mul(10f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val identityM = mat4().identity()
@@ -135,16 +136,19 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glUse(billboardsTechnique, diffuse) {
+        glUse(billboardsTechnique, skyboxTechnique, diffuse) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
                 }
-                billboardsTechnique.draw(camera) {
-                    billboardsTechnique.instance(billboardsProvider, identityM, diffuse, 1f, 1f,
-                        updateScale = false, updateTransparency = false)
+                skyboxTechnique.skybox(camera)
+                glDepthTest {
+                    billboardsTechnique.draw(camera) {
+                        billboardsTechnique.instance(billboardsProvider, identityM, diffuse, 1f, 1f,
+                            updateScale = false, updateTransparency = false)
+                    }
                 }
             }
         }

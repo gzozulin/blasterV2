@@ -57,7 +57,7 @@ Pretty well known <b>Ambient Diffuse Specular (ADS)</b> shading technique with d
 
 
 ### Billboards
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.BillboardKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.BillboardsKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/03/text.png" /> <b>Billboarding</b> is an effortless technique to implement. In its essence, a billboard is just a rectangle, always oriented towards the camera. In my implementation, this rectangle rendered with instancing, and all of the matrix calculations happens on the GPU. Billboards are planned to cover two use cases in my simulation: particle systems and character animations. I want to use pre-baked sprites to render characters from relatively far away. This way, the lack of real-time lighting will be less noticeable, but I will be able to handle many moving actors.
 
