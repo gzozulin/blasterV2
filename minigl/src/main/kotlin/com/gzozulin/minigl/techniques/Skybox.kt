@@ -37,7 +37,7 @@ private val camera = Camera()
 private val controller = Controller()
 private val wasdInput = WasdInput(controller)
 
-private val technique = SkyboxTechnique("textures/lmcity")
+private val technique = SkyboxTechnique("textures/snowy")
 
 fun main() {
     val window = GlWindow()

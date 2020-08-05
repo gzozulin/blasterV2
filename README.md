@@ -8,7 +8,7 @@ This project is a natural development of its predecessor, [Blaster v1.](https://
 The **goals are multiple** - therefore, it is convenient to store various subprojects together: they operate on a shared set of assets and a common codebase.
 
 ## Minigl
-The realtime graphical library of choice for Blaster is OpenGL with [LWJGL](https://www.lwjgl.org/) wrappers (only window and API bindings). I am not using any existing rendering engine, because staring cluelessly at the black screen is my favorite way to spend time. Also, I want to understand things.
+The realtime graphical library of choice for Blaster is OpenGL with [LWJGL](https://www.lwjgl.org/) wrappers (only window and API bindings). I am not using any existing rendering engine, because staring cluelessly at the black screen is my favorite way to spend time. Also, I want to understand how things works.
 
 I am trying to keep **minigl** as simple as possible. One reason is that I do not know yet how to make it neat and sophisticated, and the second is that it makes the code much more versatile and less domain-specific.
 
@@ -71,5 +71,5 @@ Pretty well known <b>Ambient Diffuse Specular (ADS)</b> shading technique with d
 ```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.SimpleKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/simple.png" />
-As the name suggests, <b>Simple</b> is a straightforward scene with just a couple of triangles. I developed a liking to start any rendering framework in this manner. Despite its apparent plainness, this setup allows me to engage all of the main components of real-time renderer: shaders, geometry, textures, and matrices operations. When this arrangement is debugged and working, the followup becomes much more manageable.
+As the name suggests, <b>Simple</b> is a straightforward scene with just a couple of triangles. I developed a liking to start any rendering framework in this manner. Despite its apparent plainness, this setup allows me to engage all of the main components of the real-time renderer: shaders, geometry, textures, and operations on matrices. When this arrangement is debugged and working, the followup becomes much more manageable.
 
