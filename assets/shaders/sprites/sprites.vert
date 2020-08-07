@@ -13,6 +13,7 @@ uniform vec3 uEye;
 
 uniform float uWidth;
 uniform float uHeight;
+
 uniform float uFrameLeft;
 uniform float uFrameTop;
 uniform float uFrameWidth;

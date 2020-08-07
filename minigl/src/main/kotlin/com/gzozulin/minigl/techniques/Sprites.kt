@@ -35,8 +35,17 @@ data class Frame(
     val width: Float,
     val height: Float
 ) {
-    constructor(pixelLeft: Int, pixelTop: Int, pixelWidth: Int, pixelHeight: Int):
-            this(0f, 0f, 1f, 1f)
+
+    companion object {
+        fun fromImage(offsetX: Int, offsetY: Int, frameX: Int, frameY: Int,
+                      frameWidth: Int, frameHeight: Int, imageWidth: Int, imageHeight: Int): Frame {
+            val width = frameWidth.toFloat() / imageWidth.toFloat()
+            val height = frameHeight.toFloat() / imageHeight.toFloat()
+            val left = offsetX + width * frameX
+            val top = offsetY + height * frameY
+            return Frame(left, top, width, height)
+        }
+    }
 }
 
 class SpritesTechnique : GlResource() {
@@ -90,68 +99,168 @@ class SpritesTechnique : GlResource() {
 
 private val window = GlWindow()
 
-private val diffuse = texturesLib.loadTexture("textures/ss/reaver.png")
+private val diffuse = texturesLib.loadTexture("textures/woman.png")
 
+private val simpleTechnique = SimpleTechnique()
 private val spritesTechnique = SpritesTechnique()
-private val skyboxTechnique = SkyboxTechnique("textures/gatekeeper")
+private val skyboxTechnique = SkyboxTechnique("textures/darkskies")
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().front(), velocity = 0.1f)
+private val controller = Controller(position = vec3(40f, 10f, 40f), pitch = radf(-90f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
+
+private val field = GlMesh.rect(0f, 100f, 100f, 0f)
+private val fieldM = mat4().identity().rotate(radf(90f), vec3().right())
+private val fieldDiffuse = texturesLib.loadTexture("textures/floor.jpg")
+
+
+private const val FRAMES = 9
+private const val ANIMS = 8
+private var a = 0;
 
 private val sprite = Sprite(
     frames = listOf(
-        Frame(  0f,   0f, .25f, .25f),
-        Frame(.25f, .25f, .25f, .25f),
-        Frame( .5f,  .5f, .25f, .25f),
-        Frame(.75f, .75f, .25f, .25f)
+        Frame.fromImage(0, 0, 0, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 0, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 1, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 2, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 3, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 4, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 5, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 6, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 0, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 1, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 2, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 3, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 4, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 5, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 6, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 7, 7, 48, 92, 432, 736),
+        Frame.fromImage(0, 0, 8, 7, 48, 92, 432, 736)
     ),
     animations = listOf(
-        Animation(listOf(
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3)),
-        Animation(listOf(
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)),
-        Animation(listOf(
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3))
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++)),
+        Animation(listOf(a++, a++, a++, a++, a++, a++, a++, a++, a++))
     )
 )
 
+private data class Model(val startFrame: Int, val animation: Int, val modelM: mat4)
+
+private fun createModels() {
+    val origin = mat4().identity()
+    for (x in 0..100) {
+        for (z in 0..100) {
+            origin.setTranslation(randf(0f, 100f), 1f, randf(0f, 100f))
+            models.add(Model(random.nextInt(FRAMES), random.nextInt(ANIMS), mat4().set(origin)))
+        }
+    }
+}
+
+private val models = mutableListOf<Model>()
+
 private val random = Random()
 
+private var currentFrame = 0
+
+private var mouseLook = false
+
 fun main() {
-    window.create(isFullscreen = true) {
+    createModels()
+    window.create(isFullscreen = false, isHoldingCursor = false) {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
         }
-        window.deltaCallback = { delta ->
-            wasdInput.onCursorDelta(delta)
+        window.buttonCallback = { key, pressed ->
+            if (key == 0) {
+                mouseLook = pressed
+            }
         }
-        glUse(spritesTechnique, skyboxTechnique, diffuse) {
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }
+        glUse(simpleTechnique, spritesTechnique, skyboxTechnique, diffuse, field, fieldDiffuse) {
             window.show {
+                currentFrame++
                 glClear()
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
                 }
-                skyboxTechnique.skybox(camera)
-                spritesTechnique.draw(camera) {
-                    val origin = mat4().identity()
-                    for (x in 0..100) {
-                        for (z in 0..100) {
-                            origin.setTranslation(x.toFloat(), 0f, z.toFloat())
-                            spritesTechnique.instance(origin, diffuse, sprite, 0, random.nextInt(60), 1f, 1f)
+                glDepthTest {
+                    skyboxTechnique.skybox(camera)
+                    simpleTechnique.draw(camera) {
+                        simpleTechnique.instance(field, fieldDiffuse, fieldM)
+                    }
+                    spritesTechnique.draw(camera) {
+                        for (assassin in models) {
+                            val frame = (currentFrame + assassin.startFrame) % FRAMES
+                            spritesTechnique.instance(assassin.modelM, diffuse, sprite, assassin.animation, frame, 1f, 2f)
                         }
                     }
                 }

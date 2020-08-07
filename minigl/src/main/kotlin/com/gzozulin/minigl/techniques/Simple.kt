@@ -17,6 +17,10 @@ class SimpleTechnique : GlResource() {
         addChildren(program)
     }
 
+    fun draw(camera: Camera, draw: () -> Unit) {
+        draw(camera.calculateViewM(), camera.projectionM, draw)
+    }
+
     fun draw(viewM: mat4, projectionM: mat4, draw: () -> Unit) {
         checkReady()
         glBind(program) {
