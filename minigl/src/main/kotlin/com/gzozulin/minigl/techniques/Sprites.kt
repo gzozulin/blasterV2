@@ -114,6 +114,7 @@ private val fieldM = mat4().identity().rotate(radf(90f), vec3().right())
 private val fieldDiffuse = texturesLib.loadTexture("textures/floor.jpg")
 
 
+private const val MODELS = 10000
 private const val FRAMES = 9
 private const val ANIMS = 8
 private var a = 0;
@@ -209,11 +210,9 @@ private data class Model(val startFrame: Int, val animation: Int, val modelM: ma
 
 private fun createModels() {
     val origin = mat4().identity()
-    for (x in 0..100) {
-        for (z in 0..100) {
-            origin.setTranslation(randf(0f, 100f), 1f, randf(0f, 100f))
-            models.add(Model(random.nextInt(FRAMES), random.nextInt(ANIMS), mat4().set(origin)))
-        }
+    (1..MODELS).forEach {
+        origin.setTranslation(randf(0f, 100f), 1f, randf(0f, 100f))
+        models.add(Model(random.nextInt(FRAMES), random.nextInt(ANIMS), mat4().set(origin)))
     }
 }
 
@@ -258,9 +257,9 @@ fun main() {
                         simpleTechnique.instance(field, fieldDiffuse, fieldM)
                     }
                     spritesTechnique.draw(camera) {
-                        for (assassin in models) {
-                            val frame = (currentFrame + assassin.startFrame) % FRAMES
-                            spritesTechnique.instance(assassin.modelM, diffuse, sprite, assassin.animation, frame, 1f, 2f)
+                        for (model in models) {
+                            val frame = (currentFrame + model.startFrame) % FRAMES
+                            spritesTechnique.instance(model.modelM, diffuse, sprite, model.animation, frame, 1f, 2f)
                         }
                     }
                 }
