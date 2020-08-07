@@ -31,6 +31,13 @@ Each project contains a set of runnables. To try them out, you need to clone the
 * Don't forget to install [you know what](https://www.oracle.com/ca-en/java/technologies/javase/javase-jdk8-downloads.html) to assemble and run the code
 * For Windows users: [this tool](https://gitforwindows.org/) can simplify life without a console
 
+### Sprites
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.SpritesKt```
+
+<img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/08/ufo.png" />
+There are many ways to represent an animated character in a scene. Some of those ways are straightforward, and others are incredibly complex. For the Blaster, I chose the character sprite sheet animation. The viewpoint for my scenes will be hight above the scene, and the lack of detailed lighting will not be visible. On the other hand, sprite sheet animation has many advantages: simplicity, performance, elaborate animations. Some effects and lighting can even be baked in it. Since the main emphasis will be on simulation, this approach looks balanced enough. For a roguelike/strategy scene, it is a next step after just flat tiles and before full-blown skeletal animation. 
+
+
 ### Soccer
 ```./gradlew :simulator:run -PmainClass=com.gzozulin.sim.simulation.SoccerKt```
 

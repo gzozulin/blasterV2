@@ -106,7 +106,7 @@ private val spritesTechnique = SpritesTechnique()
 private val skyboxTechnique = SkyboxTechnique("textures/darkskies")
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(40f, 10f, 40f), pitch = radf(-90f), velocity = 0.1f)
+private val controller = Controller(position = vec3(50f, 5f, 70f), pitch = radf(-30f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val field = GlMesh.rect(0f, 100f, 100f, 0f)
@@ -210,7 +210,7 @@ private data class Model(val startFrame: Int, val animation: Int, val modelM: ma
 
 private fun createModels() {
     val origin = mat4().identity()
-    (1..MODELS).forEach {
+    repeat(MODELS) {
         origin.setTranslation(randf(0f, 100f), 1f, randf(0f, 100f))
         models.add(Model(random.nextInt(FRAMES), random.nextInt(ANIMS), mat4().set(origin)))
     }
