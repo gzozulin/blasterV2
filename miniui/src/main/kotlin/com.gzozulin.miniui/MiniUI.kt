@@ -5,6 +5,7 @@ import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.techniques.SimpleTechnique
 import com.gzozulin.minigl.techniques.TextTechnique
+import org.lwjgl.stb.STBTruetype.stbtt_BakeFontBitmap
 
 private interface Component
 private data class CompBackground(val diffuse: GlTexture) : Component

@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.glViewport
 import org.lwjgl.opengl.GLContext
+import org.lwjgl.stb.STBTruetype
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
