@@ -118,6 +118,9 @@ abstract class GlResource {
 
     open fun use() {
         childResource.forEach { it.use() }
+        if (STRICT_MODE) {
+            check(!isUsed) { "Already used!" }
+        }
         isUsed = true
     }
 
@@ -146,6 +149,9 @@ abstract class GlBindable : GlResource() {
     open fun bind() {
         super.checkReady()
         childBindable.forEach { it.bind() }
+        if (STRICT_MODE) {
+            check(!isBound) { "Already bound!" }
+        }
         isBound = true
     }
 

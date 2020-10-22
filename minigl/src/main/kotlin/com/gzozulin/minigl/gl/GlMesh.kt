@@ -25,12 +25,7 @@ class GlMesh(
 
     override fun bind() {
         super.bind()
-        try {
-            backend.glBindVertexArray(handle)
-        } catch (e: GlError) {
-            createVAO() // by some reason happens after resize
-            bind()
-        }
+        backend.glBindVertexArray(handle)
     }
 
     override fun unbind() {
@@ -39,17 +34,19 @@ class GlMesh(
     }
 
     private fun createVAO() {
-        glBind(this) {
-            attributes.forEach {
-                backend.glEnableVertexAttribArray(it.first.location)
-                it.second.bind()
-                backend.glVertexAttribPointer(it.first.location, it.first.size, backend.GL_FLOAT, false, 0, 0)
-                if (it.first.divisor != 0) {
-                    backend.glVertexAttribDivisor(it.first.location, it.first.divisor)
-                }
+        backend.glBindVertexArray(handle)
+        attributes.forEach {
+            backend.glEnableVertexAttribArray(it.first.location)
+            it.second.bind()
+            backend.glVertexAttribPointer(it.first.location, it.first.size, backend.GL_FLOAT, false, 0, 0)
+            if (it.first.divisor != 0) {
+                backend.glVertexAttribDivisor(it.first.location, it.first.divisor)
             }
-            indicesBuffer.bind()
         }
+        indicesBuffer.bind()
+        backend.glBindVertexArray(0)
+        indicesBuffer.unbind()
+        attributes.forEach { it.second.unbind() }
     }
 
     companion object {
