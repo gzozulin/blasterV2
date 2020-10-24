@@ -1,14 +1,11 @@
 package com.gzozulin.minigl.gl
 
-import com.gzozulin.minigl.SharedLibraryLoader
-import org.lwjgl.glfw.Callbacks.errorCallbackPrint
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.lwjgl.glfw.GLFWMouseButtonCallback
 import org.lwjgl.glfw.GLFWWindowSizeCallback
+import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.glViewport
-import org.lwjgl.opengl.GLContext
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -22,15 +19,13 @@ private const val fullHeight: Int = 1080
 private const val winX: Int = 448
 private const val winY: Int = 156
 
-private typealias ResizeCallback = (width: Int, height: Int) -> Unit
-private typealias KeyCallback = (key: Int, pressed: Boolean) -> Unit
-private typealias ButtonCallback = (key: Int, pressed: Boolean) -> Unit
-private typealias PositionCallback = (position: vec2) -> Unit
-private typealias DeltaCallback = (delta: vec2) -> Unit
+typealias ResizeCallback = (width: Int, height: Int) -> Unit
+typealias KeyCallback = (key: Int, pressed: Boolean) -> Unit
+typealias ButtonCallback = (key: Int, pressed: Boolean) -> Unit
+typealias PositionCallback = (position: vec2) -> Unit
+typealias DeltaCallback = (delta: vec2) -> Unit
 
 class GlWindow {
-    init { SharedLibraryLoader.load() }
-
     var resizeCallback: ResizeCallback? = null
     var keyCallback: KeyCallback? = null
     var buttonCallback: ButtonCallback? = null
@@ -45,29 +40,26 @@ class GlWindow {
     private val height: Int
         get() = if (isFullscreen) fullHeight else winHeight
 
-    private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder())
-    private val xbufDouble = xbuf.asDoubleBuffer()
-    private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder())
-    private val ybufDouble = ybuf.asDoubleBuffer()
+    private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+    private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+
     private val currentPos = vec2()
     private val lastCursorPos = vec2()
 
     private var fps = 0
     private var last = System.currentTimeMillis()
 
-    private val errorCallback = errorCallbackPrint(System.err)
-
     private val resizeCallbackInternal = object : GLFWWindowSizeCallback() {
-        override fun invoke(window: kotlin.Long, width: kotlin.Int, height: kotlin.Int) {
+        override fun invoke(window: Long, width: Int, height: Int) {
             glCheck { backend.glViewport(0, 0, width, height) }
             resizeCallback?.invoke(width, height)
         }
     }
 
     private val keyCallbackInternal = object : GLFWKeyCallback() {
-        override fun invoke(window: kotlin.Long, key: kotlin.Int, scancode: kotlin.Int, action: kotlin.Int, mods: kotlin.Int) {
+        override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
             if (key == GLFW_KEY_ESCAPE) {
-                glfwSetWindowShouldClose(window, GL11.GL_TRUE)
+                glfwSetWindowShouldClose(window, true)
             }
             if (action == GLFW_PRESS) {
                 keyCallback?.invoke(key, true)
@@ -78,18 +70,16 @@ class GlWindow {
     }
 
     private val buttonCallbackInternal = object : GLFWMouseButtonCallback() {
-        override fun invoke(window: kotlin.Long, button: kotlin.Int, action: kotlin.Int, mods: kotlin.Int) {
+        override fun invoke(window: Long, button: Int, action: Int, mods: Int) {
             buttonCallback?.invoke(button, action == GLFW_PRESS)
         }
     }
 
     private fun updateCursor(window: Long) {
         xbuf.rewind()
-        xbufDouble.rewind()
         ybuf.rewind()
-        ybufDouble.rewind()
         glfwGetCursorPos(window, xbuf, ybuf)
-        currentPos.set(xbufDouble.get().toFloat(), ybufDouble.get().toFloat())
+        currentPos.set(xbuf.get().toFloat(), ybuf.get().toFloat())
         if (lastCursorPos.x == 0f && lastCursorPos.y == 0f) {
             lastCursorPos.set(currentPos.x, currentPos.y)
         }
@@ -111,8 +101,8 @@ class GlWindow {
 
     fun create(isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, onCreated: () -> Unit) {
         this.isFullscreen = isFullscreen
-        glfwSetErrorCallback(errorCallback)
-        check(glfwInit() == GL11.GL_TRUE)
+        glfwSetErrorCallback { error, description -> error("$error, $description") }
+        check(glfwInit())
         val result = if (isFullscreen) {
             glfwCreateWindow(fullWidth, fullHeight, "Blaster!", glfwGetPrimaryMonitor(), window)
         } else {
@@ -129,11 +119,10 @@ class GlWindow {
         glfwSetKeyCallback(result, keyCallbackInternal)
         glfwMakeContextCurrent(result)
         glfwSwapInterval(1)
-        GLContext.createFromCurrent()
         window = result
+        GL.createCapabilities();
         onCreated.invoke()
         glfwDestroyWindow(window)
-        keyCallbackInternal.release()
     }
 
     fun show(onFrame: () -> Unit) {
@@ -141,12 +130,22 @@ class GlWindow {
         glCheck { backend.glViewport(0, 0, width, height) }
         resizeCallback?.invoke(width, height)
         glfwShowWindow(window)
-        while (glfwWindowShouldClose(window) == GL11.GL_FALSE) {
+        while (!glfwWindowShouldClose(window)) {
             updateCursor(window)
             onFrame.invoke()
             glfwSwapBuffers(window)
             glfwPollEvents()
             updateFps()
+        }
+    }
+}
+
+private val window = GlWindow()
+
+fun main() {
+    window.create {
+        window.show {
+            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT) // clear the framebuffer
         }
     }
 }

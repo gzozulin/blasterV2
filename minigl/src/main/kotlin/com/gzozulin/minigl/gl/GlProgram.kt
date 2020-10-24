@@ -8,15 +8,19 @@ import java.nio.ByteOrder
 
 private val bufferVec2 = ByteBuffer.allocateDirect(2 * 4)
     .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 private val bufferVec3 = ByteBuffer.allocateDirect(3 * 4)
     .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 private val bufferVec4 = ByteBuffer.allocateDirect(4 * 4)
     .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4)
     .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 class GlProgram(
     private val vertexShader: GlShader,
@@ -84,7 +88,7 @@ class GlProgram(
     fun setUniform(uniform: GlUniform, value: Matrix4f) {
         checkReady()
         value.get(bufferMat4)
-        backend.glUniformMatrix4fv(uniformLocations[uniform]!!, 1, false, bufferMat4)
+        backend.glUniformMatrix4fv(uniformLocations[uniform]!!, false, bufferMat4)
         unsatisfiedUniforms.remove(uniform)
     }
 
@@ -134,12 +138,6 @@ class GlProgram(
         checkReady()
         texture.checkReady()
         backend.glUniform1i(arrayLocation(uniform, index), texture.unit)
-    }
-
-    fun setArrayUniform(uniform: GlUniform, index: Int, value: vec4i) {
-        checkReady()
-        value.get(bufferVec4)
-        backend.glUniform3fv(arrayLocation(uniform, index), bufferVec4)
     }
 
     fun draw(mode: Int = backend.GL_TRIANGLES, indicesCount: Int) {

@@ -9,7 +9,9 @@ import org.joml.AABBf
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder())
+private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 class ImmediateTechnique {
     fun resize(camera: Camera) {

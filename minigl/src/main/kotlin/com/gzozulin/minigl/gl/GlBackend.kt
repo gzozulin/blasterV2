@@ -3,6 +3,7 @@ package com.gzozulin.minigl.gl
 import org.lwjgl.opengl.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.FloatBuffer
 
 val backend = GlBackend()
 
@@ -129,23 +130,26 @@ class GlBackend {
     fun glUseProgram(program: Int) = glCheck { GL20.glUseProgram(program) }
     fun glUniform1i(location: Int, x: Int) = glCheck { GL20.glUniform1i(location, x) }
     fun glUniform1f(location: Int, x: Float) = glCheck { GL20.glUniform1f(location, x) }
-    fun glUniform2fv(location: Int, v: ByteBuffer) = glCheck { GL20.glUniform2fv(location, v.asFloatBuffer()) }
-    fun glUniform3fv(location: Int, v: ByteBuffer) = glCheck { GL20.glUniform3fv(location, v.asFloatBuffer()) }
-    fun glUniformMatrix4fv(location: Int, count: Int, transpose: Boolean, value: ByteBuffer) = glCheck { GL20.glUniformMatrix4fv(location, count, transpose, value) }
+    fun glUniform2fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform2fv(location, v) }
+    fun glUniform3fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform3fv(location, v) }
+    fun glUniformMatrix4fv(location: Int, transpose: Boolean, value: FloatBuffer) =
+        glCheck { GL20.glUniformMatrix4fv(location, transpose, value) }
     fun glGenRenderbuffers() = glCheck { GL30.glGenRenderbuffers() }
     fun glDeleteRenderBuffers(handle: Int) = glCheck { GL30.glDeleteRenderbuffers(handle) }
     fun glBindRenderbuffer(target: Int, renderbuffer: Int) = glCheck { GL30.glBindRenderbuffer(target, renderbuffer) }
-    fun glRenderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) = glCheck { GL30.glRenderbufferStorage(target, internalformat, width, height) }
+    fun glRenderbufferStorage(target: Int, internalformat: Int, width: Int, height: Int) =
+        glCheck { GL30.glRenderbufferStorage(target, internalformat, width, height) }
     fun glGenTextures() = glCheck { GL11.glGenTextures() }
     fun glDeleteTextures(handle: Int) = glCheck { GL11.glDeleteTextures(handle) }
     fun glBindTexture(target: Int, texture: Int) = glCheck { GL11.glBindTexture(target, texture) }
     fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteBuffer?) = glCheck { GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) }
-    fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteBuffer) = glCheck { GL11.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels) }
+    fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteBuffer) =
+        glCheck { GL11.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels) }
     fun glTexParameteri(target: Int, pname: Int, param: Int) = glCheck { GL11.glTexParameteri(target, pname, param) }
     fun glActiveTexture(texture: Int) = glCheck { GL13.glActiveTexture(texture) }
-    fun glMapBuffer(target: Int, access: Int, oldBuffer: ByteBuffer) = glCheck { GL15.glMapBuffer(target, access, oldBuffer) }
+    fun glMapBuffer(target: Int, access: Int, oldBuffer: ByteBuffer) = glCheck { GL15.glMapBuffer(target, access, oldBuffer) }!!
     fun glUnapBuffer(target: Int) = glCheck { GL15.glUnmapBuffer(target) }
-    fun glMapBufferRange(target: Int, offset: Long, length: Long, access: Int, oldBuffer: ByteBuffer): ByteBuffer = glCheck { GL30.glMapBufferRange(target, offset, length, access, oldBuffer) }
+    fun glMapBufferRange(target: Int, offset: Long, length: Long, access: Int, oldBuffer: ByteBuffer): ByteBuffer = glCheck { GL30.glMapBufferRange(target, offset, length, access, oldBuffer) }!!
     fun glBegin(mode: Int) = glCheck { GL11.glBegin(mode) }
     fun glEnd() = glCheck { GL11.glEnd() }
     fun glColor3f(rgb: color) = glCheck { GL11.glColor3f(rgb.x, rgb.y, rgb.z) }
@@ -154,5 +158,5 @@ class GlBackend {
     fun glVertex3f(xyz: vec3) = glCheck { GL11.glVertex3f(xyz.x, xyz.y, xyz.z) }
     fun glBlendFunc(sfactor: Int, dfactor: Int) = glCheck { GL11.glBlendFunc(sfactor, dfactor) }
     fun glMatrixMode(mode: Int) = glCheck { GL11.glMatrixMode(mode) }
-    fun glLoadMatrix(matrix: ByteBuffer) = glCheck { GL11.glLoadMatrixf(matrix) }
+    fun glLoadMatrix(matrix: FloatBuffer) = glCheck { GL11.glLoadMatrixf(matrix) }
 }
