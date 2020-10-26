@@ -1,7 +1,17 @@
 package com.gzozulin.alch
 
+import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
-import org.kodein.di.*
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.MatrixStack
+import com.gzozulin.minigl.scene.WasdInput
+import com.gzozulin.minigl.techniques.SimpleTechnique
+import com.gzozulin.minigl.techniques.SkyboxTechnique
+import org.kodein.di.DI
+import org.kodein.di.bind
+import org.kodein.di.instance
+import org.kodein.di.singleton
 
 // Alchemist
 
@@ -88,6 +98,7 @@ val di = DI {
     bind<MechanicShop>()            with singleton { MechanicShop() }
     bind<MechanicPotions>()         with singleton { MechanicPotions() }
     bind<MechanicCustomers>()       with singleton { MechanicCustomers() }
+    bind<MechanicsPresentation>()   with singleton { MechanicsPresentation() }
 }
 
 private class Console {
@@ -177,11 +188,39 @@ private class MechanicCustomers {
     }
 }
 
+private var mouseLook = false
+private val camera = Camera()
+private val controller = Controller(position = vec3().front().mul(10f), velocity = .1f)
+private val wasdInput = WasdInput(controller)
+
 private class MechanicsPresentation: GlResource() {
     private val repository: Repository by di.instance()
 
-    fun drawShopWares() {
+    private val simpleTechnique = SimpleTechnique()
+    private val skyboxTechnique = SkyboxTechnique("textures/snowy")
 
+    private val rect = GlMesh.rect()
+    private val bottle = texturesLib.loadTexture("textures/bottle.png")
+    private val marble = texturesLib.loadTexture("textures/marble.jpg")
+
+    private val matrixStack = MatrixStack()
+
+    init {
+        addChildren(simpleTechnique, skyboxTechnique, rect, bottle, marble)
+    }
+
+    fun drawAmbient() {
+        skyboxTechnique.skybox(camera)
+    }
+
+    private val potion = Potion(vec3(0f, 0f, 1f), .5f)
+    fun drawPotion() {
+        simpleTechnique.draw(camera) {
+            simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+            matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f).translate(0f, (potion.power-1f)/2f, 0f)) {
+                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = potion.color)
+            }
+        }
     }
 }
 
@@ -205,7 +244,8 @@ class AlchApp: GlResource() {
         mechanicCustomers.throttleDissatisfaction()
         mechanicCustomers.throttleSatisfaction()
         mechanicCustomers.throttleOrders()
-        mechanicsPresentation.drawShopWares()
+        mechanicsPresentation.drawAmbient()
+        mechanicsPresentation.drawPotion()
     }
 }
 
@@ -214,8 +254,26 @@ private val app = AlchApp()
 
 fun main() {
     window.create(isHoldingCursor = false) {
+        window.buttonCallback = { key, pressed ->
+            if (key == 0) {
+                mouseLook = pressed
+            }
+        }
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }
+        window.keyCallback = { key, pressed ->
+            wasdInput.onKeyPressed(key, pressed)
+        }
         glUse(app) {
             window.show {
+                glClear()
+                controller.apply { position, direction ->
+                    camera.setPosition(position)
+                    camera.lookAlong(direction)
+                }
                 app.tick()
             }
         }

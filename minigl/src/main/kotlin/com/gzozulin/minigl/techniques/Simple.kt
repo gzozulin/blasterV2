@@ -30,11 +30,12 @@ class SimpleTechnique : GlResource() {
         }
     }
 
-    fun instance(mesh: GlMesh, diffuse: GlTexture, modelM: Matrix4f) {
+    fun instance(mesh: GlMesh, diffuse: GlTexture, modelM: Matrix4f, color: color = color(1f)) {
         checkReady()
         glBind(mesh, diffuse) {
             program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
             program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.setUniform(GlUniform.UNIFORM_COLOR, color)
             program.draw(indicesCount = mesh.indicesCount)
         }
     }
