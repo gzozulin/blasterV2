@@ -34,11 +34,11 @@ import org.kodein.di.singleton
 // damage if potion strength > 1f
 // random death phrases (poison, explosion, fire, police, etc)
 
+// todo mechanics presentation
 // todo mix potions
 // todo generate order with consideration to wealth
 // todo sale potions
 // todo drink potions
-// todo mechanics presentation
 
 private const val MILLIS_PER_TICK = 16 // 60 Hz
 
@@ -217,7 +217,7 @@ private class MechanicsPresentation: GlResource() {
     fun drawPotion() {
         simpleTechnique.draw(camera) {
             simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
-            matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f).translate(0f, (potion.power-1f)/2f, 0f)) {
+            matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f).translate(0f, (potion.power-1f)*2f, 0f)) {
                 simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = potion.color)
             }
         }
