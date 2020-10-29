@@ -1,10 +1,12 @@
-#version 300 es
+#version 400
 
 precision highp float;
+precision highp sampler2D;
+precision highp usampler2D;
 
 in vec2 vTexCoord;
 
-const int DIFFUSE_CNT = 32;
+const int DIFFUSE_CNT = 16;
 const int SIDE_CNT = 8;
 
 const float STEP = 1.0 / float(SIDE_CNT);

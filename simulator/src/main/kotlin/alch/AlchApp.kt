@@ -1,4 +1,4 @@
-package com.gzozulin.alch
+package alch
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*

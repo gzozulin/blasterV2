@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
 
-private const val SHADER_DIFFUSE_CNT = 32
+private const val SHADER_DIFFUSE_CNT = 16
 private const val SHADER_SIDE_CNT = 8
 
 class TileMapTechnique : GlResource() {

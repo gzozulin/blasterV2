@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.gl
 
+import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.lwjgl.glfw.GLFWMouseButtonCallback
@@ -9,6 +10,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+
 
 private const val winWidth: Int = 1024
 private const val winHeight: Int = 768
@@ -33,7 +35,7 @@ class GlWindow {
     var deltaCallback: DeltaCallback? = null
 
     private var isFullscreen: Boolean = false
-    private var window = NULL
+    var handle = NULL
 
     private val width: Int
         get() = if (isFullscreen) fullWidth else winWidth
@@ -93,7 +95,7 @@ class GlWindow {
         fps++
         val current = System.currentTimeMillis()
         if (current - last >= 1000L) {
-            glfwSetWindowTitle(window, "Blaster! $fps fps")
+            glfwSetWindowTitle(handle, "Blaster! $fps fps")
             last = current
             fps = 0
         }
@@ -104,9 +106,9 @@ class GlWindow {
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         val result = if (isFullscreen) {
-            glfwCreateWindow(fullWidth, fullHeight, "Blaster!", glfwGetPrimaryMonitor(), window)
+            glfwCreateWindow(fullWidth, fullHeight, "Blaster!", glfwGetPrimaryMonitor(), handle)
         } else {
-            glfwCreateWindow(winWidth, winHeight, "Blaster!", NULL, window)
+            glfwCreateWindow(winWidth, winHeight, "Blaster!", NULL, handle)
         }
         if (!isFullscreen) {
             glfwSetWindowPos(result, winX, winY)
@@ -119,24 +121,32 @@ class GlWindow {
         glfwSetKeyCallback(result, keyCallbackInternal)
         glfwMakeContextCurrent(result)
         glfwSwapInterval(1)
-        window = result
+        handle = result
         GL.createCapabilities();
         onCreated.invoke()
-        glfwDestroyWindow(window)
+        glfwDestroyWindow(handle)
     }
 
     fun show(onFrame: () -> Unit) {
-        check(window != NULL) { "Window is not yet created!" }
+        check(handle != NULL) { "Window is not yet created!" }
         glCheck { backend.glViewport(0, 0, width, height) }
         resizeCallback?.invoke(width, height)
-        glfwShowWindow(window)
-        while (!glfwWindowShouldClose(window)) {
-            updateCursor(window)
+        glfwShowWindow(handle)
+        while (!glfwWindowShouldClose(handle)) {
+            updateCursor(handle)
             onFrame.invoke()
-            glfwSwapBuffers(window)
+            glfwSwapBuffers(handle)
             glfwPollEvents()
             updateFps()
         }
+    }
+
+    fun copyWindowBuffer(): ByteBuffer {
+        GL11.glReadBuffer(GL11.GL_FRONT)
+        val bpp = 4
+        val buffer = BufferUtils.createByteBuffer(width * height * bpp)
+        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer)
+        return buffer
     }
 }
 
