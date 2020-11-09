@@ -34,6 +34,9 @@ import org.kodein.di.singleton
 // damage if potion strength > 1f
 // random death phrases (poison, explosion, fire, police, etc)
 
+// presentation independent from mechanics:
+//      you can play with inventory but that will not affect mechanics
+
 // todo mechanics presentation
 // todo mix potions
 // todo generate order with consideration to wealth
@@ -51,6 +54,8 @@ private const val BOTTLE_PRICE = 10
 private const val INGREDIENT_PRICE = 15
 private const val SHOP_PRICE_MULTIPLIER = 1.3f
 private const val POTION_PRICE_MULTIPLIER = 100f
+
+private const val POTION_GRID_WIDTH = 5
 
 private data class Player(var cash: Int = 100)
 
@@ -213,12 +218,78 @@ private class MechanicsPresentation: GlResource() {
         skyboxTechnique.skybox(camera)
     }
 
-    private val potion = Potion(vec3(0f, 0f, 1f), .5f)
-    fun drawPotion() {
-        simpleTechnique.draw(camera) {
-            simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
-            matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f).translate(0f, (potion.power-1f)*2f, 0f)) {
-                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = potion.color)
+    private fun randomPotion() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
+
+    private val shopPotions = listOf(
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+    )
+
+    private val playerPotions = listOf(
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+    )
+
+    private val customerPotions = listOf(
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+        randomPotion(),
+    )
+
+    fun drawGrid() {
+        var column = 0
+        var row = 0
+        fun increment() {
+            column++
+            if (column % POTION_GRID_WIDTH == 0) {
+                column = 0
+                row++
+            }
+        }
+        fun position() = vec3(column * 2f, row * -2f, 0f)
+        shopPotions.forEach { potion ->
+            drawPotion(potion, position())
+            increment()
+        }
+        column = 0
+        row += 2
+        playerPotions.forEach { potion ->
+            drawPotion(potion, position())
+            increment()
+        }
+        column = 0
+        row += 2
+        customerPotions.forEach { potion ->
+            drawPotion(potion, position())
+            increment()
+        }
+    }
+
+    private fun drawPotion(potion: Potion, position: vec3) {
+        matrixStack.pushMatrix(mat4().identity().translate(position)) {
+            simpleTechnique.draw(camera) {
+                simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+                matrixStack.pushMatrix(mat4().identity().translate(0f, (potion.power - 1f), 0f)) {
+                    matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f)) {
+                        simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = potion.color)
+                    }
+                }
             }
         }
     }
@@ -245,7 +316,7 @@ class AlchApp: GlResource() {
         mechanicCustomers.throttleSatisfaction()
         mechanicCustomers.throttleOrders()
         mechanicsPresentation.drawAmbient()
-        mechanicsPresentation.drawPotion()
+        mechanicsPresentation.drawGrid()
     }
 }
 

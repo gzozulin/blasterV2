@@ -45,7 +45,7 @@ class GlWindow {
     private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
     private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
 
-    private val currentPos = vec2()
+    private val cursorPos = vec2()
     private val lastCursorPos = vec2()
 
     private var fps = 0
@@ -81,14 +81,14 @@ class GlWindow {
         xbuf.rewind()
         ybuf.rewind()
         glfwGetCursorPos(window, xbuf, ybuf)
-        currentPos.set(xbuf.get().toFloat(), ybuf.get().toFloat())
+        cursorPos.set(xbuf.get().toFloat(), ybuf.get().toFloat())
         if (lastCursorPos.x == 0f && lastCursorPos.y == 0f) {
-            lastCursorPos.set(currentPos.x, currentPos.y)
+            lastCursorPos.set(cursorPos.x, cursorPos.y)
         }
-        positionCallback?.invoke(currentPos)
-        currentPos.sub(lastCursorPos, lastCursorPos)
+        positionCallback?.invoke(cursorPos)
+        cursorPos.sub(lastCursorPos, lastCursorPos)
         deltaCallback?.invoke(lastCursorPos)
-        lastCursorPos.set(currentPos)
+        lastCursorPos.set(cursorPos)
     }
 
     private fun updateFps() {

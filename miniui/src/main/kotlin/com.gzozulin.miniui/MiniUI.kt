@@ -4,24 +4,23 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.techniques.SimpleTechnique
+import org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT
+
+typealias ClickCallback = () -> Unit
+
+// todo comp animator background?
 
 private interface Component
 private data class CompBackground(val diffuse: GlTexture) : Component
+private data class CompClickable(val clicked: GlTexture, val callback: ClickCallback) : Component
 
 private class Widget(
     val pos: vec2 = vec2(0f),
     val size: vec2 = vec2(1f),
     val compBackground: CompBackground? = null,
+    val compClickable: CompClickable? = null,
     val children: MutableList<Widget> = mutableListOf()
-) {
-    operator fun get(index: Int): Component =
-        when(index) {
-            0 -> compBackground!!
-            else -> error("Unknown component!")
-        }
-}
-
-private val utahTeapot = texturesLib.loadTexture("textures/utah.jpg")
+)
 
 private class RenderingSystem : GlResource() {
     private val simpleTechnique = SimpleTechnique()
@@ -59,16 +58,57 @@ private class RenderingSystem : GlResource() {
     }
 }
 
+private class InputSystem {
+    private var width = 0
+    private var height = 0
+
+    private val relativeCursorPos = vec2()
+
+    private val matrixStack = MatrixStack()
+
+    fun onResize(width: Int, height: Int) {
+        this.width = width
+        this.height = height
+    }
+
+    fun onPosition(position: vec2) {
+        relativeCursorPos.x = lerpf(-1f, 1f, position.x / width)
+        relativeCursorPos.y = lerpf(1f, -1f, position.y / height)
+    }
+
+    fun onButton(button: Int, pressed: Boolean, root: Widget) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && pressed) {
+            checkClicked(root)
+        }
+    }
+
+    private fun checkClicked(root: Widget) {
+
+    }
+}
+
 private val window = GlWindow()
 
-private val renderingSystem = RenderingSystem()
+private val utahTeapot = texturesLib.loadTexture("textures/utah.jpg")
 
-private val teapot3 = Widget(pos = vec2(-.5f), size = vec2(-.5f), compBackground = CompBackground(utahTeapot))
-private val teapot2 = Widget(pos = vec2(.5f), size = vec2(.5f), compBackground = CompBackground(utahTeapot))
-private val guiRoot = Widget(size = vec2(.5f), compBackground = CompBackground(utahTeapot), children = mutableListOf(teapot2, teapot3))
+private val renderingSystem = RenderingSystem()
+private val inputSystem = InputSystem()
+
+private val teapot3 = Widget(pos = vec2(-0.5f), size = vec2(-.5f), compBackground = CompBackground(utahTeapot))
+private val teapot2 = Widget(pos = vec2(0.5f), size = vec2(.5f), compBackground = CompBackground(utahTeapot))
+private val guiRoot = Widget(size = vec2(1f), compBackground = CompBackground(utahTeapot), children = mutableListOf(teapot2, teapot3))
 
 fun main() {
     window.create(isHoldingCursor = false) {
+        window.resizeCallback = { width, height ->
+            inputSystem.onResize(width, height)
+        }
+        window.positionCallback = { position ->
+            inputSystem.onPosition(position)
+        }
+        window.buttonCallback = { button, pressed ->
+            inputSystem.onButton(button, pressed, guiRoot)
+        }
         glUse(renderingSystem, utahTeapot) {
             window.show {
                 glClear()
