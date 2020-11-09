@@ -2,12 +2,8 @@ package alch
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
-import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.MatrixStack
-import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.SimpleTechnique
-import com.gzozulin.minigl.techniques.SkyboxTechnique
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -37,11 +33,9 @@ import org.kodein.di.singleton
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
-// todo mechanics presentation
-// todo mix potions
-// todo generate order with consideration to wealth
-// todo sale potions
-// todo drink potions
+// todo: horizontal presentation
+// todo: present repository
+// todo: input system
 
 private const val MILLIS_PER_TICK = 16 // 60 Hz
 
@@ -56,6 +50,7 @@ private const val SHOP_PRICE_MULTIPLIER = 1.3f
 private const val POTION_PRICE_MULTIPLIER = 100f
 
 private const val POTION_GRID_WIDTH = 5
+private const val POTION_GRID_SIDE = 2f
 
 private data class Player(var cash: Int = 100)
 
@@ -202,9 +197,6 @@ private class MechanicsPresentation: GlResource() {
     private val rect = GlMesh.rect()
     private val bottle = texturesLib.loadTexture("textures/bottle.png")
     private val marble = texturesLib.loadTexture("textures/marble.jpg")
-
-    private val viewMatrix = mat4().identity().translate(vec3().front()).lookAlong(vec3().back(), vec3().up())
-    private val projectionMatrix = mat4().identity().ortho(-10f, 10f, -30f, 30f, 10000f, -1f)
     private val matrixStack = MatrixStack()
 
     init {
@@ -256,29 +248,44 @@ private class MechanicsPresentation: GlResource() {
             }
         }
         fun skipRow() {
+            if (column % POTION_GRID_WIDTH != 0) {
+                row +=1
+            }
             column = 0
-            row += 2
+            row += 1
         }
-        fun position() = vec3(column * 2f, row * -2f, 0f)
+        fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
+        val renderList = mutableListOf<Pair<Potion, vec3>>()
         shopPotions.forEach { potion ->
-            drawPotion(potion, position())
+            renderList.add(potion to position())
             nextColumn()
         }
         skipRow()
         playerPotions.forEach { potion ->
-            drawPotion(potion, position())
+            renderList.add(potion to position())
             nextColumn()
         }
         skipRow()
         customerPotions.forEach { potion ->
-            drawPotion(potion, position())
+            renderList.add(potion to position())
             nextColumn()
+        }
+        val width = POTION_GRID_WIDTH * POTION_GRID_SIDE
+        val height = row * POTION_GRID_SIDE
+        val left = 0f - POTION_GRID_SIDE/2f
+        val right = width - POTION_GRID_SIDE/2f
+        val bottom = -height - POTION_GRID_SIDE/2f
+        val top = 0f + POTION_GRID_SIDE/2f
+        val projM = mat4().identity().ortho(left, right, bottom, top, 10000f, -1f)
+        val viewM = mat4().identity()
+        renderList.forEach { pair ->
+            drawPotion(pair.first, pair.second, viewM, projM)
         }
     }
 
-    private fun drawPotion(potion: Potion, position: vec3) {
-        matrixStack.pushMatrix(mat4().identity().translate(position)) {
-            simpleTechnique.draw(viewMatrix, projectionMatrix) {
+    private fun drawPotion(potion: Potion, position: vec3, viewM: mat4, projM: mat4) {
+        simpleTechnique.draw(viewM, projM) {
+            matrixStack.pushMatrix(mat4().identity().translate(position)) {
                 simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
                 matrixStack.pushMatrix(mat4().identity().translate(0f, (potion.power - 1f), 0f)) {
                     matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f)) {
