@@ -53,6 +53,7 @@ fun color.blue()    = set(0f, 0f, 1f)
 fun color.yellow()  = set(1f, 1f, 0f)
 fun color.magenta() = set(1f, 0f, 1f)
 fun color.cyan()    = set(0f, 1f, 1f)
+fun color.grey()    = set(0.5f)
 
 fun color.parseColor(hex: String): color {
     val integerHex = Integer.parseInt(hex, 16)

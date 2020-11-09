@@ -27,7 +27,7 @@ import org.kodein.di.singleton
 // potions: money, slow time, satisfaction
 // enough money - won
 // no customers - game over
-// complexity: complex colors, fast dissatisfaction, expensive reagents
+// complexity: complex colors!, fast dissatisfaction, expensive reagents
 // scoreboard with Google Leaderboards
 // colorful console text
 // nonlinear potion price
@@ -104,6 +104,7 @@ val di = DI {
     bind<MechanicPotions>()         with singleton { MechanicPotions() }
     bind<MechanicCustomers>()       with singleton { MechanicCustomers() }
     bind<MechanicsPresentation>()   with singleton { MechanicsPresentation() }
+    bind<MechanicInput>()           with singleton { MechanicInput() }
 }
 
 private class Console {
@@ -193,29 +194,21 @@ private class MechanicCustomers {
     }
 }
 
-private var mouseLook = false
-private val camera = Camera()
-private val controller = Controller(position = vec3().front().mul(10f), velocity = .1f)
-private val wasdInput = WasdInput(controller)
-
 private class MechanicsPresentation: GlResource() {
     private val repository: Repository by di.instance()
 
     private val simpleTechnique = SimpleTechnique()
-    private val skyboxTechnique = SkyboxTechnique("textures/snowy")
 
     private val rect = GlMesh.rect()
     private val bottle = texturesLib.loadTexture("textures/bottle.png")
     private val marble = texturesLib.loadTexture("textures/marble.jpg")
 
+    private val viewMatrix = mat4().identity().translate(vec3().front()).lookAlong(vec3().back(), vec3().up())
+    private val projectionMatrix = mat4().identity().ortho(-10f, 10f, -30f, 30f, 10000f, -1f)
     private val matrixStack = MatrixStack()
 
     init {
-        addChildren(simpleTechnique, skyboxTechnique, rect, bottle, marble)
-    }
-
-    fun drawAmbient() {
-        skyboxTechnique.skybox(camera)
+        addChildren(simpleTechnique, rect, bottle, marble)
     }
 
     private fun randomPotion() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
@@ -255,35 +248,37 @@ private class MechanicsPresentation: GlResource() {
     fun drawGrid() {
         var column = 0
         var row = 0
-        fun increment() {
+        fun nextColumn() {
             column++
             if (column % POTION_GRID_WIDTH == 0) {
                 column = 0
                 row++
             }
         }
+        fun skipRow() {
+            column = 0
+            row += 2
+        }
         fun position() = vec3(column * 2f, row * -2f, 0f)
         shopPotions.forEach { potion ->
             drawPotion(potion, position())
-            increment()
+            nextColumn()
         }
-        column = 0
-        row += 2
+        skipRow()
         playerPotions.forEach { potion ->
             drawPotion(potion, position())
-            increment()
+            nextColumn()
         }
-        column = 0
-        row += 2
+        skipRow()
         customerPotions.forEach { potion ->
             drawPotion(potion, position())
-            increment()
+            nextColumn()
         }
     }
 
     private fun drawPotion(potion: Potion, position: vec3) {
         matrixStack.pushMatrix(mat4().identity().translate(position)) {
-            simpleTechnique.draw(camera) {
+            simpleTechnique.draw(viewMatrix, projectionMatrix) {
                 simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
                 matrixStack.pushMatrix(mat4().identity().translate(0f, (potion.power - 1f), 0f)) {
                     matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f)) {
@@ -295,57 +290,40 @@ private class MechanicsPresentation: GlResource() {
     }
 }
 
-class AlchApp: GlResource() {
-    private val mechanicShop: MechanicShop by di.instance()
-    private val mechanicPotions: MechanicPotions by di.instance()
-    private val mechanicCustomers: MechanicCustomers by di.instance()
-    private val mechanicsPresentation: MechanicsPresentation by di.instance()
+private class MechanicInput {
+    fun onButtonPressed(button: Int, pressed: Boolean) {
 
-    init {
-        addChildren(mechanicsPresentation)
     }
 
-    override fun use() {
-        super.use()
-        mechanicShop.createShop()
-        mechanicCustomers.createCustomers()
-    }
-
-    fun tick() {
-        mechanicCustomers.throttleDissatisfaction()
-        mechanicCustomers.throttleSatisfaction()
-        mechanicCustomers.throttleOrders()
-        mechanicsPresentation.drawAmbient()
-        mechanicsPresentation.drawGrid()
+    fun onCursorPosition(position: vec2) {
     }
 }
 
+private val mechanicShop: MechanicShop by di.instance()
+private val mechanicPotions: MechanicPotions by di.instance()
+private val mechanicCustomers: MechanicCustomers by di.instance()
+private val mechanicsPresentation: MechanicsPresentation by di.instance()
+private val mechanicInput: MechanicInput by di.instance()
+
 private val window = GlWindow()
-private val app = AlchApp()
 
 fun main() {
     window.create(isHoldingCursor = false) {
-        window.buttonCallback = { key, pressed ->
-            if (key == 0) {
-                mouseLook = pressed
-            }
+        mechanicShop.createShop()
+        mechanicCustomers.createCustomers()
+        window.buttonCallback = { button, pressed ->
+            mechanicInput.onButtonPressed(button, pressed)
         }
-        window.deltaCallback = { delta ->
-            if (mouseLook) {
-                wasdInput.onCursorDelta(delta)
-            }
+        window.positionCallback = { position ->
+            mechanicInput.onCursorPosition(position)
         }
-        window.keyCallback = { key, pressed ->
-            wasdInput.onKeyPressed(key, pressed)
-        }
-        glUse(app) {
+        glUse(mechanicsPresentation) {
             window.show {
-                glClear()
-                controller.apply { position, direction ->
-                    camera.setPosition(position)
-                    camera.lookAlong(direction)
-                }
-                app.tick()
+                glClear(color = vec3().grey())
+                mechanicCustomers.throttleDissatisfaction()
+                mechanicCustomers.throttleSatisfaction()
+                mechanicCustomers.throttleOrders()
+                mechanicsPresentation.drawGrid()
             }
         }
     }
