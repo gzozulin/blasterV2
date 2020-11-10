@@ -267,7 +267,7 @@ private class MechanicsPresentation: GlResource() {
             slots += POTION_GRID_WIDTH
         }
         fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
-        val renderList = mutableListOf<Pair<Potion, vec3>>()
+        val renderList = mutableListOf<Pair<Potion, vec3>>() // todo: just store it in repo for input usage
         repository.shopPotions.forEach { potion ->
             renderList.add(potion to position())
             nextRow()
@@ -358,7 +358,7 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
-                // repository.oneMore()
+                repository.oneMore()
                 mechanicCustomers.throttleDissatisfaction()
                 // mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
