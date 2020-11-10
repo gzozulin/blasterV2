@@ -17,6 +17,7 @@ typealias vec4i = Vector4i
 typealias euler3 = Vector3f
 typealias color = Vector3f
 typealias vec2 = Vector2f
+typealias vec2i = Vector2i
 typealias mat3 = Matrix3f
 typealias mat4 = Matrix4f
 typealias quat = Quaternionf

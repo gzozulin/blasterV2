@@ -37,9 +37,9 @@ class GlWindow {
     private var isFullscreen: Boolean = false
     var handle = NULL
 
-    private val width: Int
+    val width: Int
         get() = if (isFullscreen) fullWidth else winWidth
-    private val height: Int
+    val height: Int
         get() = if (isFullscreen) fullHeight else winHeight
 
     private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
