@@ -31,6 +31,7 @@ fun cosf(value: Float) = cos(value.toDouble()).toFloat()
 fun lerpf(from: Float, to: Float, t: Float) = (1f - t) * from + t * to
 fun powf(base: Float, p: Float) = base.pow(p)
 
+fun randi(bound: Int) = random.nextInt(bound)
 fun randf(min: Float = 0f, max: Float = 1f) = min + random.nextFloat() * (max - min)
 fun vec3.rand(min: vec3 = vec3(0f), max: vec3 = vec3(1f)): vec3 {
     x = randf(min.x, max.x)

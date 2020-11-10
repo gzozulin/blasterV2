@@ -205,76 +205,53 @@ private class MechanicsPresentation: GlResource() {
 
     private fun randomPotion() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
 
-    private val shopPotions = listOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-    )
-
-    private val playerPotions = listOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-    )
-
-    private val customerPotions = listOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-    )
+    private val shopPotions = mutableListOf(randomPotion())
+    private val playerPotions = mutableListOf(randomPotion())
+    private val customerPotions = mutableListOf(randomPotion())
 
     fun drawGrid() {
+        when (randi(3)) {
+            0 -> shopPotions.add(randomPotion())
+            1 -> playerPotions.add(randomPotion())
+            2 -> customerPotions.add(randomPotion())
+        }
         var column = 0
         var row = 0
-        fun nextColumn() {
-            column++
-            if (column % POTION_GRID_WIDTH == 0) {
-                column = 0
-                row++
+        fun nextRow() {
+            row++
+            if (row % POTION_GRID_WIDTH == 0) {
+                row = 0
+                column++
             }
         }
-        fun skipRow() {
-            if (column % POTION_GRID_WIDTH != 0) {
-                row +=1
+        fun skipColumn() {
+            if (row % POTION_GRID_WIDTH != 0) {
+                column +=1
             }
-            column = 0
-            row += 1
+            row = 0
+            column += 1
         }
         fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
         val renderList = mutableListOf<Pair<Potion, vec3>>()
         shopPotions.forEach { potion ->
             renderList.add(potion to position())
-            nextColumn()
+            nextRow()
         }
-        skipRow()
+        skipColumn()
         playerPotions.forEach { potion ->
             renderList.add(potion to position())
-            nextColumn()
+            nextRow()
         }
-        skipRow()
+        skipColumn()
         customerPotions.forEach { potion ->
             renderList.add(potion to position())
-            nextColumn()
+            nextRow()
         }
-        val width = POTION_GRID_WIDTH * POTION_GRID_SIDE
-        val height = row * POTION_GRID_SIDE
+        val width = column * POTION_GRID_SIDE
+        val height = POTION_GRID_WIDTH * POTION_GRID_SIDE
         val left = 0f - POTION_GRID_SIDE/2f
-        val right = width - POTION_GRID_SIDE/2f
-        val bottom = -height - POTION_GRID_SIDE/2f
+        val right = width + POTION_GRID_SIDE/2f
+        val bottom = -height + POTION_GRID_SIDE/2f
         val top = 0f + POTION_GRID_SIDE/2f
         val projM = mat4().identity().ortho(left, right, bottom, top, 10000f, -1f)
         val viewM = mat4().identity()
@@ -328,7 +305,7 @@ fun main() {
             window.show {
                 glClear(color = vec3().grey())
                 mechanicCustomers.throttleDissatisfaction()
-                mechanicCustomers.throttleSatisfaction()
+               // mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
                 mechanicsPresentation.drawGrid()
             }
