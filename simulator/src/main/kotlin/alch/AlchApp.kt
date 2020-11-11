@@ -29,6 +29,7 @@ import org.kodein.di.singleton
 // nonlinear potion price
 // damage if potion strength > 1f
 // random death phrases (poison, explosion, fire, police, etc)
+// more colors in potion: more complex: more side effects (good and bad)
 
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
@@ -113,7 +114,9 @@ private class Repository {
     val line = Line()
 
     // todo: debuggling
-    var slots = 0
+    var columnsShopEnd = 0
+    var columnsPlayerEnd = 0
+    var columnsCustomersEnd = 0
 
     private fun randomPotion() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
 
@@ -246,47 +249,51 @@ private class MechanicsPresentation: GlResource() {
     }
 
     fun drawGrid() {
-        var slots = 0
         var column = 0
         var row = 0
         fun nextRow() {
-            slots++
             row++
             if (row % POTION_GRID_WIDTH == 0) {
                 row = 0
                 column++
             }
         }
-        fun skipColumn() {
+        fun endColumn() {
             if (row % POTION_GRID_WIDTH != 0) {
                 column +=1
-                slots += POTION_GRID_WIDTH - row % POTION_GRID_WIDTH
+                row = 0
             }
+        }
+        fun skipColumn() {
             row = 0
             column += 1
-            slots += POTION_GRID_WIDTH
         }
         fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
-        val renderList = mutableListOf<Pair<Potion, vec3>>() // todo: just store it in repo for input usage
+        val renderList = mutableListOf<Pair<Potion, vec3>>()
         repository.shopPotions.forEach { potion ->
             renderList.add(potion to position())
             nextRow()
         }
+        endColumn()
         skipColumn()
+        repository.columnsShopEnd = column
         repository.playerPotions.forEach { potion ->
             renderList.add(potion to position())
             nextRow()
         }
+        endColumn()
         skipColumn()
+        repository.columnsPlayerEnd = column
         repository.customerPotions.forEach { potion ->
             renderList.add(potion to position())
             nextRow()
         }
-        repository.slots = slots
+        endColumn()
+        repository.columnsCustomersEnd = column
         val width = column * POTION_GRID_SIDE
         val height = POTION_GRID_WIDTH * POTION_GRID_SIDE
         val left = 0f - POTION_GRID_SIDE/2f
-        val right = width + POTION_GRID_SIDE/2f
+        val right = width - POTION_GRID_SIDE/2f
         val bottom = -height + POTION_GRID_SIDE/2f
         val top = 0f + POTION_GRID_SIDE/2f
         val projM = mat4().identity().ortho(left, right, bottom, top, 10000f, -1f)
@@ -319,12 +326,8 @@ private class MechanicInput {
 
     private val cursor = vec2()
     private fun current(): vec2i {
-        var columns = repository.slots / POTION_GRID_WIDTH
-        if (repository.slots % POTION_GRID_WIDTH != 0) {
-            columns += 1
-        }
         val normalized = vec2(cursor.x / window.width, cursor.y / window.height)
-        return vec2i((columns * normalized.x).toInt(), (POTION_GRID_WIDTH * normalized.y).toInt())
+        return vec2i((repository.columnsCustomersEnd * normalized.x).toInt(), (POTION_GRID_WIDTH * normalized.y).toInt())
     }
 
     fun onButtonPressed(button: Int, pressed: Boolean) {
@@ -358,7 +361,7 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
-                repository.oneMore()
+                //repository.oneMore()
                 mechanicCustomers.throttleDissatisfaction()
                 // mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
