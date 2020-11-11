@@ -1,4 +1,4 @@
-package alch
+package com.gzozulin.alch
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
@@ -53,10 +53,7 @@ private const val INGREDIENT_PRICE = 15
 private const val SHOP_PRICE_MULTIPLIER = 1.3f
 private const val POTION_PRICE_MULTIPLIER = 100f
 
-private const val POTION_GRID_WIDTH = 5
-private const val POTION_GRID_SIDE = 2f
-
-private interface Ware {
+interface Ware {
     val price: Int
 }
 
@@ -70,7 +67,7 @@ private data class Ingredient(val color: vec3, val power: Float): Ware {
         get() = INGREDIENT_PRICE
 }
 
-private data class Potion(val color: vec3, val power: Float): Ware {
+data class Potion(val color: vec3, val power: Float): Ware {
     override val price: Int
         get() = (power * POTION_PRICE_MULTIPLIER).toInt()
 
@@ -79,13 +76,13 @@ private data class Potion(val color: vec3, val power: Float): Ware {
     }
 }
 
-private data class Shop(val wares: MutableList<Ware> = mutableListOf())
+data class Shop(val wares: MutableList<Ware> = mutableListOf())
 
-private data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
+data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
 
-private data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
+data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
                             var currentOrder: Ware? = null)
-private data class Line(val customers: MutableList<Customer> = mutableListOf())
+data class Line(val customers: MutableList<Customer> = mutableListOf())
 
 private val firstnames = listOf("John", "Mark", "Charles", "Greg", "Andrew")
 private val surnames = listOf("Smith", "Doe", "Buck", "Mallet", "Lynn")
@@ -100,6 +97,7 @@ private val templateSpidersSilk = Ingredient(color = vec3(0f, 0f, 1f), power = .
 private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
 val di = DI {
+    bind<GlWindow>()                with singleton { GlWindow() }
     bind<Console>()                 with singleton { Console() }
     bind<Repository>()              with singleton { Repository() }
     bind<MechanicShop>()            with singleton { MechanicShop() }
@@ -113,7 +111,7 @@ private class Console {
     fun say(what: String) = println(what)
 }
 
-private class Repository {
+class Repository {
     val shop = Shop()
     val player = Player()
     val line = Line()
@@ -129,8 +127,10 @@ private class MechanicShop {
     private val repository: Repository by di.instance()
 
     fun createShop() {
-        repository.shop.wares.addAll(listOf(templateBottle,
-            templateBloodMoss, templateNightshade, templateSpidersSilk))
+        repository.shop.wares.addAll(listOf(
+            templateBottle,
+            templateBloodMoss, templateNightshade, templateSpidersSilk
+        ))
     }
 
     fun buyWare(idx: Int) {
@@ -200,154 +200,12 @@ private class MechanicCustomers {
     }
 }
 
-private class MechanicsPresentation: GlResource() {
-    private val repository: Repository by di.instance()
-
-    private val simpleTechnique = SimpleTechnique()
-
-    private val rect = GlMesh.rect()
-    private val bottle = texturesLib.loadTexture("textures/bottle.png")
-    private val marble = texturesLib.loadTexture("textures/marble.jpg")
-    private val matrixStack = MatrixStack()
-
-    init {
-        addChildren(simpleTechnique, rect, bottle, marble)
-    }
-
-    fun drawGrid() {
-        var column = 0
-        var row = 0
-        fun nextRow() {
-            row++
-            if (row % POTION_GRID_WIDTH == 0) {
-                row = 0
-                column++
-            }
-        }
-        fun endColumn() {
-            if (row % POTION_GRID_WIDTH != 0) {
-                column +=1
-                row = 0
-            }
-        }
-        fun skipColumn() {
-            row = 0
-            column += 1
-        }
-        fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
-        val renderList = mutableListOf<Pair<Ware, vec3>>()
-        repository.shop.wares.forEach { ware ->
-            renderList.add(ware to position())
-            nextRow()
-        }
-        endColumn()
-        skipColumn()
-        repository.columnsShopEnd = column
-        repository.player.wares.forEach { ware ->
-            renderList.add(ware to position())
-            nextRow()
-        }
-        endColumn()
-        skipColumn()
-        repository.columnsPlayerEnd = column
-        repository.line.customers.forEach { customer ->
-            if (customer.currentOrder != null) {
-                renderList.add(customer.currentOrder!! to position())
-                nextRow()
-            }
-        }
-        endColumn()
-        repository.columnsCustomersEnd = column
-        val width = column * POTION_GRID_SIDE
-        val height = POTION_GRID_WIDTH * POTION_GRID_SIDE
-        val left = 0f - POTION_GRID_SIDE/2f
-        val right = width - POTION_GRID_SIDE/2f
-        val bottom = -height + POTION_GRID_SIDE/2f
-        val top = 0f + POTION_GRID_SIDE/2f
-        val projM = mat4().identity().ortho(left, right, bottom, top, 10000f, -1f)
-        val viewM = mat4().identity()
-        renderList.forEach { pair ->
-            drawWare(pair.first, pair.second, viewM, projM)
-        }
-    }
-
-    private fun drawWare(ware: Ware, position: vec3, viewM: mat4, projM: mat4) {
-        when (ware) {
-            is Potion -> {
-                simpleTechnique.draw(viewM, projM) {
-                    matrixStack.pushMatrix(mat4().identity().translate(position)) {
-                        simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
-                        matrixStack.pushMatrix(mat4().identity().translate(0f, (ware.power - 1f), 0f)) {
-                            matrixStack.pushMatrix(mat4().scale(1f, ware.power, 1f)) {
-                                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = ware.color)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private class MechanicInput {
-    private val repository: Repository by di.instance()
-    // todo: click shop: buy from a shop
-    // todo: click, click again in player inventory: mix a potion
-    // todo: click right: drink a potion
-    // todo: click, click again in customer inventory: sell a potion
-
-    private val cursor = vec2()
-    private fun current(): vec2i {
-        val normalized = vec2(cursor.x / window.width, cursor.y / window.height)
-        return vec2i(
-            (repository.columnsCustomersEnd * normalized.x).toInt(),
-            (POTION_GRID_WIDTH * normalized.y).toInt())
-    }
-
-    fun onCursorPosition(position: vec2) {
-        cursor.set(position)
-    }
-
-    fun onButtonPressed(button: MouseButton, pressed: Boolean) {
-        if (pressed) {
-            when (button) {
-                MouseButton.LEFT -> onLmb()
-                MouseButton.RIGHT -> onRmb()
-            }
-        }
-    }
-
-    private fun onLmb() {
-        val current = current()
-        when {
-            current.x < repository.columnsShopEnd -> {
-                println("shop!")
-            }
-            current.x < repository.columnsPlayerEnd -> {
-                println("player!")
-            }
-            current.x < repository.columnsCustomersEnd -> {
-                println("customer!")
-            }
-            else -> {
-                error("wtf?!")
-            }
-        }
-    }
-
-    private fun onRmb() {
-
-    }
-}
-
-private val repository: Repository by di.instance()
+private val window: GlWindow by di.instance()
 private val mechanicShop: MechanicShop by di.instance()
 private val mechanicPotions: MechanicPotions by di.instance()
 private val mechanicCustomers: MechanicCustomers by di.instance()
 private val mechanicsPresentation: MechanicsPresentation by di.instance()
 private val mechanicInput: MechanicInput by di.instance()
-
-private val window = GlWindow()
 
 fun main() {
     window.create(isHoldingCursor = false) {
