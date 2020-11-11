@@ -5,6 +5,7 @@ import com.gzozulin.sim.system.PhysicsSystem
 import com.gzozulin.sim.system.PresentationSystem
 import com.gzozulin.sim.system.ProcreationSystem
 import com.gzozulin.minigl.gl.GlWindow
+import com.gzozulin.minigl.gl.MouseButton
 import com.gzozulin.minigl.gl.glUse
 
 // name: Endless Adventure, Mars, Station
@@ -42,8 +43,8 @@ private var mouseLook = false
 
 fun main() {
     window.create(isFullscreen = false, isHoldingCursor = false) {
-        window.buttonCallback = { key, pressed ->
-            if (key == 0) {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
                 mouseLook = pressed
             }
         }

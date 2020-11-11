@@ -80,8 +80,8 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        window.buttonCallback = { key, pressed ->
-            if (key == 0) {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
                 mouseLook = pressed
             }
         }

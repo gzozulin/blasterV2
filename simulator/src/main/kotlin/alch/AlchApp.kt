@@ -53,8 +53,6 @@ private const val POTION_PRICE_MULTIPLIER = 100f
 private const val POTION_GRID_WIDTH = 5
 private const val POTION_GRID_SIDE = 2f
 
-private data class Player(var cash: Int = 100)
-
 private interface Ware {
     val price: Int
 }
@@ -72,13 +70,18 @@ private data class Ingredient(val color: vec3, val power: Float): Ware {
 private data class Potion(val color: vec3, val power: Float): Ware {
     override val price: Int
         get() = (power * POTION_PRICE_MULTIPLIER).toInt()
+
+    companion object {
+        fun random() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
+    }
 }
 
 private data class Shop(val wares: MutableList<Ware> = mutableListOf())
-private data class Store(val wares: MutableList<Ware> = mutableListOf())
+
+private data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
 
 private data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
-                            var currentOrder: Potion? = null)
+                            var currentOrder: Ware? = null)
 private data class Line(val customers: MutableList<Customer> = mutableListOf())
 
 private val firstnames = listOf("John", "Mark", "Charles", "Greg", "Andrew")
@@ -108,54 +111,14 @@ private class Console {
 }
 
 private class Repository {
-    val player = Player()
     val shop = Shop()
-    val store = Store()
+    val player = Player()
     val line = Line()
 
     // todo: debuggling
     var columnsShopEnd = 0
     var columnsPlayerEnd = 0
     var columnsCustomersEnd = 0
-
-    private fun randomPotion() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
-
-    val shopPotions = mutableListOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion())
-
-    val playerPotions = mutableListOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion())
-
-    val customerPotions = mutableListOf(
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion(),
-        randomPotion())
-
-    fun oneMore() {
-        when (randi(3)) {
-            0 -> shopPotions.add(randomPotion())
-            1 -> playerPotions.add(randomPotion())
-            2 -> customerPotions.add(randomPotion())
-        }
-    }
 }
 
 private class MechanicShop {
@@ -175,7 +138,7 @@ private class MechanicShop {
             return
         }
         repository.player.cash -= ware.price
-        repository.store.wares.add(ware)
+        repository.player.wares.add(ware)
     }
 }
 
@@ -269,24 +232,26 @@ private class MechanicsPresentation: GlResource() {
             column += 1
         }
         fun position() = vec3(column * POTION_GRID_SIDE, row * -POTION_GRID_SIDE, 0f)
-        val renderList = mutableListOf<Pair<Potion, vec3>>()
-        repository.shopPotions.forEach { potion ->
-            renderList.add(potion to position())
+        val renderList = mutableListOf<Pair<Ware, vec3>>()
+        repository.shop.wares.forEach { ware ->
+            renderList.add(ware to position())
             nextRow()
         }
         endColumn()
         skipColumn()
         repository.columnsShopEnd = column
-        repository.playerPotions.forEach { potion ->
-            renderList.add(potion to position())
+        repository.player.wares.forEach { ware ->
+            renderList.add(ware to position())
             nextRow()
         }
         endColumn()
         skipColumn()
         repository.columnsPlayerEnd = column
-        repository.customerPotions.forEach { potion ->
-            renderList.add(potion to position())
-            nextRow()
+        repository.line.customers.forEach { customer ->
+            if (customer.currentOrder != null) {
+                renderList.add(customer.currentOrder!! to position())
+                nextRow()
+            }
         }
         endColumn()
         repository.columnsCustomersEnd = column
@@ -299,17 +264,21 @@ private class MechanicsPresentation: GlResource() {
         val projM = mat4().identity().ortho(left, right, bottom, top, 10000f, -1f)
         val viewM = mat4().identity()
         renderList.forEach { pair ->
-            drawPotion(pair.first, pair.second, viewM, projM)
+            drawWare(pair.first, pair.second, viewM, projM)
         }
     }
 
-    private fun drawPotion(potion: Potion, position: vec3, viewM: mat4, projM: mat4) {
-        simpleTechnique.draw(viewM, projM) {
-            matrixStack.pushMatrix(mat4().identity().translate(position)) {
-                simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
-                matrixStack.pushMatrix(mat4().identity().translate(0f, (potion.power - 1f), 0f)) {
-                    matrixStack.pushMatrix(mat4().scale(1f, potion.power, 1f)) {
-                        simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = potion.color)
+    private fun drawWare(ware: Ware, position: vec3, viewM: mat4, projM: mat4) {
+        when (ware) {
+            is Potion -> {
+                simpleTechnique.draw(viewM, projM) {
+                    matrixStack.pushMatrix(mat4().identity().translate(position)) {
+                        simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+                        matrixStack.pushMatrix(mat4().identity().translate(0f, (ware.power - 1f), 0f)) {
+                            matrixStack.pushMatrix(mat4().scale(1f, ware.power, 1f)) {
+                                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = ware.color)
+                            }
+                        }
                     }
                 }
             }
@@ -327,15 +296,44 @@ private class MechanicInput {
     private val cursor = vec2()
     private fun current(): vec2i {
         val normalized = vec2(cursor.x / window.width, cursor.y / window.height)
-        return vec2i((repository.columnsCustomersEnd * normalized.x).toInt(), (POTION_GRID_WIDTH * normalized.y).toInt())
-    }
-
-    fun onButtonPressed(button: Int, pressed: Boolean) {
-        println(current())
+        return vec2i(
+            (repository.columnsCustomersEnd * normalized.x).toInt(),
+            (POTION_GRID_WIDTH * normalized.y).toInt())
     }
 
     fun onCursorPosition(position: vec2) {
         cursor.set(position)
+    }
+
+    fun onButtonPressed(button: MouseButton, pressed: Boolean) {
+        if (pressed) {
+            when (button) {
+                MouseButton.LEFT -> onLmb()
+                MouseButton.RIGHT -> onRmb()
+            }
+        }
+    }
+
+    private fun onLmb() {
+        val current = current()
+        when {
+            current.x < repository.columnsShopEnd -> {
+                println("shop!")
+            }
+            current.x < repository.columnsPlayerEnd -> {
+                println("player!")
+            }
+            current.x < repository.columnsCustomersEnd -> {
+                println("customer!")
+            }
+            else -> {
+                error("wtf?!")
+            }
+        }
+    }
+
+    private fun onRmb() {
+
     }
 }
 
@@ -361,7 +359,7 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
-                //repository.oneMore()
+                // repository.oneMore()
                 mechanicCustomers.throttleDissatisfaction()
                 // mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()

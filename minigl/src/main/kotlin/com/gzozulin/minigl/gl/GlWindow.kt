@@ -21,9 +21,11 @@ private const val fullHeight: Int = 1080
 private const val winX: Int = 448
 private const val winY: Int = 156
 
+public enum class MouseButton { LEFT, RIGHT }
+
 typealias ResizeCallback = (width: Int, height: Int) -> Unit
 typealias KeyCallback = (key: Int, pressed: Boolean) -> Unit
-typealias ButtonCallback = (key: Int, pressed: Boolean) -> Unit
+typealias ButtonCallback = (button: MouseButton, pressed: Boolean) -> Unit
 typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
@@ -73,7 +75,12 @@ class GlWindow {
 
     private val buttonCallbackInternal = object : GLFWMouseButtonCallback() {
         override fun invoke(window: Long, button: Int, action: Int, mods: Int) {
-            buttonCallback?.invoke(button, action == GLFW_PRESS)
+            val converted = when (button) {
+                GLFW_MOUSE_BUTTON_LEFT -> MouseButton.LEFT
+                GLFW_MOUSE_BUTTON_RIGHT -> MouseButton.RIGHT
+                else -> error("Unknown mouse button!")
+            }
+            buttonCallback?.invoke(converted, action == GLFW_PRESS)
         }
     }
 

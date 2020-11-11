@@ -76,8 +76,8 @@ private class InputSystem {
         relativeCursorPos.y = lerpf(1f, -1f, position.y / height)
     }
 
-    fun onButton(button: Int, pressed: Boolean, root: Widget) {
-        if (button == GLFW_MOUSE_BUTTON_LEFT && pressed) {
+    fun onButton(button: MouseButton, pressed: Boolean, root: Widget) {
+        if (button == MouseButton.LEFT && pressed) {
             checkClicked(root)
         }
     }

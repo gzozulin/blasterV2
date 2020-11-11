@@ -102,8 +102,8 @@ fun main() {
     }
     val window = GlWindow()
     window.create(isHoldingCursor = false) {
-        window.buttonCallback = { key, pressed ->
-            if (key == 0) {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
                 mouseLook = pressed
             }
         }

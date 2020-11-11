@@ -130,8 +130,8 @@ class BillboardsApp {
             window.keyCallback = { key, pressed ->
                 wasdInput.onKeyPressed(key, pressed)
             }
-            window.buttonCallback = { key, pressed ->
-                if (key == 0) {
+            window.buttonCallback = { button, pressed ->
+                if (button == MouseButton.LEFT) {
                     mouseLook = pressed
                 }
             }
