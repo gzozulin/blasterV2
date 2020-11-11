@@ -34,9 +34,12 @@ import org.kodein.di.singleton
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
-// todo: horizontal presentation
-// todo: present repository
-// todo: input system
+// todo: fill the shop
+// todo: player wares
+// todo: customer orders
+// todo: buying wares
+// todo: mixing potions
+// todo: selling potions
 
 private const val MILLIS_PER_TICK = 16 // 60 Hz
 
