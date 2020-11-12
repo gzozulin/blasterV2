@@ -150,8 +150,8 @@ class MechanicInput {
         else -> error("wtf?!")
     }
 
-    private fun shopIndex(cursor: vec2i) = cursor.y * POTION_GRID_WIDTH + cursor.x
-    private fun playerIndex(cursor: vec2i) = shopIndex(cursor) - repository.columnsShopEnd
+    private fun shopIndex(cursor: vec2i) = cursor.y + cursor.x * POTION_GRID_WIDTH
+    private fun playerIndex(cursor: vec2i) = shopIndex(cursor) - repository.columnsShopEnd * POTION_GRID_WIDTH
 
     private fun onLmb() {
         val currSelect = current()
@@ -163,12 +163,15 @@ class MechanicInput {
                 }
             }
             SelectType.PLAYER -> {
-                if (prevSelect != null) {
+                if (prevSelect == null) {
+                    prevSelect = currSelect
+                } else {
                     val prevType = chooseType(prevSelect!!)
                     if (prevType == SelectType.PLAYER) {
                         val currIndex = playerIndex(currSelect)
                         val prevIndex = playerIndex(prevSelect!!)
                         mechanicPotions.mixPotion(prevIndex, currIndex)
+                        prevSelect = null
                     }
                 }
             }
@@ -176,12 +179,13 @@ class MechanicInput {
                 // if prev player = sale
             }
         }
-        prevSelect = currSelect
     }
 
     private fun onRmb() {
         // just removing the choice
-        prevSelect = null
-        println("Choice cleared!")
+        if (prevSelect != null) {
+            prevSelect = null
+            println("Choice cleared!")
+        }
     }
 }
