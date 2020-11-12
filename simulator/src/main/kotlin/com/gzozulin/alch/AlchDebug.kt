@@ -16,11 +16,14 @@ class MechanicsPresentation: GlResource() {
 
     private val rect = GlMesh.rect()
     private val bottle = texturesLib.loadTexture("textures/bottle.png")
+    private val reagentRed = texturesLib.loadTexture("textures/blood_moss.jpg")
+    private val reagentGreen = texturesLib.loadTexture("textures/nightshade.jpg")
+    private val reagentBlue = texturesLib.loadTexture("textures/spiders_silk.png")
     private val marble = texturesLib.loadTexture("textures/marble.jpg")
     private val matrixStack = MatrixStack()
 
     init {
-        addChildren(simpleTechnique, rect, bottle, marble)
+        addChildren(simpleTechnique, rect, bottle, reagentRed, reagentGreen, reagentBlue, marble)
     }
 
     fun drawGrid() {
@@ -81,11 +84,18 @@ class MechanicsPresentation: GlResource() {
     }
 
     private fun drawWare(ware: Ware, position: vec3, viewM: mat4, projM: mat4) {
-        when (ware) {
-            is Potion -> {
-                simpleTechnique.draw(viewM, projM) {
-                    matrixStack.pushMatrix(mat4().identity().translate(position)) {
-                        simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+        simpleTechnique.draw(viewM, projM) {
+            matrixStack.pushMatrix(mat4().identity().translate(position)) {
+                if (ware is Reagent) {
+                    val diffuse = when (ware.type) {
+                        ReagentType.RED -> reagentRed
+                        ReagentType.BLUE -> reagentBlue
+                        ReagentType.GREEN -> reagentGreen
+                    }
+                    simpleTechnique.instance(rect, diffuse, matrixStack.peekMatrix())
+                } else {
+                    simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+                    if (ware is Potion) {
                         matrixStack.pushMatrix(mat4().identity().translate(0f, (ware.power - 1f), 0f)) {
                             matrixStack.pushMatrix(mat4().scale(1f, ware.power, 1f)) {
                                 simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = ware.color)

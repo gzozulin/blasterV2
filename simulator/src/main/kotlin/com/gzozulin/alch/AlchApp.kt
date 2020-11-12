@@ -1,9 +1,6 @@
 package com.gzozulin.alch
 
-import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
-import com.gzozulin.minigl.scene.MatrixStack
-import com.gzozulin.minigl.techniques.SimpleTechnique
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -34,10 +31,8 @@ import org.kodein.di.singleton
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
-// todo: fill the shop
-// todo: player wares
-// todo: customer orders
 // todo: buying wares
+// todo: customer orders
 // todo: mixing potions
 // todo: selling potions
 
@@ -57,12 +52,12 @@ interface Ware {
     val price: Int
 }
 
-private data class Bottle(val xx: Int = 123) : Ware {
+data class Bottle(val xx: Int = 123) : Ware {
     override val price: Int
         get() = BOTTLE_PRICE
 }
 
-private data class Ingredient(val color: vec3, val power: Float): Ware {
+data class Reagent(val type: ReagentType, val power: Float): Ware {
     override val price: Int
         get() = INGREDIENT_PRICE
 }
@@ -77,11 +72,9 @@ data class Potion(val color: vec3, val power: Float): Ware {
 }
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
-
 data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
-
 data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
-                            var currentOrder: Ware? = null)
+                    var currentOrder: Potion? = null)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
 
 private val firstnames = listOf("John", "Mark", "Charles", "Greg", "Andrew")
@@ -90,9 +83,15 @@ private val surnames = listOf("Smith", "Doe", "Buck", "Mallet", "Lynn")
 private fun generateName() = "${firstnames.random()} ${surnames.random()}"
 
 private val templateBottle      = Bottle()
-private val templateBloodMoss   = Ingredient(color = vec3(1f, 0f, 0f), power = .3f)
-private val templateNightshade  = Ingredient(color = vec3(0f, 1f, 0f), power = .3f)
-private val templateSpidersSilk = Ingredient(color = vec3(0f, 0f, 1f), power = .3f)
+
+enum class ReagentType { RED, BLUE, GREEN }
+private val templateBloodMoss   = Reagent(type = ReagentType.RED,   power = .3f)
+private val templateNightshade  = Reagent(type = ReagentType.GREEN, power = .3f)
+private val templateSpidersSilk = Reagent(type = ReagentType.BLUE,  power = .3f)
+
+private val templatePotionRed   = Potion(color = vec3().red(),   power = .5f)
+private val templatePotionGreen = Potion(color = vec3().green(), power = .5f)
+private val templatePotionBlue  = Potion(color = vec3().blue(),  power = .5f)
 
 private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
@@ -129,8 +128,8 @@ private class MechanicShop {
     fun createShop() {
         repository.shop.wares.addAll(listOf(
             templateBottle,
-            templateBloodMoss, templateNightshade, templateSpidersSilk
-        ))
+            templateBloodMoss, templateNightshade, templateSpidersSilk,
+            templatePotionRed, templatePotionGreen, templatePotionBlue))
     }
 
     fun buyWare(idx: Int) {
