@@ -121,7 +121,7 @@ class Repository {
     var columnsCustomersEnd = 0
 }
 
-private class MechanicShop {
+class MechanicShop {
     private val console: Console by di.instance()
     private val repository: Repository by di.instance()
 
@@ -133,6 +133,7 @@ private class MechanicShop {
     }
 
     fun buyWare(idx: Int) {
+        check(idx < repository.shop.wares.size)
         val ware = repository.shop.wares[idx]
         val price = ware.price * SHOP_PRICE_MULTIPLIER
         if (repository.player.cash < price) {
@@ -144,10 +145,12 @@ private class MechanicShop {
     }
 }
 
-private class MechanicPotions {
+class MechanicPotions {
     private val repository: Repository by di.instance()
 
-    fun mixPotion() {}
+    fun mixPotion(firstIdx: Int, secondIdx: Int) {
+        println("Mixing $firstIdx with $secondIdx")
+    }
 }
 
 private class MechanicCustomers {

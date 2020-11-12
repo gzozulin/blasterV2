@@ -111,6 +111,8 @@ class MechanicsPresentation: GlResource() {
 class MechanicInput {
     private val window: GlWindow by di.instance()
     private val repository: Repository by di.instance()
+    private val mechanicShop: MechanicShop by di.instance()
+    private val mechanicPotions: MechanicPotions by di.instance()
 
     // todo: click shop: buy from a shop
     // todo: click, click again in player inventory: mix a potion
@@ -138,25 +140,48 @@ class MechanicInput {
         }
     }
 
+    private var prevSelect: vec2i? = null
+
+    private enum class SelectType { SHOP, PLAYER, CUSTOMER }
+    private fun chooseType(cursor: vec2i) = when {
+        cursor.x < repository.columnsShopEnd -> SelectType.SHOP
+        cursor.x < repository.columnsPlayerEnd -> SelectType.PLAYER
+        cursor.x < repository.columnsCustomersEnd -> SelectType.CUSTOMER
+        else -> error("wtf?!")
+    }
+
+    private fun shopIndex(cursor: vec2i) = cursor.y * POTION_GRID_WIDTH + cursor.x
+    private fun playerIndex(cursor: vec2i) = shopIndex(cursor) - repository.columnsShopEnd
+
     private fun onLmb() {
-        val current = current()
-        when {
-            current.x < repository.columnsShopEnd -> {
-                println("shop!")
+        val currSelect = current()
+        when (chooseType(currSelect)) {
+            SelectType.SHOP -> {
+                val index = shopIndex(currSelect)
+                if (index < repository.shop.wares.size) {
+                    mechanicShop.buyWare(index)
+                }
             }
-            current.x < repository.columnsPlayerEnd -> {
-                println("player!")
+            SelectType.PLAYER -> {
+                if (prevSelect != null) {
+                    val prevType = chooseType(prevSelect!!)
+                    if (prevType == SelectType.PLAYER) {
+                        val currIndex = playerIndex(currSelect)
+                        val prevIndex = playerIndex(prevSelect!!)
+                        mechanicPotions.mixPotion(prevIndex, currIndex)
+                    }
+                }
             }
-            current.x < repository.columnsCustomersEnd -> {
-                println("customer!")
-            }
-            else -> {
-                error("wtf?!")
+            SelectType.CUSTOMER -> {
+                // if prev player = sale
             }
         }
+        prevSelect = currSelect
     }
 
     private fun onRmb() {
-
+        // just removing the choice
+        prevSelect = null
+        println("Choice cleared!")
     }
 }
