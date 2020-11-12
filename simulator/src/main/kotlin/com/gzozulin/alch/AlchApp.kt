@@ -194,8 +194,7 @@ private class MechanicCustomers {
             if (it.currentOrder == null) {
                 it.timeout -= MILLIS_PER_TICK
                 if (it.timeout < 0) {
-                    // todo
-                    it.currentOrder = Potion(vec3(1f), 1f)
+                    it.currentOrder = Potion.random()
                 }
             }
         }
@@ -222,9 +221,8 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
-                // repository.oneMore()
                 mechanicCustomers.throttleDissatisfaction()
-                // mechanicCustomers.throttleSatisfaction()
+                mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
                 mechanicsPresentation.drawGrid()
             }
