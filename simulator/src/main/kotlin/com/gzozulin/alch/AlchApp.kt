@@ -31,7 +31,6 @@ import org.kodein.di.singleton
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
-// todo: buying wares
 // todo: customer orders
 // todo: mixing potions
 // todo: selling potions
@@ -43,38 +42,26 @@ private const val DISSATISFACTION_PER_TICK = 0.0001f
 private const val SATISFACTION_TO_BRING_FRIEND = 0.3f
 private const val CHANCE_TO_BRING_CUSTOMER = .001f
 
-private const val BOTTLE_PRICE = 10
-private const val INGREDIENT_PRICE = 15
-private const val SHOP_PRICE_MULTIPLIER = 1.3f
-private const val POTION_PRICE_MULTIPLIER = 100f
+private const val PRICE_BOTTLE = 10
+private const val PRICE_REAGENT = 15
+private const val MULTIPLIER_BUY = 1.3f
+private const val MULTIPLIER_SELL = 0.7f
 
-interface Ware {
-    val price: Int
-}
+sealed class Ware
 
-data class Bottle(val xx: Int = 123) : Ware {
-    override val price: Int
-        get() = BOTTLE_PRICE
-}
-
-data class Reagent(val type: ReagentType, val power: Float): Ware {
-    override val price: Int
-        get() = INGREDIENT_PRICE
-}
-
-data class Potion(val color: vec3, val power: Float): Ware {
-    override val price: Int
-        get() = (power * POTION_PRICE_MULTIPLIER).toInt()
-
+data class Bottle(val xx: Int = 123) : Ware()
+data class Reagent(val type: ReagentType, val power: Float): Ware()
+data class Potion(val color: vec3, val power: Float): Ware() {
     companion object {
         fun random() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
     }
 }
+data class Order(val color: vec3) : Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
 data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
 data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
-                    var currentOrder: Potion? = null)
+                    var currentOrder: Order? = null)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
 
 private val firstnames = listOf("John", "Mark", "Charles", "Greg", "Andrew")
@@ -95,10 +82,11 @@ private val templatePotionBlue  = Potion(color = vec3().blue(),  power = .5f)
 
 private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
-val di = DI {
+val injector = DI {
     bind<GlWindow>()                with singleton { GlWindow() }
     bind<Console>()                 with singleton { Console() }
     bind<Repository>()              with singleton { Repository() }
+    bind<MechanicPrice>()           with singleton { MechanicPrice() }
     bind<MechanicShop>()            with singleton { MechanicShop() }
     bind<MechanicPotions>()         with singleton { MechanicPotions() }
     bind<MechanicCustomers>()       with singleton { MechanicCustomers() }
@@ -121,9 +109,27 @@ class Repository {
     var columnsCustomersEnd = 0
 }
 
+class MechanicPrice {
+    fun priceBuy(ware: Ware): Int {
+        var price = when (ware) {
+            is Bottle -> PRICE_BOTTLE
+            is Reagent -> PRICE_REAGENT
+            is Potion -> PRICE_BOTTLE + PRICE_REAGENT
+            is Order -> error("wtf?!")
+        }
+        price = (price * MULTIPLIER_BUY).toInt()
+        return price
+    }
+
+    fun priceSell(ware: Ware) {
+
+    }
+}
+
 class MechanicShop {
-    private val console: Console by di.instance()
-    private val repository: Repository by di.instance()
+    private val console: Console by injector.instance()
+    private val repository: Repository by injector.instance()
+    private val mechanicPrice: MechanicPrice by injector.instance()
 
     fun createShop() {
         repository.shop.wares.addAll(listOf(
@@ -135,18 +141,18 @@ class MechanicShop {
     fun buyWare(idx: Int) {
         check(idx < repository.shop.wares.size)
         val ware = repository.shop.wares[idx]
-        val price = ware.price * SHOP_PRICE_MULTIPLIER
+        val price = mechanicPrice.priceBuy(ware)
         if (repository.player.cash < price) {
             console.say("You cannot afford that!")
             return
         }
-        repository.player.cash -= ware.price
+        repository.player.cash -= price
         repository.player.wares.add(ware)
     }
 }
 
 class MechanicPotions {
-    private val repository: Repository by di.instance()
+    private val repository: Repository by injector.instance()
 
     fun mixPotion(firstIdx: Int, secondIdx: Int) {
         println("Mixing $firstIdx with $secondIdx")
@@ -154,8 +160,8 @@ class MechanicPotions {
 }
 
 private class MechanicCustomers {
-    private val console: Console by di.instance()
-    private val repository: Repository by di.instance()
+    private val console: Console by injector.instance()
+    private val repository: Repository by injector.instance()
 
     fun createCustomers() {
         repository.line.customers.addAll(listOf(
@@ -194,19 +200,19 @@ private class MechanicCustomers {
             if (it.currentOrder == null) {
                 it.timeout -= MILLIS_PER_TICK
                 if (it.timeout < 0) {
-                    it.currentOrder = Potion.random()
+                    it.currentOrder = Order(color().rand())
                 }
             }
         }
     }
 }
 
-private val window: GlWindow by di.instance()
-private val mechanicShop: MechanicShop by di.instance()
-private val mechanicPotions: MechanicPotions by di.instance()
-private val mechanicCustomers: MechanicCustomers by di.instance()
-private val mechanicsPresentation: MechanicsPresentation by di.instance()
-private val mechanicInput: MechanicInput by di.instance()
+private val window: GlWindow by injector.instance()
+private val mechanicShop: MechanicShop by injector.instance()
+private val mechanicPotions: MechanicPotions by injector.instance()
+private val mechanicCustomers: MechanicCustomers by injector.instance()
+private val mechanicsPresentation: MechanicsPresentation by injector.instance()
+private val mechanicInput: MechanicInput by injector.instance()
 
 fun main() {
     window.create(isHoldingCursor = false) {

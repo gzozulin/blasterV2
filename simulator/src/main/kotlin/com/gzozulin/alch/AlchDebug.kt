@@ -10,7 +10,7 @@ private const val POTION_GRID_WIDTH = 5
 private const val POTION_GRID_SIDE = 2f
 
 class MechanicsPresentation: GlResource() {
-    private val repository: Repository by di.instance()
+    private val repository: Repository by injector.instance()
 
     private val simpleTechnique = SimpleTechnique()
 
@@ -86,33 +86,46 @@ class MechanicsPresentation: GlResource() {
     private fun drawWare(ware: Ware, position: vec3, viewM: mat4, projM: mat4) {
         simpleTechnique.draw(viewM, projM) {
             matrixStack.pushMatrix(mat4().identity().translate(position)) {
-                if (ware is Reagent) {
-                    val diffuse = when (ware.type) {
-                        ReagentType.RED -> reagentRed
-                        ReagentType.BLUE -> reagentBlue
-                        ReagentType.GREEN -> reagentGreen
+                when (ware) {
+                    is Bottle -> drawBottle()
+                    is Reagent -> drawReagent(ware)
+                    is Potion -> {
+                        drawBottle()
+                        drawContent(ware.power, ware.color)
                     }
-                    simpleTechnique.instance(rect, diffuse, matrixStack.peekMatrix())
-                } else {
-                    simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
-                    if (ware is Potion) {
-                        matrixStack.pushMatrix(mat4().identity().translate(0f, (ware.power - 1f), 0f)) {
-                            matrixStack.pushMatrix(mat4().scale(1f, ware.power, 1f)) {
-                                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = ware.color)
-                            }
-                        }
-                    }
+                    is Order -> drawContent(1f, ware.color)
                 }
+            }
+        }
+    }
+
+    private fun drawBottle() {
+        simpleTechnique.instance(rect, bottle, matrixStack.peekMatrix())
+    }
+
+    private fun drawReagent(reagent: Reagent) {
+        val diffuse = when (reagent.type) {
+            ReagentType.RED -> reagentRed
+            ReagentType.BLUE -> reagentBlue
+            ReagentType.GREEN -> reagentGreen
+        }
+        simpleTechnique.instance(rect, diffuse, matrixStack.peekMatrix())
+    }
+
+    private fun drawContent(power: Float, color: color) {
+        matrixStack.pushMatrix(mat4().identity().translate(0f, (power - 1f), 0f)) {
+            matrixStack.pushMatrix(mat4().scale(1f, power, 1f)) {
+                simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = color)
             }
         }
     }
 }
 
 class MechanicInput {
-    private val window: GlWindow by di.instance()
-    private val repository: Repository by di.instance()
-    private val mechanicShop: MechanicShop by di.instance()
-    private val mechanicPotions: MechanicPotions by di.instance()
+    private val window: GlWindow by injector.instance()
+    private val repository: Repository by injector.instance()
+    private val mechanicShop: MechanicShop by injector.instance()
+    private val mechanicPotions: MechanicPotions by injector.instance()
 
     // todo: click shop: buy from a shop
     // todo: click, click again in player inventory: mix a potion
