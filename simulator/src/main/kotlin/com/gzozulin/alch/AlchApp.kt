@@ -28,6 +28,7 @@ import kotlin.math.min
 // damage if potion strength > 1f
 // random death phrases (poison, explosion, fire, police, etc)
 // more colors in potion: more complex: more side effects (good and bad)
+// customers by satisfaction rate: the higher the level is the worse customer type
 
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
@@ -54,11 +55,7 @@ sealed class Ware
 data class Bottle(val xx: Int = 123) : Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
 data class Order(val color: col3) : Ware()
-data class Potion(val color: col3, val power: Float): Ware() {
-    companion object {
-        fun random() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
-    }
-}
+data class Potion(val color: col3, val power: Float): Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
 data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
@@ -176,17 +173,17 @@ class MechanicPotions {
     }
 
     private fun mixBottleReagent(reagent: Reagent)
-            = Potion(when (reagent.type) {
+            = Potion(color = when (reagent.type) {
                         ReagentType.RED -> vec3().red()
                         ReagentType.GREEN -> vec3().green()
                         ReagentType.BLUE -> vec3().blue()
-                    }, reagent.power)
+                    }, power = reagent.power)
 
     private fun mixPotionPotion(first: Potion, second: Potion): Potion {
         val r = (first.color.r + second.color.r) / 2f
         val g = (first.color.g + second.color.g) / 2f
         val b = (first.color.b + second.color.b) / 2f
-        return Potion(color = vec3(r, g, b), min(first.power + second.power, 1f))
+        return Potion(color = vec3(r, g, b), power = min(first.power + second.power, 1f))
     }
 }
 
@@ -263,8 +260,8 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
-                mechanicCustomers.throttleDissatisfaction()
-                mechanicCustomers.throttleSatisfaction()
+                //mechanicCustomers.throttleDissatisfaction()
+                //mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
                 mechanicsPresentation.drawGrid()
             }

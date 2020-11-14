@@ -154,7 +154,8 @@ class MechanicInput {
         }
     }
 
-    private var prevSelect: vec2i? = null
+    private var prevIndex: Int? = null
+    private var prevType: SelectType? = null
 
     private enum class SelectType { SHOP, PLAYER, CUSTOMER }
     private fun chooseType(cursor: vec2i) = when {
@@ -177,15 +178,15 @@ class MechanicInput {
                 }
             }
             SelectType.PLAYER -> {
-                if (prevSelect == null) {
-                    prevSelect = currSelect
+                if (prevIndex == null) {
+                    prevIndex = playerIndex(currSelect)
+                    prevType = SelectType.PLAYER
                 } else {
-                    val prevType = chooseType(prevSelect!!)
                     if (prevType == SelectType.PLAYER) {
                         val currIndex = playerIndex(currSelect)
-                        val prevIndex = playerIndex(prevSelect!!)
-                        mechanicPotions.mixPotion(prevIndex, currIndex)
-                        prevSelect = null
+                        mechanicPotions.mixPotion(prevIndex!!, currIndex)
+                        prevIndex = null
+                        prevType = null
                     }
                 }
             }
@@ -197,8 +198,9 @@ class MechanicInput {
 
     private fun onRmb() {
         // just removing the choice
-        if (prevSelect != null) {
-            prevSelect = null
+        if (prevIndex != null) {
+            prevIndex = null
+            prevType = null
             println("Choice cleared!")
         }
     }
