@@ -152,7 +152,7 @@ class GlBackend {
     fun glMapBufferRange(target: Int, offset: Long, length: Long, access: Int, oldBuffer: ByteBuffer): ByteBuffer = glCheck { GL30.glMapBufferRange(target, offset, length, access, oldBuffer) }!!
     fun glBegin(mode: Int) = glCheck { GL11.glBegin(mode) }
     fun glEnd() = glCheck { GL11.glEnd() }
-    fun glColor3f(rgb: color) = glCheck { GL11.glColor3f(rgb.x, rgb.y, rgb.z) }
+    fun glColor3f(rgb: col3) = glCheck { GL11.glColor3f(rgb.x, rgb.y, rgb.z) }
     fun glColor3f(r: Float, g: Float, b: Float) = glCheck { GL11.glColor3f(r, g, b) }
     fun glVertex3f(x: Float, y: Float, z: Float) = glCheck { GL11.glVertex3f(x, y, z) }
     fun glVertex3f(xyz: vec3) = glCheck { GL11.glVertex3f(xyz.x, xyz.y, xyz.z) }

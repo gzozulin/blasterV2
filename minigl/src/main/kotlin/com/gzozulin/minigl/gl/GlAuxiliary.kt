@@ -15,7 +15,7 @@ private val random = Random()
 typealias vec3 = Vector3f
 typealias vec4i = Vector4i
 typealias euler3 = Vector3f
-typealias color = Vector3f
+typealias col3 = Vector3f
 typealias vec2 = Vector2f
 typealias vec2i = Vector2i
 typealias mat3 = Matrix3f
@@ -48,16 +48,23 @@ fun vec3.right()    = set(1f, 0f, 0f)
 fun vec3.front()    = set(0f, 0f, 1f)
 fun vec3.back()     = set(0f, 0f, -1f)
 
-fun color.white()   = set(1f, 1f, 1f)
-fun color.red()     = set(1f, 0f, 0f)
-fun color.green()   = set(0f, 1f, 0f)
-fun color.blue()    = set(0f, 0f, 1f)
-fun color.yellow()  = set(1f, 1f, 0f)
-fun color.magenta() = set(1f, 0f, 1f)
-fun color.cyan()    = set(0f, 1f, 1f)
-fun color.grey()    = set(0.5f)
+fun col3.white()   = set(1f, 1f, 1f)
+fun col3.red()     = set(1f, 0f, 0f)
+fun col3.green()   = set(0f, 1f, 0f)
+fun col3.blue()    = set(0f, 0f, 1f)
+fun col3.yellow()  = set(1f, 1f, 0f)
+fun col3.magenta() = set(1f, 0f, 1f)
+fun col3.cyan()    = set(0f, 1f, 1f)
+fun col3.grey()    = set(0.5f)
 
-fun color.parseColor(hex: String): color {
+val col3.r
+    get() = x
+val col3.g
+    get() = y
+val col3.b
+    get() = z
+
+fun col3.parseColor(hex: String): col3 {
     val integerHex = Integer.parseInt(hex, 16)
     val rIntValue = (integerHex / 256 / 256) % 256
     val gIntValue = (integerHex / 256      ) % 256
@@ -194,7 +201,7 @@ fun <T> glCheck(action: () -> T): T {
     return result
 }
 
-fun glClear(color: color = color().cyan()) {
+fun glClear(color: col3 = col3().cyan()) {
     backend.glClearColor(color.x, color.y, color.z, 0f)
     backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT)
 }

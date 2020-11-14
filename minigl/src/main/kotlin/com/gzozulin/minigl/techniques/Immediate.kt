@@ -22,7 +22,7 @@ class ImmediateTechnique {
         }
     }
 
-    private fun line(from: vec3, to: vec3, color: color) {
+    private fun line(from: vec3, to: vec3, color: col3) {
         backend.glColor3f(color.x, color.y, color.z)
         backend.glVertex3f(from)
         backend.glVertex3f(to)
@@ -90,7 +90,7 @@ class ImmediateTechnique {
         }
     }
 
-    fun marker(camera: Camera, modelM: mat4, color: color = color().red(), scale: Float = 1f) {
+    fun marker(camera: Camera, modelM: mat4, color: col3 = col3().red(), scale: Float = 1f) {
         marker(camera, modelM, color, color, color, scale)
     }
 }

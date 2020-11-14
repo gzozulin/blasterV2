@@ -8,9 +8,9 @@ import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
 import java.util.*
 
-private val colorFailure = color().parseColor("ffabab")
-private val colorInfo = color().parseColor("6eb5ff")
-private val colorSuccess = color().parseColor("9ee09e")
+private val colorFailure = col3().parseColor("ffabab")
+private val colorInfo = col3().parseColor("6eb5ff")
+private val colorSuccess = col3().parseColor("9ee09e")
 
 private const val textScale = 0.025f
 
@@ -123,7 +123,7 @@ fun main() {
         console.info("ready")
         glUse(technique) {
             window.show {
-                glClear(color = color().blue())
+                glClear(color = col3().blue())
                 console.tick()
                 technique.draw {
                     console.render { position, text, color, scale ->

@@ -5,6 +5,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
+import kotlin.math.min
 
 // Alchemist
 
@@ -34,6 +35,7 @@ import org.kodein.di.singleton
 // todo: customer orders
 // todo: mixing potions
 // todo: selling potions
+// todo: satisfaction and desatisfaction
 
 private const val MILLIS_PER_TICK = 16 // 60 Hz
 
@@ -51,12 +53,12 @@ sealed class Ware
 
 data class Bottle(val xx: Int = 123) : Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
-data class Potion(val color: vec3, val power: Float): Ware() {
+data class Order(val color: col3) : Ware()
+data class Potion(val color: col3, val power: Float): Ware() {
     companion object {
         fun random() = Potion(vec3().rand(vec3(0f), vec3(1f)), randf(0f, 1f))
     }
 }
-data class Order(val color: vec3) : Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
 data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
@@ -153,9 +155,38 @@ class MechanicShop {
 
 class MechanicPotions {
     private val repository: Repository by injector.instance()
+    private val console: Console by injector.instance()
 
     fun mixPotion(firstIdx: Int, secondIdx: Int) {
-        println("Mixing $firstIdx with $secondIdx")
+        check(firstIdx < repository.player.wares.size)
+        check(secondIdx < repository.player.wares.size)
+        val first = repository.player.wares[firstIdx]
+        val second = repository.player.wares[secondIdx]
+        if (first is Bottle && second is Reagent) {
+            repository.player.wares.add(mixBottleReagent(second))
+        } else if (first is Reagent && second is Bottle) {
+            repository.player.wares.add(mixBottleReagent(first))
+        } else if (first is Potion && second is Potion) {
+            repository.player.wares.add(mixPotionPotion(first, second))
+        } else {
+            console.say("This combination is impossible!")
+        }
+        repository.player.wares.remove(first)
+        repository.player.wares.remove(second)
+    }
+
+    private fun mixBottleReagent(reagent: Reagent)
+            = Potion(when (reagent.type) {
+                        ReagentType.RED -> vec3().red()
+                        ReagentType.GREEN -> vec3().green()
+                        ReagentType.BLUE -> vec3().blue()
+                    }, reagent.power)
+
+    private fun mixPotionPotion(first: Potion, second: Potion): Potion {
+        val r = (first.color.r + second.color.r) / 2f
+        val g = (first.color.g + second.color.g) / 2f
+        val b = (first.color.b + second.color.b) / 2f
+        return Potion(color = vec3(r, g, b), min(first.power + second.power, 1f))
     }
 }
 
@@ -200,10 +231,15 @@ private class MechanicCustomers {
             if (it.currentOrder == null) {
                 it.timeout -= MILLIS_PER_TICK
                 if (it.timeout < 0) {
-                    it.currentOrder = Order(color().rand())
+                    it.currentOrder = Order(col3().rand())
                 }
             }
         }
+    }
+
+    fun sellPotion() {
+        // the more precise color == the better
+        // the more power == the better
     }
 }
 

@@ -112,7 +112,7 @@ class MechanicsPresentation: GlResource() {
         simpleTechnique.instance(rect, diffuse, matrixStack.peekMatrix())
     }
 
-    private fun drawContent(power: Float, color: color) {
+    private fun drawContent(power: Float, color: col3) {
         matrixStack.pushMatrix(mat4().identity().translate(0f, (power - 1f), 0f)) {
             matrixStack.pushMatrix(mat4().scale(1f, power, 1f)) {
                 simpleTechnique.instance(rect, marble, matrixStack.peekMatrix(), color = color)
