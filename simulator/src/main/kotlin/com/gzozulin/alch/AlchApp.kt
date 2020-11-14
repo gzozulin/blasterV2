@@ -75,9 +75,9 @@ private val templateBloodMoss   = Reagent(type = ReagentType.RED,   power = .3f)
 private val templateNightshade  = Reagent(type = ReagentType.GREEN, power = .3f)
 private val templateSpidersSilk = Reagent(type = ReagentType.BLUE,  power = .3f)
 
-private val templatePotionRed   = Potion(color = vec3().red(),   power = .5f)
-private val templatePotionGreen = Potion(color = vec3().green(), power = .5f)
-private val templatePotionBlue  = Potion(color = vec3().blue(),  power = .5f)
+private val templatePotionRed   = Potion(color = vec3().red(),   power = .3f)
+private val templatePotionGreen = Potion(color = vec3().green(), power = .3f)
+private val templatePotionBlue  = Potion(color = vec3().blue(),  power = .3f)
 
 private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
@@ -172,18 +172,17 @@ class MechanicPotions {
         repository.player.wares.remove(second)
     }
 
-    private fun mixBottleReagent(reagent: Reagent)
-            = Potion(color = when (reagent.type) {
-                        ReagentType.RED -> vec3().red()
-                        ReagentType.GREEN -> vec3().green()
-                        ReagentType.BLUE -> vec3().blue()
-                    }, power = reagent.power)
+    private fun mixBottleReagent(reagent: Reagent) = Potion(color = when (reagent.type) {
+        ReagentType.RED -> vec3().red()
+        ReagentType.GREEN -> vec3().green()
+        ReagentType.BLUE -> vec3().blue()
+    }, power = reagent.power)
 
     private fun mixPotionPotion(first: Potion, second: Potion): Potion {
-        val r = (first.color.r + second.color.r) / 2f
-        val g = (first.color.g + second.color.g) / 2f
-        val b = (first.color.b + second.color.b) / 2f
-        return Potion(color = vec3(r, g, b), power = min(first.power + second.power, 1f))
+        val r = min(1f, (first.color.r + second.color.r))
+        val g = min(1f, (first.color.g + second.color.g))
+        val b = min(1f, (first.color.b + second.color.b))
+        return Potion(color = vec3(r, g, b), power = min(1f, first.power + second.power))
     }
 }
 
