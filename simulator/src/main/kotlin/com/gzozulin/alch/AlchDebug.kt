@@ -126,6 +126,7 @@ class MechanicInput {
     private val repository: Repository by injector.instance()
     private val mechanicShop: MechanicShop by injector.instance()
     private val mechanicPotions: MechanicPotions by injector.instance()
+    private val mechanicCustomers: MechanicCustomers by injector.instance()
 
     // todo: click shop: buy from a shop
     // todo: click, click again in player inventory: mix a potion
@@ -154,9 +155,6 @@ class MechanicInput {
         }
     }
 
-    private var prevIndex: Int? = null
-    private var prevType: SelectType? = null
-
     private enum class SelectType { SHOP, PLAYER, CUSTOMER }
     private fun chooseType(cursor: vec2i) = when {
         cursor.x < repository.columnsShopEnd -> SelectType.SHOP
@@ -167,41 +165,40 @@ class MechanicInput {
 
     private fun shopIndex(cursor: vec2i) = cursor.y + cursor.x * POTION_GRID_WIDTH
     private fun playerIndex(cursor: vec2i) = shopIndex(cursor) - repository.columnsShopEnd * POTION_GRID_WIDTH
+    private fun customerIndex(cursor: vec2i): Int = shopIndex(cursor) - repository.columnsPlayerEnd * POTION_GRID_WIDTH
 
-    private fun onLmb() {
-        val currSelect = current()
-        when (chooseType(currSelect)) {
-            SelectType.SHOP -> {
-                val index = shopIndex(currSelect)
-                if (index < repository.shop.wares.size) {
-                    mechanicShop.buyWare(index)
-                }
-            }
-            SelectType.PLAYER -> {
-                if (prevIndex == null) {
-                    prevIndex = playerIndex(currSelect)
-                    prevType = SelectType.PLAYER
-                } else {
-                    if (prevType == SelectType.PLAYER) {
-                        val currIndex = playerIndex(currSelect)
-                        mechanicPotions.mixPotion(prevIndex!!, currIndex)
-                        prevIndex = null
-                        prevType = null
-                    }
-                }
-            }
-            SelectType.CUSTOMER -> {
-                // if prev player = sale
-            }
-        }
+    private var prevIndex: Int? = null
+    private var prevType: SelectType? = null
+
+    private fun clearChoice() {
+        prevIndex = null
+        prevType = null
     }
 
     private fun onRmb() {
-        // just removing the choice
-        if (prevIndex != null) {
-            prevIndex = null
-            prevType = null
-            println("Choice cleared!")
+        clearChoice()
+    }
+
+    private fun onLmb() {
+        val currSelect = current()
+        val currType = chooseType(currSelect)
+        val currIndex = when (currType) {
+            SelectType.SHOP -> shopIndex(currSelect)
+            SelectType.PLAYER -> playerIndex(currSelect)
+            SelectType.CUSTOMER -> customerIndex(currSelect)
+        }
+        if (currType == SelectType.SHOP) {
+            mechanicShop.buyWare(currIndex)
+            clearChoice()
+        } else if (prevType != null && prevType == SelectType.PLAYER && currType == SelectType.PLAYER) {
+            mechanicPotions.mixPotion(prevIndex!!, currIndex)
+            clearChoice()
+        } else if (prevType != null && prevType == SelectType.PLAYER && currType == SelectType.CUSTOMER) {
+            mechanicCustomers.sellPotion(prevIndex!!, currIndex)
+            clearChoice()
+        } else {
+            prevType = currType
+            prevIndex = currIndex
         }
     }
 }

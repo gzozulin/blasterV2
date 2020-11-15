@@ -61,7 +61,7 @@ data class Order(val color: col3) : Ware()
 data class Potion(val color: col3, val power: Float): Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
-data class Player(var cash: Int = 100, val wares: MutableList<Ware> = mutableListOf())
+data class Player(var cash: Int = 1000, val wares: MutableList<Ware> = mutableListOf())
 data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
                     var currentOrder: Order? = null)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
@@ -192,7 +192,7 @@ class MechanicPotions {
     }
 }
 
-private class MechanicCustomers {
+class MechanicCustomers {
     private val console: Console by injector.instance()
     private val repository: Repository by injector.instance()
 
@@ -239,9 +239,12 @@ private class MechanicCustomers {
         }
     }
 
-    fun sellPotion() {
+    fun sellPotion(playerIndex: Int, customerIndex: Int) {
+        console.say("Potion sold! $playerIndex, $customerIndex")
         // the more precise color == the better
         // the more power == the better
+        repository.player.wares.removeAt(playerIndex)
+        repository.line.customers[customerIndex].currentOrder = null
     }
 }
 
