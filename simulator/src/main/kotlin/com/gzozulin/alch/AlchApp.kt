@@ -50,8 +50,7 @@ private const val WARES_IN_SHOP = 9
 
 private const val PRICE_BOTTLE = 10
 private const val PRICE_REAGENT = 15
-private const val MULTIPLIER_BUY = 1.3f
-private const val MULTIPLIER_SELL = 0.7f
+private const val PRICE_POTION = 50
 
 sealed class Ware
 
@@ -117,20 +116,15 @@ class Repository {
 }
 
 class MechanicPrice {
-    fun priceBuy(ware: Ware): Int {
-        var price = when (ware) {
-            is Bottle -> PRICE_BOTTLE
-            is Reagent -> PRICE_REAGENT
-            is Potion -> PRICE_BOTTLE + PRICE_REAGENT
-            is Order -> error("wtf?!")
-        }
-        price = (price * MULTIPLIER_BUY).toInt()
-        return price
+    fun priceBuy(ware: Ware) = when (ware) {
+        is Bottle -> PRICE_BOTTLE
+        is Reagent -> PRICE_REAGENT
+        is Potion -> PRICE_BOTTLE + PRICE_REAGENT
+        is Order -> error("wtf?!")
     }
 
-    fun priceSell(ware: Ware, customerColor: col3) {
-        // (collDiff, 0f - 1f) * power * PRICE
-    }
+    fun priceSell(potion: Potion, customerColor: col3)
+        = ((3f - potion.color.distance(customerColor) / 3f) * potion.power * PRICE_POTION).toInt()
 }
 
 class MechanicShop {
@@ -220,6 +214,7 @@ class MechanicPotions {
 class MechanicCustomers {
     private val console: Console by injector.instance()
     private val repository: Repository by injector.instance()
+    private val mechanicPrice: MechanicPrice by injector.instance()
 
     fun throttleDissatisfaction() {
         val toRemove = mutableListOf<Customer>()
@@ -251,23 +246,33 @@ class MechanicCustomers {
             if (it.currentOrder == null) {
                 it.timeout -= MILLIS_PER_TICK
                 if (it.timeout < 0) {
-                    it.currentOrder = Order(col3().rand())
+                    val color = when (randi(3)) {
+                        0 -> col3().red()
+                        1 -> col3().green()
+                        2 -> col3().blue()
+                        else -> error("wtf?!")
+                    }
+                    it.currentOrder = Order(color)
                 }
             }
         }
     }
 
     fun sellPotion(playerIndex: Int, customerIndex: Int) {
-        // todo: cannot sell bottles and reagents?
         if (playerIndex >= repository.player.wares.size ||
             customerIndex >= repository.line.customers.size ||
             repository.line.customers[customerIndex].currentOrder == null) {
             console.say("Impossible transaction!")
             return
         }
-        console.say("Potion sold! $playerIndex, $customerIndex")
-        // the more precise color == the better
-        // the more power == the better
+        val ware = repository.player.wares[playerIndex]
+        if (ware !is Potion) {
+            console.say("Only potions can be sold!")
+            return
+        }
+        val price =
+            mechanicPrice.priceSell(ware, repository.line.customers[customerIndex].currentOrder!!.color)
+        console.say("Potion sold! $playerIndex, $customerIndex for $price")
         repository.player.wares.removeAt(playerIndex)
         repository.line.customers[customerIndex].currentOrder = null
     }
