@@ -33,6 +33,7 @@ import kotlin.math.min
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
+// todo: bug with input
 // todo: customer orders
 // todo: mixing potions
 // todo: selling potions
@@ -44,6 +45,8 @@ private const val DISSATISFACTION_PER_TICK = 0.0001f
 
 private const val SATISFACTION_TO_BRING_FRIEND = 0.3f
 private const val CHANCE_TO_BRING_CUSTOMER = .001f
+
+private const val WARES_IN_SHOP = 10
 
 private const val PRICE_BOTTLE = 10
 private const val PRICE_REAGENT = 15
@@ -74,10 +77,6 @@ enum class ReagentType { RED, BLUE, GREEN }
 private val templateBloodMoss   = Reagent(type = ReagentType.RED,   power = .3f)
 private val templateNightshade  = Reagent(type = ReagentType.GREEN, power = .3f)
 private val templateSpidersSilk = Reagent(type = ReagentType.BLUE,  power = .3f)
-
-private val templatePotionRed   = Potion(color = vec3().red(),   power = .3f)
-private val templatePotionGreen = Potion(color = vec3().green(), power = .3f)
-private val templatePotionBlue  = Potion(color = vec3().blue(),  power = .3f)
 
 private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
@@ -133,8 +132,13 @@ class MechanicShop {
     fun createShop() {
         repository.shop.wares.addAll(listOf(
             templateBottle,
-            templateBloodMoss, templateNightshade, templateSpidersSilk,
-            templatePotionRed, templatePotionGreen, templatePotionBlue))
+            templateBloodMoss, templateNightshade, templateSpidersSilk))
+    }
+
+    fun throttleShop() {
+        if (repository.shop.wares.size < WARES_IN_SHOP) {
+            repository.shop.wares.add(Potion(col3().rand(), randf()))
+        }
     }
 
     fun buyWare(idx: Int) {
@@ -165,9 +169,11 @@ class MechanicPotions {
             repository.player.wares.add(mixBottleReagent(first))
         } else if (first is Potion && second is Potion) {
             repository.player.wares.add(mixPotionPotion(first, second))
+            repository.player.wares.add(Bottle())
         } else {
             console.say("This combination is impossible!")
         }
+        // todo: potion + reagent
         repository.player.wares.remove(first)
         repository.player.wares.remove(second)
     }
@@ -259,6 +265,7 @@ fun main() {
         glUse(mechanicsPresentation) {
             window.show {
                 glClear(color = vec3().grey())
+                mechanicShop.throttleShop()
                 //mechanicCustomers.throttleDissatisfaction()
                 //mechanicCustomers.throttleSatisfaction()
                 mechanicCustomers.throttleOrders()
