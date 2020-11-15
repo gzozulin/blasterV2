@@ -46,7 +46,7 @@ private const val DISSATISFACTION_PER_TICK = 0.0001f
 private const val SATISFACTION_TO_BRING_FRIEND = 0.3f
 private const val CHANCE_TO_BRING_CUSTOMER = .001f
 
-private const val WARES_IN_SHOP = 10
+private const val WARES_IN_SHOP = 9
 
 private const val PRICE_BOTTLE = 10
 private const val PRICE_REAGENT = 15
@@ -142,7 +142,10 @@ class MechanicShop {
     }
 
     fun buyWare(idx: Int) {
-        check(idx < repository.shop.wares.size)
+        if (idx >= repository.shop.wares.size) {
+            console.say("Ware does not exists!")
+            return
+        }
         val ware = repository.shop.wares[idx]
         val price = mechanicPrice.priceBuy(ware)
         if (repository.player.cash < price) {
@@ -159,8 +162,10 @@ class MechanicPotions {
     private val console: Console by injector.instance()
 
     fun mixPotion(firstIdx: Int, secondIdx: Int) {
-        check(firstIdx < repository.player.wares.size)
-        check(secondIdx < repository.player.wares.size)
+        if (firstIdx >= repository.player.wares.size || secondIdx >= repository.player.wares.size) {
+            console.say("Potion does not exists!")
+            return
+        }
         val first = repository.player.wares[firstIdx]
         val second = repository.player.wares[secondIdx]
         val shouldRemove =
@@ -199,7 +204,10 @@ class MechanicPotions {
     }
 
     fun drinkPotion(idx: Int) {
-        check(idx < repository.player.wares.size)
+        if (idx >= repository.player.wares.size) {
+            console.say("Potion does not exists!")
+            return
+        }
         repository.player.wares.removeAt(idx)
         console.say("Potion is consumed!")
     }
@@ -253,8 +261,12 @@ class MechanicCustomers {
     }
 
     fun sellPotion(playerIndex: Int, customerIndex: Int) {
-        check(playerIndex < repository.player.wares.size)
-        check(repository.line.customers[customerIndex].currentOrder != null)
+        if (playerIndex >= repository.player.wares.size ||
+            customerIndex >= repository.line.customers.size ||
+            repository.line.customers[customerIndex].currentOrder == null) {
+            console.say("Impossible transaction!")
+            return
+        }
         console.say("Potion sold! $playerIndex, $customerIndex")
         // the more precise color == the better
         // the more power == the better
