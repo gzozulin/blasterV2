@@ -97,9 +97,18 @@ private class Console {
 }
 
 class Repository {
-    val shop = Shop()
     val player = Player()
-    val line = Line()
+
+    val shop = Shop(wares = mutableListOf(
+        templateBottle,
+        templateBloodMoss,
+        templateNightshade,
+        templateSpidersSilk))
+
+    val line = Line(customers = mutableListOf(
+        templateCustomer.copy(name = generateName()),
+        templateCustomer.copy(name = generateName()),
+        templateCustomer.copy(name = generateName())))
 
     // todo: debuggling
     var columnsShopEnd = 0
@@ -128,12 +137,6 @@ class MechanicShop {
     private val console: Console by injector.instance()
     private val repository: Repository by injector.instance()
     private val mechanicPrice: MechanicPrice by injector.instance()
-
-    fun createShop() {
-        repository.shop.wares.addAll(listOf(
-            templateBottle,
-            templateBloodMoss, templateNightshade, templateSpidersSilk))
-    }
 
     fun throttleShop() {
         if (repository.shop.wares.size < WARES_IN_SHOP) {
@@ -204,6 +207,7 @@ class MechanicPotions {
     }
 
     fun drinkPotion(idx: Int) {
+        // todo: cannot drink bottles and reagents
         if (idx >= repository.player.wares.size) {
             console.say("Potion does not exists!")
             return
@@ -216,13 +220,6 @@ class MechanicPotions {
 class MechanicCustomers {
     private val console: Console by injector.instance()
     private val repository: Repository by injector.instance()
-
-    fun createCustomers() {
-        repository.line.customers.addAll(listOf(
-            templateCustomer.copy(name = generateName()),
-            templateCustomer.copy(name = generateName()),
-            templateCustomer.copy(name = generateName())))
-    }
 
     fun throttleDissatisfaction() {
         val toRemove = mutableListOf<Customer>()
@@ -261,6 +258,7 @@ class MechanicCustomers {
     }
 
     fun sellPotion(playerIndex: Int, customerIndex: Int) {
+        // todo: cannot sell bottles and reagents?
         if (playerIndex >= repository.player.wares.size ||
             customerIndex >= repository.line.customers.size ||
             repository.line.customers[customerIndex].currentOrder == null) {
@@ -284,8 +282,6 @@ private val mechanicInput: MechanicInput by injector.instance()
 
 fun main() {
     window.create(isHoldingCursor = false) {
-        mechanicShop.createShop()
-        mechanicCustomers.createCustomers()
         window.buttonCallback = { button, pressed ->
             mechanicInput.onButtonPressed(button, pressed)
         }
