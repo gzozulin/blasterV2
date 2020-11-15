@@ -163,19 +163,26 @@ class MechanicPotions {
         check(secondIdx < repository.player.wares.size)
         val first = repository.player.wares[firstIdx]
         val second = repository.player.wares[secondIdx]
-        if (first is Bottle && second is Reagent) {
-            repository.player.wares.add(mixBottleReagent(second))
-        } else if (first is Reagent && second is Bottle) {
-            repository.player.wares.add(mixBottleReagent(first))
-        } else if (first is Potion && second is Potion) {
-            repository.player.wares.add(mixPotionPotion(first, second))
-            repository.player.wares.add(Bottle())
-        } else {
-            console.say("This combination is impossible!")
-        }
+        val shouldRemove =
+            if (first is Bottle && second is Reagent) {
+                repository.player.wares.add(mixBottleReagent(second))
+                true
+            } else if (first is Reagent && second is Bottle) {
+                repository.player.wares.add(mixBottleReagent(first))
+                true
+            } else if (first is Potion && second is Potion) {
+                repository.player.wares.add(mixPotionPotion(first, second))
+                repository.player.wares.add(Bottle())
+                true
+            } else {
+                console.say("This combination is impossible!")
+                false
+            }
         // todo: potion + reagent
-        repository.player.wares.remove(first)
-        repository.player.wares.remove(second)
+        if (shouldRemove) {
+            repository.player.wares.remove(first)
+            repository.player.wares.remove(second)
+        }
     }
 
     private fun mixBottleReagent(reagent: Reagent) = Potion(color = when (reagent.type) {
@@ -189,6 +196,12 @@ class MechanicPotions {
         val g = min(1f, (first.color.g + second.color.g))
         val b = min(1f, (first.color.b + second.color.b))
         return Potion(color = vec3(r, g, b), power = min(1f, first.power + second.power))
+    }
+
+    fun drinkPotion(idx: Int) {
+        check(idx < repository.player.wares.size)
+        repository.player.wares.removeAt(idx)
+        console.say("Potion is consumed!")
     }
 }
 
@@ -240,6 +253,8 @@ class MechanicCustomers {
     }
 
     fun sellPotion(playerIndex: Int, customerIndex: Int) {
+        check(playerIndex < repository.player.wares.size)
+        check(repository.line.customers[customerIndex].currentOrder != null)
         console.say("Potion sold! $playerIndex, $customerIndex")
         // the more precise color == the better
         // the more power == the better

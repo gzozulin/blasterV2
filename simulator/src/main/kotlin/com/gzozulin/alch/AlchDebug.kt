@@ -130,7 +130,7 @@ class MechanicInput {
 
     // todo: click shop: buy from a shop
     // todo: click, click again in player inventory: mix a potion
-    // todo: click long: drink a potion
+    // todo: click: click in player same: drink a potion
     // todo: click, click again in customer inventory: sell a potion
     // todo: click right: remove selection
 
@@ -191,7 +191,11 @@ class MechanicInput {
             mechanicShop.buyWare(currIndex)
             clearChoice()
         } else if (prevType != null && prevType == SelectType.PLAYER && currType == SelectType.PLAYER) {
-            mechanicPotions.mixPotion(prevIndex!!, currIndex)
+            if (currIndex == prevIndex) {
+                mechanicPotions.drinkPotion(currIndex)
+            } else {
+                mechanicPotions.mixPotion(prevIndex!!, currIndex)
+            }
             clearChoice()
         } else if (prevType != null && prevType == SelectType.PLAYER && currType == SelectType.CUSTOMER) {
             mechanicCustomers.sellPotion(prevIndex!!, currIndex)
