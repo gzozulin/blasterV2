@@ -119,8 +119,8 @@ class MechanicPrice {
         return price
     }
 
-    fun priceSell(ware: Ware) {
-
+    fun priceSell(ware: Ware, customerColor: col3) {
+        // (collDiff, 0f - 1f) * power * PRICE
     }
 }
 
