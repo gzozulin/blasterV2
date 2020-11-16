@@ -45,22 +45,10 @@ private const val PRICE_POTION = 50
 
 sealed class Ware
 
+data class Potion(val color: col3, val power: Float): Ware()
 data class Bottle(val xx: Int = 123) : Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
-data class Order(val color: col3, var timeout: Int) : Ware() {
-    companion object {
-        fun random(): Order {
-            val color = when (randi(3)) {
-                0 -> col3().red()
-                1 -> col3().green()
-                2 -> col3().blue()
-                else -> error("wtf?!")
-            }
-            return Order(color, ORDER_TIMEOUT)
-        }
-    }
-}
-data class Potion(val color: col3, val power: Float): Ware()
+data class Order(val color: col3, var timeout: Int) : Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
 data class Player(var health: Int = 100, var cash: Int = 1000, var fame: Int = 10,
@@ -203,11 +191,16 @@ class MechanicPotions {
     }
 
     fun drinkPotion(idx: Int) {
-        // todo: cannot drink bottles and reagents
         if (idx >= repository.player.wares.size) {
             console.say("Potion does not exists!")
             return
         }
+        val potion = repository.player.wares[idx]
+        if (potion !is Potion) {
+            console.say("Can only drink potions!")
+            return
+        }
+        // todo: apply potion effect
         repository.player.wares.removeAt(idx)
         console.say("Potion is consumed!")
     }
@@ -218,7 +211,7 @@ class MechanicCustomers {
     private val repository: Repository by injector.instance()
     private val mechanicPrice: MechanicPrice by injector.instance()
 
-    fun throttleDissatisfaction() {
+    fun throttleTimeout() {
         val toRemove = mutableListOf<Customer>()
         repository.line.customers.forEach {
             it.order.timeout--
@@ -237,7 +230,8 @@ class MechanicCustomers {
         if (shouldHaveCustomers > actuallyHave) {
             val toAdd = shouldHaveCustomers - actuallyHave
             for (i in 0 until toAdd) {
-                repository.line.customers.add(Customer(generateName(), order = Order.random()))
+                repository.line.customers.add(
+                    Customer(generateName(), order = Order(col3().rand(), ORDER_TIMEOUT)))
             }
         }
     }
@@ -281,7 +275,7 @@ fun main() {
             window.show {
                 glClear(color = vec3().grey())
                 mechanicShop.throttleShop()
-                mechanicCustomers.throttleDissatisfaction()
+                mechanicCustomers.throttleTimeout()
                 mechanicCustomers.throttleFame()
                 mechanicsPresentation.drawGrid()
             }

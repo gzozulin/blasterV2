@@ -126,11 +126,11 @@ class MechanicInput {
     private val mechanicPotions: MechanicPotions by injector.instance()
     private val mechanicCustomers: MechanicCustomers by injector.instance()
 
-    // todo: click shop: buy from a shop
-    // todo: click, click again in player inventory: mix a potion
-    // todo: click: click in player same: drink a potion
-    // todo: click, click again in customer inventory: sell a potion
-    // todo: click right: remove selection
+    // click shop: buy from a shop
+    // click, click again in player inventory: mix a potion
+    // click: click in player same: drink a potion
+    // click, click again in customer inventory: sell a potion
+    // click right: remove selection
 
     private val cursor = vec2()
     private fun current(): vec2i {
