@@ -118,7 +118,7 @@ class MechanicShop {
 
     fun throttleShop() {
         if (repository.shop.wares.size < WARES_IN_SHOP) {
-            repository.shop.wares.add(Potion(col3().rand(), randf()))
+            repository.shop.wares.add(Potion(randomColorTier3(), randf()))
         }
     }
 
@@ -134,6 +134,9 @@ class MechanicShop {
             return
         }
         repository.player.cash -= price
+        if (ware is Potion) {
+            repository.shop.wares.removeAt(idx)
+        }
         repository.player.wares.add(ware)
         console.say("Ware bought!")
     }
@@ -231,7 +234,7 @@ class MechanicCustomers {
             val toAdd = shouldHaveCustomers - actuallyHave
             for (i in 0 until toAdd) {
                 repository.line.customers.add(
-                    Customer(generateName(), order = Order(col3().rand(), ORDER_TIMEOUT)))
+                    Customer(generateName(), order = Order(randomColorTier3(), ORDER_TIMEOUT)))
             }
         }
     }

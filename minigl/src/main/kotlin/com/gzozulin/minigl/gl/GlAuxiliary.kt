@@ -41,21 +41,33 @@ fun vec3.rand(min: vec3 = vec3(0f), max: vec3 = vec3(1f)): vec3 {
     return this
 }
 
-fun vec3.up()       = set(0f, 1f, 0f)
-fun vec3.down()     = set(0f, -1f, 0f)
-fun vec3.left()     = set(-1f, 0f, 0f)
-fun vec3.right()    = set(1f, 0f, 0f)
-fun vec3.front()    = set(0f, 0f, 1f)
-fun vec3.back()     = set(0f, 0f, -1f)
+fun vec3.up()           = set(0f, 1f, 0f)
+fun vec3.down()         = set(0f, -1f, 0f)
+fun vec3.left()         = set(-1f, 0f, 0f)
+fun vec3.right()        = set(1f, 0f, 0f)
+fun vec3.front()        = set(0f, 0f, 1f)
+fun vec3.back()         = set(0f, 0f, -1f)
 
-fun col3.white()   = set(1f, 1f, 1f)
-fun col3.red()     = set(1f, 0f, 0f)
-fun col3.green()   = set(0f, 1f, 0f)
-fun col3.blue()    = set(0f, 0f, 1f)
-fun col3.yellow()  = set(1f, 1f, 0f)
-fun col3.magenta() = set(1f, 0f, 1f)
-fun col3.cyan()    = set(0f, 1f, 1f)
-fun col3.grey()    = set(0.5f)
+fun col3.white()        = set(1f, 1f, 1f)
+fun col3.black()        = set(0f, 0f, 0f)
+fun col3.ltGrey()       = set(0.3f)
+fun col3.grey()         = set(0.5f)
+fun col3.dkGrey()       = set(0.7f)
+
+fun col3.red()          = set(1f, 0f, 0f)
+fun col3.green()        = set(0f, 1f, 0f)
+fun col3.blue()         = set(0f, 0f, 1f)
+
+fun col3.yellow()       = set(1f, 1f, 0f)
+fun col3.magenta()      = set(1f, 0f, 1f)
+fun col3.cyan()         = set(0f, 1f, 1f)
+
+fun col3.orange()       = set(1f, .5f, 0f)
+fun col3.rose()         = set(1f, 0f, .5f)
+fun col3.violet()       = set(.5f, 0f, 1f)
+fun col3.azure()        = set(0f, .5f, 1f)
+fun col3.aquamarine()   = set(0f, 1f, .5f)
+fun col3.chartreuse()   = set(.5f, 1f, 0f)
 
 val col3.r
     get() = x

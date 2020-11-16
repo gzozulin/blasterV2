@@ -1,4 +1,16 @@
 package com.gzozulin.alch
+
+import com.gzozulin.minigl.gl.*
+
+private val colorsTier1 = listOf(col3().red(), col3().green(), col3().blue())
+private val colorsTier2 = listOf(*colorsTier1.toTypedArray(), col3().yellow(), col3().cyan(), col3().magenta())
+private val colorsTier3 = listOf(*colorsTier2.toTypedArray(), col3().orange(), col3().rose(), col3().violet(),
+    col3().azure(), col3().aquamarine(), col3().chartreuse())
+
+fun randomColorTier1() = colorsTier1.random()
+fun randomColorTier2() = colorsTier2.random()
+fun randomColorTier3() = colorsTier3.random()
+
 private val names = listOf(
 "Liam",
 "Noah",
