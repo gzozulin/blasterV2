@@ -45,8 +45,8 @@ private const val PRICE_POTION = 50
 
 sealed class Ware
 
-data class Potion(val color: col3, val power: Float): Ware()
 data class Bottle(val xx: Int = 123) : Ware()
+data class Potion(val color: col3, val power: Float): Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
 data class Order(val color: col3, var timeout: Int) : Ware()
 
