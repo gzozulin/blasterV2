@@ -5,6 +5,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
+import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 // Alchemist
@@ -33,18 +34,9 @@ import kotlin.math.min
 // presentation independent from mechanics:
 //      you can play with inventory but that will not affect mechanics
 
-// todo: bug with input
-// todo: customer orders
-// todo: mixing potions
-// todo: selling potions
-// todo: satisfaction and desatisfaction
+private const val FAME_PER_CUSTOMER = 1
 
-private const val MILLIS_PER_TICK = 16 // 60 Hz
-
-private const val DISSATISFACTION_PER_TICK = 0.0001f
-
-private const val SATISFACTION_TO_BRING_FRIEND = 0.3f
-private const val CHANCE_TO_BRING_CUSTOMER = .001f
+private const val INITIAL_SATISFACTION = 60 * 45
 
 private const val WARES_IN_SHOP = 9
 
@@ -56,19 +48,26 @@ sealed class Ware
 
 data class Bottle(val xx: Int = 123) : Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
-data class Order(val color: col3) : Ware()
+data class Order(val color: col3) : Ware() {
+    companion object {
+        fun random(): Order {
+            val color = when (randi(3)) {
+                0 -> col3().red()
+                1 -> col3().green()
+                2 -> col3().blue()
+                else -> error("wtf?!")
+            }
+            return Order(color)
+        }
+    }
+}
 data class Potion(val color: col3, val power: Float): Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
-data class Player(var cash: Int = 1000, val wares: MutableList<Ware> = mutableListOf())
-data class Customer(val name: String, var satisfaction: Float, val wealth: Float, var timeout: Long,
-                    var currentOrder: Order? = null)
+data class Player(var health: Int = 100, var cash: Int = 1000, var fame: Int = 10,
+                  val wares: MutableList<Ware> = mutableListOf())
+data class Customer(val name: String, var satisfaction: Int, val order: Order)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
-
-private val firstnames = listOf("John", "Mark", "Charles", "Greg", "Andrew")
-private val surnames = listOf("Smith", "Doe", "Buck", "Mallet", "Lynn")
-
-private fun generateName() = "${firstnames.random()} ${surnames.random()}"
 
 private val templateBottle      = Bottle()
 
@@ -76,8 +75,6 @@ enum class ReagentType { RED, BLUE, GREEN }
 private val templateBloodMoss   = Reagent(type = ReagentType.RED,   power = .3f)
 private val templateNightshade  = Reagent(type = ReagentType.GREEN, power = .3f)
 private val templateSpidersSilk = Reagent(type = ReagentType.BLUE,  power = .3f)
-
-private val templateCustomer    = Customer(name = "John Smith", satisfaction = 0.5f, wealth = .5f, timeout = 2000L)
 
 val injector = DI {
     bind<GlWindow>()                with singleton { GlWindow() }
@@ -92,7 +89,10 @@ val injector = DI {
 }
 
 private class Console {
-    fun say(what: String) = println(what)
+    private val repository: Repository by injector.instance()
+
+    fun say(what: String) = println(what +
+            " health ${repository.player.health} cash ${repository.player.cash} fame ${repository.player.fame}")
 }
 
 class Repository {
@@ -104,10 +104,7 @@ class Repository {
         templateNightshade,
         templateSpidersSilk))
 
-    val line = Line(customers = mutableListOf(
-        templateCustomer.copy(name = generateName()),
-        templateCustomer.copy(name = generateName()),
-        templateCustomer.copy(name = generateName())))
+    val line = Line(customers = mutableListOf())
 
     // todo: debuggling
     var columnsShopEnd = 0
@@ -151,6 +148,7 @@ class MechanicShop {
         }
         repository.player.cash -= price
         repository.player.wares.add(ware)
+        console.say("Ware bought!")
     }
 }
 
@@ -176,11 +174,16 @@ class MechanicPotions {
                 repository.player.wares.add(mixPotionPotion(first, second))
                 repository.player.wares.add(Bottle())
                 true
+            } else if (first is Reagent && second is Potion) {
+                repository.player.wares.add(mixPotionPotion(mixBottleReagent(first), second))
+                true
+            } else if (first is Potion && second is Reagent) {
+                repository.player.wares.add(mixPotionPotion(mixBottleReagent(second), first))
+                true
             } else {
                 console.say("This combination is impossible!")
                 false
             }
-        // todo: potion + reagent
         if (shouldRemove) {
             repository.player.wares.remove(first)
             repository.player.wares.remove(second)
@@ -219,49 +222,31 @@ class MechanicCustomers {
     fun throttleDissatisfaction() {
         val toRemove = mutableListOf<Customer>()
         repository.line.customers.forEach {
-            it.satisfaction -= DISSATISFACTION_PER_TICK
-            if (it.satisfaction < 0f) {
+            it.satisfaction--
+            if (it.satisfaction <= 0) {
                 console.say("${it.name} decided to leave your shop!")
                 toRemove.add(it)
+                repository.player.fame -= FAME_PER_CUSTOMER
             }
         }
         repository.line.customers.removeAll(toRemove)
     }
 
-    fun throttleSatisfaction() {
-        val toAdd = mutableListOf<Customer>()
-        repository.line.customers.forEach {
-            if (it.satisfaction > SATISFACTION_TO_BRING_FRIEND) {
-                if (CHANCE_TO_BRING_CUSTOMER > randf()) {
-                    console.say("${it.name} brought a friend!")
-                    toAdd.add(templateCustomer.copy(name = generateName()))
-                }
-            }
-        }
-        repository.line.customers.addAll(toAdd)
-    }
-
-    fun throttleOrders() {
-        repository.line.customers.forEach {
-            if (it.currentOrder == null) {
-                it.timeout -= MILLIS_PER_TICK
-                if (it.timeout < 0) {
-                    val color = when (randi(3)) {
-                        0 -> col3().red()
-                        1 -> col3().green()
-                        2 -> col3().blue()
-                        else -> error("wtf?!")
-                    }
-                    it.currentOrder = Order(color)
-                }
+    fun throttleFame() {
+        val shouldHaveCustomers = repository.player.fame
+        val actuallyHave = repository.line.customers.size
+        if (shouldHaveCustomers > actuallyHave) {
+            val toAdd = shouldHaveCustomers - actuallyHave
+            for (i in 0 until toAdd) {
+                repository.line.customers.add(Customer(
+                    generateName(), satisfaction = INITIAL_SATISFACTION, order = Order.random()))
             }
         }
     }
 
     fun sellPotion(playerIndex: Int, customerIndex: Int) {
         if (playerIndex >= repository.player.wares.size ||
-            customerIndex >= repository.line.customers.size ||
-            repository.line.customers[customerIndex].currentOrder == null) {
+            customerIndex >= repository.line.customers.size) {
             console.say("Impossible transaction!")
             return
         }
@@ -271,16 +256,17 @@ class MechanicCustomers {
             return
         }
         val price =
-            mechanicPrice.priceSell(ware, repository.line.customers[customerIndex].currentOrder!!.color)
-        console.say("Potion sold! $playerIndex, $customerIndex for $price")
+            mechanicPrice.priceSell(ware, repository.line.customers[customerIndex].order.color)
         repository.player.wares.removeAt(playerIndex)
-        repository.line.customers[customerIndex].currentOrder = null
+        repository.line.customers.removeAt(customerIndex)
+        repository.player.fame += FAME_PER_CUSTOMER
+        repository.player.cash += price
+        console.say("Potion sold for $price!")
     }
 }
 
 private val window: GlWindow by injector.instance()
 private val mechanicShop: MechanicShop by injector.instance()
-private val mechanicPotions: MechanicPotions by injector.instance()
 private val mechanicCustomers: MechanicCustomers by injector.instance()
 private val mechanicsPresentation: MechanicsPresentation by injector.instance()
 private val mechanicInput: MechanicInput by injector.instance()
@@ -297,9 +283,8 @@ fun main() {
             window.show {
                 glClear(color = vec3().grey())
                 mechanicShop.throttleShop()
-                //mechanicCustomers.throttleDissatisfaction()
-                //mechanicCustomers.throttleSatisfaction()
-                mechanicCustomers.throttleOrders()
+                mechanicCustomers.throttleDissatisfaction()
+                mechanicCustomers.throttleFame()
                 mechanicsPresentation.drawGrid()
             }
         }

@@ -63,10 +63,8 @@ class MechanicsPresentation: GlResource() {
         skipColumn()
         repository.columnsPlayerEnd = column
         repository.line.customers.forEach { customer ->
-            if (customer.currentOrder != null) {
-                renderList.add(customer.currentOrder!! to position())
-                nextRow()
-            }
+            renderList.add(customer.order to position())
+            nextRow()
         }
         endColumn()
         repository.columnsCustomersEnd = column
