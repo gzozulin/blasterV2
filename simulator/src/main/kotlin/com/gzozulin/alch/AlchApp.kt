@@ -5,7 +5,6 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
-import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 // Alchemist
@@ -36,7 +35,7 @@ import kotlin.math.min
 
 private const val FAME_PER_CUSTOMER = 1
 
-private const val INITIAL_SATISFACTION = 60 * 45
+const val ORDER_TIMEOUT = 60 * 45
 
 private const val WARES_IN_SHOP = 9
 
@@ -48,7 +47,7 @@ sealed class Ware
 
 data class Bottle(val xx: Int = 123) : Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
-data class Order(val color: col3) : Ware() {
+data class Order(val color: col3, var timeout: Int) : Ware() {
     companion object {
         fun random(): Order {
             val color = when (randi(3)) {
@@ -57,7 +56,7 @@ data class Order(val color: col3) : Ware() {
                 2 -> col3().blue()
                 else -> error("wtf?!")
             }
-            return Order(color)
+            return Order(color, ORDER_TIMEOUT)
         }
     }
 }
@@ -66,7 +65,7 @@ data class Potion(val color: col3, val power: Float): Ware()
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
 data class Player(var health: Int = 100, var cash: Int = 1000, var fame: Int = 10,
                   val wares: MutableList<Ware> = mutableListOf())
-data class Customer(val name: String, var satisfaction: Int, val order: Order)
+data class Customer(val name: String, val order: Order)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
 
 private val templateBottle      = Bottle()
@@ -222,8 +221,8 @@ class MechanicCustomers {
     fun throttleDissatisfaction() {
         val toRemove = mutableListOf<Customer>()
         repository.line.customers.forEach {
-            it.satisfaction--
-            if (it.satisfaction <= 0) {
+            it.order.timeout--
+            if (it.order.timeout <= 0) {
                 console.say("${it.name} decided to leave your shop!")
                 toRemove.add(it)
                 repository.player.fame -= FAME_PER_CUSTOMER
@@ -238,8 +237,7 @@ class MechanicCustomers {
         if (shouldHaveCustomers > actuallyHave) {
             val toAdd = shouldHaveCustomers - actuallyHave
             for (i in 0 until toAdd) {
-                repository.line.customers.add(Customer(
-                    generateName(), satisfaction = INITIAL_SATISFACTION, order = Order.random()))
+                repository.line.customers.add(Customer(generateName(), order = Order.random()))
             }
         }
     }
