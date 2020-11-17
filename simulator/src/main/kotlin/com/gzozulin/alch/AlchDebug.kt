@@ -91,7 +91,7 @@ class MechanicsPresentation: GlResource() {
                         drawBottle()
                         drawContent(ware.power, ware.color)
                     }
-                    is Order -> drawContent(ware.timeout.toFloat() / ORDER_TIMEOUT.toFloat(), ware.color)
+                    is Order -> drawContent(ware.timeout, ware.color)
                 }
             }
         }

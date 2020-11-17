@@ -29,29 +29,34 @@ import kotlin.math.min
 // random death phrases (poison, explosion, fire, police, etc)
 // more colors in potion: more complex: more side effects (good and bad)
 // customers by satisfaction rate: the higher the level is the worse customer type
+// perfection bonus: linear price + perfection multipliers
+// effect: pause time, cure, fame, money
 
-// presentation independent from mechanics:
-//      you can play with inventory but that will not affect mechanics
-
-private const val FAME_PER_CUSTOMER = 1
-
-const val ORDER_TIMEOUT = 60 * 45
-
-private const val WARES_IN_SHOP = 9
+// todo: power > 1f == bad sideffect, remove health proportionally
+// todo: better presentation
+// todo: ability to reset
+// todo: starting setup for level 1
+// todo: progressive setups for levels 2-10
 
 private const val PRICE_BOTTLE = 10
 private const val PRICE_REAGENT = 15
 private const val PRICE_POTION = 50
 
-sealed class Ware
+private const val FAME_PER_SUCCESS = 1.3f
+private const val FAME_PER_FAILURE = 1f
+private const val FAME_PER_CUSTOMER = 1f
+private const val FAME_PER_WARE = 1f
 
+private const val DISSATISFACTION_PER_TICK = 0.001f
+
+sealed class Ware
 data class Bottle(val xx: Int = 123) : Ware()
 data class Potion(val color: col3, val power: Float): Ware()
 data class Reagent(val type: ReagentType, val power: Float): Ware()
-data class Order(val color: col3, var timeout: Int) : Ware()
+data class Order(val color: col3, var timeout: Float) : Ware()
 
 data class Shop(val wares: MutableList<Ware> = mutableListOf())
-data class Player(var health: Int = 100, var cash: Int = 1000, var fame: Int = 10,
+data class Player(var health: Int = 100, var cash: Int = 1000, var fame: Float = 10f,
                   val wares: MutableList<Ware> = mutableListOf())
 data class Customer(val name: String, val order: Order)
 data class Line(val customers: MutableList<Customer> = mutableListOf())
@@ -79,7 +84,9 @@ private class Console {
     private val repository: Repository by injector.instance()
 
     fun say(what: String) = println(what +
-            " health ${repository.player.health} cash ${repository.player.cash} fame ${repository.player.fame}")
+            " health ${repository.player.health}" +
+            " cash ${repository.player.cash}" +
+            " fame ${repository.player.fame}")
 }
 
 class Repository {
@@ -117,7 +124,8 @@ class MechanicShop {
     private val mechanicPrice: MechanicPrice by injector.instance()
 
     fun throttleShop() {
-        if (repository.shop.wares.size < WARES_IN_SHOP) {
+        val waresToAdd = (repository.player.fame / FAME_PER_WARE).toInt() - repository.shop.wares.size
+        for (i in 0 until waresToAdd) {
             repository.shop.wares.add(Potion(randomColorTier3(), randf()))
         }
     }
@@ -217,24 +225,24 @@ class MechanicCustomers {
     fun throttleTimeout() {
         val toRemove = mutableListOf<Customer>()
         repository.line.customers.forEach {
-            it.order.timeout--
-            if (it.order.timeout <= 0) {
+            it.order.timeout -= DISSATISFACTION_PER_TICK
+            if (it.order.timeout <= 0f) {
                 console.say("${it.name} decided to leave your shop!")
                 toRemove.add(it)
-                repository.player.fame -= FAME_PER_CUSTOMER
+                repository.player.fame -= FAME_PER_FAILURE
             }
         }
         repository.line.customers.removeAll(toRemove)
     }
 
     fun throttleFame() {
-        val shouldHaveCustomers = repository.player.fame
+        val shouldHaveCustomers = (repository.player.fame / FAME_PER_CUSTOMER).toInt()
         val actuallyHave = repository.line.customers.size
         if (shouldHaveCustomers > actuallyHave) {
             val toAdd = shouldHaveCustomers - actuallyHave
             for (i in 0 until toAdd) {
                 repository.line.customers.add(
-                    Customer(generateName(), order = Order(randomColorTier3(), ORDER_TIMEOUT)))
+                    Customer(generateName(), order = Order(randomColorTier3(), 1f)))
             }
         }
     }
@@ -254,7 +262,7 @@ class MechanicCustomers {
             mechanicPrice.priceSell(ware, repository.line.customers[customerIndex].order.color)
         repository.player.wares.removeAt(playerIndex)
         repository.line.customers.removeAt(customerIndex)
-        repository.player.fame += FAME_PER_CUSTOMER
+        repository.player.fame += FAME_PER_SUCCESS
         repository.player.cash += price
         console.say("Potion sold for $price!")
     }
