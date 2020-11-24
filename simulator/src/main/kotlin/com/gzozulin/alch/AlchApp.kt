@@ -32,7 +32,9 @@ import kotlin.math.min
 // perfection bonus: linear price + perfection multipliers
 // effect: pause time, cure, fame, money
 
+// todo: do not sell ready potions, but sell more reagents: orange, azure, etc?
 // todo: power > 1f == bad sideffect, remove health proportionally
+// todo: fame depends on the sale - same as price?
 // todo: better presentation
 // todo: ability to reset
 // todo: starting setup for level 1
