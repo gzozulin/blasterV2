@@ -8,6 +8,11 @@ import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.SkyboxTechnique
 
+// todo: fix GlProgram
+// todo: pass sampler
+// todo: do not store expressions in technique
+// todo: withTechnique { instance(mesh) }
+
 private const val VERSION = "#version 300 es"
 private const val PRECISION_HIGH = "precision highp float;"
 
