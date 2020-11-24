@@ -94,6 +94,14 @@ class GlProgram(
         unsatisfiedUniforms.clear()
     }
 
+    fun setArbitraryUniform(name: String, value: vec3) {
+        checkReady()
+        value.get(bufferVec3)
+        val location = backend.glGetUniformLocation(handle, name)
+        backend.glUniform3fv(location, bufferVec3)
+        unsatisfiedUniforms.clear()
+    }
+
     fun setUniform(uniform: GlUniform, value: Matrix4f) {
         checkReady()
         value.get(bufferMat4)
