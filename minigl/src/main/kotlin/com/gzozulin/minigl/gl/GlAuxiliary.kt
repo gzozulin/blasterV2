@@ -13,6 +13,7 @@ const val STRICT_MODE = true
 private val random = Random()
 
 typealias vec3 = Vector3f
+typealias vec4 = Vector4f
 typealias vec4i = Vector4i
 typealias euler3 = Vector3f
 typealias col3 = Vector3f

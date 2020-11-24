@@ -85,6 +85,15 @@ class GlProgram(
         unsatisfiedUniforms.remove(uniform)
     }
 
+    // TODO - ???
+    fun setArbitraryUniform(name: String, value: mat4) {
+        checkReady()
+        value.get(bufferMat4)
+        val location = backend.glGetUniformLocation(handle, name)
+        backend.glUniformMatrix4fv(location, false, bufferMat4)
+        unsatisfiedUniforms.clear()
+    }
+
     fun setUniform(uniform: GlUniform, value: Matrix4f) {
         checkReady()
         value.get(bufferMat4)

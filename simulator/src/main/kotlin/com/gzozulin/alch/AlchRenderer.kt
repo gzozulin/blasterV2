@@ -30,7 +30,7 @@ private abstract class Expression<R> {
 
 //================================Constant================================
 
-private abstract class Constant<T>(private val value: T): Expression<T>() {
+private abstract class Constant<T>(val value: T): Expression<T>() {
     override fun decl() = listOf("const $type $name = $value;")
 }
 
@@ -47,11 +47,21 @@ private class ConstantF(value: Float) : Constant<Float>(value) {
 private class ConstantV3(value: vec3) : Constant<vec3>(value) {
     override val type: String
         get() = "vec3"
+
+    override fun decl() = listOf("const $type $name = vec3(${value.x}, ${value.y}, ${value.z});")
+}
+
+private class ConstantV4(value: vec4) : Constant<vec4>(value) {
+    override val type: String
+        get() = "vec4"
+
+    override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
 }
 
 private fun consti(value: Int) = ConstantI(value)
 private fun constf(value: Float) = ConstantF(value)
 private fun constv3(value: vec3) = ConstantV3(value)
+private fun constv4(value: vec4) = ConstantV4(value)
 
 //================================Uniform================================
 
@@ -64,7 +74,13 @@ private class UniformI : Uniform<Int>() {
         get() = "int"
 }
 
+private class UniformM4 : Uniform<mat4>() {
+    override val type: String
+        get() = "mat4"
+}
+
 private fun uniformi() = UniformI()
+private fun uniformm4() = UniformM4()
 
 //================================Attribute================================
 
@@ -134,25 +150,39 @@ private fun addf(left: Expression<Float>, right: Expression<Float>) = AddF(left,
 //================================Technique================================
 
 private abstract class Technique: GlResource() {
-    fun instance() {}
+    abstract val program: GlProgram
 }
 
 private data class SimpleTechnique(
-    val program: GlProgram,
+    override val program: GlProgram,
     val position: Expression<vec3>,
     val texCoord: Expression<vec2>,
-    val albedo: Expression<vec3>
-): Technique()
+    val albedo: Expression<vec4>,
+    val modelM: Expression<mat4>,
+    val viewM: Expression<mat4>,
+    val projM: Expression<mat4>
+): Technique() {
+    init {
+        addChildren(program)
+    }
+}
 
 private fun List<String>.toSrc() = this.distinct().joinToString("\n")
 
-private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albedo: Expression<vec3>): SimpleTechnique {
+private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albedo: Expression<vec4>,
+                   modelM: Expression<mat4>, viewM: Expression<mat4>, projM: Expression<mat4>): SimpleTechnique {
     val vertDeclarations = mutableListOf<String>()
     vertDeclarations.addAll(position.decl())
     vertDeclarations.addAll(texCoord.decl())
+    vertDeclarations.addAll(modelM.decl())
+    vertDeclarations.addAll(viewM.decl())
+    vertDeclarations.addAll(projM.decl())
     val vertExpressions = mutableListOf<String>()
     vertExpressions.addAll(position.expr())
     vertExpressions.addAll(texCoord.expr())
+    vertExpressions.addAll(modelM.expr())
+    vertExpressions.addAll(viewM.expr())
+    vertExpressions.addAll(projM.expr())
     val vert = """
         $VERSION
         $PRECISION_HIGH
@@ -161,7 +191,7 @@ private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albed
         void main() {
             ${vertExpressions.toSrc()}
             vTexCoord = ${texCoord.name};
-            mat4 mvp =  uProjectionM * uViewM * uModelM;
+            mat4 mvp =  ${projM.name} * ${viewM.name} * ${modelM.name};
             gl_Position = mvp * vec4(${position.name}, 1.0);
         }
     """.trimIndent()
@@ -171,6 +201,7 @@ private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albed
         $VERSION
         $PRECISION_HIGH
         ${fragDeclarations.toSrc()}
+        layout (location = 0) out vec4 oFragColor;
         void main() {
             ${fragExpressions.toSrc()}
             oFragColor = ${albedo.name};
@@ -178,12 +209,14 @@ private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albed
     """.trimIndent()
     return SimpleTechnique(GlProgram(
         GlShader(GlShaderType.VERTEX_SHADER, vert), GlShader(GlShaderType.FRAGMENT_SHADER, frag)),
-        position, texCoord, albedo
+        position, texCoord, albedo, modelM, viewM, projM
     )
 }
 
-private fun withTechnique(techinque: Technique, draw: Technique.() -> Unit) {
-    draw.invoke(techinque)
+private fun <T : Technique> withTechnique(techinque: T, draw: T.() -> Unit) {
+    glBind(techinque.program) {
+        draw.invoke(techinque)
+    }
 }
 
 //================================Variable================================
@@ -191,7 +224,10 @@ private fun withTechnique(techinque: Technique, draw: Technique.() -> Unit) {
 private val simpleTechnique = simple(
     attributev3(0),
     attributev2(1),
-    constv3(vec3().magenta())
+    constv4(vec4(1f, 0f, 0f, 1f)),
+    uniformm4(),
+    uniformm4(),
+    uniformm4()
 )
 
 private val window = GlWindow()
@@ -233,11 +269,12 @@ fun main() {
                     camera.lookAlong(direction)
                 }
                 skyboxTechnique.skybox(camera)
-                /*simpleTechnique.draw(camera.calculateViewM(), camera.projectionM) {
-                    matrixStack.pushMatrix(mat4().identity().translate(vec3().left())) {
-                        simpleTechnique.instance(rectangle, diffuse, matrixStack.peekMatrix())
-                    }
-                }*/
+                withTechnique(simpleTechnique) {
+                    program.setArbitraryUniform(viewM.name, camera.calculateViewM())
+                    program.setArbitraryUniform(projM.name, camera.projectionM)
+                    program.setArbitraryUniform(modelM.name, matrixStack.peekMatrix())
+                    program.draw(indicesCount = rectangle.indicesCount)
+                }
             }
         }
     }
