@@ -272,10 +272,16 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 withTechnique(simpleTechnique) {
                     glBind(rectangle) {
-                        val color = when (randi(3)) {
-                            0 -> vec3(1f, 0f, 0f)
-                            1 -> vec3(1f, 1f, 0f)
-                            2 -> vec3(1f, 0f, 1f)
+                        val color = when (randi(9)) {
+                            0 -> vec3().red()
+                            1 -> vec3().green()
+                            2 -> vec3().blue()
+                            3 -> vec3().yellow()
+                            4 -> vec3().magenta()
+                            5 -> vec3().cyan()
+                            6 -> vec3().orange()
+                            7 -> vec3().rose()
+                            8 -> vec3().violet()
                             else -> error("")
                         }
                         program.setArbitraryUniform(albedo.name, color)
