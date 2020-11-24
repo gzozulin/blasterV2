@@ -85,7 +85,7 @@ class GlProgram(
         unsatisfiedUniforms.remove(uniform)
     }
 
-    // TODO - ???
+    // TODO - remove by name, not by enum
     fun setArbitraryUniform(name: String, value: mat4) {
         checkReady()
         value.get(bufferMat4)

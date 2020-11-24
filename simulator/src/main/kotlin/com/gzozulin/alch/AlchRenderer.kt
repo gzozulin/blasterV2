@@ -67,6 +67,8 @@ private fun constv4(value: vec4) = ConstantV4(value)
 
 //================================Uniform================================
 
+private class Sampler2D
+
 private abstract class Uniform<T> : Expression<T>() {
     override fun decl() = listOf("uniform $type $name;")
 }
@@ -86,9 +88,15 @@ private class UniformM4 : Uniform<mat4>() {
         get() = "mat4"
 }
 
+private class UniformS : Uniform<Sampler2D>() {
+    override val type: String
+        get() = "sampler2D"
+}
+
 private fun uniformi() = UniformI()
 private fun uniformv3() = UniformV3()
 private fun uniformm4() = UniformM4()
+private fun uniforms() = UniformS()
 
 //================================Attribute================================
 
