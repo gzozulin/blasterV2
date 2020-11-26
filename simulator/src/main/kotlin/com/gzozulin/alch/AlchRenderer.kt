@@ -234,6 +234,9 @@ private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albed
             gl_Position = mvp * vec4(${position.name}, 1.0);
         }
     """.trimIndent()
+
+    // todo: for variables in between, we need to declare them as out in vert and as in in frag
+
     val fragDeclarations = albedo.decl()
     val fragExpressions = albedo.expr()
     val frag = """
