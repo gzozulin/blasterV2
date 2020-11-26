@@ -17,4 +17,6 @@ class MatrixStack {
     }
 
     fun peekMatrix(): mat4 = matrixStack.peek()
+
+    // todo: translate, rotate, scale
 }

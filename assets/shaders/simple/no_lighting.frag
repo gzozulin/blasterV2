@@ -9,6 +9,8 @@ uniform vec3 uColor;
 
 layout (location = 0) out vec4 oFragColor;
 
+vec4 tex2d(sampler2D sampler, vec2 texCoord) { return texture(sampler, texCoord); }
+
 void main() {
     // Retreiving the color directly from texture
     oFragColor = texture(uTexDiffuse, vTexCoord);

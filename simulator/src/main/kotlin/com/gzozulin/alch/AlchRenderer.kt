@@ -162,6 +162,32 @@ private class AddV3(left: Expression<vec3>, right: Expression<vec3>) : Add<vec3>
 private fun addi(left: Expression<Int>, right: Expression<Int>) = AddI(left, right)
 private fun addf(left: Expression<Float>, right: Expression<Float>) = AddF(left, right)
 
+//================================Texture================================
+
+private class Texture(private val sampler: Expression<Sampler2D>, private val texCoord: Expression<vec2>)
+    : Expression<vec4>() {
+
+    override val type: String
+        get() = "vec4"
+
+    override fun decl(): List<String> {
+        val declarations = mutableListOf<String>()
+        declarations.addAll(sampler.decl())
+        declarations.addAll(texCoord.decl())
+        return declarations
+    }
+
+    override fun expr(): List<String> {
+        val expressions = mutableListOf<String>()
+        expressions.addAll(sampler.expr())
+        expressions.addAll(texCoord.expr())
+        expressions.add("$type $name = texture(${sampler.name}, ${texCoord.name});")
+        return expressions
+    }
+}
+
+private fun texture(sampler: Expression<Sampler2D>, texCoord: Expression<vec2>) = Texture(sampler, texCoord)
+
 //================================Technique================================
 
 private abstract class Technique: GlResource() {
@@ -172,7 +198,7 @@ private data class SimpleTechnique(
     override val program: GlProgram,
     val position: Expression<vec3>,
     val texCoord: Expression<vec2>,
-    val albedo: Expression<vec3>,
+    val albedo: Expression<vec4>,
     val modelM: Expression<mat4>,
     val viewM: Expression<mat4>,
     val projM: Expression<mat4>
@@ -182,7 +208,7 @@ private data class SimpleTechnique(
     }
 }
 
-private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albedo: Expression<vec3>,
+private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albedo: Expression<vec4>,
                    modelM: Expression<mat4>, viewM: Expression<mat4>, projM: Expression<mat4>): SimpleTechnique {
     val vertDeclarations = mutableListOf<String>()
     vertDeclarations.addAll(position.decl())
@@ -218,7 +244,7 @@ private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albed
         layout (location = 0) out vec4 oFragColor;
         void main() {
             ${fragExpressions.toSrc()}
-            oFragColor = vec4(${albedo.name}, 1.0);
+            oFragColor = ${albedo.name};
         }
     """.trimIndent()
     return SimpleTechnique(GlProgram(
@@ -235,10 +261,15 @@ private fun <T : Technique> withTechnique(techinque: T, draw: T.() -> Unit) {
 
 //================================Variable================================
 
+private val attributePosition = attributev3(0)
+private val attributeTexCoord = attributev2(1)
+
+private val uniformSampler = uniforms()
+
 private val simpleTechnique = simple(
-    attributev3(0),
-    attributev2(1),
-    uniformv3(),
+    attributePosition,
+    attributeTexCoord,
+    texture(uniformSampler, attributeTexCoord),
     uniformm4(),
     uniformm4(),
     uniformm4()
@@ -275,7 +306,7 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleTechnique, skyboxTechnique, diffuse, rectangle) {
+        glUse(simpleTechnique, skyboxTechnique, rectangle, diffuse) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -284,7 +315,7 @@ fun main() {
                 }
                 skyboxTechnique.skybox(camera)
                 withTechnique(simpleTechnique) {
-                    glBind(rectangle) {
+                    glBind(rectangle, diffuse) {
                         val color = when (randi(9)) {
                             0 -> vec3().red()
                             1 -> vec3().green()
@@ -301,6 +332,7 @@ fun main() {
                         program.setArbitraryUniform(viewM.name, camera.calculateViewM())
                         program.setArbitraryUniform(projM.name, camera.projectionM)
                         program.setArbitraryUniform(modelM.name, matrixStack.peekMatrix())
+                        program.setArbitraryUniform(uniformSampler.name, diffuse)
                         program.draw(indicesCount = rectangle.indicesCount)
                     }
                 }
