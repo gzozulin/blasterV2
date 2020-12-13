@@ -1,5 +1,7 @@
 package com.gzozulin.alch
 
+/*
+
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.Camera
@@ -18,7 +20,7 @@ private const val PRECISION_HIGH = "precision highp float;"
 
 //================================Expression================================
 
-private abstract class Expression<R> {
+private abstract class Expr<R> {
     val name = nextName()
 
     open fun decl(): List<String> = listOf()
@@ -37,7 +39,7 @@ private fun List<String>.toSrc() = this.distinct().joinToString("\n")
 
 //================================Constant================================
 
-private abstract class Constant<T>(val value: T): Expression<T>() {
+private abstract class Constant<T>(val value: T): Expr<T>() {
     override fun decl() = listOf("const $type $name = $value;")
 }
 
@@ -74,7 +76,7 @@ private fun constv4(value: vec4) = ConstantV4(value)
 
 private class Sampler2D
 
-private abstract class Uniform<T> : Expression<T>() {
+private abstract class Uniform<T> : Expr<T>() {
     override fun decl() = listOf("uniform $type $name;")
 }
 
@@ -105,7 +107,7 @@ private fun uniforms() = UniformS()
 
 //================================Attribute================================
 
-private abstract class Attribute<T>(private val index: Int) : Expression<T>() {
+private abstract class Attribute<T>(private val index: Int) : Expr<T>() {
     override fun decl() = listOf("layout (location = $index) in $type $name;")
 }
 
@@ -124,8 +126,8 @@ private fun attributev3(index: Int) = AttributeV3(index)
 
 //================================Add================================
 
-private abstract class Add<T>(val left: Expression<T>,
-                              val right: Expression<T>) : Expression<T>() {
+private abstract class Add<T>(val left: Expr<T>,
+                              val right: Expr<T>) : Expr<T>() {
 
     override fun decl(): List<String> {
         val declarations = mutableListOf<String>()
@@ -144,28 +146,28 @@ private abstract class Add<T>(val left: Expression<T>,
     }
 }
 
-private class AddI(left: Expression<Int>, right: Expression<Int>) : Add<Int>(left, right) {
+private class AddI(left: Expr<Int>, right: Expr<Int>) : Add<Int>(left, right) {
     override val type: String
         get() = "int"
 }
 
-private class AddF(left: Expression<Float>, right: Expression<Float>) : Add<Float>(left, right) {
+private class AddF(left: Expr<Float>, right: Expr<Float>) : Add<Float>(left, right) {
     override val type: String
         get() = "float"
 }
 
-private class AddV3(left: Expression<vec3>, right: Expression<vec3>) : Add<vec3>(left, right) {
+private class AddV3(left: Expr<vec3>, right: Expr<vec3>) : Add<vec3>(left, right) {
     override val type: String
         get() = "vec3"
 }
 
-private fun addi(left: Expression<Int>, right: Expression<Int>) = AddI(left, right)
-private fun addf(left: Expression<Float>, right: Expression<Float>) = AddF(left, right)
+private fun addi(left: Expr<Int>, right: Expr<Int>) = AddI(left, right)
+private fun addf(left: Expr<Float>, right: Expr<Float>) = AddF(left, right)
 
 //================================Texture================================
 
-private class Texture(private val sampler: Expression<Sampler2D>, private val texCoord: Expression<vec2>)
-    : Expression<vec4>() {
+private class Texture(private val sampler: Expr<Sampler2D>, private val texCoord: Expr<vec2>)
+    : Expr<vec4>() {
 
     override val type: String
         get() = "vec4"
@@ -186,7 +188,7 @@ private class Texture(private val sampler: Expression<Sampler2D>, private val te
     }
 }
 
-private fun texture(sampler: Expression<Sampler2D>, texCoord: Expression<vec2>) = Texture(sampler, texCoord)
+private fun texture(sampler: Expr<Sampler2D>, texCoord: Expr<vec2>) = Texture(sampler, texCoord)
 
 //================================Technique================================
 
@@ -196,20 +198,20 @@ private abstract class Technique: GlResource() {
 
 private data class SimpleTechnique(
     override val program: GlProgram,
-    val position: Expression<vec3>,
-    val texCoord: Expression<vec2>,
-    val albedo: Expression<vec4>,
-    val modelM: Expression<mat4>,
-    val viewM: Expression<mat4>,
-    val projM: Expression<mat4>
+    val position: Expr<vec3>,
+    val texCoord: Expr<vec2>,
+    val albedo: Expr<vec4>,
+    val modelM: Expr<mat4>,
+    val viewM: Expr<mat4>,
+    val projM: Expr<mat4>
 ): Technique() {
     init {
         addChildren(program)
     }
 }
 
-private fun simple(position: Expression<vec3>, texCoord: Expression<vec2>, albedo: Expression<vec4>,
-                   modelM: Expression<mat4>, viewM: Expression<mat4>, projM: Expression<mat4>): SimpleTechnique {
+private fun simple(position: Expr<vec3>, texCoord: Expr<vec2>, albedo: Expr<vec4>,
+                   modelM: Expr<mat4>, viewM: Expr<mat4>, projM: Expr<mat4>): SimpleTechnique {
     val vertDeclarations = mutableListOf<String>()
     vertDeclarations.addAll(position.decl())
     vertDeclarations.addAll(texCoord.decl())
@@ -343,3 +345,4 @@ fun main() {
         }
     }
 }
+*/
