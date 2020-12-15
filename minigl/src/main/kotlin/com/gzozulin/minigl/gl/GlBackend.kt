@@ -132,6 +132,7 @@ class GlBackend {
     fun glUniform1f(location: Int, x: Float) = glCheck { GL20.glUniform1f(location, x) }
     fun glUniform2fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform2fv(location, v) }
     fun glUniform3fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform3fv(location, v) }
+    fun glUniform4fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform4fv(location, v) }
     fun glUniformMatrix4fv(location: Int, transpose: Boolean, value: FloatBuffer) =
         glCheck { GL20.glUniformMatrix4fv(location, transpose, value) }
     fun glGenRenderbuffers() = glCheck { GL30.glGenRenderbuffers() }

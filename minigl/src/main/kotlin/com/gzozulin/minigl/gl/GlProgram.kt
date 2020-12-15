@@ -86,6 +86,13 @@ class GlProgram(
     }
 
     // TODO - remove by name, not by enum
+    fun setArbitraryUniform(name: String, value: Int) {
+        checkReady()
+        val location = backend.glGetUniformLocation(handle, name)
+        backend.glUniform1i(location, value)
+        unsatisfiedUniforms.clear()
+    }
+
     fun setArbitraryUniform(name: String, value: mat4) {
         checkReady()
         value.get(bufferMat4)
@@ -99,6 +106,14 @@ class GlProgram(
         value.get(bufferVec3)
         val location = backend.glGetUniformLocation(handle, name)
         backend.glUniform3fv(location, bufferVec3)
+        unsatisfiedUniforms.clear()
+    }
+
+    fun setArbitraryUniform(name: String, value: vec4) {
+        checkReady()
+        value.get(bufferVec4)
+        val location = backend.glGetUniformLocation(handle, name)
+        backend.glUniform4fv(location, bufferVec4)
         unsatisfiedUniforms.clear()
     }
 
