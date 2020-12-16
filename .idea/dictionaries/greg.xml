@@ -2,6 +2,7 @@
   <dictionary name="greg">
     <words>
       <w>constf</w>
+      <w>coord</w>
       <w>decl</w>
       <w>defn</w>
       <w>templ</w>

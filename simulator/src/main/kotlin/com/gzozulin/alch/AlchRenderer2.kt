@@ -51,9 +51,13 @@ private fun unifvec4() = object : Uniform<vec4>() {
     override val type = "vec4"
 }
 
-private interface Sampler
-private fun unifsampler() = object : Uniform<Sampler>() {
+private fun unifsampler() = object : Uniform<GlTexture>() {
     override val type = "sampler2D"
+}
+
+private fun propv4(value: vec4) = object : Expression<vec4>() {
+    override val type = "vec4"
+    override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
 }
 
 private abstract class Add<R>(val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
@@ -69,7 +73,16 @@ private fun addv4(left: Expression<vec4>, right: Expression<vec4>) = object : Ad
     override val type = "vec4"
 }
 
-private fun tex(texCoord: Expression<vec2>, sampler: Expression<Sampler>) = object : Expression<vec4>() {
+private abstract class Mul<R>(val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
+    override fun decl() = left.decl() + right.decl() + listOf("$type mul($type left, $type right) { return left * right; }")
+    override fun expr() = left.expr() + right.expr() + listOf("$type $name = mul(${left.name}, ${right.name});")
+}
+
+private fun mulv4(left: Expression<vec4>, right: Expression<vec4>) = object : Mul<vec4>(left, right) {
+    override val type = "vec4"
+}
+
+private fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun decl() = texCoord.decl() + sampler.decl() +
             listOf("$type tex(${texCoord.type} texCoord, ${sampler.type} sampler) { return texture(sampler, texCoord); }")
     override fun expr() = texCoord.expr() + sampler.expr() +
@@ -160,7 +173,8 @@ private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = SkyboxTechnique("textures/snowy")
-private val diffuse = texturesLib.loadTexture("textures/utah.jpg")
+private val diffuse1 = texturesLib.loadTexture("textures/utah.jpg", unit = 1)
+private val diffuse2 = texturesLib.loadTexture("textures/smoke.png", unit = 2)
 private val rectangle = GlMesh.rect()
 
 private var mouseLook = false
@@ -170,14 +184,25 @@ private val constTexCoord = constv2("vTexCoord")
 private val unifModelM = unifmat4()
 private val unifViewM = unifmat4()
 private val unifProjM = unifmat4()
-private val unifDiffuse = unifsampler()
-private val unifColor = unifvec4()
+private val unifDiffuse1 = unifsampler()
+private val unifDiffuse2 = unifsampler()
+private val unifProp1 = unifvec4()
+private val unifProp2 = unifvec4()
+
+private var proportion = 0f
+private var delta = 0.01f
 
 private val simpleProgram = simple(
     unifModelM, unifViewM, unifProjM,
     addv4(
-        tex(constTexCoord, unifDiffuse),
-        unifColor
+        mulv4(
+            tex(constTexCoord, unifDiffuse1),
+            unifProp1
+        ),
+        mulv4(
+            tex(constTexCoord, unifDiffuse2),
+            unifProp2
+        )
     )
 )
 
@@ -199,7 +224,7 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleProgram, skyboxTechnique, rectangle, diffuse) {
+        glUse(simpleProgram, skyboxTechnique, rectangle, diffuse1, diffuse2) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -207,13 +232,19 @@ fun main() {
                     camera.lookAlong(direction)
                 }
                 skyboxTechnique.skybox(camera)
-                glBind(simpleProgram, rectangle, diffuse) {
+                glBind(simpleProgram, rectangle, diffuse1, diffuse2) {
                     simpleProgram.setArbitraryUniform(unifModelM.name, matrixStack.peekMatrix())
                     simpleProgram.setArbitraryUniform(unifViewM.name, camera.calculateViewM())
                     simpleProgram.setArbitraryUniform(unifProjM.name, camera.projectionM)
-                    simpleProgram.setArbitraryUniform(unifDiffuse.name, diffuse.unit)
-                    simpleProgram.setArbitraryUniform(unifColor.name, vec4(1f, 0f, 0f, 0f))
+                    simpleProgram.setArbitraryUniform(unifDiffuse1.name, diffuse1.unit)
+                    simpleProgram.setArbitraryUniform(unifDiffuse2.name, diffuse2.unit)
+                    simpleProgram.setArbitraryUniform(unifProp1.name, vec4(proportion))
+                    simpleProgram.setArbitraryUniform(unifProp2.name, vec4(1f - proportion))
                     simpleProgram.draw(indicesCount = rectangle.indicesCount)
+                }
+                proportion += delta
+                if (proportion < 0f || proportion > 1f) {
+                    delta = -delta
                 }
             }
         }
