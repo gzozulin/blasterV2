@@ -31,9 +31,3 @@ abstract class GlBindable : GlResource() {
         }
     }
 }
-
-fun glBind(vararg bindables: GlBindable, action: () -> Unit) {
-    bindables.forEach { it.bind() }
-    action.invoke()
-    bindables.reversed().forEach { it.unbind() }
-}

@@ -32,9 +32,3 @@ abstract class GlResource {
         }
     }
 }
-
-fun glUse(vararg usables: GlResource, action: () -> Unit) {
-    usables.forEach { it.use() }
-    action.invoke()
-    usables.forEach { it.release() }
-}

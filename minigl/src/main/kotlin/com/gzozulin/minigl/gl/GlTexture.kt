@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.gl
 
-import sun.rmi.server.InactiveGroupException
 import java.nio.ByteBuffer
 
 data class GlTexData(
