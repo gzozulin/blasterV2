@@ -3,8 +3,7 @@ package com.gzozulin.miniui
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.MatrixStack
-import com.gzozulin.minigl.techniques.SimpleTechnique
-import org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT
+import com.gzozulin.minigl.techniques.StaticSimpleTechnique
 
 typealias ClickCallback = () -> Unit
 
@@ -23,7 +22,7 @@ private class Widget(
 )
 
 private class RenderingSystem : GlResource() {
-    private val simpleTechnique = SimpleTechnique()
+    private val simpleTechnique = StaticSimpleTechnique()
     private val rectangle = GlMesh.rect()
 
     private val projM = mat4().ortho(-1f, 1f, -1f, 1f, 0f, 10000f)

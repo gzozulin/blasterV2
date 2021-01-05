@@ -9,7 +9,7 @@ import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
 
-class DeferredTechnique : GlResource() {
+class StaticDeferredTechnique : GlResource() {
     private val programGeomPass: GlProgram = shadersLib.loadProgram(
         "shaders/deferred/geom_pass.vert", "shaders/deferred/geom_pass.frag")
     private val programLightPass = shadersLib.loadProgram(
@@ -181,9 +181,9 @@ private val objMatrix = mat4().identity()
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())
 private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
 
-private val deferredTechnique = DeferredTechnique()
-private val skyboxTechnique = SkyboxTechnique("textures/miramar")
-private val textTechnique = TextTechnique()
+private val deferredTechnique = StaticDeferredTechnique()
+private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
+private val textTechnique = StaticTextTechnique()
 private val mesh = meshLib.loadMesh("models/house/low.obj") { println("progress: $it") }.mesh
 private val diffuse = texturesLib.loadTexture("models/house/house_diffuse.png")
 

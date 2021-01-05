@@ -19,7 +19,7 @@ private const val startY = 1 - textScale
 
 private val position = Vector2f()
 
-class TextTechnique(font: String = "textures/font.png") : GlResource() {
+class StaticTextTechnique(font: String = "textures/font.png") : GlResource() {
 
     private val program = shadersLib.loadProgram("shaders/text/text.vert", "shaders/text/text.frag")
     private val diffuse = texturesLib.loadTexture(font)
@@ -105,7 +105,7 @@ private val random = Random()
 
 private val console = Console()
 
-private val technique = TextTechnique()
+private val technique = StaticTextTechnique()
 
 fun main() {
     val window = GlWindow()

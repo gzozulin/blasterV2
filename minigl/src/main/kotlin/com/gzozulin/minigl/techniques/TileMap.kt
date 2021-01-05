@@ -13,7 +13,7 @@ import java.util.*
 private const val SHADER_DIFFUSE_CNT = 16
 private const val SHADER_SIDE_CNT = 8
 
-class TileMapTechnique : GlResource() {
+class StaticTileMapTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/tilemap/tilemap.vert", "shaders/tilemap/tilemap.frag")
 
@@ -64,8 +64,8 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(40f, 10f, 40f), pitch = radf(-90f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = SkyboxTechnique("textures/hills")
-private val tileMapTechnique = TileMapTechnique()
+private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")
+private val tileMapTechnique = StaticTileMapTechnique()
 
 private val rect = GlMesh.rect()
 
@@ -98,7 +98,7 @@ fun main() {
         (0 until 64).forEach {
             list.add(random.nextInt(diffuseArray.size))
         }
-        tileMaps.add(TileMapTechnique.createTileMap(list.toIntArray()))
+        tileMaps.add(StaticTileMapTechnique.createTileMap(list.toIntArray()))
     }
     val window = GlWindow()
     window.create(isHoldingCursor = false) {

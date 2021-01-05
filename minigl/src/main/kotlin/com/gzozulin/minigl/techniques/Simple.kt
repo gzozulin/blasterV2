@@ -9,7 +9,7 @@ import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.scene.WasdInput
 import org.joml.Matrix4f
 
-class SimpleTechnique : GlResource() {
+class StaticSimpleTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/simple/no_lighting.vert", "shaders/simple/no_lighting.frag")
 
@@ -48,8 +48,8 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = SkyboxTechnique("textures/snowy")
-private val simpleTechnique = SimpleTechnique()
+private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")
+private val simpleTechnique = StaticSimpleTechnique()
 private val diffuse = texturesLib.loadTexture("textures/utah.jpg")
 private val rectangle = GlMesh.rect()
 

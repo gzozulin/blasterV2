@@ -6,9 +6,9 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.BillboardsProvider
-import com.gzozulin.minigl.techniques.BillboardsTechnique
-import com.gzozulin.minigl.techniques.SimpleTechnique
-import com.gzozulin.minigl.techniques.SkyboxTechnique
+import com.gzozulin.minigl.techniques.StaticBillboardsTechnique
+import com.gzozulin.minigl.techniques.StaticSimpleTechnique
+import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import com.gzozulin.sim.entity.*
 import java.nio.FloatBuffer
 
@@ -19,9 +19,9 @@ private val wasdInput = WasdInput(controller)
 private val identityM = mat4().identity()
 
 class PresentationSystem : GlResource() {
-    private val simpleTechnique = SimpleTechnique()
-    private val billboardsTechnique = BillboardsTechnique(10000)
-    private val skyboxTechnique = SkyboxTechnique("textures/miramar")
+    private val simpleTechnique = StaticSimpleTechnique()
+    private val billboardsTechnique = StaticBillboardsTechnique(10000)
+    private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 
     init {
         addChildren(simpleTechnique, billboardsTechnique, skyboxTechnique)

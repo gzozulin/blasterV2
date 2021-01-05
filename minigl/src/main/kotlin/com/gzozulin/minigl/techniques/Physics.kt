@@ -7,7 +7,7 @@ import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
 
-class PbrTechnique: GlResource() {
+class StaticPbrTechnique: GlResource() {
     private val program = shadersLib.loadProgram("shaders/pbr/pbr.vert", "shaders/pbr/pbr.frag")
 
     init {
@@ -62,8 +62,8 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(0f, 2.5f, 4f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = SkyboxTechnique("textures/miramar")
-private val pbrTechnique = PbrTechnique()
+private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
+private val pbrTechnique = StaticPbrTechnique()
 
 private val meshData = meshLib.loadMesh("models/mandalorian/mandalorian.obj") { println("loading $it") }
 private val material = texturesLib.loadPbr("models/mandalorian")

@@ -18,7 +18,7 @@ abstract class BillboardsProvider {
     abstract fun size(): Int
 }
 
-class BillboardsTechnique(max: Int) : GlResource() {
+class StaticBillboardsTechnique(max: Int) : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/billboards/billboards.vert", "shaders/billboards/billboards.frag")
 
@@ -96,8 +96,8 @@ private val window = GlWindow()
 
 private val diffuse = texturesLib.loadTexture("textures/smoke.png")
 
-private val skyboxTechnique = SkyboxTechnique("textures/nuke")
-private val billboardsTechnique = BillboardsTechnique(1000)
+private val skyboxTechnique = StaticSkyboxTechnique("textures/nuke")
+private val billboardsTechnique = StaticBillboardsTechnique(1000)
 
 private val camera = Camera()
 private val controller = Controller(position = vec3().front().mul(10f), velocity = 0.1f)

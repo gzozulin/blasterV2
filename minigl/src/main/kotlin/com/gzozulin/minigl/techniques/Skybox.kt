@@ -6,7 +6,7 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 
-class SkyboxTechnique(skybox: String) : GlResource() {
+class StaticSkyboxTechnique(skybox: String) : GlResource() {
 
     private val program = shadersLib.loadProgram(
         "shaders/skybox/skybox.vert", "shaders/skybox/skybox.frag")
@@ -37,7 +37,7 @@ private val camera = Camera()
 private val controller = Controller()
 private val wasdInput = WasdInput(controller)
 
-private val technique = SkyboxTechnique("textures/snowy")
+private val technique = StaticSkyboxTechnique("textures/snowy")
 
 fun main() {
     val window = GlWindow()

@@ -82,11 +82,4 @@ class GlTexture(
         checkReady()
         return handle
     }
-
-    fun updatePixels(uOffset: Int, vOffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteBuffer) {
-        checkReady()
-        glBind(this) {
-            backend.glTexSubImage2D(target, 0, uOffset, vOffset, width, height, format, type, pixels)
-        }
-    }
 }

@@ -36,7 +36,7 @@ data class Frame(
     }
 }
 
-class SpritesTechnique : GlResource() {
+class StaticSpritesTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/sprites/sprites.vert", "shaders/sprites/sprites.frag")
 
@@ -89,9 +89,9 @@ private val window = GlWindow()
 
 private val diffuse = texturesLib.loadTexture("textures/woman.png")
 
-private val simpleTechnique = SimpleTechnique()
-private val spritesTechnique = SpritesTechnique()
-private val skyboxTechnique = SkyboxTechnique("textures/darkskies")
+private val simpleTechnique = StaticSimpleTechnique()
+private val spritesTechnique = StaticSpritesTechnique()
+private val skyboxTechnique = StaticSkyboxTechnique("textures/darkskies")
 
 private val camera = Camera()
 private val controller = Controller(position = vec3(50f, 5f, 70f), pitch = radf(-30f), velocity = 0.1f)

@@ -3,7 +3,7 @@ package com.gzozulin.alch
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.MatrixStack
-import com.gzozulin.minigl.techniques.SimpleTechnique
+import com.gzozulin.minigl.techniques.StaticSimpleTechnique
 import org.kodein.di.instance
 
 private const val POTION_GRID_WIDTH = 5
@@ -12,7 +12,7 @@ private const val POTION_GRID_SIDE = 2f
 class MechanicsPresentation: GlResource() {
     private val repository: Repository by injector.instance()
 
-    private val simpleTechnique = SimpleTechnique()
+    private val simpleTechnique = StaticSimpleTechnique()
 
     private val rect = GlMesh.rect()
     private val bottle = texturesLib.loadTexture("textures/bottle.png")
