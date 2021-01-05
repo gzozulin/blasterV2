@@ -8,18 +8,6 @@ import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 import java.util.*
 
-private class ValueCache<T>(private val setter: (T) -> Unit) {
-
-    private var cached: T? = null;
-
-    fun set(value: T) {
-        if (value != cached) {
-            setter.invoke(value)
-            cached = value
-        }
-    }
-}
-
 data class Sprite(
     val frames: List<Frame>,
     val animations: List<Animation>

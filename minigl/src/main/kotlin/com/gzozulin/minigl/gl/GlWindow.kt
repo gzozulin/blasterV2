@@ -11,7 +11,6 @@ import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-
 private const val winWidth: Int = 1024
 private const val winHeight: Int = 768
 
@@ -21,7 +20,7 @@ private const val fullHeight: Int = 1080
 private const val winX: Int = 448
 private const val winY: Int = 156
 
-public enum class MouseButton { LEFT, RIGHT }
+enum class MouseButton { LEFT, RIGHT }
 
 typealias ResizeCallback = (width: Int, height: Int) -> Unit
 typealias KeyCallback = (key: Int, pressed: Boolean) -> Unit
