@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="8">
-      <module name="blasterV2.minigl" target="1.7" />
-      <module name="blasterV2.miniui" target="1.7" />
+    <bytecodeTargetLevel target="1.7">
       <module name="blasterV2.rider" target="1.7" />
-      <module name="blasterV2.simulator" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,5 +1,4 @@
-rootProject.name = 'blasterV2'
-include ':app'
+rootProject.name = 'blaster'
 include ':minigl'
 include ':miniui'
 include ':simulator'
