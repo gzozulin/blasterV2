@@ -6,11 +6,16 @@ enum class GlShaderType(val type: Int) {
 }
 
 class GlShader(val type: GlShaderType, private val source: String): GlResource() {
-    private var handle: Int = -1
+    private var internalHandle: Int = -1
+    val handle: Int
+    get() {
+        checkReady()
+        return internalHandle
+    }
 
     override fun use() {
         super.use()
-        handle= backend.glCreateShader(type.type)
+        internalHandle = backend.glCreateShader(type.type)
         backend.glShaderSource(handle, source)
         backend.glCompileShader(handle)
         val isCompiled = backend.glGetShaderi(handle, backend.GL_COMPILE_STATUS)
@@ -28,10 +33,5 @@ class GlShader(val type: GlShaderType, private val source: String): GlResource()
     override fun release() {
         backend.glDeleteShader(handle)
         super.release()
-    }
-
-    fun accessHandle(): Int {
-        checkReady()
-        return handle
     }
 }

@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.gl
 
+import sun.rmi.server.InactiveGroupException
 import java.nio.ByteBuffer
 
 data class GlTexData(
@@ -15,7 +16,12 @@ class GlTexture(
     private val texData: List<GlTexData>
 ) : GlBindable() {
 
-    private var handle: Int = -1
+    private var internalHandle: Int = -1
+    val handle: Int
+    get() {
+        checkReady()
+        return internalHandle
+    }
 
     constructor(
         target: Int = backend.GL_TEXTURE_2D, unit: Int = 0,
@@ -25,7 +31,7 @@ class GlTexture(
 
     override fun use() {
         super.use()
-        handle = backend.glGenTextures()
+        internalHandle = backend.glGenTextures()
         glBind(this) {
             backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST)
             backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_NEAREST)
@@ -76,10 +82,5 @@ class GlTexture(
                 side.pixelFormat, side.pixelType, side.pixels
             )
         }
-    }
-
-    fun accessHandle(): Int {
-        checkReady()
-        return handle
     }
 }
