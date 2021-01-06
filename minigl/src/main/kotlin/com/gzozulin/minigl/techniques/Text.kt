@@ -19,6 +19,7 @@ private const val startY = 1 - textScale
 
 private val position = Vector2f()
 
+@Deprecated("Use assembly instead!")
 class StaticTextTechnique(font: String = "textures/font.png") : GlResource() {
 
     private val program = shadersLib.loadProgram("shaders/text/text.vert", "shaders/text/text.frag")
@@ -34,7 +35,7 @@ class StaticTextTechnique(font: String = "textures/font.png") : GlResource() {
     fun draw(call: () -> Unit) {
         checkReady()
         glBind(program, diffuse, rect) {
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             call.invoke()
         }
     }
@@ -48,10 +49,10 @@ class StaticTextTechnique(font: String = "textures/font.png") : GlResource() {
     }
 
     private fun character(ch: Char, start: Vector2f, scale: Float, color: Vector3f) {
-        program.setUniform(GlUniform.UNIFORM_CHAR_INDEX, ch.toInt())
-        program.setUniform(GlUniform.UNIFORM_CHAR_START, start)
-        program.setUniform(GlUniform.UNIFORM_CHAR_SCALE, scale)
-        program.setUniform(GlUniform.UNIFORM_COLOR, color)
+        program.setUniform(GlUniform.UNIFORM_CHAR_INDEX.label, ch.toInt())
+        program.setUniform(GlUniform.UNIFORM_CHAR_START.label, start)
+        program.setUniform(GlUniform.UNIFORM_CHAR_SCALE.label, scale)
+        program.setUniform(GlUniform.UNIFORM_COLOR.label, color)
         program.draw(indicesCount = rect.indicesCount)
     }
 }

@@ -9,15 +9,18 @@ import com.gzozulin.minigl.scene.ValueCache
 import com.gzozulin.minigl.scene.WasdInput
 import java.util.*
 
+@Deprecated("Use assembly instead!")
 data class Sprite(
     val frames: List<Frame>,
     val animations: List<Animation>
 )
 
+@Deprecated("Use assembly instead!")
 data class Animation(
     val frameIndices: List<Int>
 )
 
+@Deprecated("Use assembly instead!")
 data class Frame(
     val left: Float,
     val top: Float,
@@ -37,19 +40,20 @@ data class Frame(
     }
 }
 
+@Deprecated("Use assembly instead!")
 class StaticSpritesTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/sprites/sprites.vert", "shaders/sprites/sprites.frag")
 
     private val rect = GlMesh.rect()
 
-    private val cachedFrameLeft = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_LEFT, it) }
-    private val cachedFrameTop = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_TOP, it) }
-    private val cachedFrameWidth = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_WIDTH, it) }
-    private val cachedFrameHeight = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_HEIGHT, it) }
+    private val cachedFrameLeft = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_LEFT.label, it) }
+    private val cachedFrameTop = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_TOP.label, it) }
+    private val cachedFrameWidth = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_WIDTH.label, it) }
+    private val cachedFrameHeight = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_FRAME_HEIGHT.label, it) }
 
-    private val cachedWidth = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_WIDTH, it) }
-    private val cachedHeight = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_HEIGHT, it) }
+    private val cachedWidth = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_WIDTH.label, it) }
+    private val cachedHeight = ValueCache<Float> { program.setUniform(GlUniform.UNIFORM_HEIGHT.label, it) }
 
     init {
         addChildren(program, rect)
@@ -57,9 +61,9 @@ class StaticSpritesTechnique : GlResource() {
 
     fun draw(camera: Camera, draw: () -> Unit) {
         glBind(program, rect) {
-            program.setUniform(GlUniform.UNIFORM_VIEW_M, camera.calculateViewM())
-            program.setUniform(GlUniform.UNIFORM_PROJ_M, camera.projectionM)
-            program.setUniform(GlUniform.UNIFORM_EYE, camera.position)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, camera.calculateViewM())
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
+            program.setUniform(GlUniform.UNIFORM_EYE.label, camera.position)
             draw.invoke()
         }
     }
@@ -73,8 +77,8 @@ class StaticSpritesTechnique : GlResource() {
             cachedFrameHeight.set(frameHeight)
             cachedWidth.set(width)
             cachedHeight.set(height)
-            program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             program.draw(mesh = rect)
         }
     }

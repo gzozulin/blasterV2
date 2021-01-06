@@ -6,6 +6,7 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 
+@Deprecated("Use assembly instead!")
 class StaticSkyboxTechnique(skybox: String) : GlResource() {
 
     private val program = shadersLib.loadProgram(
@@ -25,9 +26,9 @@ class StaticSkyboxTechnique(skybox: String) : GlResource() {
         onlyRotationM.set(camera.calculateViewM())
         noTranslationM.set(onlyRotationM)
         glBind(program, cube, diffuse) {
-            program.setUniform(GlUniform.UNIFORM_PROJ_M, camera.projectionM)
-            program.setUniform(GlUniform.UNIFORM_VIEW_M, noTranslationM)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, noTranslationM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             program.draw(indicesCount = cube.indicesCount)
         }
     }

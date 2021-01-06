@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.gl
 
+@Deprecated("Use assembly instead!")
 enum class GlUniform(val label: String) {
     UNIFORM_MODEL_M             ("uModelM"),
     UNIFORM_PROJ_M              ("uProjectionM"),

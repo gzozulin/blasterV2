@@ -31,12 +31,11 @@ class GlProgram(
         addChildren(vertexShader, fragmentShader)
     }
 
-    private var handle: Int = -1;
+    private var handle: Int = -1
 
-    private val uniformLocations = HashMap<GlUniform, Int>()
-    private val unsatisfiedUniforms = HashSet<GlUniform>()
-
-    private val arrayUniformLocations = HashMap<String, Int>()
+    private val uniformLocations = HashMap<String, Int>()
+    private val arrayLocations = HashMap<String, Int>()
+    private val unsatisfiedUniforms = mutableListOf<String>()
 
     override fun use() {
         super.use()
@@ -69,137 +68,94 @@ class GlProgram(
     }
 
     private fun cacheUniforms() {
-        GlUniform.values().forEach {
-            val location = backend.glGetUniformLocation(handle, it.label)
-            if (location != -1) {
-                uniformLocations[it] = location
+        val count = backend.glGetProgrami(handle, backend.GL_ACTIVE_UNIFORMS)
+        val size = ByteBuffer.allocateDirect(4).asIntBuffer()
+        val type = ByteBuffer.allocateDirect(4).asIntBuffer()
+        for (i in 0 until count) {
+            val uniform = backend.glGetActiveUniform(handle, i, size, type)
+            val location = backend.glGetUniformLocation(handle, uniform)
+            if (uniform.contains('[') && uniform.contains(']')) {
+                arrayLocations[uniform] = location
+            } else {
+                uniformLocations[uniform] = location
             }
         }
         unsatisfiedUniforms.addAll(uniformLocations.keys)
     }
 
-    fun setTexture(uniform: GlUniform, texture: GlTexture) {
-        checkReady()
-        texture.checkReady()
-        setUniform(uniform, texture.unit)
+    private fun satisfyUniformLocation(uniform: String): Int {
+        val location = uniformLocations[uniform]
+        checkNotNull(location) { "Location for uniform $uniform not found!" }
         unsatisfiedUniforms.remove(uniform)
-    }
-
-    // TODO - remove by name, not by enum
-    fun setArbitraryUniform(name: String, value: Int) {
-        checkReady()
-        val location = backend.glGetUniformLocation(handle, name)
-        backend.glUniform1i(location, value)
-        unsatisfiedUniforms.clear()
-    }
-
-    fun setArbitraryUniform(name: String, value: mat4) {
-        checkReady()
-        value.get(bufferMat4)
-        val location = backend.glGetUniformLocation(handle, name)
-        backend.glUniformMatrix4fv(location, false, bufferMat4)
-        unsatisfiedUniforms.clear()
-    }
-
-    fun setArbitraryUniform(name: String, value: vec3) {
-        checkReady()
-        value.get(bufferVec3)
-        val location = backend.glGetUniformLocation(handle, name)
-        backend.glUniform3fv(location, bufferVec3)
-        unsatisfiedUniforms.clear()
-    }
-
-    fun setArbitraryUniform(name: String, value: vec4) {
-        checkReady()
-        value.get(bufferVec4)
-        val location = backend.glGetUniformLocation(handle, name)
-        backend.glUniform4fv(location, bufferVec4)
-        unsatisfiedUniforms.clear()
-    }
-
-    fun setArbitraryUniform(name: String, texture: GlTexture) {
-        checkReady()
-        val location = backend.glGetUniformLocation(handle, name)
-        backend.glUniform1i(location, texture.unit)
-        unsatisfiedUniforms.clear()
-    }
-
-    fun setUniform(uniform: GlUniform, value: Matrix4f) {
-        checkReady()
-        value.get(bufferMat4)
-        backend.glUniformMatrix4fv(uniformLocations[uniform]!!, false, bufferMat4)
-        unsatisfiedUniforms.remove(uniform)
-    }
-
-    fun setUniform(uniform: GlUniform, value: Int) {
-        checkReady()
-        backend.glUniform1i(uniformLocations[uniform]!!, value)
-        unsatisfiedUniforms.remove(uniform)
-    }
-
-    fun setUniform(uniform: GlUniform, value: Float) {
-        checkReady()
-        backend.glUniform1f(uniformLocations[uniform]!!, value)
-        unsatisfiedUniforms.remove(uniform)
-    }
-
-    fun setUniform(uniform: GlUniform, value: Vector2f) {
-        checkReady()
-        value.get(bufferVec2)
-        backend.glUniform2fv(uniformLocations[uniform]!!, bufferVec2)
-        unsatisfiedUniforms.remove(uniform)
-    }
-
-    fun setUniform(uniform: GlUniform, value: Vector3f) {
-        checkReady()
-        value.get(bufferVec3)
-        backend.glUniform3fv(uniformLocations[uniform]!!, bufferVec3)
-        unsatisfiedUniforms.remove(uniform)
-    }
-
-    private fun arrayLocation(uniform: GlUniform, index: Int): Int {
-        val label = uniform.label.format(index)
-        var location: Int? = arrayUniformLocations[label]
-        if (location == null) {
-            location = backend.glGetUniformLocation(handle, label)
-            arrayUniformLocations[label] = location
-        }
         return location
     }
 
-    fun setArrayUniform(uniform: GlUniform, index: Int, value: vec3) {
-        checkReady()
-        value.get(bufferVec3)
-        backend.glUniform3fv(arrayLocation(uniform, index), bufferVec3)
-    }
+    private fun getArrayUniformLocation(uniform: String, index: Int) =
+        arrayLocations[(uniform.format(index))]!!
 
-    fun setArrayTexture(uniform: GlUniform, index: Int, texture: GlTexture) {
+    fun setTexture(uniform: String, texture: GlTexture) {
         checkReady()
         texture.checkReady()
-        backend.glUniform1i(arrayLocation(uniform, index), texture.unit)
+        setUniform(uniform, texture.unit)
+    }
+
+    fun setUniform(uniform: String, value: Matrix4f) {
+        checkReady()
+        value.get(bufferMat4)
+        backend.glUniformMatrix4fv(satisfyUniformLocation(uniform), false, bufferMat4)
+    }
+
+    fun setUniform(uniform: String, value: Int) {
+        checkReady()
+        backend.glUniform1i(satisfyUniformLocation(uniform), value)
+    }
+
+    fun setUniform(uniform: String, value: Float) {
+        checkReady()
+        backend.glUniform1f(satisfyUniformLocation(uniform), value)
+    }
+
+    fun setUniform(uniform: String, value: Vector2f) {
+        checkReady()
+        value.get(bufferVec2)
+        backend.glUniform2fv(satisfyUniformLocation(uniform), bufferVec2)
+    }
+
+    fun setUniform(uniform: String, value: Vector3f) {
+        checkReady()
+        value.get(bufferVec3)
+        backend.glUniform3fv(satisfyUniformLocation(uniform), bufferVec3)
+    }
+
+    fun setUniform(name: String, value: vec4) {
+        checkReady()
+        value.get(bufferVec4)
+        backend.glUniform4fv(satisfyUniformLocation(name), bufferVec4)
+    }
+
+    fun setArrayUniform(uniform: String, index: Int, value: vec3) {
+        checkReady()
+        value.get(bufferVec3)
+        backend.glUniform3fv(getArrayUniformLocation(uniform, index), bufferVec3)
+    }
+
+    fun setArrayTexture(uniform: String, index: Int, texture: GlTexture) {
+        checkReady()
+        texture.checkReady()
+        backend.glUniform1i(getArrayUniformLocation(uniform, index), texture.unit)
     }
 
     fun draw(mode: Int = backend.GL_TRIANGLES, indicesCount: Int) {
         checkReady()
-        checkUnsatisfiedUniforms()
         backend.glDrawElements(mode, indicesCount, backend.GL_UNSIGNED_INT, 0)
     }
 
     fun drawInstanced(mode: Int = backend.GL_TRIANGLES, indicesCount: Int, instances: Int) {
         checkReady()
-        checkUnsatisfiedUniforms()
         backend.glDrawElementsInstanced(mode, indicesCount, backend.GL_UNSIGNED_INT, 0, instances)
     }
 
     fun draw(mesh: GlMesh) {
         draw(mode = backend.GL_TRIANGLES, indicesCount = mesh.indicesCount)
-    }
-
-    private fun checkUnsatisfiedUniforms() {
-        check(unsatisfiedUniforms.isEmpty()) {
-            var unsatisfied = ""
-            unsatisfiedUniforms.forEach { unsatisfied += it.label + "\n" }
-            "Uniforms aren't satisfied:\n$unsatisfied"
-        }
     }
 }

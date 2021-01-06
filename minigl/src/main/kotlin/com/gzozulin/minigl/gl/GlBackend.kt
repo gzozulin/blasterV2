@@ -4,6 +4,7 @@ import org.lwjgl.opengl.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
+import java.nio.IntBuffer
 
 val backend = GlBackend()
 
@@ -35,6 +36,7 @@ class GlBackend {
     val GL_FRAGMENT_SHADER:    Int get() = GL20.GL_FRAGMENT_SHADER
     val GL_COMPILE_STATUS:     Int get() = GL20.GL_COMPILE_STATUS
     val GL_LINK_STATUS:        Int get() = GL20.GL_LINK_STATUS
+    val GL_ACTIVE_UNIFORMS:    Int get() = GL20.GL_ACTIVE_UNIFORMS
     val GL_RENDERBUFFER:       Int get() = GL30.GL_RENDERBUFFER
     val GL_DEPTH_COMPONENT24:  Int get() = GL14.GL_DEPTH_COMPONENT24
     val GL_RED:                Int get() = GL11.GL_RED
@@ -117,6 +119,7 @@ class GlBackend {
     fun glCreateShader(type: Int): Int = glCheck { GL20.glCreateShader(type) }
     fun glShaderSource(shader: Int, string: String) = glCheck { GL20.glShaderSource(shader, string) }
     fun glCompileShader(shader: Int) = glCheck { GL20.glCompileShader(shader) }
+    fun glGetActiveUniform(program: Int, index: Int, size: IntBuffer, type: IntBuffer) = glCheck { GL20.glGetActiveUniform(program, index, size, type) }
     fun glGetShaderi(shader: Int, pname: Int): Int = glCheck { GL20.glGetShaderi(shader, pname) }
     fun glGetShaderInfoLog(shader: Int) = glCheck { GL20.glGetShaderInfoLog(shader) }
     fun glDeleteShader(shader: Int) = glCheck { GL20.glDeleteShader(shader) }

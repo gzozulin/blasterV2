@@ -12,9 +12,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/challenges" />
             <option value="$PROJECT_DIR$/minigl" />
             <option value="$PROJECT_DIR$/miniui" />
+            <option value="$PROJECT_DIR$/sfcs" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

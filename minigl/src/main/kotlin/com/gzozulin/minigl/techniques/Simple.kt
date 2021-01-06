@@ -9,6 +9,7 @@ import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.scene.WasdInput
 import org.joml.Matrix4f
 
+@Deprecated("Use assembly instead!")
 class StaticSimpleTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/simple/no_lighting.vert", "shaders/simple/no_lighting.frag")
@@ -24,8 +25,8 @@ class StaticSimpleTechnique : GlResource() {
     fun draw(viewM: mat4, projectionM: mat4, draw: () -> Unit) {
         checkReady()
         glBind(program) {
-            program.setUniform(GlUniform.UNIFORM_VIEW_M, viewM)
-            program.setUniform(GlUniform.UNIFORM_PROJ_M, projectionM)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, viewM)
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, projectionM)
             draw.invoke()
         }
     }
@@ -33,9 +34,9 @@ class StaticSimpleTechnique : GlResource() {
     fun instance(mesh: GlMesh, diffuse: GlTexture, modelM: Matrix4f, color: col3 = col3(1f)) {
         checkReady()
         glBind(mesh, diffuse) {
-            program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
-            program.setUniform(GlUniform.UNIFORM_COLOR, color)
+            program.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
+            program.setUniform(GlUniform.UNIFORM_COLOR.label, color)
             program.draw(indicesCount = mesh.indicesCount)
         }
     }

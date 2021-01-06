@@ -143,13 +143,13 @@ fun main() {
                 }
                 skyboxTechnique.skybox(camera)
                 glBind(simpleProgram, rectangle, diffuse1, diffuse2) {
-                    simpleProgram.setArbitraryUniform(unifModelM.name, matrixStack.peekMatrix())
-                    simpleProgram.setArbitraryUniform(unifViewM.name, camera.calculateViewM())
-                    simpleProgram.setArbitraryUniform(unifProjM.name, camera.projectionM)
-                    simpleProgram.setArbitraryUniform(unifDiffuse1.name, diffuse1.unit)
-                    simpleProgram.setArbitraryUniform(unifDiffuse2.name, diffuse2.unit)
-                    simpleProgram.setArbitraryUniform(unifProp1.name, vec4(proportion))
-                    simpleProgram.setArbitraryUniform(unifProp2.name, vec4(1f - proportion))
+                    simpleProgram.setUniform(unifModelM.name, matrixStack.peekMatrix())
+                    simpleProgram.setUniform(unifViewM.name, camera.calculateViewM())
+                    simpleProgram.setUniform(unifProjM.name, camera.projectionM)
+                    simpleProgram.setUniform(unifDiffuse1.name, diffuse1.unit)
+                    simpleProgram.setUniform(unifDiffuse2.name, diffuse2.unit)
+                    simpleProgram.setUniform(unifProp1.name, vec4(proportion))
+                    simpleProgram.setUniform(unifProp2.name, vec4(1f - proportion))
                     simpleProgram.draw(indicesCount = rectangle.indicesCount)
                 }
                 proportion += delta

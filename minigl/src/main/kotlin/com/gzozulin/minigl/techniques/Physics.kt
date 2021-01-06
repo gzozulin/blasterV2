@@ -7,6 +7,7 @@ import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
 
+@Deprecated("Use assembly instead!")
 class StaticPbrTechnique: GlResource() {
     private val program = shadersLib.loadProgram("shaders/pbr/pbr.vert", "shaders/pbr/pbr.frag")
 
@@ -18,12 +19,12 @@ class StaticPbrTechnique: GlResource() {
     private var dirLightCnt = 0
     fun draw(camera: Camera, lights: () -> Unit, meshes: () -> Unit) {
         glBind(program) {
-            program.setUniform(GlUniform.UNIFORM_VIEW_M,    camera.calculateViewM())
-            program.setUniform(GlUniform.UNIFORM_PROJ_M,    camera.projectionM)
-            program.setUniform(GlUniform.UNIFORM_EYE,       camera.position)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label,    camera.calculateViewM())
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label,    camera.projectionM)
+            program.setUniform(GlUniform.UNIFORM_EYE.label,       camera.position)
             lights.invoke()
-            program.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT, pointLightCnt)
-            //program.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT, dirLightCnt)
+            program.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT.label, pointLightCnt)
+            //program.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT.label, dirLightCnt)
             meshes.invoke()
         }
         pointLightCnt = 0
@@ -34,8 +35,8 @@ class StaticPbrTechnique: GlResource() {
     fun light(light: Light, modelM: Matrix4f) {
         if (light.point) {
             modelM.getColumn(3, lightVectorBuf)
-            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR, pointLightCnt, lightVectorBuf)
-            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY, pointLightCnt, light.intensity)
+            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
+            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
             pointLightCnt++
         } else {
             TODO()
@@ -45,12 +46,12 @@ class StaticPbrTechnique: GlResource() {
 
     fun instance(mesh: GlMesh, modelM: Matrix4f, material: PbrMaterial) {
         glBind(mesh, material.albedo, material.normal, material.metallic, material.roughness, material.ao) {
-            program.setUniform(GlUniform.UNIFORM_MODEL_M,           modelM)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_ALBEDO,    material.albedo)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_NORMAL,    material.normal)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_METALLIC,  material.metallic)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_ROUGHNESS, material.roughness)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_AO,        material.ao)
+            program.setUniform(GlUniform.UNIFORM_MODEL_M.label,           modelM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_ALBEDO.label,    material.albedo)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_NORMAL.label,    material.normal)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_METALLIC.label,  material.metallic)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_ROUGHNESS.label, material.roughness)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_AO.label,        material.ao)
             program.draw(mesh)
         }
     }

@@ -11,6 +11,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
+@Deprecated("Use assembly instead!")
 abstract class BillboardsProvider {
     abstract fun flushPositions(position: FloatBuffer)
     open fun flushScale(scale: FloatBuffer) {}
@@ -18,6 +19,7 @@ abstract class BillboardsProvider {
     abstract fun size(): Int
 }
 
+@Deprecated("Use assembly instead!")
 class StaticBillboardsTechnique(max: Int) : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/billboards/billboards.vert", "shaders/billboards/billboards.frag")
@@ -40,9 +42,9 @@ class StaticBillboardsTechnique(max: Int) : GlResource() {
 
     fun draw(camera: Camera, draw: () -> Unit) {
         glBind(program) {
-            program.setUniform(GlUniform.UNIFORM_VIEW_M, camera.calculateViewM())
-            program.setUniform(GlUniform.UNIFORM_PROJ_M, camera.projectionM)
-            program.setUniform(GlUniform.UNIFORM_EYE, camera.position)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, camera.calculateViewM())
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
+            program.setUniform(GlUniform.UNIFORM_EYE.label, camera.position)
             draw.invoke()
         }
     }
@@ -81,12 +83,12 @@ class StaticBillboardsTechnique(max: Int) : GlResource() {
             updateTransparency(provider)
         }
         glBind(rect, diffuse) {
-            program.setUniform(GlUniform.UNIFORM_SCALE_FLAG, if (updateScale) 1 else 0)
-            program.setUniform(GlUniform.UNIFORM_TRANSPARENCY_FLAG, if (updateTransparency) 1 else 0)
-            program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
-            program.setUniform(GlUniform.UNIFORM_WIDTH, width)
-            program.setUniform(GlUniform.UNIFORM_HEIGHT, height)
-            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            program.setUniform(GlUniform.UNIFORM_SCALE_FLAG.label, if (updateScale) 1 else 0)
+            program.setUniform(GlUniform.UNIFORM_TRANSPARENCY_FLAG.label, if (updateTransparency) 1 else 0)
+            program.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            program.setUniform(GlUniform.UNIFORM_WIDTH.label, width)
+            program.setUniform(GlUniform.UNIFORM_HEIGHT.label, height)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             program.drawInstanced(indicesCount = rect.indicesCount, instances = provider.size())
         }
     }

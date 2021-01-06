@@ -13,6 +13,7 @@ import java.util.*
 private const val SHADER_DIFFUSE_CNT = 16
 private const val SHADER_SIDE_CNT = 8
 
+@Deprecated("Use assembly instead!")
 class StaticTileMapTechnique : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/tilemap/tilemap.vert", "shaders/tilemap/tilemap.frag")
@@ -29,10 +30,10 @@ class StaticTileMapTechnique : GlResource() {
         }
         glBind(program, *diffuseArray) {
             diffuseArray.forEachIndexed { index, texture ->
-                program.setArrayTexture(GlUniform.UNIFORM_DIFFUSE_ARRAY, index, texture)
+                program.setArrayTexture(GlUniform.UNIFORM_DIFFUSE_ARRAY.label, index, texture)
             }
-            program.setUniform(GlUniform.UNIFORM_VIEW_M, viewM)
-            program.setUniform(GlUniform.UNIFORM_PROJ_M, projectionM)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, viewM)
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, projectionM)
             draw.invoke()
         }
     }
@@ -41,8 +42,8 @@ class StaticTileMapTechnique : GlResource() {
         checkReady()
         tileMap.unit = 0
         glBind(mesh, tileMap) {
-            program.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
-            program.setTexture(GlUniform.UNIFORM_TILE_MAP, tileMap)
+            program.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            program.setTexture(GlUniform.UNIFORM_TILE_MAP.label, tileMap)
             program.draw(indicesCount = mesh.indicesCount)
         }
     }

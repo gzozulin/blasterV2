@@ -9,6 +9,7 @@ import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
 
+@Deprecated("Use assembly instead!")
 class StaticDeferredTechnique : GlResource() {
     private val programGeomPass: GlProgram = shadersLib.loadProgram(
         "shaders/deferred/geom_pass.vert", "shaders/deferred/geom_pass.frag")
@@ -100,12 +101,12 @@ class StaticDeferredTechnique : GlResource() {
             framebuffer.setRenderBuffer(backend.GL_DEPTH_ATTACHMENT, depthBuffer)
             framebuffer.checkIsComplete()
             glBind(programLightPass) {
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_POSITION, positionStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_NORMAL, normalStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuseStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_AMB_SHINE, matAmbShineStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_DIFF_TRANSP, matDiffTranspStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_SPECULAR, matSpecularStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_POSITION.label, positionStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_NORMAL.label, normalStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuseStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_AMB_SHINE.label, matAmbShineStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_DIFF_TRANSP.label, matDiffTranspStorage)
+                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_SPECULAR.label, matSpecularStorage)
             }
         }
     }
@@ -119,8 +120,8 @@ class StaticDeferredTechnique : GlResource() {
         glBind(framebuffer) {
             glCheck { backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT) }
             glBind(programGeomPass) {
-                programGeomPass.setUniform(GlUniform.UNIFORM_VIEW_M, camera.calculateViewM())
-                programGeomPass.setUniform(GlUniform.UNIFORM_PROJ_M, camera.projectionM)
+                programGeomPass.setUniform(GlUniform.UNIFORM_VIEW_M.label, camera.calculateViewM())
+                programGeomPass.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
                 instances.invoke()
             }
         }
@@ -128,9 +129,9 @@ class StaticDeferredTechnique : GlResource() {
             positionStorage, normalStorage, diffuseStorage,
             matAmbShineStorage, matDiffTranspStorage, matSpecularStorage) {
             lights.invoke()
-            programLightPass.setUniform(GlUniform.UNIFORM_EYE, camera.position)
-            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT, pointLightCnt)
-            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT, dirLightCnt)
+            programLightPass.setUniform(GlUniform.UNIFORM_EYE.label, camera.position)
+            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT.label, pointLightCnt)
+            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT.label, dirLightCnt)
             programLightPass.draw(indicesCount = quadMesh.indicesCount)
         }
     }
@@ -140,14 +141,14 @@ class StaticDeferredTechnique : GlResource() {
         checkReady()
         if (light.point) {
             modelM.getColumn(3, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR, pointLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY, pointLightCnt, light.intensity)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
             pointLightCnt++
         } else {
             modelM.getRow(2, lightVectorBuf) // transpose
             lightVectorBuf.negate() // -Z
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR, dirLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY, dirLightCnt, light.intensity)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, dirLightCnt, lightVectorBuf)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, dirLightCnt, light.intensity)
             dirLightCnt++
         }
         check(pointLightCnt + dirLightCnt < MAX_LIGHTS) { "More lights than defined in shader!" }
@@ -156,13 +157,13 @@ class StaticDeferredTechnique : GlResource() {
     fun instance(mesh: GlMesh, modelM: Matrix4f, diffuse: GlTexture, material: Material) {
         checkReady()
         glBind(mesh, diffuse) {
-            programGeomPass.setUniform(GlUniform.UNIFORM_MODEL_M, modelM)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_AMBIENT, material.ambient)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_DIFFUSE, material.diffuse)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SPECULAR, material.specular)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SHINE, material.shine)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_TRANSP, material.transparency)
-            programGeomPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE, diffuse)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_AMBIENT.label, material.ambient)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_DIFFUSE.label, material.diffuse)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SPECULAR.label, material.specular)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SHINE.label, material.shine)
+            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_TRANSP.label, material.transparency)
+            programGeomPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             programGeomPass.draw(indicesCount = mesh.indicesCount)
         }
     }

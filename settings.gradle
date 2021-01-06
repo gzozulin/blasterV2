@@ -1,4 +1,4 @@
 rootProject.name = 'blaster'
 include ':minigl'
 include ':miniui'
-include ':challenges'
+include ':sfcs'
