@@ -55,32 +55,26 @@ class StaticDeferredTechnique : GlResource() {
             releaseFrame()
         }
         positionStorage = GlTexture(
-            unit = 0,
             width = width, height = height, internalFormat = backend.GL_RGBA16F,
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
         positionStorage.use()
         normalStorage = GlTexture(
-            unit = 1,
             width = width, height = height, internalFormat = backend.GL_RGB16F,
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         normalStorage.use()
         diffuseStorage = GlTexture(
-            unit = 2,
             width = width, height = height, internalFormat = backend.GL_RGBA,
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
         diffuseStorage.use()
         matAmbShineStorage = GlTexture(
-            unit = 3,
             width = width, height = height, internalFormat = backend.GL_RGBA16F,
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
         matAmbShineStorage.use()
         matDiffTranspStorage = GlTexture(
-            unit = 4,
             width = width, height = height, internalFormat = backend.GL_RGBA16F,
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
         matDiffTranspStorage.use()
         matSpecularStorage = GlTexture(
-            unit = 5,
             width = width, height = height, internalFormat = backend.GL_RGB16F,
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matSpecularStorage.use()

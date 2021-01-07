@@ -83,8 +83,8 @@ private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")
-private val diffuse1 = texturesLib.loadTexture("textures/utah.jpg", unit = 1)
-private val diffuse2 = texturesLib.loadTexture("textures/smoke.png", unit = 2)
+private val diffuse1 = texturesLib.loadTexture("textures/utah.jpg")
+private val diffuse2 = texturesLib.loadTexture("textures/smoke.png")
 private val rectangle = GlMesh.rect()
 
 private var mouseLook = false
@@ -146,8 +146,8 @@ fun main() {
                     simpleProgram.setUniform(unifModelM.name, matrixStack.peekMatrix())
                     simpleProgram.setUniform(unifViewM.name, camera.calculateViewM())
                     simpleProgram.setUniform(unifProjM.name, camera.projectionM)
-                    simpleProgram.setUniform(unifDiffuse1.name, diffuse1.unit)
-                    simpleProgram.setUniform(unifDiffuse2.name, diffuse2.unit)
+                    simpleProgram.setUniform(unifDiffuse1.name, diffuse1.accessUnit())
+                    simpleProgram.setUniform(unifDiffuse2.name, diffuse2.accessUnit())
                     simpleProgram.setUniform(unifProp1.name, vec4(proportion))
                     simpleProgram.setUniform(unifProp2.name, vec4(1f - proportion))
                     simpleProgram.draw(indicesCount = rectangle.indicesCount)

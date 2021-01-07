@@ -25,9 +25,6 @@ class StaticTileMapTechnique : GlResource() {
     fun draw(viewM: mat4, projectionM: mat4, diffuseArray: Array<GlTexture>, draw: () -> Unit) {
         check(diffuseArray.size <= SHADER_DIFFUSE_CNT) { "Too many diffuse!" }
         checkReady()
-        diffuseArray.forEachIndexed { index, texture ->
-            texture.unit = index + 1
-        }
         glBind(program, *diffuseArray) {
             diffuseArray.forEachIndexed { index, texture ->
                 program.setArrayTexture(GlUniform.UNIFORM_DIFFUSE_ARRAY.label, index, texture)
@@ -40,7 +37,6 @@ class StaticTileMapTechnique : GlResource() {
 
     fun instance(mesh: GlMesh, tileMap: GlTexture, modelM: Matrix4f) {
         checkReady()
-        tileMap.unit = 0
         glBind(mesh, tileMap) {
             program.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
             program.setTexture(GlUniform.UNIFORM_TILE_MAP.label, tileMap)
@@ -62,7 +58,7 @@ class StaticTileMapTechnique : GlResource() {
 }
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(40f, 10f, 40f), pitch = radf(-90f), velocity = 0.1f)
+private val controller = Controller(position = vec3(2.5f, 10f, 2.5f), pitch = radf(-90f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")
@@ -94,7 +90,7 @@ private var mouseLook = false
 fun main() {
     val random = Random()
     val tileMaps = mutableListOf<GlTexture>()
-    (0 until 1600).forEach {
+    (0 until 25).forEach {
         val list = mutableListOf<Int>()
         (0 until 64).forEach {
             list.add(random.nextInt(diffuseArray.size))
@@ -131,8 +127,8 @@ fun main() {
                     tileMapTechnique.draw(camera.calculateViewM(), camera.projectionM, diffuseArray) {
                         val origin = mat4().identity().rotate(radf(90f), vec3().right())
                         var tileMapIdx = 0
-                        for (x in 0 until 40) {
-                            for (z in 0 until 40) {
+                        for (x in 0 until 5) {
+                            for (z in 0 until 5) {
                                 origin.setTranslation(x.toFloat() * 2f, 0f, z.toFloat() * 2f)
                                 tileMapTechnique.instance(rect, tileMaps[tileMapIdx], origin)
                                 tileMapIdx++

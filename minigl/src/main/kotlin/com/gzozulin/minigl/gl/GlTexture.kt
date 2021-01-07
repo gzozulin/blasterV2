@@ -2,6 +2,23 @@ package com.gzozulin.minigl.gl
 
 import java.nio.ByteBuffer
 
+// At least 80, see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glActiveTexture.xhtml
+private const val MAX_ACTIVE_TEXTURES = 80
+private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
+
+private fun holdTextureUnit(): Int {
+    synchronized(availableActiveTextures) {
+        check(availableActiveTextures.isNotEmpty())
+        return availableActiveTextures.removeFirst()
+    }
+}
+
+private fun releaseTextureUnit(unit: Int) {
+    synchronized(availableActiveTextures) {
+        availableActiveTextures.add(unit)
+    }
+}
+
 data class GlTexData(
     val internalFormat: Int = backend.GL_RGBA,
     val pixelFormat: Int = backend.GL_RGBA,
@@ -11,21 +28,22 @@ data class GlTexData(
 
 class GlTexture(
     val target: Int,
-    var unit: Int = 0,
     private val texData: List<GlTexData>
 ) : GlBindable() {
 
     private var handle: Int = -1
+    private var unit: Int = -1
 
     constructor(
-        target: Int = backend.GL_TEXTURE_2D, unit: Int = 0,
+        target: Int = backend.GL_TEXTURE_2D,
         internalFormat: Int = backend.GL_RGBA, pixelFormat: Int = backend.GL_RGBA, pixelType: Int = backend.GL_UNSIGNED_BYTE,
         width: Int, height: Int, pixels: ByteBuffer? = null
-    ) : this(target, unit, listOf(GlTexData(internalFormat, pixelFormat, pixelType, width, height, pixels)))
+    ) : this(target, listOf(GlTexData(internalFormat, pixelFormat, pixelType, width, height, pixels)))
 
     override fun use() {
         super.use()
         handle = backend.glGenTextures()
+        unit = holdTextureUnit()
         glBind(this) {
             backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST)
             backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_NEAREST)
@@ -39,6 +57,7 @@ class GlTexture(
 
     override fun release() {
         backend.glDeleteTextures(handle)
+        releaseTextureUnit(unit)
         super.release()
     }
 
@@ -81,5 +100,10 @@ class GlTexture(
     fun accessHandle(): Int {
         checkReady()
         return handle
+    }
+
+    fun accessUnit(): Int {
+        checkReady()
+        return unit
     }
 }

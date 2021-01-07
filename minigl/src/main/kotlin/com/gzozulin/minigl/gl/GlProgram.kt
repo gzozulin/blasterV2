@@ -94,7 +94,7 @@ class GlProgram(
     fun setTexture(uniform: String, texture: GlTexture) {
         checkReady()
         texture.checkReady()
-        setUniform(uniform, texture.unit)
+        setUniform(uniform, texture.accessUnit())
     }
 
     fun setUniform(uniform: String, value: Matrix4f) {
@@ -140,7 +140,7 @@ class GlProgram(
     fun setArrayTexture(uniform: String, index: Int, texture: GlTexture) {
         checkReady()
         texture.checkReady()
-        backend.glUniform1i(getArrayUniformLocation(uniform, index), texture.unit)
+        backend.glUniform1i(getArrayUniformLocation(uniform, index), texture.accessUnit())
     }
 
     fun draw(mode: Int = backend.GL_TRIANGLES, indicesCount: Int) {

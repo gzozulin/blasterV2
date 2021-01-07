@@ -51,9 +51,9 @@ open class PixelDecoder internal constructor() {
 val texturesLib = TexturesLib()
 
 class TexturesLib internal constructor() {
-    fun loadTexture(filename: String, unit: Int = 0, mirror: Boolean = false): GlTexture {
+    fun loadTexture(filename: String, mirror: Boolean = false): GlTexture {
         val decoded = pixelDecoder.decodePixels(assetStream.openAsset(filename), mirror)
-        return GlTexture(unit = unit, width = decoded.width, height = decoded.height, pixels = decoded.pixels)
+        return GlTexture(width = decoded.width, height = decoded.height, pixels = decoded.pixels)
     }
 
     fun loadSkybox(filename: String, unit: Int = 0): GlTexture {
@@ -65,7 +65,7 @@ class TexturesLib internal constructor() {
         val front   = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_ft.jpg"), mirrorX = true, mirrorY = true)
         val back    = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_bk.jpg"), mirrorX = true, mirrorY = true)
         return GlTexture(
-            unit = unit, target = backend.GL_TEXTURE_CUBE_MAP, texData = listOf(
+            target = backend.GL_TEXTURE_CUBE_MAP, texData = listOf(
                 GlTexData(width = right.width, height = right.height, pixels = right.pixels),
                 GlTexData(width = left.width, height = left.height, pixels = left.pixels),
                 GlTexData(width = top.width, height = top.height, pixels = top.pixels),
@@ -88,11 +88,11 @@ class TexturesLib internal constructor() {
         val decodedRoughness = pixelDecoder.decodePixels(assetStream.openAsset(roughness))
         val decodedAo       = pixelDecoder.decodePixels(assetStream.openAsset(ao))
         return PbrMaterial(
-            GlTexture(unit = 0, width = decodedAlbedo.width, height = decodedAlbedo.height, pixels = decodedAlbedo.pixels),
-            GlTexture(unit = 1, width = decodedNormal.width, height = decodedNormal.height, pixels = decodedNormal.pixels),
-            GlTexture(unit = 2, width = decodedMetallic.width, height = decodedMetallic.height, pixels = decodedMetallic.pixels),
-            GlTexture(unit = 3, width = decodedRoughness.width, height = decodedRoughness.height, pixels = decodedRoughness.pixels),
-            GlTexture(unit = 4, width = decodedAo.width, height = decodedAo.height, pixels = decodedAo.pixels)
+            GlTexture(width = decodedAlbedo.width, height = decodedAlbedo.height, pixels = decodedAlbedo.pixels),
+            GlTexture(width = decodedNormal.width, height = decodedNormal.height, pixels = decodedNormal.pixels),
+            GlTexture(width = decodedMetallic.width, height = decodedMetallic.height, pixels = decodedMetallic.pixels),
+            GlTexture(width = decodedRoughness.width, height = decodedRoughness.height, pixels = decodedRoughness.pixels),
+            GlTexture(width = decodedAo.width, height = decodedAo.height, pixels = decodedAo.pixels)
         )
     }
 }
