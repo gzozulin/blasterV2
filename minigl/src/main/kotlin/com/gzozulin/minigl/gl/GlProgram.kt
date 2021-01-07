@@ -93,7 +93,6 @@ class GlProgram(
 
     fun setTexture(uniform: String, texture: GlTexture) {
         checkReady()
-        texture.checkReady()
         setUniform(uniform, texture.accessUnit())
     }
 
@@ -139,7 +138,6 @@ class GlProgram(
 
     fun setArrayTexture(uniform: String, index: Int, texture: GlTexture) {
         checkReady()
-        texture.checkReady()
         backend.glUniform1i(getArrayUniformLocation(uniform, index), texture.accessUnit())
     }
 
