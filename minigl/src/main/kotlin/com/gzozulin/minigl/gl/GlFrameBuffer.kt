@@ -25,12 +25,12 @@ class GlFrameBuffer : GlBindable() {
 
     fun setTexture(attachement: Int, texture: GlTexture) {
         checkReady()
-        backend.glFramebufferTexture2D(backend.GL_FRAMEBUFFER, attachement, texture.target, texture.handle, 0) // 0 - level
+        backend.glFramebufferTexture2D(backend.GL_FRAMEBUFFER, attachement, texture.target, texture.accessHandle(), 0) // 0 - level
     }
 
     fun setRenderBuffer(attachement: Int, renderBuffer: GlRenderBuffer) {
         checkReady()
-        backend.glFramebufferRenderbuffer(backend.GL_FRAMEBUFFER, attachement, backend.GL_RENDERBUFFER, renderBuffer.handle)
+        backend.glFramebufferRenderbuffer(backend.GL_FRAMEBUFFER, attachement, backend.GL_RENDERBUFFER, renderBuffer.accessHandle())
     }
 
     fun setOutputs(outputs: IntArray) {

@@ -34,7 +34,6 @@ class GlProgram(
     private var handle: Int = -1
 
     private val uniformLocations = HashMap<String, Int>()
-    private val arrayLocations = HashMap<String, Int>()
     private val unsatisfiedUniforms = mutableListOf<String>()
 
     override fun use() {
@@ -42,8 +41,8 @@ class GlProgram(
         handle = backend.glCreateProgram()
         check(vertexShader.type == GlShaderType.VERTEX_SHADER)
         check(fragmentShader.type == GlShaderType.FRAGMENT_SHADER)
-        backend.glAttachShader(handle, vertexShader.handle)
-        backend.glAttachShader(handle, fragmentShader.handle)
+        backend.glAttachShader(handle, vertexShader.accessHandle())
+        backend.glAttachShader(handle, fragmentShader.accessHandle())
         backend.glLinkProgram(handle)
         val isLinked = backend.glGetProgrami(handle, backend.GL_LINK_STATUS)
         if (isLinked == backend.GL_FALSE) {
@@ -74,11 +73,7 @@ class GlProgram(
         for (i in 0 until count) {
             val uniform = backend.glGetActiveUniform(handle, i, size, type)
             val location = backend.glGetUniformLocation(handle, uniform)
-            if (uniform.contains('[') && uniform.contains(']')) {
-                arrayLocations[uniform] = location
-            } else {
-                uniformLocations[uniform] = location
-            }
+            uniformLocations[uniform] = location
         }
         unsatisfiedUniforms.addAll(uniformLocations.keys)
     }
@@ -90,8 +85,11 @@ class GlProgram(
         return location
     }
 
-    private fun getArrayUniformLocation(uniform: String, index: Int) =
-        arrayLocations[(uniform.format(index))]!!
+    private fun getArrayUniformLocation(uniform: String, index: Int): Int {
+        val location = backend.glGetUniformLocation(handle, uniform.format(index))
+        checkNotNull(location != -1) { "Location for uniform $uniform not found!" }
+        return location
+    }
 
     fun setTexture(uniform: String, texture: GlTexture) {
         checkReady()

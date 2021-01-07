@@ -111,8 +111,8 @@ private val technique = StaticTextTechnique()
 fun main() {
     val window = GlWindow()
     window.create {
-        window.keyCallback = { key, _ ->
-            if (key == GLFW.GLFW_KEY_SPACE) {
+        window.keyCallback = { key, pressed ->
+            if (key == GLFW.GLFW_KEY_SPACE && pressed) {
                 when (random.nextInt(3)) {
                     0 -> console.failure(System.currentTimeMillis().toString())
                     1 -> console.info(System.currentTimeMillis().toString())

@@ -106,7 +106,6 @@ private val field = GlMesh.rect(0f, 100f, 100f, 0f)
 private val fieldM = mat4().identity().rotate(radf(90f), vec3().right())
 private val fieldDiffuse = texturesLib.loadTexture("textures/floor.jpg")
 
-
 private const val MODELS = 10000
 private const val FRAMES = 9
 private const val ANIMS = 8
