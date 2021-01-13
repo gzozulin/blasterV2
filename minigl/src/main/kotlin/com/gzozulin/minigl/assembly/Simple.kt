@@ -49,30 +49,53 @@ void main() {
 
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
-private fun simple(modelM: Expression<mat4>, viewM: Expression<mat4>, projM: Expression<mat4>,
-                   color: Expression<vec4>): GlProgram {
-    val vertDecl = modelM.decl() + viewM.decl() + projM.decl()
-    val vertDeclSrc = vertDecl.toSrc()
-    val vertExpr = modelM.expr() + modelM.expr() + modelM.expr()
-    val vertExprSrc = vertExpr.toSrc()
-    val vertSrc = TEMPL_SIMPLE_VERT
-        .replace("%DECL%", vertDeclSrc)
-        .replace("%EXPR%", vertExprSrc)
-        .replace("%MODEL%", modelM.name)
-        .replace("%VIEW%", viewM.name)
-        .replace("%PROJ%", projM.name)
-    val fragDecl = color.decl()
-    val fragDeclSrc = fragDecl.toSrc()
-    val fragExpr = color.expr()
-    val fragExprSrc = fragExpr.toSrc()
-    val fragSrc = TEMPL_SIMPLE_FRAG
-        .replace("%DECL%", fragDeclSrc)
-        .replace("%EXPR%", fragExprSrc)
-        .replace("%COLOR%", color.name)
-    return GlProgram(
-        GlShader(GlShaderType.VERTEX_SHADER, vertSrc),
-        GlShader(GlShaderType.FRAGMENT_SHADER, fragSrc)
-    )
+private class SimpleTechnique(private val modelM: Expression<mat4>,
+                              private val viewM: Expression<mat4>,
+                              private val projM: Expression<mat4>,
+                              private val color: Expression<vec4>) : GlResource() {
+
+    private val program: GlProgram
+
+    init {
+        val vertDecl = modelM.decl() + viewM.decl() + projM.decl()
+        val vertDeclSrc = vertDecl.toSrc()
+        val vertExpr = modelM.expr() + modelM.expr() + modelM.expr()
+        val vertExprSrc = vertExpr.toSrc()
+        val vertSrc = TEMPL_SIMPLE_VERT
+            .replace("%DECL%", vertDeclSrc)
+            .replace("%EXPR%", vertExprSrc)
+            .replace("%MODEL%", modelM.name)
+            .replace("%VIEW%", viewM.name)
+            .replace("%PROJ%", projM.name)
+        val fragDecl = color.decl()
+        val fragDeclSrc = fragDecl.toSrc()
+        val fragExpr = color.expr()
+        val fragExprSrc = fragExpr.toSrc()
+        val fragSrc = TEMPL_SIMPLE_FRAG
+            .replace("%DECL%", fragDeclSrc)
+            .replace("%EXPR%", fragExprSrc)
+            .replace("%COLOR%", color.name)
+        program = GlProgram(
+            GlShader(GlShaderType.VERTEX_SHADER, vertSrc),
+            GlShader(GlShaderType.FRAGMENT_SHADER, fragSrc))
+        addChildren(program)
+    }
+
+    fun draw(draw: () -> Unit) {
+        glBind(program) {
+            projM.submit(program)
+            viewM.submit(program)
+            draw.invoke()
+        }
+    }
+
+    fun instance(mesh: GlMesh) {
+        modelM.submit(program)
+        color.submit(program)
+        glBind(mesh) {
+            program.draw(mesh)
+        }
+    }
 }
 
 private val window = GlWindow()
@@ -91,28 +114,22 @@ private var mouseLook = false
 
 private val constTexCoord = constv2("vTexCoord")
 
-private val unifModelM = unifmat4()
-private val unifViewM = unifmat4()
-private val unifProjM = unifmat4()
-private val unifDiffuse1 = unifsampler()
-private val unifDiffuse2 = unifsampler()
-private val unifProp1 = unifvec4()
-private val unifProp2 = unifvec4()
-
 private var proportion = 0f
 private var delta = 0.01f
 
-private val simpleProgram = simple(
+private val unifModelM = unifmat4 { matrixStack.peekMatrix() }
+private val unifViewM = unifmat4 { camera.calculateViewM() }
+private val unifProjM = unifmat4 { camera.projectionM }
+private val unifDiffuse1 = unifsampler { diffuse1 }
+private val unifDiffuse2 = unifsampler { diffuse2 }
+private val unifProp1 = unifvec4 { vec4(proportion) }
+private val unifProp2 = unifvec4 { vec4(1f - proportion) }
+
+private val simpleTechnique = SimpleTechnique(
     unifModelM, unifViewM, unifProjM,
     addv4(
-        mulv4(
-            tex(constTexCoord, unifDiffuse1),
-            unifProp1
-        ),
-        mulv4(
-            tex(constTexCoord, unifDiffuse2),
-            unifProp2
-        )
+        mulv4(tex(constTexCoord, unifDiffuse1), unifProp1),
+        mulv4(tex(constTexCoord, unifDiffuse2), unifProp2)
     )
 )
 
@@ -134,27 +151,22 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleProgram, skyboxTechnique, rectangle, diffuse1, diffuse2) {
+        glUse(simpleTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2) {
             window.show {
-                glClear()
-                controller.apply { position, direction ->
-                    camera.setPosition(position)
-                    camera.lookAlong(direction)
-                }
-                skyboxTechnique.skybox(camera)
-                glBind(simpleProgram, rectangle, diffuse1, diffuse2) {
-                    simpleProgram.setUniform(unifModelM.name, matrixStack.peekMatrix())
-                    simpleProgram.setUniform(unifViewM.name, camera.calculateViewM())
-                    simpleProgram.setUniform(unifProjM.name, camera.projectionM)
-                    simpleProgram.setUniform(unifDiffuse1.name, diffuse1.accessUnit())
-                    simpleProgram.setUniform(unifDiffuse2.name, diffuse2.accessUnit())
-                    simpleProgram.setUniform(unifProp1.name, vec4(proportion))
-                    simpleProgram.setUniform(unifProp2.name, vec4(1f - proportion))
-                    simpleProgram.draw(indicesCount = rectangle.indicesCount)
-                }
-                proportion += delta
-                if (proportion < 0f || proportion > 1f) {
-                    delta = -delta
+                glBind(diffuse1, diffuse2) {
+                    glClear()
+                    controller.apply { position, direction ->
+                        camera.setPosition(position)
+                        camera.lookAlong(direction)
+                    }
+                    skyboxTechnique.skybox(camera)
+                    simpleTechnique.draw {
+                        simpleTechnique.instance(rectangle)
+                    }
+                    proportion += delta
+                    if (proportion < 0f || proportion > 1f) {
+                        delta = -delta
+                    }
                 }
             }
         }
