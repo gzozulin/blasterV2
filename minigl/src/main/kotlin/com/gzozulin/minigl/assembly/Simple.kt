@@ -108,6 +108,8 @@ private val wasdInput = WasdInput(controller)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")
 private val diffuse1 = texturesLib.loadTexture("textures/utah.jpg")
 private val diffuse2 = texturesLib.loadTexture("textures/smoke.png")
+private val diffuse3 = texturesLib.loadTexture("textures/blood_moss.jpg")
+private val diffuse4 = texturesLib.loadTexture("textures/floor.jpg")
 private val rectangle = GlMesh.rect()
 
 private var mouseLook = false
@@ -122,14 +124,22 @@ private val unifViewM = unifmat4 { camera.calculateViewM() }
 private val unifProjM = unifmat4 { camera.projectionM }
 private val unifDiffuse1 = unifsampler { diffuse1 }
 private val unifDiffuse2 = unifsampler { diffuse2 }
+private val unifDiffuse3 = unifsampler { diffuse3 }
+private val unifDiffuse4 = unifsampler { diffuse4 }
 private val unifProp1 = unifvec4 { vec4(proportion) }
 private val unifProp2 = unifvec4 { vec4(1f - proportion) }
 
 private val simpleTechnique = SimpleTechnique(
     unifModelM, unifViewM, unifProjM,
-    addv4(
-        mulv4(tex(constTexCoord, unifDiffuse1), unifProp1),
-        mulv4(tex(constTexCoord, unifDiffuse2), unifProp2)
+    mulv4(
+        addv4(
+            mulv4(tex(constTexCoord, unifDiffuse1), unifProp1),
+            mulv4(tex(constTexCoord, unifDiffuse2), unifProp2)
+        ),
+        addv4(
+            mulv4(tex(constTexCoord, unifDiffuse3), unifProp1),
+            mulv4(tex(constTexCoord, unifDiffuse4), unifProp2)
+        )
     )
 )
 
@@ -151,9 +161,9 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2) {
+        glUse(simpleTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
             window.show {
-                glBind(diffuse1, diffuse2) {
+                glBind(diffuse1, diffuse2, diffuse3, diffuse4) {
                     glClear()
                     controller.apply { position, direction ->
                         camera.setPosition(position)
