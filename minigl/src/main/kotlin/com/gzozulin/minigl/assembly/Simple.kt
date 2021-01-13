@@ -114,20 +114,19 @@ private val rectangle = GlMesh.rect()
 
 private var mouseLook = false
 
-private val constTexCoord = constv2("vTexCoord")
-
 private var proportion = 0f
 private var delta = 0.01f
 
-private val unifModelM = unifmat4 { matrixStack.peekMatrix() }
-private val unifViewM = unifmat4 { camera.calculateViewM() }
-private val unifProjM = unifmat4 { camera.projectionM }
-private val unifDiffuse1 = unifsampler { diffuse1 }
-private val unifDiffuse2 = unifsampler { diffuse2 }
-private val unifDiffuse3 = unifsampler { diffuse3 }
-private val unifDiffuse4 = unifsampler { diffuse4 }
-private val unifProp1 = unifvec4 { vec4(proportion) }
-private val unifProp2 = unifvec4 { vec4(1f - proportion) }
+private val constTexCoord = constv2("vTexCoord")
+private val unifModelM = unifmat4()
+private val unifViewM = unifmat4(camera.calculateViewM())
+private val unifProjM = unifmat4(camera.projectionM)
+private val unifDiffuse1 = unifsampler(diffuse1)
+private val unifDiffuse2 = unifsampler(diffuse2)
+private val unifDiffuse3 = unifsampler(diffuse3)
+private val unifDiffuse4 = unifsampler(diffuse4)
+private val unifProp1 = unifvec4(vec4(proportion))
+private val unifProp2 = unifvec4(vec4(1f - proportion))
 
 private val simpleTechnique = SimpleTechnique(
     unifModelM, unifViewM, unifProjM,
@@ -171,12 +170,17 @@ fun main() {
                     }
                     skyboxTechnique.skybox(camera)
                     simpleTechnique.draw {
+                        unifModelM.value = mat4().identity()
+                        simpleTechnique.instance(rectangle)
+                        unifModelM.value = mat4().identity().translate(vec3(1f))
                         simpleTechnique.instance(rectangle)
                     }
                     proportion += delta
                     if (proportion < 0f || proportion > 1f) {
                         delta = -delta
                     }
+                    unifProp1.value = vec4(proportion)
+                    unifProp2.value = vec4(1f - proportion)
                 }
             }
         }
