@@ -41,6 +41,11 @@ abstract class Uniform<R>(var value: R?) : Expression<R>() {
     override fun decl() = listOf("uniform $type $name;")
 }
 
+fun uniff(v: Float? = null) = object : Uniform<Float>(v) {
+    override val type = "float"
+    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+}
+
 fun unifmat4(v: mat4? = null) = object : Uniform<mat4>(v) {
     override val type = "mat4"
     override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
@@ -57,6 +62,16 @@ fun unifsampler(v: GlTexture? = null) = object : Uniform<GlTexture>(v) {
 }
 
 // ------------------------- Properties -------------------------
+
+fun propi(value: Int) = object : Expression<Int>() {
+    override val type = "int"
+    override fun decl() = listOf("const $type $name = $value;")
+}
+
+fun propf(value: Float) = object : Expression<Float>() {
+    override val type = "float"
+    override fun decl() = listOf("const $type $name = $value;")
+}
 
 fun propv4(value: vec4) = object : Expression<vec4>() {
     override val type = "vec4"
