@@ -156,7 +156,8 @@ private val unifDiffuse3 = unifsampler(diffuse3)
 private val unifDiffuse4 = unifsampler(diffuse4)
 private val unifProp1 = unifvec4(vec4(proportion))
 private val unifProp2 = unifvec4(vec4(1f - proportion))
-private val unifShift = uniff(0f)
+private val unifShiftU = uniff(0f)
+private val unifShiftV = uniff(0f)
 
 private val simpleTechnique = SimpleTechnique(
     unifModelM, unifViewM, unifProjM,
@@ -174,8 +175,8 @@ private val simpleTechnique = SimpleTechnique(
     tileV = propi(0),
     tilesCntU = propi(2),
     tilesCntV = propi(2),
-    shiftU = unifShift,
-    shiftV = unifShift
+    shiftU = unifShiftU,
+    shiftV = unifShiftV
 )
 
 fun main() {
@@ -218,7 +219,8 @@ fun main() {
                     unifProp1.value = vec4(proportion)
                     unifProp2.value = vec4(1f - proportion)
                     shift += 0.001f
-                    unifShift.value = shift
+                    unifShiftU.value = shift
+                    unifShiftV.value = cosf(shift * 10) * 0.1f
                 }
             }
         }
