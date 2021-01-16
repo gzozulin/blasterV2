@@ -25,11 +25,11 @@ out vec2 vTexCoord;
 void main() {
     %EXPR%
 
-    float tileSideX = 1.0 / float(%TILES_CNT_U%);
+    float tileSideX = 1.0 / float(%CNT_U%);
     float tileStartX = float(%TILE_U%) * tileSideX + %SHIFT_U%;
     vTexCoord.x = tileStartX + aTexCoord.x * tileSideX;
     
-    float tileSideY = 1.0 / float(%TILES_CNT_V%);
+    float tileSideY = 1.0 / float(%CNT_V%);
     float tileStartY = float(%TILE_V%) * tileSideY + %SHIFT_V%;
     vTexCoord.y = tileStartY + aTexCoord.y * tileSideY;
     
@@ -59,11 +59,11 @@ private fun List<String>.toSrc() = distinct().joinToString("\n")
 private class SimpleTechnique(private val modelM: Expression<mat4>,
                               private val viewM: Expression<mat4>,
                               private val projM: Expression<mat4>,
-                              private val color: Expression<vec4>,
+                              private val color: Expression<vec4> = propv4(vec4(1f)),
                               private val tileU: Expression<Int> = propi(0),
                               private val tileV: Expression<Int> = propi(0),
-                              private val tilesCntU: Expression<Int> = propi(1),
-                              private val tilesCntV: Expression<Int> = propi(1),
+                              private val cntU: Expression<Int> = propi(1),
+                              private val cntV: Expression<Int> = propi(1),
                               private val shiftU: Expression<Float> = propf(0f),
                               private val shiftV: Expression<Float> = propf(0f)) : GlResource() {
 
@@ -71,11 +71,11 @@ private class SimpleTechnique(private val modelM: Expression<mat4>,
 
     init {
         val vertDecl = modelM.decl() + viewM.decl() + projM.decl() +
-                tileU.decl() + tileV.decl() + tilesCntU.decl() + tilesCntV.decl() +
+                tileU.decl() + tileV.decl() + cntU.decl() + cntV.decl() +
                 shiftU.decl() + shiftV.decl()
         val vertDeclSrc = vertDecl.toSrc()
         val vertExpr = modelM.expr() + modelM.expr() + modelM.expr() +
-                tileU.expr() + tileV.expr() + tilesCntU.expr() + tilesCntV.expr() +
+                tileU.expr() + tileV.expr() + cntU.expr() + cntV.expr() +
                 shiftU.expr() + shiftV.expr()
         val vertExprSrc = vertExpr.toSrc()
         val vertSrc = TEMPL_SIMPLE_VERT
@@ -86,8 +86,8 @@ private class SimpleTechnique(private val modelM: Expression<mat4>,
             .replace("%PROJ%", projM.name)
             .replace("%TILE_U%", tileU.name)
             .replace("%TILE_V%", tileV.name)
-            .replace("%TILES_CNT_U%", tilesCntU.name)
-            .replace("%TILES_CNT_V%", tilesCntV.name)
+            .replace("%CNT_U%", cntU.name)
+            .replace("%CNT_V%", cntV.name)
             .replace("%SHIFT_U%", shiftU.name)
             .replace("%SHIFT_V%", shiftV.name)
         val fragDecl = color.decl()
@@ -110,8 +110,8 @@ private class SimpleTechnique(private val modelM: Expression<mat4>,
             viewM.submit(program)
             tileU.submit(program)
             tileV.submit(program)
-            tilesCntU.submit(program)
-            tilesCntV.submit(program)
+            cntU.submit(program)
+            cntV.submit(program)
             shiftU.submit(program)
             shiftV.submit(program)
             draw.invoke()
@@ -173,8 +173,8 @@ private val simpleTechnique = SimpleTechnique(
     ),
     tileU = propi(0),
     tileV = propi(0),
-    tilesCntU = propi(2),
-    tilesCntV = propi(2),
+    cntU = propi(2),
+    cntV = propi(2),
     shiftU = unifShiftU,
     shiftV = unifShiftV
 )
