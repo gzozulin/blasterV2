@@ -6,6 +6,8 @@ import org.joml.Vector3f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+private var complainAboutUniforms = true
+
 private val bufferVec2 = ByteBuffer.allocateDirect(2 * 4)
     .order(ByteOrder.nativeOrder())
     .asFloatBuffer()
@@ -78,9 +80,17 @@ class GlProgram(
         unsatisfiedUniforms.addAll(uniformLocations.keys)
     }
 
-    private fun satisfyUniformLocation(uniform: String): Int {
+    private fun satisfyUniformLocation(uniform: String): Int? {
         val location = uniformLocations[uniform]
-        checkNotNull(location) { "Location for uniform $uniform not found!" }
+        if (location == null) {
+            if (complainAboutUniforms) {
+                println(
+                    "Uniform location $uniform is not found! " +
+                            "Removed by GLSL compiler?"
+                )
+            }
+            return null
+        }
         unsatisfiedUniforms.remove(uniform)
         return location
     }
@@ -98,36 +108,48 @@ class GlProgram(
 
     fun setUniform(uniform: String, value: Matrix4f) {
         checkReady()
-        value.get(bufferMat4)
-        backend.glUniformMatrix4fv(satisfyUniformLocation(uniform), false, bufferMat4)
+        satisfyUniformLocation(uniform)?.let {
+            value.get(bufferMat4)
+            backend.glUniformMatrix4fv(it, false, bufferMat4)
+        }
     }
 
     fun setUniform(uniform: String, value: Int) {
         checkReady()
-        backend.glUniform1i(satisfyUniformLocation(uniform), value)
+        satisfyUniformLocation(uniform)?.let {
+            backend.glUniform1i(it, value)
+        }
     }
 
     fun setUniform(uniform: String, value: Float) {
         checkReady()
-        backend.glUniform1f(satisfyUniformLocation(uniform), value)
+        satisfyUniformLocation(uniform)?.let {
+            backend.glUniform1f(it, value)
+        }
     }
 
     fun setUniform(uniform: String, value: Vector2f) {
         checkReady()
-        value.get(bufferVec2)
-        backend.glUniform2fv(satisfyUniformLocation(uniform), bufferVec2)
+        satisfyUniformLocation(uniform)?.let {
+            value.get(bufferVec2)
+            backend.glUniform2fv(it, bufferVec2)
+        }
     }
 
     fun setUniform(uniform: String, value: Vector3f) {
         checkReady()
-        value.get(bufferVec3)
-        backend.glUniform3fv(satisfyUniformLocation(uniform), bufferVec3)
+        satisfyUniformLocation(uniform)?.let {
+            value.get(bufferVec3)
+            backend.glUniform3fv(it, bufferVec3)
+        }
     }
 
-    fun setUniform(name: String, value: vec4) {
+    fun setUniform(uniform: String, value: vec4) {
         checkReady()
-        value.get(bufferVec4)
-        backend.glUniform4fv(satisfyUniformLocation(name), bufferVec4)
+        satisfyUniformLocation(uniform)?.let {
+            value.get(bufferVec4)
+            backend.glUniform4fv(it, bufferVec4)
+        }
     }
 
     fun setArrayUniform(uniform: String, index: Int, value: vec3) {
@@ -153,5 +175,11 @@ class GlProgram(
 
     fun draw(mesh: GlMesh) {
         draw(mode = backend.GL_TRIANGLES, indicesCount = mesh.indicesCount)
+    }
+
+    companion object {
+        fun stopComplaining() {
+            complainAboutUniforms = false
+        }
     }
 }

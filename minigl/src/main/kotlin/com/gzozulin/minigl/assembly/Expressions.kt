@@ -78,6 +78,11 @@ fun propf(value: Float) = object : Expression<Float>() {
     override fun decl() = listOf("const $type $name = $value;")
 }
 
+fun propb(value: Boolean) = object : Expression<Boolean>() {
+    override val type = "bool"
+    override fun decl() = listOf("const $type $name = $value;")
+}
+
 fun propv4(value: vec4) = object : Expression<vec4>() {
     override val type = "vec4"
     override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
@@ -140,4 +145,20 @@ fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : E
         texCoord.submit(program)
         sampler.submit(program)
     }
+}
+
+// ------------------------- If expr -------------------------
+
+abstract class IfExp<R>(val check: Expression<Boolean>, val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
+    override fun decl() = check.decl() + left.decl() + right.decl() + listOf("$type ifexpr(bool check, $type left, $type right) { if(check) return left; else return right; }")
+    override fun expr() = check.expr() + left.expr() + right.expr() + listOf("$type $name = ifexpr(${check.name}, ${left.name}, ${right.name});")
+    override fun submit(program: GlProgram) {
+        check.submit(program)
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
+fun ifexpv4(check: Expression<Boolean>, left: Expression<vec4>, right: Expression<vec4>) = object : IfExp<vec4>(check, left, right) {
+    override val type = "vec4"
 }

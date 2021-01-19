@@ -144,6 +144,7 @@ class GlWindow {
             glfwSwapBuffers(handle)
             glfwPollEvents()
             updateFps()
+            GlProgram.stopComplaining()
         }
     }
 
