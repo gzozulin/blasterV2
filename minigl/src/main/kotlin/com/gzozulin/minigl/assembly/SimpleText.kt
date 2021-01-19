@@ -5,7 +5,7 @@ import com.gzozulin.minigl.gl.*
 
 class SimpleTextTechnique : GlResource() {
 
-    private val rect = GlMesh.rect(-1f, 1f, 1f, -1f)
+    private val rect = GlMesh.rect(-1f, 1f, -1f, 1f)
     private val font = texturesLib.loadTexture("textures/font.png")
     private val floor = texturesLib.loadTexture("textures/floor.jpg")
 

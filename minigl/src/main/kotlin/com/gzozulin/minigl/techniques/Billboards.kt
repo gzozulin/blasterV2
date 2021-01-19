@@ -31,10 +31,12 @@ class StaticBillboardsTechnique(max: Int) : GlResource() {
     private val transparency = GlBuffer(backend.GL_ARRAY_BUFFER, 
         ByteBuffer.allocateDirect(max * 4).order(ByteOrder.nativeOrder()), backend.GL_STREAM_DRAW)
 
-    private val rect = GlMesh.rect(additionalAttributes = listOf(
-        GlAttribute.ATTRIBUTE_BILLBOARD_POSITION to positions,
-        GlAttribute.ATTRIBUTE_BILLBOARD_SCALE to scale,
-        GlAttribute.ATTRIBUTE_BILLBOARD_TRANSPARENCY to transparency))
+    private val rect = GlMesh.rect(
+        additionalAttributes = listOf(
+            GlAttribute.ATTRIBUTE_BILLBOARD_POSITION to positions,
+            GlAttribute.ATTRIBUTE_BILLBOARD_SCALE to scale,
+            GlAttribute.ATTRIBUTE_BILLBOARD_TRANSPARENCY to transparency)
+    )
 
     init {
         addChildren(program, rect)

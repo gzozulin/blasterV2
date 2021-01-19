@@ -34,7 +34,7 @@ class PresentationSystem : GlResource() {
     }
 
     private val fieldTexture = texturesLib.loadTexture("textures/grass.jpg")
-    private val fieldRect = GlMesh.rect(left = -32f, right = 32f, top = 32f, bottom = -32f)
+    private val fieldRect = GlMesh.rect(left = -32f, right = 32f, bottom = -32f, top = 32f)
 
     fun onCursorDelta(delta: vec2) {
         wasdInput.onCursorDelta(delta)

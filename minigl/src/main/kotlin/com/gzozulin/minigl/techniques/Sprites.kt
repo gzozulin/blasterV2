@@ -102,7 +102,7 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(50f, 5f, 70f), pitch = radf(-30f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val field = GlMesh.rect(0f, 100f, 100f, 0f)
+private val field = GlMesh.rect(0f, 100f, 0f, 100f)
 private val fieldM = mat4().identity().rotate(radf(90f), vec3().right())
 private val fieldDiffuse = texturesLib.loadTexture("textures/floor.jpg")
 
