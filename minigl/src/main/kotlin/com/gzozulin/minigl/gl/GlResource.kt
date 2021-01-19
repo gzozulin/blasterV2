@@ -5,11 +5,11 @@ abstract class GlResource {
 
     private val childResource = mutableListOf<GlResource>()
 
-    open fun addChildren(vararg children: GlResource) {
+    fun addChildren(vararg children: GlResource) {
         childResource.addAll(children)
     }
 
-    open fun addChildren(children: Collection<GlResource>) {
+    fun addChildren(children: Collection<GlResource>) {
         childResource.addAll(children)
     }
 

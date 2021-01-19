@@ -46,6 +46,11 @@ fun uniff(v: Float? = null) = object : Uniform<Float>(v) {
     override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
 }
 
+fun unifi(v: Int? = null) = object : Uniform<Int>(v) {
+    override val type = "int"
+    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+}
+
 fun unifmat4(v: mat4? = null) = object : Uniform<mat4>(v) {
     override val type = "mat4"
     override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
@@ -76,6 +81,15 @@ fun propf(value: Float) = object : Expression<Float>() {
 fun propv4(value: vec4) = object : Expression<vec4>() {
     override val type = "vec4"
     override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
+}
+
+fun propm4(value: mat4) = object : Expression<mat4>() {
+    override val type = "mat4"
+    override fun decl() = listOf("const $type $name = mat4(" +
+            "${value.get(0, 0)}, ${value.get(0, 1)}, ${value.get(0, 2)}, ${value.get(0, 3)}, " +
+            "${value.get(1, 0)}, ${value.get(1, 1)}, ${value.get(1, 2)}, ${value.get(1, 3)}, " +
+            "${value.get(2, 0)}, ${value.get(2, 1)}, ${value.get(2, 2)}, ${value.get(2, 3)}, " +
+            "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});")
 }
 
 // ------------------------- Addition -------------------------

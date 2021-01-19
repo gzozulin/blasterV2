@@ -56,16 +56,16 @@ void main() {
 
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
-private class SimpleTechnique(private val modelM: Expression<mat4>,
-                              private val viewM: Expression<mat4>,
-                              private val projM: Expression<mat4>,
-                              private val color: Expression<vec4> = propv4(vec4(1f)),
-                              private val tileU: Expression<Int> = propi(0),
-                              private val tileV: Expression<Int> = propi(0),
-                              private val cntU: Expression<Int> = propi(1),
-                              private val cntV: Expression<Int> = propi(1),
-                              private val shiftU: Expression<Float> = propf(0f),
-                              private val shiftV: Expression<Float> = propf(0f)) : GlResource() {
+open class SimpleTechnique(private val modelM: Expression<mat4>,
+                           private val viewM: Expression<mat4>,
+                           private val projM: Expression<mat4>,
+                           private val color: Expression<vec4> = propv4(vec4(1f)),
+                           private val tileU: Expression<Int> = propi(0),
+                           private val tileV: Expression<Int> = propi(0),
+                           private val cntU: Expression<Int> = propi(1),
+                           private val cntV: Expression<Int> = propi(1),
+                           private val shiftU: Expression<Float> = propf(0f),
+                           private val shiftV: Expression<Float> = propf(0f)) : GlResource() {
 
     private val program: GlProgram
 
@@ -147,7 +147,7 @@ private var shift = 0f
 private var delta = 0.01f
 
 private val constTexCoord = constv2("vTexCoord")
-private val unifModelM = unifmat4()
+private val propIdentityM = propm4(mat4().identity())
 private val unifViewM = unifmat4(camera.calculateViewM())
 private val unifProjM = unifmat4(camera.projectionM)
 private val unifDiffuse1 = unifsampler(diffuse1)
@@ -160,7 +160,7 @@ private val unifShiftU = uniff(0f)
 private val unifShiftV = uniff(0f)
 
 private val simpleTechnique = SimpleTechnique(
-    unifModelM, unifViewM, unifProjM,
+    propIdentityM, unifViewM, unifProjM,
     mulv4(
         addv4(
             mulv4(tex(constTexCoord, unifDiffuse1), unifProp1),
@@ -207,9 +207,6 @@ fun main() {
                     }
                     skyboxTechnique.skybox(camera)
                     simpleTechnique.draw {
-                        unifModelM.value = mat4().identity()
-                        simpleTechnique.instance(rectangle)
-                        unifModelM.value = mat4().identity().translate(vec3(1f))
                         simpleTechnique.instance(rectangle)
                     }
                     proportion += delta
