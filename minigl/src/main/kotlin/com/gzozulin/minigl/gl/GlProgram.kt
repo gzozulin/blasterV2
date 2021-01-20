@@ -8,6 +8,10 @@ import java.nio.ByteOrder
 
 private var complainAboutUniforms = true
 
+private val bufferVec2i = ByteBuffer.allocateDirect(2 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asIntBuffer()
+
 private val bufferVec2 = ByteBuffer.allocateDirect(2 * 4)
     .order(ByteOrder.nativeOrder())
     .asFloatBuffer()
@@ -106,7 +110,7 @@ class GlProgram(
         setUniform(uniform, texture.accessUnit())
     }
 
-    fun setUniform(uniform: String, value: Matrix4f) {
+    fun setUniform(uniform: String, value: mat4) {
         checkReady()
         satisfyUniformLocation(uniform)?.let {
             value.get(bufferMat4)
@@ -128,7 +132,7 @@ class GlProgram(
         }
     }
 
-    fun setUniform(uniform: String, value: Vector2f) {
+    fun setUniform(uniform: String, value: vec2) {
         checkReady()
         satisfyUniformLocation(uniform)?.let {
             value.get(bufferVec2)
@@ -136,7 +140,15 @@ class GlProgram(
         }
     }
 
-    fun setUniform(uniform: String, value: Vector3f) {
+    fun setUniform(uniform: String, value: vec2i) {
+        checkReady()
+        satisfyUniformLocation(uniform)?.let {
+            value.get(bufferVec2i)
+            backend.glUniform2iv(it, bufferVec2i)
+        }
+    }
+
+    fun setUniform(uniform: String, value: vec3) {
         checkReady()
         satisfyUniformLocation(uniform)?.let {
             value.get(bufferVec3)

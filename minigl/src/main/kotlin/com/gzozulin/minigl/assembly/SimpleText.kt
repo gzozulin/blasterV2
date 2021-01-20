@@ -11,23 +11,17 @@ class SimpleTextTechnique : GlResource() {
 
     private val propIdentityM = propm4(mat4().identity())
     private val propProjM = propm4(mat4().ortho(-1f, 1f, -1f, 1f, -1f, 1f))
-    private val constTexCoord = constv2("vTexCoord")
-    private val unifFont = tex(constTexCoord, unifsampler(font))
-    private val unifFloor = tex(constTexCoord, unifsampler(floor))
-    private val propUVCnt = propi(16)
-    private val unifTileU = unifi(15)
-    private val unifTileV = unifi(15)
+
+    private val unifTileUV = unifv2i(vec2i(0))
+
+    private val constTexCoordTiled = tile(constv2(SimpleVarrying.vTexCoord.name), unifTileUV, propv2i(vec2i(16)))
+    private val unifFont = tex(constTexCoordTiled, unifsampler(font))
+    private val unifFloor = tex(constTexCoordTiled, unifsampler(floor))
 
     private val propBool = propb(true)
     private val ifExp = ifexpv4(propBool, unifFont, unifFloor)
 
-    private val simpleTechnique = SimpleTechnique(
-        propIdentityM, propIdentityM, propProjM,
-        color = ifExp,
-        tileU = unifTileU,
-        tileV = unifTileV,
-        cntU = propUVCnt,
-        cntV = propUVCnt)
+    private val simpleTechnique = SimpleTechnique(propIdentityM, propIdentityM, propProjM, color = ifExp)
 
     init {
         addChildren(floor, simpleTechnique, rect, font)

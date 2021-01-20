@@ -24,14 +24,8 @@ out vec2 vTexCoord;
 
 void main() {
     %EXPR%
-
-    float tileSideX = 1.0 / float(%CNT_U%);
-    float tileStartX = float(%TILE_U%) * tileSideX + %SHIFT_U%;
-    vTexCoord.x = tileStartX + aTexCoord.x * tileSideX;
     
-    float tileSideY = 1.0 / float(%CNT_V%);
-    float tileStartY = float(%TILE_V%) * tileSideY + %SHIFT_V%;
-    vTexCoord.y = tileStartY + aTexCoord.y * tileSideY;
+    vTexCoord = aTexCoord;
     
     mat4 mvp =  %PROJ% * %VIEW% * %MODEL%;
     gl_Position = mvp * vec4(aPosition, 1.0);
@@ -54,29 +48,23 @@ void main() {
 }
 """
 
+enum class SimpleVarrying {
+    vTexCoord
+}
+
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
 open class SimpleTechnique(private val modelM: Expression<mat4>,
                            private val viewM: Expression<mat4>,
                            private val projM: Expression<mat4>,
-                           private val color: Expression<vec4> = propv4(vec4(1f)),
-                           private val tileU: Expression<Int> = propi(0),
-                           private val tileV: Expression<Int> = propi(0),
-                           private val cntU: Expression<Int> = propi(1),
-                           private val cntV: Expression<Int> = propi(1),
-                           private val shiftU: Expression<Float> = propf(0f),
-                           private val shiftV: Expression<Float> = propf(0f)) : GlResource() {
+                           private val color: Expression<vec4> = propv4(vec4(1f))) : GlResource() {
 
     private val program: GlProgram
 
     init {
-        val vertDecl = modelM.decl() + viewM.decl() + projM.decl() +
-                tileU.decl() + tileV.decl() + cntU.decl() + cntV.decl() +
-                shiftU.decl() + shiftV.decl()
+        val vertDecl = modelM.decl() + viewM.decl() + projM.decl()
         val vertDeclSrc = vertDecl.toSrc()
-        val vertExpr = modelM.expr() + modelM.expr() + modelM.expr() +
-                tileU.expr() + tileV.expr() + cntU.expr() + cntV.expr() +
-                shiftU.expr() + shiftV.expr()
+        val vertExpr = modelM.expr() + modelM.expr() + modelM.expr()
         val vertExprSrc = vertExpr.toSrc()
         val vertSrc = TEMPL_SIMPLE_VERT
             .replace("%DECL%", vertDeclSrc)
@@ -84,12 +72,6 @@ open class SimpleTechnique(private val modelM: Expression<mat4>,
             .replace("%MODEL%", modelM.name)
             .replace("%VIEW%", viewM.name)
             .replace("%PROJ%", projM.name)
-            .replace("%TILE_U%", tileU.name)
-            .replace("%TILE_V%", tileV.name)
-            .replace("%CNT_U%", cntU.name)
-            .replace("%CNT_V%", cntV.name)
-            .replace("%SHIFT_U%", shiftU.name)
-            .replace("%SHIFT_V%", shiftV.name)
         val fragDecl = color.decl()
         val fragDeclSrc = fragDecl.toSrc()
         val fragExpr = color.expr()
@@ -108,12 +90,6 @@ open class SimpleTechnique(private val modelM: Expression<mat4>,
         glBind(program) {
             projM.submit(program)
             viewM.submit(program)
-            tileU.submit(program)
-            tileV.submit(program)
-            cntU.submit(program)
-            cntV.submit(program)
-            shiftU.submit(program)
-            shiftV.submit(program)
             draw.invoke()
         }
     }
@@ -146,37 +122,34 @@ private var proportion = 0f
 private var shift = 0f
 private var delta = 0.01f
 
-private val constTexCoord = constv2("vTexCoord")
+private val unifShiftUV = unifv2(vec2(0f))
+
+private val constTexCoords = constv2(SimpleVarrying.vTexCoord.name)
+private val tiledCoords = tile(constTexCoords, propv2i(vec2i(15, 15)), propv2i(vec2i(16, 16)))
+private val tiledShiftedCoords = addv2(tiledCoords, unifShiftUV)
+
 private val propIdentityM = propm4(mat4().identity())
 private val unifViewM = unifmat4(camera.calculateViewM())
 private val unifProjM = unifmat4(camera.projectionM)
-private val unifDiffuse1 = unifsampler(diffuse1)
+private val unifFont = unifsampler(diffuse1)
 private val unifDiffuse2 = unifsampler(diffuse2)
 private val unifDiffuse3 = unifsampler(diffuse3)
 private val unifDiffuse4 = unifsampler(diffuse4)
-private val unifProp1 = unifvec4(vec4(proportion))
-private val unifProp2 = unifvec4(vec4(1f - proportion))
-private val unifShiftU = uniff(0f)
-private val unifShiftV = uniff(0f)
+private val unifProp1 = unifv4(vec4(proportion))
+private val unifProp2 = unifv4(vec4(1f - proportion))
 
 private val simpleTechnique = SimpleTechnique(
     propIdentityM, unifViewM, unifProjM,
     mulv4(
         addv4(
-            mulv4(tex(constTexCoord, unifDiffuse1), unifProp1),
-            mulv4(tex(constTexCoord, unifDiffuse2), unifProp2)
+            mulv4(tex(tiledShiftedCoords, unifFont), unifProp1),
+            mulv4(tex(constTexCoords, unifDiffuse2), unifProp2)
         ),
         addv4(
-            mulv4(tex(constTexCoord, unifDiffuse3), unifProp1),
-            mulv4(tex(constTexCoord, unifDiffuse4), unifProp2)
+            mulv4(tex(constTexCoords, unifDiffuse3), unifProp1),
+            mulv4(tex(constTexCoords, unifDiffuse4), unifProp2)
         )
-    ),
-    tileU = propi(0),
-    tileV = propi(0),
-    cntU = propi(2),
-    cntV = propi(2),
-    shiftU = unifShiftU,
-    shiftV = unifShiftV
+    )
 )
 
 fun main() {
@@ -215,9 +188,8 @@ fun main() {
                     }
                     unifProp1.value = vec4(proportion)
                     unifProp2.value = vec4(1f - proportion)
-                    shift += 0.001f
-                    unifShiftU.value = shift
-                    unifShiftV.value = cosf(shift * 10) * 0.1f
+                    shift += 0.003f
+                    unifShiftUV.value = vec2(shift,cosf(shift * 10) * 0.1f)
                 }
             }
         }
