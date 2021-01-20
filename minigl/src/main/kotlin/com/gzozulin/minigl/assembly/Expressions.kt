@@ -115,8 +115,8 @@ fun propm4(value: mat4) = object : Expression<mat4>() {
 // ------------------------- Addition -------------------------
 
 abstract class Add<R>(val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
-    override fun decl() = left.decl() + right.decl() + listOf("$type add($type left, $type right) { return left + right; }")
-    override fun expr() = left.expr() + right.expr() + listOf("$type $name = add(${left.name}, ${right.name});")
+    override fun decl() = left.decl() + right.decl() + listOf("$type expr_add($type left, $type right) { return left + right; }")
+    override fun expr() = left.expr() + right.expr() + listOf("$type $name = expr_add(${left.name}, ${right.name});")
     override fun submit(program: GlProgram) {
         left.submit(program)
         right.submit(program)
@@ -138,8 +138,8 @@ fun addv2(left: Expression<vec2>, right: Expression<vec2>) = object : Add<vec2>(
 // ------------------------- Multiplication -------------------------
 
 abstract class Mul<R>(val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
-    override fun decl() = left.decl() + right.decl() + listOf("$type mul($type left, $type right) { return left * right; }")
-    override fun expr() = left.expr() + right.expr() + listOf("$type $name = mul(${left.name}, ${right.name});")
+    override fun decl() = left.decl() + right.decl() + listOf("$type expr_mul($type left, $type right) { return left * right; }")
+    override fun expr() = left.expr() + right.expr() + listOf("$type $name = expr_mul(${left.name}, ${right.name});")
     override fun submit(program: GlProgram) {
         left.submit(program)
         right.submit(program)
@@ -152,11 +152,11 @@ fun mulv4(left: Expression<vec4>, right: Expression<vec4>) = object : Mul<vec4>(
 
 // ------------------------- Textures -------------------------
 
-fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
+fun texv4(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun decl() = texCoord.decl() + sampler.decl() +
-            listOf("$type tex(${texCoord.type} texCoord, ${sampler.type} sampler) { return texture(sampler, texCoord); }")
+            listOf("$type expr_tex(${texCoord.type} texCoord, ${sampler.type} sampler) { return texture(sampler, texCoord); }")
     override fun expr() = texCoord.expr() + sampler.expr() +
-            listOf("$type $name = tex(${texCoord.name}, ${sampler.name});")
+            listOf("$type $name = expr_tex(${texCoord.name}, ${sampler.name});")
 
     override val type = "vec4"
 
@@ -168,10 +168,10 @@ fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : E
 
 // ------------------------- If -------------------------
 
-abstract class IfExp<R>(val check: Expression<Boolean>, val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
+abstract class If<R>(val check: Expression<Boolean>, val left: Expression<R>, val right: Expression<R>) : Expression<R>() {
     override fun decl() = check.decl() + left.decl() + right.decl() +
-            listOf("$type ifexpr(bool check, $type left, $type right) { if(check) return left; else return right; }")
-    override fun expr() = check.expr() + left.expr() + right.expr() + listOf("$type $name = ifexpr(${check.name}, ${left.name}, ${right.name});")
+            listOf("$type expr_if(bool check, $type left, $type right) { if(check) return left; else return right; }")
+    override fun expr() = check.expr() + left.expr() + right.expr() + listOf("$type $name = expr_if(${check.name}, ${left.name}, ${right.name});")
     override fun submit(program: GlProgram) {
         check.submit(program)
         left.submit(program)
@@ -179,7 +179,7 @@ abstract class IfExp<R>(val check: Expression<Boolean>, val left: Expression<R>,
     }
 }
 
-fun ifexpv4(check: Expression<Boolean>, left: Expression<vec4>, right: Expression<vec4>) = object : IfExp<vec4>(check, left, right) {
+fun ifv4(check: Expression<Boolean>, left: Expression<vec4>, right: Expression<vec4>) = object : If<vec4>(check, left, right) {
     override val type = "vec4"
 }
 
@@ -187,7 +187,7 @@ fun ifexpv4(check: Expression<Boolean>, left: Expression<vec4>, right: Expressio
 
 fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
     override fun decl() = texCoord.decl() + uv.decl() + cnt.decl() +
-            listOf("$type tile(vec2 texCoord, ivec2 uv, ivec2 cnt) { " +
+            listOf("$type expr_tile(vec2 texCoord, ivec2 uv, ivec2 cnt) { " +
                     "    vec2 result;" +
                     "    float tileSideX = 1.0 / float(cnt.x);\n" +
                     "    float tileStartX = float(uv.x) * tileSideX;\n" +
@@ -200,7 +200,7 @@ fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2
                     " }")
 
     override fun expr() = texCoord.expr() + uv.expr() + cnt.expr() +
-            listOf("$type $name = tile(${texCoord.name}, ${uv.name}, ${cnt.name});")
+            listOf("$type $name = expr_tile(${texCoord.name}, ${uv.name}, ${cnt.name});")
 
     override val type = "vec2"
 
@@ -210,3 +210,53 @@ fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2
         cnt.submit(program)
     }
 }
+
+// ------------------------- Filter -------------------------
+
+abstract class Filter<R>(val check: Expression<Boolean>, val input: Expression<R>) : Expression<R>() {
+    override fun decl() = check.decl() + input.decl() +
+            listOf("$type expr_filter(bool check, $type inp) { if(check) return inp; else discard; }")
+    override fun expr() = check.expr() + input.expr() +
+            listOf("$type $name = expr_filter(${check.name}, ${input.name});")
+    override fun submit(program: GlProgram) {
+        check.submit(program)
+        input.submit(program)
+    }
+}
+
+fun filterv4(check: Expression<Boolean>, input: Expression<vec4>) = object : Filter<vec4>(check, input) {
+    override val type = "vec4"
+}
+
+// ------------------------- Boolean -------------------------
+
+// eq/not/more/less
+
+fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun decl() = left.decl() + right.decl() +
+            listOf("$type expr_eq(${left.type} left, ${right.type} right) { return left == right; }")
+    override fun expr() = left.expr() + right.expr() +
+            listOf("bool $name = expr_eq(${left.name}, ${right.name});")
+
+    override val type = "bool"
+
+    override fun submit(program: GlProgram) {
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
+fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
+    override val type = "bool"
+
+    override fun decl() = expr.decl() + listOf("$type expr_not(bool value) { return !value; }")
+    override fun expr() = expr.expr() + listOf("bool $name = expr_not(${expr.name});")
+
+    override fun submit(program: GlProgram) {
+        expr.submit(program)
+    }
+}
+
+// ------------------------- Accessors -------------------------
+
+// x, y, z, w, u, v, swizzles

@@ -142,12 +142,12 @@ private val simpleTechnique = SimpleTechnique(
     propIdentityM, unifViewM, unifProjM,
     mulv4(
         addv4(
-            mulv4(tex(tiledShiftedCoords, unifFont), unifProp1),
-            mulv4(tex(constTexCoords, unifDiffuse2), unifProp2)
+            mulv4(texv4(tiledShiftedCoords, unifFont), unifProp1),
+            mulv4(texv4(constTexCoords, unifDiffuse2), unifProp2)
         ),
         addv4(
-            mulv4(tex(constTexCoords, unifDiffuse3), unifProp1),
-            mulv4(tex(constTexCoords, unifDiffuse4), unifProp2)
+            mulv4(texv4(constTexCoords, unifDiffuse3), unifProp1),
+            mulv4(texv4(constTexCoords, unifDiffuse4), unifProp2)
         )
     )
 )

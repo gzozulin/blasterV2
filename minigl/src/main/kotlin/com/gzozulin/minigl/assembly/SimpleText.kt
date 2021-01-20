@@ -13,15 +13,21 @@ class SimpleTextTechnique : GlResource() {
     private val propProjM = propm4(mat4().ortho(-1f, 1f, -1f, 1f, -1f, 1f))
 
     private val unifTileUV = unifv2i(vec2i(0))
+    private val texCoord = constv2(SimpleVarrying.vTexCoord.name)
+    private val texCoordTiled = tile(texCoord, unifTileUV, propv2i(vec2i(16)))
 
-    private val constTexCoordTiled = tile(constv2(SimpleVarrying.vTexCoord.name), unifTileUV, propv2i(vec2i(16)))
-    private val unifFont = tex(constTexCoordTiled, unifsampler(font))
-    private val unifFloor = tex(constTexCoordTiled, unifsampler(floor))
+    private val unifFont = unifsampler(font)
+    private val unifFont2 = unifsampler(floor)
 
-    private val propBool = propb(true)
-    private val ifExp = ifexpv4(propBool, unifFont, unifFloor)
+    private val color = texv4(texCoordTiled, unifFont)
+    private val color2 = texv4(texCoord, unifFont2)
 
-    private val simpleTechnique = SimpleTechnique(propIdentityM, propIdentityM, propProjM, color = ifExp)
+    private val propVec1 = propv4(vec4(1f))
+
+    private val colorResult = ifv4(eq(color, propVec1), color, color2)
+    private val filteredResult = filterv4(not(eq(colorResult, propVec1)), colorResult)
+
+    private val simpleTechnique = SimpleTechnique(propIdentityM, propIdentityM, propProjM, filteredResult)
 
     init {
         addChildren(floor, simpleTechnique, rect, font)
@@ -57,6 +63,7 @@ fun main() {
     window.create(isHoldingCursor = false) {
         glUse(simpleTextTechnique) {
             window.show {
+                glClear()
                 simpleTextTechnique.page(examplePage)
             }
         }
