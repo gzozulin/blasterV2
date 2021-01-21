@@ -213,7 +213,11 @@ fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2
 
 // ------------------------- Filter -------------------------
 
-// todo: discard operator
+// todo:
+fun discardv4() = object : Expression<vec4>() {
+    override val type = "vec4"
+    override fun expr() = listOf("discard;")
+}
 
 abstract class Filter<R>(val check: Expression<Boolean>, val input: Expression<R>) : Expression<R>() {
     override fun decl() = check.decl() + input.decl() +

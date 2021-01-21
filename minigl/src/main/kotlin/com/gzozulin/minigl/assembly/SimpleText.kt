@@ -21,7 +21,7 @@ class SimpleTextTechnique(color: Expression<vec4> = propv4(vec4(1f)),
     private val propIdentityM = propm4(mat4().identity())
     private val propProjM = propm4(mat4().ortho(-1f, 1f, -1f, 1f, -1f, 1f))
 
-    private val unifTileUV = unifv2i(vec2i(15))
+    private val unifTileUV = unifv2i(vec2i(12))
     private val texCoordTiled = tile(texCoord, unifTileUV, propv2i(vec2i(16)))
 
     private val unifFont = unifsampler(font)
@@ -34,7 +34,22 @@ class SimpleTextTechnique(color: Expression<vec4> = propv4(vec4(1f)),
         addChildren(simpleTechnique, rect, font)
     }
 
+    private var counter = 0
+    private var u = 0
+    private var v = 0
+
     fun page(page: TextPage) {
+        if (counter % 30 == 0) {
+            u += 1
+            if (u == 15) {
+                u = 0
+                v += 1
+                if (v == 15) {
+                    v = 0
+                }
+            }
+            unifTileUV.value = vec2i(u, v)
+        }
         glBind(font) {
             simpleTechnique.draw {
                 for (line in page.lines) {
@@ -44,6 +59,7 @@ class SimpleTextTechnique(color: Expression<vec4> = propv4(vec4(1f)),
                 }
             }
         }
+        counter++
     }
 }
 
