@@ -213,6 +213,8 @@ fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2
 
 // ------------------------- Filter -------------------------
 
+// todo: discard operator
+
 abstract class Filter<R>(val check: Expression<Boolean>, val input: Expression<R>) : Expression<R>() {
     override fun decl() = check.decl() + input.decl() +
             listOf("$type expr_filter(bool check, $type inp) { if(check) return inp; else discard; }")
