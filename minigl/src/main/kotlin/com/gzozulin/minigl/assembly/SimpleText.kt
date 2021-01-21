@@ -73,8 +73,9 @@ private val grass = texturesLib.loadTexture("textures/grass.jpg")
 private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
 private val floorSampler = tex(texCoords, unifsampler(floor))
 private val grassSampler = tex(texCoords, unifsampler(grass))
+private val combined = add(floorSampler, grassSampler)
 
-private val simpleTextTechnique = SimpleTextTechnique(floorSampler, discardv4())
+private val simpleTextTechnique = SimpleTextTechnique(combined, discardv4())
 
 fun main() {
     window.create(isHoldingCursor = false) {
