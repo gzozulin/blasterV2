@@ -2,6 +2,11 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.gl.*
 
+const val VERSION = "#version 300 es"
+const val PRECISION_HIGH = "precision highp float;"
+
+const val DECLARATION = ""
+
 abstract class Expression<R> {
     open val name: String = nextName()
 

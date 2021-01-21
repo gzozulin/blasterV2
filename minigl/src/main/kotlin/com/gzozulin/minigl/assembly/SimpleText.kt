@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.assembly
 
-import com.gzozulin.minigl.assets.texturesLib
+/*import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 
 data class TextFragment(val text: String,
@@ -87,4 +87,4 @@ fun main() {
             }
         }
     }
-}
+}*/

@@ -7,9 +7,6 @@ import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 
-private const val VERSION = "#version 300 es"
-private const val PRECISION_HIGH = "precision highp float;"
-
 private const val TEMPL_SIMPLE_VERT = """
 $VERSION
 $PRECISION_HIGH
