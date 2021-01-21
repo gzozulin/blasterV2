@@ -17,13 +17,13 @@ private const val EXPR_TILE =
         "    float tileStartY = float(uv.y) * tileSideY;\n" +
         "    result.y = tileStartY + texCoord.y * tileSideY;\n" +
         "    return result;\n" +
-        " }\n"
+        "}\n"
 
 private const val EXPR_DISCARD =
     "vec4 expr_discard() {\n" +
             "    discard;\n" +
             "    return vec4(1.0);\n" +
-            " }\n"
+            "}\n"
 
 const val DECLARATIONS_VERT = EXPR_TILE
 const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD
@@ -32,9 +32,8 @@ private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
 
 abstract class Expression<R> {
-    open val type: String = "Override!"
-
     open val name: String = nextName()
+    open val type: String = "Override!"
 
     open fun decl(): List<String> = listOf()
     open fun vrbl(): List<String> = listOf()
@@ -131,7 +130,7 @@ fun constm4(value: mat4) = object : Const<mat4>(value) {
 
 // ------------------------- Variable -------------------------
 
-abstract class Variable<R>(val expr: Expression<R>) : Expression<R>() {
+abstract class Variable<R>(private val expr: Expression<R>) : Expression<R>() {
     override fun decl() = expr.decl()
     override fun vrbl() = expr.vrbl() + listOf("$type $name = ${expr.expr()};")
     override fun expr() = name
@@ -145,12 +144,29 @@ fun varv2(expr: Expression<vec2>) = object : Variable<vec2>(expr) {
     override val type = "vec2"
 }
 
+fun varv4(expr: Expression<vec4>) = object : Variable<vec4>(expr) {
+    override val type = "vec4"
+}
+
 // ------------------------- Addition -------------------------
 
 fun <R> add(left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
     override fun decl() = left.decl() + right.decl()
     override fun vrbl() = left.vrbl() + right.vrbl()
     override fun expr() = "(${left.expr()} + ${right.expr()})"
+
+    override fun submit(program: GlProgram) {
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
+// ------------------------- Subtraction -------------------------
+
+fun <R> sub(left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
+    override fun decl() = left.decl() + right.decl()
+    override fun vrbl() = left.vrbl() + right.vrbl()
+    override fun expr() = "(${left.expr()} - ${right.expr()})"
 
     override fun submit(program: GlProgram) {
         left.submit(program)
@@ -171,6 +187,19 @@ fun <R> mul(left: Expression<R>, right: Expression<R>) = object : Expression<R>(
     }
 }
 
+// ------------------------- Division -------------------------
+
+fun <R> div(left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
+    override fun decl() = left.decl() + right.decl()
+    override fun vrbl() = left.vrbl() + right.vrbl()
+    override fun expr() = "(${left.expr()} / ${right.expr()})"
+
+    override fun submit(program: GlProgram) {
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
 // ------------------------- Textures -------------------------
 
 fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
@@ -181,20 +210,6 @@ fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : E
     override fun submit(program: GlProgram) {
         texCoord.submit(program)
         sampler.submit(program)
-    }
-}
-
-// ------------------------- If -------------------------
-
-fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
-    override fun decl() = check.decl() + left.decl() + right.decl()
-    override fun vrbl() = check.vrbl() + left.vrbl() + right.vrbl()
-    override fun expr() = "(${check.expr()}) ? ${left.expr()} : ${right.expr()}"
-
-    override fun submit(program: GlProgram) {
-        check.submit(program)
-        left.submit(program)
-        right.submit(program)
     }
 }
 
@@ -214,13 +229,23 @@ fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2
 
 // ------------------------- Discard -------------------------
 
-fun discardv4() = object : Expression<vec4>() {
+fun <R> discard() = object : Expression<R>() {
     override fun expr() = "expr_discard()"
 }
 
 // ------------------------- Boolean -------------------------
 
-// eq/not/more/less
+fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
+    override fun decl() = check.decl() + left.decl() + right.decl()
+    override fun vrbl() = check.vrbl() + left.vrbl() + right.vrbl()
+    override fun expr() = "((${check.expr()}) ? ${left.expr()} : ${right.expr()})"
+
+    override fun submit(program: GlProgram) {
+        check.submit(program)
+        left.submit(program)
+        right.submit(program)
+    }
+}
 
 fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
     override fun decl() = left.decl() + right.decl()
@@ -242,6 +267,8 @@ fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
         expr.submit(program)
     }
 }
+
+// todo: more, less, boundary
 
 // ------------------------- Accessors -------------------------
 

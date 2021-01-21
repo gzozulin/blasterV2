@@ -19,9 +19,6 @@ void main() {
 
     if (oFragColor.a < 0.1) {
         discard;
-        oFragColor = vec4(1.0);
-    } else {
-        oFragColor = oFragColor;
     }
 
     oFragColor.rgb *= uColor;
