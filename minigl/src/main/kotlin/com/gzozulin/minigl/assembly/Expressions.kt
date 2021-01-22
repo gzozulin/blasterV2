@@ -65,7 +65,7 @@ fun unifi(v: Int? = null) = object : Uniform<Int>(v) {
     override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
 }
 
-fun unifmat4(v: mat4? = null) = object : Uniform<mat4>(v) {
+fun unifm4(v: mat4? = null) = object : Uniform<mat4>(v) {
     override val type = "mat4"
     override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
 }
@@ -92,7 +92,7 @@ fun unifsampler(v: GlTexture? = null) = object : Uniform<GlTexture>(v) {
 
 // ------------------------- Constants -------------------------
 
-abstract class Const<R>(var value: R?) : Expression<R>() {
+abstract class Const<R>(private var value: R?) : Expression<R>() {
     override fun decl() = listOf("const $type $name = $value;")
     override fun expr() = name
 }
@@ -140,11 +140,11 @@ abstract class Variable<R>(private val expr: Expression<R>) : Expression<R>() {
     }
 }
 
-fun varv2(expr: Expression<vec2>) = object : Variable<vec2>(expr) {
+fun cachev2(expr: Expression<vec2>) = object : Variable<vec2>(expr) {
     override val type = "vec2"
 }
 
-fun varv4(expr: Expression<vec4>) = object : Variable<vec4>(expr) {
+fun cachev4(expr: Expression<vec4>) = object : Variable<vec4>(expr) {
     override val type = "vec4"
 }
 

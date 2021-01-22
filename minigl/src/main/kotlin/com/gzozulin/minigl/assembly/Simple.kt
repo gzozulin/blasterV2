@@ -127,12 +127,12 @@ private val unifProp1 = unifv4(vec4(proportion))
 private val unifProp2 = unifv4(vec4(1f - proportion))
 
 private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
-private val tiledCoords = varv2(tile(texCoords, constv2i(vec2i(15, 15)), constv2i(vec2i(16, 16))))
-private val tiledShiftedCoords = varv2(add(tiledCoords, unifShiftUV))
+private val tiledCoords = cachev2(tile(texCoords, constv2i(vec2i(15, 15)), constv2i(vec2i(16, 16))))
+private val tiledShiftedCoords = cachev2(add(tiledCoords, unifShiftUV))
 
 private val identityM = constm4(mat4().identity())
-private val unifViewM = unifmat4(camera.calculateViewM())
-private val unifProjM = unifmat4(camera.projectionM)
+private val unifViewM = unifm4(camera.calculateViewM())
+private val unifProjM = unifm4(camera.projectionM)
 
 private val unifFont = unifsampler(diffuse1)
 private val unifDiffuse2 = unifsampler(diffuse2)

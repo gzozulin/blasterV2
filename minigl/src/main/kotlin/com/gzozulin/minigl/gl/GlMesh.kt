@@ -58,10 +58,10 @@ class GlMesh(
                 right, top,     0f,
                 right, bottom,  0f)
             val texCoords = floatArrayOf(
-                0f,     top,
-                0f,     0f,
-                right,  top,
-                right,  0f)
+                0f,  1f,
+                0f,  0f,
+                1f,  1f,
+                1f,  0f)
             val indices = intArrayOf(0, 1, 2, 1, 3, 2)
             val attributes = mutableListOf(
                 GlAttribute.ATTRIBUTE_POSITION to GlBuffer.create(backend.GL_ARRAY_BUFFER, vertices),
