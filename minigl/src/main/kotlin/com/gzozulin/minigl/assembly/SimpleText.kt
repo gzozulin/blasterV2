@@ -4,7 +4,6 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 
 private const val FONT_CNT_UV = 16
-
 private const val FONT_GLYPH_SIDE = 12
 private const val FONT_SCALE_U = 1f
 private const val FONT_SCALE_V = 1.5f

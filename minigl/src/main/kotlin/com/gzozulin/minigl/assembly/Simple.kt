@@ -62,23 +62,19 @@ open class SimpleTechnique(private val modelM: Expression<mat4>,
     private val program: GlProgram
 
     init {
-        val vertDecl = modelM.decl() + viewM.decl() + projM.decl()
-        val vertDeclSrc = vertDecl.toSrc()
-        val vertVrbl = modelM.vrbl() + modelM.vrbl() + modelM.vrbl()
-        val vertVrblSrc = vertVrbl.toSrc()
+        val vertDecl = (modelM.decl() + viewM.decl() + projM.decl()).toSrc()
+        val vertVrbl = (modelM.vrbl() + modelM.vrbl() + modelM.vrbl()).toSrc()
         val vertSrc = TEMPL_SIMPLE_VERT
-            .replace("%DECL%", vertDeclSrc)
-            .replace("%VRBL%", vertVrblSrc)
+            .replace("%DECL%", vertDecl)
+            .replace("%VRBL%", vertVrbl)
             .replace("%MODEL%", modelM.expr())
             .replace("%VIEW%", viewM.expr())
             .replace("%PROJ%", projM.expr())
-        val fragDecl = color.decl()
-        val fragDeclSrc = fragDecl.toSrc()
-        val fragVrbl = color.vrbl()
-        val fragVrblSrc = fragVrbl.toSrc()
+        val fragDecl = color.decl().toSrc()
+        val fragVrbl = color.vrbl().toSrc()
         val fragSrc = TEMPL_SIMPLE_FRAG
-            .replace("%DECL%", fragDeclSrc)
-            .replace("%VRBL%", fragVrblSrc)
+            .replace("%DECL%", fragDecl)
+            .replace("%VRBL%", fragVrbl)
             .replace("%COLOR%", color.expr())
         program = GlProgram(
             GlShader(GlShaderType.VERTEX_SHADER, vertSrc),
