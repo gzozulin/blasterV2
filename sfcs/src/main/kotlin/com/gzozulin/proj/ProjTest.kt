@@ -13,12 +13,16 @@ typealias FunctionCtx = KotlinParser.FunctionDeclarationContext
 typealias PropertyCtx = KotlinParser.PropertyDeclarationContext
 typealias ObjectCtx   = KotlinParser.ObjectDeclarationContext
 
+// todo: nodes are better representation
+// todo subScenario
+// todo instead of adding, mark tokens in stream as "visible", overlapping ranges
+// todo: maybe tests?
+
 private val parser by lazy {
     KotlinParser(CommonTokenStream(KotlinLexer(CharStreams.fromFileName(
         "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt"))))
 }
 
-// todo: nodes are better representation
 private val scenario = listOf(
     listOf("MainClass", "originFunction"),
     listOf("UtilityClass", "internalFlag"),
@@ -106,8 +110,6 @@ private fun subScenario(step: Int) {
     var current = 0
 }
 
-// todo subScenario
-// todo instead of adding, mark tokens in stream as "visible", overlapping ranges
 private fun renderStep(step: Int) {
 
     var result = ""
