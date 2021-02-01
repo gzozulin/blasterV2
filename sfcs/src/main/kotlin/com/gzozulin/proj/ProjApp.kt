@@ -24,18 +24,29 @@ private data class ScenarioNode(val address: List<String>)
 private fun parseScenario(scenario: String): List<ScenarioNode> {
     val lines = scenario.split("\n")
     val result = mutableListOf<ScenarioNode>()
-    var currentAddress = mutableListOf<String>()
-    var currentDepth = 0
+    val currentAddress = mutableListOf<String>()
+    var currentDepth = -1
+    fun createNode() { result.add(ScenarioNode(currentAddress.toList())) }
+    fun addAddress(new: String) { currentAddress.add(new) }
     for (line in lines) {
-        val (depth, noDepth) = removeDepth(line)
-        if (depth > currentDepth) {
-            currentAddress.add(noDepth)
-        } else {
-            result.add(ScenarioNode(currentAddress))
-            currentAddress = mutableListOf()
+        val (newDepth, noDepth) = removeDepth(line)
+        when {
+            newDepth == currentDepth -> {
+                createNode()
+            }
+            newDepth > currentDepth -> {
+                addAddress(noDepth)
+            }
+            newDepth < currentDepth -> {
+                check(newDepth == 0) { "Only new address is expected here" }
+                createNode()
+                currentAddress.clear()
+                addAddress(noDepth)
+            }
         }
-        currentDepth = depth
+        currentDepth = newDepth
     }
+    createNode()
     return result
 }
 
@@ -48,7 +59,6 @@ private fun removeDepth(line: String): Pair<Int, String> {
     }
     return depth to result
 }
-
 fun main() {
     val nodes = parseScenario(scenario)
     ProjApp().exampleFun()

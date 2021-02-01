@@ -12,6 +12,8 @@ dependencies {
     implementation(project(":minigl"))
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation "org.antlr:antlr4:4.7.2"
 }
 
 sourceCompatibility = "7"
