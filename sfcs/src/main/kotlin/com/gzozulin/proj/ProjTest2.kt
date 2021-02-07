@@ -14,6 +14,8 @@ private val parser by lazy { KotlinParser(tokens) }
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
+private fun source(start: Int, end: Int) = tokens.get(start, end).joinToString("") { it.text }
+
 private fun DeclCtx.identifier() = when {
     classDeclaration() != null -> classDeclaration().simpleIdentifier().text
     functionDeclaration() != null -> functionDeclaration().simpleIdentifier().text
@@ -22,12 +24,20 @@ private fun DeclCtx.identifier() = when {
     else -> error("Unknown declaration!")
 }
 
-// todo: only for classes? only they can have children
-private fun DeclCtx.predeclare() = "{\n"
-private fun DeclCtx.postdeclare() = "\n}"
+private fun DeclCtx.declare(): String {
+    val start = start.tokenIndex
+    val classDecl = classDeclaration()!!
+    val end = classDecl.classBody().start.tokenIndex - 1
+    return source(start, end)  + "\n"
+}
 
-private fun DeclCtx.define() = tokens.get(start.tokenIndex, stop.tokenIndex)
-    .joinToString(separator = "") { it.text }
+private fun DeclCtx.define() = when {
+    classDeclaration() != null -> source(start.tokenIndex, classDeclaration().classBody().stop.tokenIndex)
+    functionDeclaration() != null -> source(start.tokenIndex, functionDeclaration().functionBody().stop.tokenIndex)
+    propertyDeclaration() != null -> source(start.tokenIndex, propertyDeclaration().variableDeclaration().stop.tokenIndex)
+    objectDeclaration() != null -> source(start.tokenIndex, objectDeclaration().classBody().stop.tokenIndex)
+    else -> error("Unknown declaration!")
+} + "\n"
 
 private data class ProjectorNode(val identifier: String,
                                  var isKnown: Boolean = false,
@@ -73,13 +83,12 @@ private class DeclVisitor(val nodes: List<ProjectorNode>,
         val identifier = decl.identifier()
         val node = nodes.firstOrNull { it.identifier == identifier } ?: return
         if (node.isKnown) {
-            result.invoke(decl.predeclare())
             if (node.children != null) {
+                result.invoke(decl.declare())
                 visitNext(node.children, decl)
             } else {
                 result.invoke(decl.define())
             }
-            result.invoke(decl.postdeclare())
         }
     }
 
