@@ -19,6 +19,7 @@ class MainClass {
     private val internalValue = UtilityClass()
 
     fun originFunction() {
+        // Comments are welcome!
         if (internalFlag) {
             internalValue.internalFunction()
         }

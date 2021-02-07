@@ -13,7 +13,7 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation "org.antlr:antlr4:4.7.2"
+    implementation "org.antlr:antlr4:4.9.1"
 }
 
 sourceCompatibility = "7"

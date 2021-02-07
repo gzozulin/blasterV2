@@ -37,7 +37,7 @@ fun main() {
 
 private fun RuleCtx.getIdentifier() = when (this) {
     is ClassCtx -> simpleIdentifier().text
-    is FunctionCtx -> identifier().text
+    //is FunctionCtx -> identifier().text
     is PropertyCtx -> variableDeclaration().simpleIdentifier().text
     is ObjectCtx -> simpleIdentifier().text
     else -> wtf()
@@ -45,7 +45,7 @@ private fun RuleCtx.getIdentifier() = when (this) {
 
 private fun RuleCtx.getDeclaration() = when (this) {
     is ClassCtx -> simpleIdentifier().text
-    is FunctionCtx -> identifier().text
+    //is FunctionCtx -> identifier().text
     is PropertyCtx -> variableDeclaration().simpleIdentifier().text
     is ObjectCtx -> simpleIdentifier().text
     else -> wtf()

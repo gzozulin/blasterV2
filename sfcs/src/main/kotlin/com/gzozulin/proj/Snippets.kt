@@ -1,5 +1,7 @@
 package com.gzozulin.proj
 
+//val node = nodes.firstOrNull { it.identifier == identifier } ?: return
+
 // declared and defined
 // if branch - add to declared
 // if leaf - add to defined

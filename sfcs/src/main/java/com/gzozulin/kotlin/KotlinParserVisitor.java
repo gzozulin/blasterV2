@@ -1,5 +1,4 @@
-// Generated from KotlinParser.g4 by ANTLR 4.7.2
-
+// Generated from KotlinParser.g4 by ANTLR 4.9.1
 package com.gzozulin.kotlin;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -25,17 +24,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitScript(KotlinParser.ScriptContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#preamble}.
+	 * Visit a parse tree produced by {@link KotlinParser#shebangLine}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPreamble(KotlinParser.PreambleContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#fileAnnotations}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFileAnnotations(KotlinParser.FileAnnotationsContext ctx);
+	T visitShebangLine(KotlinParser.ShebangLineContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#fileAnnotation}.
 	 * @param ctx the parse tree
@@ -73,6 +66,18 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTopLevelObject(KotlinParser.TopLevelObjectContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeAlias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeAlias(KotlinParser.TypeAliasContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaration(KotlinParser.DeclarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link KotlinParser#classDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -84,6 +89,12 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrimaryConstructor(KotlinParser.PrimaryConstructorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#classBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassBody(KotlinParser.ClassBodyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#classParameters}.
 	 * @param ctx the parse tree
@@ -115,17 +126,47 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstructorInvocation(KotlinParser.ConstructorInvocationContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link KotlinParser#annotatedDelegationSpecifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnnotatedDelegationSpecifier(KotlinParser.AnnotatedDelegationSpecifierContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link KotlinParser#explicitDelegation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExplicitDelegation(KotlinParser.ExplicitDelegationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#classBody}.
+	 * Visit a parse tree produced by {@link KotlinParser#typeParameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitClassBody(KotlinParser.ClassBodyContext ctx);
+	T visitTypeParameters(KotlinParser.TypeParametersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeParameter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeParameter(KotlinParser.TypeParameterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeConstraints}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeConstraints(KotlinParser.TypeConstraintsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeConstraint}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeConstraint(KotlinParser.TypeConstraintContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#classMemberDeclarations}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassMemberDeclarations(KotlinParser.ClassMemberDeclarationsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#classMemberDeclaration}.
 	 * @param ctx the parse tree
@@ -138,6 +179,96 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAnonymousInitializer(KotlinParser.AnonymousInitializerContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#companionObject}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompanionObject(KotlinParser.CompanionObjectContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionValueParameters}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionValueParameters(KotlinParser.FunctionValueParametersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionValueParameter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionValueParameter(KotlinParser.FunctionValueParameterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionDeclaration(KotlinParser.FunctionDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionBody(KotlinParser.FunctionBodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#variableDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableDeclaration(KotlinParser.VariableDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#multiVariableDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMultiVariableDeclaration(KotlinParser.MultiVariableDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#propertyDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropertyDeclaration(KotlinParser.PropertyDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#propertyDelegate}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPropertyDelegate(KotlinParser.PropertyDelegateContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#getter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGetter(KotlinParser.GetterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#setter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSetter(KotlinParser.SetterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parametersWithOptionalType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParametersWithOptionalType(KotlinParser.ParametersWithOptionalTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parameterWithOptionalType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterWithOptionalType(KotlinParser.ParameterWithOptionalTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parameter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameter(KotlinParser.ParameterContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#objectDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitObjectDeclaration(KotlinParser.ObjectDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#secondaryConstructor}.
 	 * @param ctx the parse tree
@@ -169,119 +300,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitEnumEntry(KotlinParser.EnumEntryContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionDeclaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionDeclaration(KotlinParser.FunctionDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionValueParameters}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionValueParameters(KotlinParser.FunctionValueParametersContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionValueParameter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionValueParameter(KotlinParser.FunctionValueParameterContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#parameter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParameter(KotlinParser.ParameterContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionBody}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFunctionBody(KotlinParser.FunctionBodyContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#objectDeclaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitObjectDeclaration(KotlinParser.ObjectDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#companionObject}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCompanionObject(KotlinParser.CompanionObjectContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#propertyDeclaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPropertyDeclaration(KotlinParser.PropertyDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#multiVariableDeclaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMultiVariableDeclaration(KotlinParser.MultiVariableDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#variableDeclaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableDeclaration(KotlinParser.VariableDeclarationContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#getter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitGetter(KotlinParser.GetterContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#setter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSetter(KotlinParser.SetterContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeAlias}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeAlias(KotlinParser.TypeAliasContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeParameters}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeParameters(KotlinParser.TypeParametersContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeParameter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeParameter(KotlinParser.TypeParameterContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link KotlinParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitType(KotlinParser.TypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeModifierList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeModifierList(KotlinParser.TypeModifierListContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitParenthesizedType(KotlinParser.ParenthesizedTypeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#nullableType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNullableType(KotlinParser.NullableTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#typeReference}.
 	 * @param ctx the parse tree
@@ -289,17 +312,17 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypeReference(KotlinParser.TypeReferenceContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionType}.
+	 * Visit a parse tree produced by {@link KotlinParser#nullableType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunctionType(KotlinParser.FunctionTypeContext ctx);
+	T visitNullableType(KotlinParser.NullableTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionTypeReceiver}.
+	 * Visit a parse tree produced by {@link KotlinParser#quest}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunctionTypeReceiver(KotlinParser.FunctionTypeReceiverContext ctx);
+	T visitQuest(KotlinParser.QuestContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#userType}.
 	 * @param ctx the parse tree
@@ -313,29 +336,53 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSimpleUserType(KotlinParser.SimpleUserTypeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeProjection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeProjection(KotlinParser.TypeProjectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeProjectionModifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeProjectionModifiers(KotlinParser.TypeProjectionModifiersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeProjectionModifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeProjectionModifier(KotlinParser.TypeProjectionModifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionType(KotlinParser.FunctionTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link KotlinParser#functionTypeParameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitFunctionTypeParameters(KotlinParser.FunctionTypeParametersContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeConstraints}.
+	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeConstraints(KotlinParser.TypeConstraintsContext ctx);
+	T visitParenthesizedType(KotlinParser.ParenthesizedTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeConstraint}.
+	 * Visit a parse tree produced by {@link KotlinParser#receiverType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeConstraint(KotlinParser.TypeConstraintContext ctx);
+	T visitReceiverType(KotlinParser.ReceiverTypeContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#block}.
+	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedUserType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBlock(KotlinParser.BlockContext ctx);
+	T visitParenthesizedUserType(KotlinParser.ParenthesizedUserTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#statements}.
 	 * @param ctx the parse tree
@@ -349,17 +396,65 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitStatement(KotlinParser.StatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#blockLevelExpression}.
+	 * Visit a parse tree produced by {@link KotlinParser#label}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBlockLevelExpression(KotlinParser.BlockLevelExpressionContext ctx);
+	T visitLabel(KotlinParser.LabelContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#declaration}.
+	 * Visit a parse tree produced by {@link KotlinParser#controlStructureBody}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDeclaration(KotlinParser.DeclarationContext ctx);
+	T visitControlStructureBody(KotlinParser.ControlStructureBodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#block}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlock(KotlinParser.BlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#loopStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLoopStatement(KotlinParser.LoopStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#forStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForStatement(KotlinParser.ForStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#whileStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStatement(KotlinParser.WhileStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#doWhileStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDoWhileStatement(KotlinParser.DoWhileStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#assignment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssignment(KotlinParser.AssignmentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#semi}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSemi(KotlinParser.SemiContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#semis}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSemis(KotlinParser.SemisContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#expression}.
 	 * @param ctx the parse tree
@@ -379,11 +474,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConjunction(KotlinParser.ConjunctionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#equalityComparison}.
+	 * Visit a parse tree produced by {@link KotlinParser#equality}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEqualityComparison(KotlinParser.EqualityComparisonContext ctx);
+	T visitEquality(KotlinParser.EqualityContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#comparison}.
 	 * @param ctx the parse tree
@@ -391,17 +486,29 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitComparison(KotlinParser.ComparisonContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#namedInfix}.
+	 * Visit a parse tree produced by {@link KotlinParser#genericCallLikeComparison}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNamedInfix(KotlinParser.NamedInfixContext ctx);
+	T visitGenericCallLikeComparison(KotlinParser.GenericCallLikeComparisonContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#infixOperation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInfixOperation(KotlinParser.InfixOperationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#elvisExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitElvisExpression(KotlinParser.ElvisExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#elvis}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElvis(KotlinParser.ElvisContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#infixFunctionCall}.
 	 * @param ctx the parse tree
@@ -427,11 +534,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMultiplicativeExpression(KotlinParser.MultiplicativeExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeRHS}.
+	 * Visit a parse tree produced by {@link KotlinParser#asExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeRHS(KotlinParser.TypeRHSContext ctx);
+	T visitAsExpression(KotlinParser.AsExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#prefixUnaryExpression}.
 	 * @param ctx the parse tree
@@ -439,23 +546,65 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPrefixUnaryExpression(KotlinParser.PrefixUnaryExpressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link KotlinParser#unaryPrefix}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitUnaryPrefix(KotlinParser.UnaryPrefixContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link KotlinParser#postfixUnaryExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitPostfixUnaryExpression(KotlinParser.PostfixUnaryExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#atomicExpression}.
+	 * Visit a parse tree produced by {@link KotlinParser#postfixUnarySuffix}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAtomicExpression(KotlinParser.AtomicExpressionContext ctx);
+	T visitPostfixUnarySuffix(KotlinParser.PostfixUnarySuffixContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedExpression}.
+	 * Visit a parse tree produced by {@link KotlinParser#directlyAssignableExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitParenthesizedExpression(KotlinParser.ParenthesizedExpressionContext ctx);
+	T visitDirectlyAssignableExpression(KotlinParser.DirectlyAssignableExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedDirectlyAssignableExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParenthesizedDirectlyAssignableExpression(KotlinParser.ParenthesizedDirectlyAssignableExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#assignableExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssignableExpression(KotlinParser.AssignableExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedAssignableExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParenthesizedAssignableExpression(KotlinParser.ParenthesizedAssignableExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#assignableSuffix}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssignableSuffix(KotlinParser.AssignableSuffixContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#indexingSuffix}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIndexingSuffix(KotlinParser.IndexingSuffixContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#navigationSuffix}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNavigationSuffix(KotlinParser.NavigationSuffixContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#callSuffix}.
 	 * @param ctx the parse tree
@@ -469,11 +618,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAnnotatedLambda(KotlinParser.AnnotatedLambdaContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#arrayAccess}.
+	 * Visit a parse tree produced by {@link KotlinParser#typeArguments}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitArrayAccess(KotlinParser.ArrayAccessContext ctx);
+	T visitTypeArguments(KotlinParser.TypeArgumentsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#valueArguments}.
 	 * @param ctx the parse tree
@@ -481,29 +630,29 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitValueArguments(KotlinParser.ValueArgumentsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeArguments}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeArguments(KotlinParser.TypeArgumentsContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeProjection}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeProjection(KotlinParser.TypeProjectionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeProjectionModifierList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeProjectionModifierList(KotlinParser.TypeProjectionModifierListContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link KotlinParser#valueArgument}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitValueArgument(KotlinParser.ValueArgumentContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#primaryExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimaryExpression(KotlinParser.PrimaryExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parenthesizedExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParenthesizedExpression(KotlinParser.ParenthesizedExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#collectionLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCollectionLiteral(KotlinParser.CollectionLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#literalConstant}.
 	 * @param ctx the parse tree
@@ -553,11 +702,11 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMultiLineStringExpression(KotlinParser.MultiLineStringExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#functionLiteral}.
+	 * Visit a parse tree produced by {@link KotlinParser#lambdaLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunctionLiteral(KotlinParser.FunctionLiteralContext ctx);
+	T visitLambdaLiteral(KotlinParser.LambdaLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#lambdaParameters}.
 	 * @param ctx the parse tree
@@ -571,17 +720,23 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLambdaParameter(KotlinParser.LambdaParameterContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link KotlinParser#anonymousFunction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAnonymousFunction(KotlinParser.AnonymousFunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#functionLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionLiteral(KotlinParser.FunctionLiteralContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link KotlinParser#objectLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitObjectLiteral(KotlinParser.ObjectLiteralContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#collectionLiteral}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitCollectionLiteral(KotlinParser.CollectionLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#thisExpression}.
 	 * @param ctx the parse tree
@@ -595,23 +750,17 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSuperExpression(KotlinParser.SuperExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#conditionalExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitConditionalExpression(KotlinParser.ConditionalExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link KotlinParser#ifExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitIfExpression(KotlinParser.IfExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#controlStructureBody}.
+	 * Visit a parse tree produced by {@link KotlinParser#whenSubject}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitControlStructureBody(KotlinParser.ControlStructureBodyContext ctx);
+	T visitWhenSubject(KotlinParser.WhenSubjectContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#whenExpression}.
 	 * @param ctx the parse tree
@@ -661,30 +810,6 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFinallyBlock(KotlinParser.FinallyBlockContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#loopExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLoopExpression(KotlinParser.LoopExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#forExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitForExpression(KotlinParser.ForExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#whileExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitWhileExpression(KotlinParser.WhileExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#doWhileExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDoWhileExpression(KotlinParser.DoWhileExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link KotlinParser#jumpExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -697,17 +822,17 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCallableReference(KotlinParser.CallableReferenceContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#assignmentOperator}.
+	 * Visit a parse tree produced by {@link KotlinParser#assignmentAndOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAssignmentOperator(KotlinParser.AssignmentOperatorContext ctx);
+	T visitAssignmentAndOperator(KotlinParser.AssignmentAndOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#equalityOperation}.
+	 * Visit a parse tree produced by {@link KotlinParser#equalityOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEqualityOperation(KotlinParser.EqualityOperationContext ctx);
+	T visitEqualityOperator(KotlinParser.EqualityOperatorContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#comparisonOperator}.
 	 * @param ctx the parse tree
@@ -733,29 +858,35 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAdditiveOperator(KotlinParser.AdditiveOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#multiplicativeOperation}.
+	 * Visit a parse tree produced by {@link KotlinParser#multiplicativeOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMultiplicativeOperation(KotlinParser.MultiplicativeOperationContext ctx);
+	T visitMultiplicativeOperator(KotlinParser.MultiplicativeOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeOperation}.
+	 * Visit a parse tree produced by {@link KotlinParser#asOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeOperation(KotlinParser.TypeOperationContext ctx);
+	T visitAsOperator(KotlinParser.AsOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#prefixUnaryOperation}.
+	 * Visit a parse tree produced by {@link KotlinParser#prefixUnaryOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrefixUnaryOperation(KotlinParser.PrefixUnaryOperationContext ctx);
+	T visitPrefixUnaryOperator(KotlinParser.PrefixUnaryOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#postfixUnaryOperation}.
+	 * Visit a parse tree produced by {@link KotlinParser#postfixUnaryOperator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPostfixUnaryOperation(KotlinParser.PostfixUnaryOperationContext ctx);
+	T visitPostfixUnaryOperator(KotlinParser.PostfixUnaryOperatorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#excl}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExcl(KotlinParser.ExclContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#memberAccessOperator}.
 	 * @param ctx the parse tree
@@ -763,17 +894,41 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMemberAccessOperator(KotlinParser.MemberAccessOperatorContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#modifierList}.
+	 * Visit a parse tree produced by {@link KotlinParser#safeNav}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitModifierList(KotlinParser.ModifierListContext ctx);
+	T visitSafeNav(KotlinParser.SafeNavContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#modifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitModifiers(KotlinParser.ModifiersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#parameterModifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitParameterModifiers(KotlinParser.ParameterModifiersContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#modifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitModifier(KotlinParser.ModifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeModifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeModifiers(KotlinParser.TypeModifiersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeModifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeModifier(KotlinParser.TypeModifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#classModifier}.
 	 * @param ctx the parse tree
@@ -793,11 +948,23 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVisibilityModifier(KotlinParser.VisibilityModifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#varianceAnnotation}.
+	 * Visit a parse tree produced by {@link KotlinParser#varianceModifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitVarianceAnnotation(KotlinParser.VarianceAnnotationContext ctx);
+	T visitVarianceModifier(KotlinParser.VarianceModifierContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeParameterModifiers}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeParameterModifiers(KotlinParser.TypeParameterModifiersContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#typeParameterModifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeParameterModifier(KotlinParser.TypeParameterModifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#functionModifier}.
 	 * @param ctx the parse tree
@@ -823,23 +990,17 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParameterModifier(KotlinParser.ParameterModifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#typeParameterModifier}.
+	 * Visit a parse tree produced by {@link KotlinParser#reificationModifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypeParameterModifier(KotlinParser.TypeParameterModifierContext ctx);
+	T visitReificationModifier(KotlinParser.ReificationModifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#labelDefinition}.
+	 * Visit a parse tree produced by {@link KotlinParser#platformModifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitLabelDefinition(KotlinParser.LabelDefinitionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#annotations}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnnotations(KotlinParser.AnnotationsContext ctx);
+	T visitPlatformModifier(KotlinParser.PlatformModifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#annotation}.
 	 * @param ctx the parse tree
@@ -847,11 +1008,17 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAnnotation(KotlinParser.AnnotationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#annotationList}.
+	 * Visit a parse tree produced by {@link KotlinParser#singleAnnotation}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAnnotationList(KotlinParser.AnnotationListContext ctx);
+	T visitSingleAnnotation(KotlinParser.SingleAnnotationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link KotlinParser#multiAnnotation}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMultiAnnotation(KotlinParser.MultiAnnotationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link KotlinParser#annotationUseSiteTarget}.
 	 * @param ctx the parse tree
@@ -865,27 +1032,15 @@ public interface KotlinParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitUnescapedAnnotation(KotlinParser.UnescapedAnnotationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#identifier}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifier(KotlinParser.IdentifierContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link KotlinParser#simpleIdentifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitSimpleIdentifier(KotlinParser.SimpleIdentifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link KotlinParser#semi}.
+	 * Visit a parse tree produced by {@link KotlinParser#identifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSemi(KotlinParser.SemiContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link KotlinParser#anysemi}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnysemi(KotlinParser.AnysemiContext ctx);
+	T visitIdentifier(KotlinParser.IdentifierContext ctx);
 }
