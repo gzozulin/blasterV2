@@ -14,7 +14,10 @@ class UtilityClass {
     }
 }
 
-class MainClass {
+class MainClass(val hereisanUglyCtor: Int,
+                val multiline: Boolean,
+                val ofcourse: Char) {
+
     private val internalFlag = true
     private val internalValue = UtilityClass()
 
