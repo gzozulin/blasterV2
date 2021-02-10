@@ -8,14 +8,14 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 
-private const val width: Int = 640
-private const val height: Int = 480
+private const val WIDTH: Int = 1000
+private const val HEIGHT: Int = 900
 
-private const val winX: Int = 448
-private const val winY: Int = 156
+private const val WIN_X: Int = 500
+private const val WIN_Y: Int = 100
 
 private const val BPP = 4
-private val FRAME_BUFFER by lazy { BufferUtils.createByteBuffer(width * height * BPP) }
+private val FRAME_BUFFER by lazy { BufferUtils.createByteBuffer(WIDTH * HEIGHT * BPP) }
 
 private val keyCallbackInternal = object : GLFWKeyCallback() {
     override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
@@ -31,6 +31,9 @@ class GlCapturer {
     private var fps = 0
     private var last = System.currentTimeMillis()
 
+    val width: Int = WIDTH
+    val height: Int = HEIGHT
+
     private fun updateFps() {
         fps++
         val current = System.currentTimeMillis()
@@ -45,7 +48,7 @@ class GlCapturer {
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         val result = glfwCreateWindow(width, height, "Blaster!", NULL, handle)
-        glfwSetWindowPos(result, winX, winY)
+        glfwSetWindowPos(result, WIN_X, WIN_Y)
         glfwSetKeyCallback(result, keyCallbackInternal)
         glfwMakeContextCurrent(result)
         glfwSwapInterval(1)
