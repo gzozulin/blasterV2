@@ -17,7 +17,7 @@ private typealias DeclCtx = KotlinParser.DeclarationContext
 
 private data class ProjectorNode(val order: Int, val identifier: String, val children: List<ProjectorNode>? = null)
 
-private data class OrderedToken(val order: Int, val token: Token)
+data class OrderedToken(val order: Int, val token: Token)
 
 private val chars by lazy { CharStreams.fromFileName(
     "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt") }
@@ -135,9 +135,6 @@ private fun Int.leftWS(): Int {
     }
     return result
 }
-
-// todo: highlighting
-private fun OrderedToken.toSpan() = TextSpan(token.text, col3().cyan(), visibility = SpanVisibility.GONE)
 
 private fun preparePage() {
     val spans = mutableListOf<TextSpan>()
