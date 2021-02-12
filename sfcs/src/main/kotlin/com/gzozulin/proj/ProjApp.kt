@@ -11,13 +11,13 @@ import org.antlr.v4.runtime.Token
 import java.nio.ByteBuffer
 import kotlin.streams.toList
 
-private const val FRAMES_PER_PAGE = 60
+private const val FRAMES_PER_SPAN = 5
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
 private data class ProjectorNode(val order: Int, val identifier: String, val children: List<ProjectorNode>? = null)
 
-private data class RenderedToken(val order: Int, val token: Token)
+private data class OrderedToken(val order: Int, val token: Token)
 
 private val chars by lazy { CharStreams.fromFileName(
     "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt") }
@@ -26,33 +26,33 @@ private val tokens by lazy { CommonTokenStream(lexer) }
 private val parser by lazy { KotlinParser(tokens) }
 
 // todo: add the aility to "split" the node: i.e. MainClass first, then UtilityClass, then MainClass again
-private var nodeOrder = 0
+private var orderCnt = 0
 private val scenario = listOf(
     ProjectorNode(
-        nodeOrder++,"MainClass", children = listOf(
-            ProjectorNode(nodeOrder++, "originFunction"),
-            ProjectorNode(nodeOrder++, "internalValue"),
-            ProjectorNode(nodeOrder++, "internalFlag"),
+        orderCnt++,"MainClass", children = listOf(
+            ProjectorNode(orderCnt++, "originFunction"),
+            ProjectorNode(orderCnt++, "internalValue"),
+            ProjectorNode(orderCnt++, "internalFlag"),
     )),
-    ProjectorNode(nodeOrder++, "UtilityClass", children = listOf(
-        ProjectorNode(nodeOrder++, "internalFunction")
+    ProjectorNode(orderCnt++, "UtilityClass", children = listOf(
+        ProjectorNode(orderCnt++, "internalFunction")
     )),
-    ProjectorNode(nodeOrder++, "highlevelFunction")
+    ProjectorNode(orderCnt++, "highlevelFunction")
 )
 
-private val renderedTokens = mutableListOf<RenderedToken>()
-private val renderedPages = mutableListOf<TextPage>()
+private val orderedTokens = mutableListOf<OrderedToken>()
+private lateinit var renderedPage: TextPage
 
 private val capturer = GlCapturer()
 
 private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
-private var currentPage = 0
 private var currentFrame = 0
+private var currentOrder = 0
 
 fun main() {
     renderScenario()
-    preparePages()
+    preparePage()
     capturer.create {
         glUse(simpleTextTechnique) {
             capturer.show(::onFrame, ::onBuffer)
@@ -64,15 +64,15 @@ private fun renderScenario() {
     parser.reset()
     val visitor = visit(scenario) { increment ->
         for (renderedToken in increment) {
-            if (!renderedTokens.contains(renderedToken)) {
-                renderedTokens += renderedToken
+            if (!orderedTokens.contains(renderedToken)) {
+                orderedTokens += renderedToken
             }
         }
     }
     visitor.visitKotlinFile(parser.kotlinFile())
 }
 
-private fun visit(nodes: List<ProjectorNode>, result: (increment: List<RenderedToken>) -> Unit) =
+private fun visit(nodes: List<ProjectorNode>, result: (increment: List<OrderedToken>) -> Unit) =
     object : KotlinParserBaseVisitor<Unit>() {
         override fun visitDeclaration(decl: DeclCtx) {
             val identifier = decl.identifier()
@@ -115,7 +115,7 @@ private fun DeclCtx.postdeclare(): List<Token> {
     return tokens.get(start, stop.tokenIndex)
 }
 
-private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: List<RenderedToken>) -> Unit) {
+private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: List<OrderedToken>) -> Unit) {
     val visitor = visit(nodes, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
@@ -126,7 +126,7 @@ private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: Li
     }
 }
 
-private fun List<Token>.withOrder(step: Int) = stream().map { RenderedToken(step, it) }.toList()
+private fun List<Token>.withOrder(step: Int) = stream().map { OrderedToken(step, it) }.toList()
 
 private fun Int.leftWS(): Int {
     var result = this - 1
@@ -136,35 +136,48 @@ private fun Int.leftWS(): Int {
     return result
 }
 
-private fun preparePages() {
-    for (current in 0 until nodeOrder) {
-        val spans = mutableListOf<TextSpan>()
-        for (renderedToken in renderedTokens) {
-            if (renderedToken.order <= current) {
-                spans.add(TextSpan(renderedToken.token.text, col3().cyan()))
+// todo: highlighting
+private fun OrderedToken.toSpan() = TextSpan(token.text, col3().cyan(), visibility = SpanVisibility.GONE)
+
+private fun preparePage() {
+    val spans = mutableListOf<TextSpan>()
+    for (renderedToken in orderedTokens) {
+        spans.add(renderedToken.toSpan())
+    }
+    renderedPage = TextPage(spans)
+}
+
+private fun updateCursor() {
+    currentFrame++
+    if (currentFrame == FRAMES_PER_SPAN) {
+        currentFrame = 0
+        val cnt = orderedTokens.size
+        var found = false
+        for (i in 0 until cnt) {
+            val token = orderedTokens[i]
+            val span = renderedPage.spans[i]
+            if (token.order == currentOrder) {
+                if (span.visibility == SpanVisibility.GONE) {
+                    span.visibility = SpanVisibility.VISIBLE
+                    found = true
+                    break
+                }
             }
         }
-        renderedPages.add(TextPage(spans))
-    }
-}
-
-private fun nextFrame() {
-    currentFrame++
-    if (currentFrame == FRAMES_PER_PAGE) {
-        currentPage++
-        currentFrame = 0
-        if (currentPage == renderedPages.size) {
-            currentPage = 0
+        if (!found) {
+            currentOrder++
+            if (currentOrder == orderCnt) {
+                currentOrder = 0
+                renderedPage.spans.forEach { it.visibility = SpanVisibility.GONE }
+            }
         }
     }
 }
-
-private fun currentPage() = renderedPages[currentPage]
 
 private fun onFrame() {
     glClear(col3().ltGrey())
-    simpleTextTechnique.page(currentPage())
-    nextFrame()
+    updateCursor()
+    simpleTextTechnique.page(renderedPage)
 }
 
 private fun onBuffer(buffer: ByteBuffer) {

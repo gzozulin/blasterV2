@@ -13,7 +13,9 @@ private const val FONT_STEP_V = 1f
 private const val LETTER_SIZE_U = FONT_GLYPH_SIDE * FONT_SCALE_U
 private const val LETTER_SIZE_V = FONT_GLYPH_SIDE * FONT_SCALE_V
 
-data class TextSpan(val text: String, val color: col3 = col3().blue())
+enum class SpanVisibility { VISIBLE, INVISIBLE, GONE }
+data class TextSpan(val text: String, val color: col3 = col3().blue(),
+                    var visibility: SpanVisibility = SpanVisibility.VISIBLE)
 data class TextPage(val spans: List<TextSpan>)
 
 class SimpleTextTechnique(
@@ -82,6 +84,9 @@ class SimpleTextTechnique(
         glBind(font) {
             simpleTechnique.draw {
                 for (span in page.spans) {
+                    if (span.visibility == SpanVisibility.GONE) {
+                        continue
+                    }
                     updateSpan(span)
                     for (character in span.text) {
                         if (character == '\n') {
@@ -89,9 +94,11 @@ class SimpleTextTechnique(
                             currentLine++
                             continue
                         }
-                        updateCursor()
-                        updateGlyph(character)
-                        simpleTechnique.instance(rect)
+                        if (span.visibility == SpanVisibility.VISIBLE) {
+                            updateCursor()
+                            updateGlyph(character)
+                            simpleTechnique.instance(rect)
+                        }
                         currentLetter ++
                     }
                 }
@@ -104,7 +111,9 @@ private val window = GlWindow()
 
 private val examplePage = TextPage(listOf(
     TextSpan("Heeeeeelloooo Greg!!\n", color = col3().red()),
-    TextSpan("What an occasion, we met again!!\n\n", color = col3().blue()),
+    TextSpan("What an occasion, we met again!!\n", color = col3().blue()),
+    TextSpan("This span is invisible!\n", color = col3().blue(), visibility = SpanVisibility.INVISIBLE),
+    TextSpan("This span is gone!\n", color = col3().blue(), visibility = SpanVisibility.GONE),
     TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
