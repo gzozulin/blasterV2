@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.Token
 import java.nio.ByteBuffer
 import kotlin.streams.toList
 
-private const val FRAMES_PER_SPAN = 1
+private const val FRAMES_PER_SPAN = 5
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
@@ -61,11 +61,7 @@ fun main() {
 private fun renderScenario() {
     parser.reset()
     val visitor = visit(scenario) { increment ->
-        for (renderedToken in increment) {
-            if (!orderedTokens.contains(renderedToken)) {
-                orderedTokens += renderedToken
-            }
-        }
+        orderedTokens += increment
     }
     visitor.visitKotlinFile(parser.kotlinFile())
 }
@@ -98,20 +94,29 @@ private fun DeclCtx.identifier() = when {
 }
 
 private fun DeclCtx.predeclare(): List<Token> {
-    val start = start.tokenIndex.leftWS()
+    val start = start.tokenIndex.leftPadding()
     val classDecl = classDeclaration()!!
     val stop = classDecl.classBody().start.tokenIndex
     return tokens.get(start, stop)
 }
 
 private fun DeclCtx.define(): List<Token> {
-    val start = start.tokenIndex.leftWS()
+    val start = start.tokenIndex.leftPadding()
     return tokens.get(start, stop.tokenIndex)
 }
 
 private fun DeclCtx.postdeclare(): List<Token> {
-    val start = stop.tokenIndex.leftWS()
+    val start = stop.tokenIndex.leftPadding()
     return tokens.get(start, stop.tokenIndex)
+}
+
+private fun Int.leftPadding(): Int {
+    var result = this - 1
+    // FIXME: 2021-02-12 other WS types
+    while (result >= 0 && tokens.get(result).type == KotlinLexer.WS) {
+        result --
+    }
+    return result
 }
 
 private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: List<OrderedToken>) -> Unit) {
@@ -127,42 +132,42 @@ private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: Li
 
 private fun List<Token>.withOrder(step: Int) = stream().map { OrderedToken(step, it) }.toList()
 
-private fun Int.leftWS(): Int {
-    var result = this - 1
-    while (result >= 0 && tokens.get(result).type == KotlinLexer.WS) {
-        result --
-    }
-    return result
-}
-
 private fun preparePage() {
     val spans = mutableListOf<OrderedSpan>()
-    for (renderedToken in orderedTokens) {
-        spans.add(renderedToken.toOrderedSpan())
+    for (orderedToken in orderedTokens) {
+        spans.add(orderedToken.toOrderedSpan())
     }
     renderedPage = TextPage(spans)
 }
 
 fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
 
+private fun onFrame() {
+    glClear(col3().ltGrey())
+    updateSpans()
+    simpleTextTechnique.page(renderedPage)
+}
+
 private fun updateSpans() {
     currentFrame++
     if (currentFrame == FRAMES_PER_SPAN) {
         currentFrame = 0
-        val cnt = orderedTokens.size
         var found = false
-        for (i in 0 until cnt) {
-            val orderedSpan = renderedPage.spans[i]
+        for (orderedSpan in renderedPage.spans) {
             if (orderedSpan.order == currentOrder) {
                 if (orderedSpan.visibility == SpanVisibility.GONE) {
                     orderedSpan.visibility = SpanVisibility.VISIBLE
-                    found = true
-                    break
+                    if (orderedSpan.text.isNotBlank()) {
+                        // non-WS counts
+                        found = true
+                        break
+                    }
                 }
             }
         }
         if (!found) {
             nextOrder()
+            showWS()
         }
     }
 }
@@ -175,10 +180,11 @@ private fun nextOrder() {
     }
 }
 
-private fun onFrame() {
-    glClear(col3().ltGrey())
-    updateSpans()
-    simpleTextTechnique.page(renderedPage)
+private fun showWS() {
+    renderedPage.spans
+        .filter { it.order == currentOrder }
+        .filter { it.text.isBlank() }
+        .forEach { it.visibility = SpanVisibility.VISIBLE }
 }
 
 private fun onBuffer(buffer: ByteBuffer) {
