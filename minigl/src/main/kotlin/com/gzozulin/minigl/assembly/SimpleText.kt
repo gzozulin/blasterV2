@@ -14,9 +14,14 @@ private const val LETTER_SIZE_U = FONT_GLYPH_SIDE * FONT_SCALE_U
 private const val LETTER_SIZE_V = FONT_GLYPH_SIDE * FONT_SCALE_V
 
 enum class SpanVisibility { VISIBLE, INVISIBLE, GONE }
-data class TextSpan(val text: String, val color: col3 = col3().blue(),
-                    var visibility: SpanVisibility = SpanVisibility.VISIBLE)
-data class TextPage(val spans: List<TextSpan>)
+
+interface TextSpan {
+    val text: String
+    val color: col3
+    var visibility: SpanVisibility
+}
+
+data class TextPage<T : TextSpan>(val spans: List<T>)
 
 class SimpleTextTechnique(
     private var windowWidth: Int, private var windowHeight: Int) : GlResource() {
@@ -78,7 +83,7 @@ class SimpleTextTechnique(
         uniformColor.value = vec4(span.color, 0f)
     }
 
-    fun page(page: TextPage) {
+    fun <T : TextSpan> page(page: TextPage<T>) {
         currentLetter = 0
         currentLine = 0
         glBind(font) {
@@ -109,40 +114,45 @@ class SimpleTextTechnique(
 
 private val window = GlWindow()
 
+private data class SimpleSpan(
+    override val text: String,
+    override val color: col3,
+    override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
+
 private val examplePage = TextPage(listOf(
-    TextSpan("Heeeeeelloooo Greg!!\n", color = col3().red()),
-    TextSpan("What an occasion, we met again!!\n", color = col3().blue()),
-    TextSpan("This span is invisible!\n", color = col3().blue(), visibility = SpanVisibility.INVISIBLE),
-    TextSpan("This span is gone!\n", color = col3().blue(), visibility = SpanVisibility.GONE),
-    TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
+    SimpleSpan("Heeeeeelloooo Greg!!\n", color = col3().red()),
+    SimpleSpan("What an occasion, we met again!!\n", color = col3().blue()),
+    SimpleSpan("This span is invisible!\n", color = col3().blue(), visibility = SpanVisibility.INVISIBLE),
+    SimpleSpan("This span is gone!\n", color = col3().blue(), visibility = SpanVisibility.GONE),
+    SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
             "It has survived not only five centuries, but also the leap into electronic typesetting,\n" +
             "remaining essentially unchanged. It was popularised in the 1960s with the release of\n" +
             "Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing\n" +
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().green()),
-    TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
+    SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
             "It has survived not only five centuries, but also the leap into electronic typesetting,\n" +
             "remaining essentially unchanged. It was popularised in the 1960s with the release of\n" +
             "Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing\n" +
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().cyan()),
-    TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
+    SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
             "It has survived not only five centuries, but also the leap into electronic typesetting,\n" +
             "remaining essentially unchanged. It was popularised in the 1960s with the release of\n" +
             "Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing\n" +
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().azure()),
-    TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
+    SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
             "It has survived not only five centuries, but also the leap into electronic typesetting,\n" +
             "remaining essentially unchanged. It was popularised in the 1960s with the release of\n" +
             "Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing\n" +
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().aquamarine()),
-    TextSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
+    SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
             "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when\n" +
             "an unknown printer took a galley of type and scrambled it to make a type specimen book.\n" +
             "It has survived not only five centuries, but also the leap into electronic typesetting,\n" +

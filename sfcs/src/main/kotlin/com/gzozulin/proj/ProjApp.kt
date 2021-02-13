@@ -11,16 +11,18 @@ import org.antlr.v4.runtime.Token
 import java.nio.ByteBuffer
 import kotlin.streams.toList
 
-private const val FRAMES_PER_SPAN = 5
+private const val FRAMES_PER_SPAN = 1
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
 private data class ProjectorNode(val order: Int, val identifier: String, val children: List<ProjectorNode>? = null)
 
 data class OrderedToken(val order: Int, val token: Token)
+data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
+                       override var visibility: SpanVisibility) : TextSpan
 
 private val chars by lazy { CharStreams.fromFileName(
-    "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt") }
+    "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjApp.kt") }
 private val lexer by lazy { KotlinLexer(chars) }
 private val tokens by lazy { CommonTokenStream(lexer) }
 private val parser by lazy { KotlinParser(tokens) }
@@ -28,20 +30,16 @@ private val parser by lazy { KotlinParser(tokens) }
 // todo: add the aility to "split" the node: i.e. MainClass first, then UtilityClass, then MainClass again
 private var orderCnt = 0
 private val scenario = listOf(
-    ProjectorNode(
-        orderCnt++,"MainClass", children = listOf(
-            ProjectorNode(orderCnt++, "originFunction"),
-            ProjectorNode(orderCnt++, "internalValue"),
-            ProjectorNode(orderCnt++, "internalFlag"),
-    )),
-    ProjectorNode(orderCnt++, "UtilityClass", children = listOf(
-        ProjectorNode(orderCnt++, "internalFunction")
-    )),
-    ProjectorNode(orderCnt++, "highlevelFunction")
+    ProjectorNode(orderCnt++, "main"),
+    ProjectorNode(orderCnt++, "renderScenario"),
+    ProjectorNode(orderCnt++, "preparePage"),
+    ProjectorNode(orderCnt++, "capturer"),
+    ProjectorNode(orderCnt++, "visit"),
+    ProjectorNode(orderCnt++, "updateCursor"),
 )
 
 private val orderedTokens = mutableListOf<OrderedToken>()
-private lateinit var renderedPage: TextPage
+private lateinit var renderedPage: TextPage<OrderedSpan>
 
 private val capturer = GlCapturer()
 
@@ -95,6 +93,7 @@ private fun DeclCtx.identifier() = when {
     functionDeclaration() != null -> functionDeclaration().simpleIdentifier().text
     propertyDeclaration() != null -> propertyDeclaration().variableDeclaration().simpleIdentifier().text
     objectDeclaration() != null -> objectDeclaration().simpleIdentifier().text
+    typeAlias() != null -> typeAlias().simpleIdentifier().text
     else -> error("Unknown declaration!")
 }
 
@@ -137,43 +136,48 @@ private fun Int.leftWS(): Int {
 }
 
 private fun preparePage() {
-    val spans = mutableListOf<TextSpan>()
+    val spans = mutableListOf<OrderedSpan>()
     for (renderedToken in orderedTokens) {
-        spans.add(renderedToken.toSpan())
+        spans.add(renderedToken.toOrderedSpan())
     }
     renderedPage = TextPage(spans)
 }
 
-private fun updateCursor() {
+fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
+
+private fun updateSpans() {
     currentFrame++
     if (currentFrame == FRAMES_PER_SPAN) {
         currentFrame = 0
         val cnt = orderedTokens.size
         var found = false
         for (i in 0 until cnt) {
-            val token = orderedTokens[i]
-            val span = renderedPage.spans[i]
-            if (token.order == currentOrder) {
-                if (span.visibility == SpanVisibility.GONE) {
-                    span.visibility = SpanVisibility.VISIBLE
+            val orderedSpan = renderedPage.spans[i]
+            if (orderedSpan.order == currentOrder) {
+                if (orderedSpan.visibility == SpanVisibility.GONE) {
+                    orderedSpan.visibility = SpanVisibility.VISIBLE
                     found = true
                     break
                 }
             }
         }
         if (!found) {
-            currentOrder++
-            if (currentOrder == orderCnt) {
-                currentOrder = 0
-                renderedPage.spans.forEach { it.visibility = SpanVisibility.GONE }
-            }
+            nextOrder()
         }
+    }
+}
+
+private fun nextOrder() {
+    currentOrder++
+    if (currentOrder == orderCnt) {
+        currentOrder = 0
+        renderedPage.spans.forEach { it.visibility = SpanVisibility.GONE }
     }
 }
 
 private fun onFrame() {
     glClear(col3().ltGrey())
-    updateCursor()
+    updateSpans()
     simpleTextTechnique.page(renderedPage)
 }
 
