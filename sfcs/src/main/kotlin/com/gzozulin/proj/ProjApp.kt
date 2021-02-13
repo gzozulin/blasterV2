@@ -6,6 +6,7 @@ import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.gl.*
 import org.antlr.v4.runtime.CharStreams
+import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
 import java.nio.ByteBuffer
@@ -61,10 +62,17 @@ fun main() {
 private fun renderScenario() {
     parser.reset()
     val visitor = visit(scenario) { increment ->
-        orderedTokens += increment
+        if (increment.last().token.type != KotlinLexer.NL) {
+            orderedTokens += addTrailingNl(increment)
+        } else {
+            orderedTokens += increment
+        }
     }
     visitor.visitKotlinFile(parser.kotlinFile())
 }
+
+private fun addTrailingNl(increment: List<OrderedToken>) =
+    listOf(*increment.toTypedArray(), OrderedToken(increment.first().order, CommonToken(KotlinParser.NL, "\n")))
 
 private fun visit(nodes: List<ProjectorNode>, result: (increment: List<OrderedToken>) -> Unit) =
     object : KotlinParserBaseVisitor<Unit>() {
