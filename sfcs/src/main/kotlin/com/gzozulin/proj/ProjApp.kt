@@ -18,8 +18,18 @@ private const val MILLIS_PER_FRAME = 16
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
-private data class ProjectorNode(val order: Int, val timeout: Long,
-                                 val identifier: String, val children: List<ProjectorNode>? = null)
+private data class ScenarioNode(val order: Int, val identifier: String,
+                                val timeout: Long = TimeUnit.SECONDS.toMillis(1),
+                                val children: List<ScenarioNode>? = null) {
+
+    override fun toString(): String {
+        return super.toString()
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
+}
 
 data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
@@ -34,13 +44,13 @@ private val parser by lazy { KotlinParser(tokens) }
 // todo: add the aility to "split" the node: i.e. MainClass first, then UtilityClass, then MainClass again
 private var scenarioNodeCnt = 0
 private val scenario = listOf(
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(7),"main"),
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"renderScenario"),
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"preparePage"),
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"capturer"),
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"Visitor",
-        children = listOf(ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"visitDeclaration"))),
-    ProjectorNode(scenarioNodeCnt++, TimeUnit.SECONDS.toMillis(2),"updateCursor"),
+    ScenarioNode(scenarioNodeCnt++,"ScenarioNode", children = listOf(
+        ScenarioNode(scenarioNodeCnt++, "toString")
+    )),
+    ScenarioNode(scenarioNodeCnt++, "main"),
+    ScenarioNode(scenarioNodeCnt++,"ScenarioNode", children = listOf(
+        ScenarioNode(scenarioNodeCnt++, "hashCode")
+    ))
 )
 
 private val orderedTokens = mutableListOf<OrderedToken>()
@@ -81,7 +91,7 @@ private fun renderScenario() {
 private fun addTrailingNl(increment: List<OrderedToken>) =
     listOf(*increment.toTypedArray(), OrderedToken(increment.first().order, CommonToken(KotlinParser.NL, "\n")))
 
-private class Visitor(val nodes: List<ProjectorNode>, val result: (increment: List<OrderedToken>) -> Unit)
+private class Visitor(val nodes: List<ScenarioNode>, val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
     override fun visitDeclaration(decl: DeclCtx) {
         val identifier = decl.identifier()
@@ -108,7 +118,7 @@ private fun DeclCtx.identifier() = when {
     else -> error("Unknown declaration!")
 }
 
-// FIXME: 2021-02-12 objects and functions
+// FIXME: 2021-02-12 objects and functions, ctors
 private fun DeclCtx.predeclare(): List<Token> {
     val start = start.tokenIndex.leftPadding()
     val classDecl = classDeclaration()!!
@@ -135,7 +145,7 @@ private fun Int.leftPadding(): Int {
     return result
 }
 
-private fun DeclCtx.visitNext(nodes: List<ProjectorNode>, result: (increment: List<OrderedToken>) -> Unit) {
+private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, result: (increment: List<OrderedToken>) -> Unit) {
     val visitor = Visitor(nodes, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
@@ -157,14 +167,6 @@ private fun preparePage() {
 }
 
 fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
-
-private fun prepareOrder() {
-    renderedPage.spans
-        .filter { it.order == currentOrder }
-        .filter { it.text.isBlank() }
-        .forEach { it.visibility = SpanVisibility.VISIBLE }
-    currentTimeout = scenario[currentOrder].timeout
-}
 
 private fun onFrame() {
     glClear(col3().ltGrey())
@@ -217,9 +219,32 @@ private fun advanceTimeout() {
 
 private fun nextOrder() {
     currentOrder++
-    if (currentOrder == scenarioNodeCnt - 1) {
+    if (currentOrder == scenarioNodeCnt) {
         currentOrder = 0
         renderedPage.spans.forEach { it.visibility = SpanVisibility.GONE }
+    }
+}
+
+private fun prepareOrder() {
+    showOrderWs()
+    findOrderTimeout(scenario)
+}
+
+private fun showOrderWs() {
+    renderedPage.spans
+        .filter { it.order == currentOrder }
+        .filter { it.text.isBlank() }
+        .forEach { it.visibility = SpanVisibility.VISIBLE }
+}
+
+private fun findOrderTimeout(scenario: List<ScenarioNode>) {
+    for (scenarioNode in scenario) {
+        if (scenarioNode.order == currentOrder) {
+            currentTimeout = scenarioNode.timeout
+            return
+        } else if (scenarioNode.children != null) {
+            findOrderTimeout(scenarioNode.children)
+        }
     }
 }
 
