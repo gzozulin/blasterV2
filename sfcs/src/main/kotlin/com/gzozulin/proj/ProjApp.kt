@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.streams.toList
@@ -18,7 +19,7 @@ private const val MILLIS_PER_FRAME = 16
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
-private data class ScenarioNode(val order: Int, val identifier: String,
+private data class ScenarioNode(val order: Int, val file: File, val identifier: String,
                                 val timeout: Long = TimeUnit.SECONDS.toMillis(1),
                                 val children: List<ScenarioNode>? = null) {
 
@@ -35,39 +36,34 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-private val chars by lazy { CharStreams.fromFileName(
-    "/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjApp.kt") }
-private val lexer by lazy { KotlinLexer(chars) }
-private val tokens by lazy { CommonTokenStream(lexer) }
-private val parser by lazy { KotlinParser(tokens) }
-
-// todo: add the aility to "split" the node: i.e. MainClass first, then UtilityClass, then MainClass again
 private var scenarioNodeCnt = 0
+
+// todo: assert that children file is same as parent
+private val thisFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjApp.kt")
+private val anotherFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt")
+
 private val scenario = listOf(
-    ScenarioNode(scenarioNodeCnt++,"ScenarioNode", children = listOf(
-        ScenarioNode(scenarioNodeCnt++, "toString")
+    ScenarioNode(scenarioNodeCnt++, thisFile, "ScenarioNode", children = listOf(
+        ScenarioNode(scenarioNodeCnt++, thisFile,"toString"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "hashCode")
     )),
-    ScenarioNode(scenarioNodeCnt++, "main"),
-    ScenarioNode(scenarioNodeCnt++,"ScenarioNode", children = listOf(
-        ScenarioNode(scenarioNodeCnt++, "hashCode")
-    ))
+    ScenarioNode(scenarioNodeCnt++, anotherFile, "highlevelFunction")
 )
 
-private val orderedTokens = mutableListOf<OrderedToken>()
-private lateinit var renderedPage: TextPage<OrderedSpan>
+private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
 private val capturer = GlCapturer()
 
 private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
 private var isAdvancingSpans = true // spans or timeout
+private var currentPage = TextPage<OrderedSpan>(emptyList())
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
 
 fun main() {
     renderScenario()
-    preparePage()
     prepareOrder()
     capturer.create {
         glUse(simpleTextTechnique) {
@@ -77,8 +73,25 @@ fun main() {
 }
 
 private fun renderScenario() {
-    parser.reset()
-    val visitor = Visitor(scenario) { increment ->
+    val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()
+    for (scenarioNode in scenario) {
+        if (!nodesToFiles.containsKey(scenarioNode.file)) {
+            nodesToFiles[scenarioNode.file] = mutableListOf()
+        }
+        nodesToFiles[scenarioNode.file]!!.add(scenarioNode)
+    }
+    for (pairs in nodesToFiles) {
+        renderedPages.add(renderFile(pairs.key, pairs.value))
+    }
+}
+
+private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
+    val chars = CharStreams.fromFileName(file.absolutePath)
+    val lexer = KotlinLexer(chars)
+    val tokens = CommonTokenStream(lexer)
+    val parser = KotlinParser(tokens).apply { reset() }
+    val orderedTokens = mutableListOf<OrderedToken>()
+    val visitor = Visitor(nodes, tokens) { increment ->
         if (increment.last().token.type != KotlinLexer.NL) {
             orderedTokens += addTrailingNl(increment)
         } else {
@@ -86,13 +99,17 @@ private fun renderScenario() {
         }
     }
     visitor.visitKotlinFile(parser.kotlinFile())
+    return preparePage(orderedTokens)
 }
 
 private fun addTrailingNl(increment: List<OrderedToken>) =
     listOf(*increment.toTypedArray(), OrderedToken(increment.first().order, CommonToken(KotlinParser.NL, "\n")))
 
-private class Visitor(val nodes: List<ScenarioNode>, val result: (increment: List<OrderedToken>) -> Unit)
+private class Visitor(val nodes: List<ScenarioNode>,
+                      val tokens: CommonTokenStream,
+                      val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
+
     override fun visitDeclaration(decl: DeclCtx) {
         val identifier = decl.identifier()
         val filtered = nodes.filter { it.identifier == identifier }
@@ -100,13 +117,13 @@ private class Visitor(val nodes: List<ScenarioNode>, val result: (increment: Lis
         val withChildren = filtered.filter { it.children != null }
         if (withChildren.isNotEmpty()) { // need to declare then
             check(withChildren.size == filtered.size) { "All with children or none!" }
-            result.invoke(decl.predeclare().withOrder(first.order))
+            result.invoke(decl.predeclare(tokens).withOrder(first.order))
             withChildren.forEach {
-                decl.visitNext(it.children!!, result)
+                decl.visitNext(it.children!!, tokens, result)
             }
-            result.invoke(decl.postdeclare().withOrder(first.order))
+            result.invoke(decl.postdeclare(tokens).withOrder(first.order))
         } else { // just define
-            result.invoke(decl.define().withOrder(first.order))
+            result.invoke(decl.define(tokens).withOrder(first.order))
         }
     }
 }
@@ -121,24 +138,24 @@ private fun DeclCtx.identifier() = when {
 }
 
 // FIXME: 2021-02-12 objects and functions, ctors
-private fun DeclCtx.predeclare(): List<Token> {
-    val start = start.tokenIndex.leftPadding()
+private fun DeclCtx.predeclare(tokens: CommonTokenStream): List<Token> {
+    val start = start.tokenIndex.leftPadding(tokens)
     val classDecl = classDeclaration()!!
     val stop = classDecl.classBody().start.tokenIndex
     return tokens.get(start, stop)
 }
 
-private fun DeclCtx.define(): List<Token> {
-    val start = start.tokenIndex.leftPadding()
+private fun DeclCtx.define(tokens: CommonTokenStream): List<Token> {
+    val start = start.tokenIndex.leftPadding(tokens)
     return tokens.get(start, stop.tokenIndex)
 }
 
-private fun DeclCtx.postdeclare(): List<Token> {
-    val start = stop.tokenIndex.leftPadding()
+private fun DeclCtx.postdeclare(tokens: CommonTokenStream): List<Token> {
+    val start = stop.tokenIndex.leftPadding(tokens)
     return tokens.get(start, stop.tokenIndex)
 }
 
-private fun Int.leftPadding(): Int {
+private fun Int.leftPadding(tokens: CommonTokenStream): Int {
     var result = this - 1
     // FIXME: 2021-02-12 other WS types
     while (result >= 0 && tokens.get(result).type == KotlinLexer.WS) {
@@ -147,8 +164,8 @@ private fun Int.leftPadding(): Int {
     return result
 }
 
-private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, result: (increment: List<OrderedToken>) -> Unit) {
-    val visitor = Visitor(nodes, result)
+private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
+    val visitor = Visitor(nodes, tokens, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
         functionDeclaration() != null -> visitor.visitFunctionDeclaration(functionDeclaration())
@@ -160,12 +177,12 @@ private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, result: (increment: Lis
 
 private fun List<Token>.withOrder(step: Int) = stream().map { OrderedToken(step, it) }.toList()
 
-private fun preparePage() {
+private fun preparePage(orderedTokens: MutableList<OrderedToken>): TextPage<OrderedSpan> {
     val spans = mutableListOf<OrderedSpan>()
     for (orderedToken in orderedTokens) {
         spans.add(orderedToken.toOrderedSpan())
     }
-    renderedPage = TextPage(spans)
+    return TextPage(spans)
 }
 
 fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
@@ -173,7 +190,7 @@ fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(),
 private fun onFrame() {
     glClear(col3().ltGrey())
     updateSpans()
-    simpleTextTechnique.page(renderedPage)
+    simpleTextTechnique.page(currentPage)
 }
 
 private fun updateSpans() {
@@ -197,7 +214,7 @@ private fun advanceSpans() {
 }
 
 private fun makeNextNonWsSpanVisible(): Boolean {
-    for (orderedSpan in renderedPage.spans) {
+    for (orderedSpan in currentPage.spans) {
         if (orderedSpan.order == currentOrder) {
             if (orderedSpan.visibility == SpanVisibility.GONE) {
                 orderedSpan.visibility = SpanVisibility.VISIBLE
@@ -223,20 +240,35 @@ private fun nextOrder() {
     currentOrder++
     if (currentOrder == scenarioNodeCnt) {
         currentOrder = 0
-        renderedPage.spans.forEach { it.visibility = SpanVisibility.GONE }
+        renderedPages.forEach {
+            it.spans.forEach { span -> span.visibility = SpanVisibility.GONE }
+        }
     }
 }
 
 private fun prepareOrder() {
+    findNextPage()
     showOrderWs()
     findOrderTimeout(scenario)
 }
 
 private fun showOrderWs() {
-    renderedPage.spans
+    currentPage.spans
         .filter { it.order == currentOrder }
         .filter { it.text.isBlank() }
         .forEach { it.visibility = SpanVisibility.VISIBLE }
+}
+
+private fun findNextPage() {
+    for (renderedPage in renderedPages) {
+        for (span in renderedPage.spans) {
+            if (span.order == currentOrder) {
+                currentPage = renderedPage
+                return
+            }
+        }
+    }
+    error("Did not found next page!")
 }
 
 private fun findOrderTimeout(scenario: List<ScenarioNode>) {

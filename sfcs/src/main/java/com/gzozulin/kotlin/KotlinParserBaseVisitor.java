@@ -3,7 +3,7 @@ package com.gzozulin.kotlin;
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
-/**
+/**scenario
  * This class provides an empty implementation of {@link KotlinParserVisitor},
  * which can be extended to create a visitor which only needs to handle a subset
  * of the available methods.
