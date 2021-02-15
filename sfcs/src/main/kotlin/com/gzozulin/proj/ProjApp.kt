@@ -95,16 +95,18 @@ private class Visitor(val nodes: List<ScenarioNode>, val result: (increment: Lis
     : KotlinParserBaseVisitor<Unit>() {
     override fun visitDeclaration(decl: DeclCtx) {
         val identifier = decl.identifier()
-        for (node in nodes) {
-            if (node.identifier == identifier) {
-                if (node.children != null) {
-                    result.invoke(decl.predeclare().withOrder(node.order))
-                    decl.visitNext(node.children, result)
-                    result.invoke(decl.postdeclare().withOrder(node.order))
-                } else {
-                    result.invoke(decl.define().withOrder(node.order))
-                }
+        val filtered = nodes.filter { it.identifier == identifier }
+        val first = filtered.firstOrNull() ?: return // first or none found
+        val withChildren = filtered.filter { it.children != null }
+        if (withChildren.isNotEmpty()) { // need to declare then
+            check(withChildren.size == filtered.size) { "All with children or none!" }
+            result.invoke(decl.predeclare().withOrder(first.order))
+            withChildren.forEach {
+                decl.visitNext(it.children!!, result)
             }
+            result.invoke(decl.postdeclare().withOrder(first.order))
+        } else { // just define
+            result.invoke(decl.define().withOrder(first.order))
         }
     }
 }
