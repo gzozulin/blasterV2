@@ -5,6 +5,10 @@ import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.gl.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
@@ -47,7 +51,8 @@ private val scenario = listOf(
         ScenarioNode(scenarioNodeCnt++, thisFile,"toString"),
         ScenarioNode(scenarioNodeCnt++, thisFile, "hashCode")
     )),
-    ScenarioNode(scenarioNodeCnt++, anotherFile, "highlevelFunction")
+    ScenarioNode(scenarioNodeCnt++, anotherFile, "highlevelFunction"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "main")
 )
 
 private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
@@ -80,8 +85,12 @@ private fun renderScenario() {
         }
         nodesToFiles[scenarioNode.file]!!.add(scenarioNode)
     }
-    for (pairs in nodesToFiles) {
-        renderedPages.add(renderFile(pairs.key, pairs.value))
+    runBlocking {
+        val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
+        for (pairs in nodesToFiles) {
+            deferred.add(async { renderFile(pairs.key, pairs.value) })
+        }
+        renderedPages.addAll(deferred.awaitAll())
     }
 }
 
