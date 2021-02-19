@@ -3,7 +3,6 @@ package com.gzozulin.minigl.assembly
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import java.lang.Integer.max
-import kotlin.math.min
 
 private const val FONT_CNT_UV = 16
 private const val FONT_GLYPH_SIDE = 12
@@ -83,7 +82,34 @@ class SimpleTextTechnique(
         uniformColor.value = vec4(span.color, 0f)
     }
 
-    fun <T : TextSpan> page(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
+    fun <T : TextSpan> pageExcerpt(page: TextPage<T>, centerOn: T, linesCnt: Int) {
+        var center = -1
+        var currentLine = 0
+        for (span in page.spans) {
+            if (span == centerOn) {
+                center = currentLine
+                break
+            }
+            if (span.visibility == SpanVisibility.GONE) {
+                continue
+            }
+            for (character in span.text) {
+                if (character == '\n') {
+                    currentLine++
+                }
+            }
+        }
+        check(center >= 0) { "Span $centerOn not found in page $page" }
+        pageCentered(page, center, linesCnt)
+    }
+
+    fun <T : TextSpan> pageCentered(page: TextPage<T>, center: Int, linesCnt: Int) {
+        val fromLine = max(center - linesCnt, 0)
+        val toLine = center + linesCnt
+        pageRange(page, fromLine, toLine)
+    }
+
+    fun <T : TextSpan> pageRange(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
         check(fromLine in 0 until toLine) { "wtf?!" }
         var currentLetter = 0
         var currentLine = 0
@@ -117,13 +143,6 @@ class SimpleTextTechnique(
             }
         }
     }
-
-    fun <T : TextSpan> pageExcerpt(page: TextPage<T>, center: Int, linesCnt: Int) {
-        val cntHalf = linesCnt / 2
-        val fromLine = max(center - cntHalf, 0)
-        val toLine = center + cntHalf
-        page(page, fromLine, toLine)
-    }
 }
 
 private val window = GlWindow()
@@ -133,9 +152,11 @@ private data class SimpleSpan(
     override val color: col3,
     override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
 
+private val occasionSpan = SimpleSpan("What an occasion, we met again!!\n", color = col3().blue())
+
 private val examplePage = TextPage(listOf(
     SimpleSpan("Heeeeeelloooo Greg!!\n", color = col3().red()),
-    SimpleSpan("What an occasion, we met again!!\n", color = col3().blue()),
+    occasionSpan,
     SimpleSpan("This span is invisible!\n", color = col3().blue(), visibility = SpanVisibility.INVISIBLE),
     SimpleSpan("This span is gone!\n", color = col3().blue(), visibility = SpanVisibility.GONE),
     SimpleSpan("Lorem Ipsum is simply dummy text of the printing and typesetting industry.\n" +
@@ -185,7 +206,7 @@ fun main() {
         glUse(simpleTextTechnique) {
             window.show {
                 glClear(col3().ltGrey())
-                simpleTextTechnique.pageExcerpt(examplePage, 0, 100)
+                simpleTextTechnique.pageExcerpt(examplePage, occasionSpan, 10)
             }
         }
     }

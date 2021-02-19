@@ -20,6 +20,7 @@ import kotlin.streams.toList
 
 private const val FRAMES_PER_SPAN = 5
 private const val MILLIS_PER_FRAME = 16
+private const val LINES_TO_SHOW = 2
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
@@ -63,6 +64,7 @@ private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.h
 
 private var isAdvancingSpans = true // spans or timeout
 private lateinit var currentPage: TextPage<OrderedSpan>
+private lateinit var centerOn: OrderedSpan
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
@@ -199,7 +201,7 @@ fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(),
 private fun onFrame() {
     glClear(col3().ltGrey())
     updateSpans()
-    simpleTextTechnique.page(currentPage)
+    simpleTextTechnique.pageExcerpt(currentPage, centerOn, LINES_TO_SHOW)
 }
 
 private fun updateSpans() {
@@ -216,25 +218,27 @@ private fun advanceSpans() {
     if (currentFrame == FRAMES_PER_SPAN) {
         currentFrame = 0
         val found = makeNextNonWsSpanVisible()
-        if (!found) {
+        if (found == null) {
             isAdvancingSpans = false
+        } else {
+            centerOn = found
         }
     }
 }
 
-private fun makeNextNonWsSpanVisible(): Boolean {
+private fun makeNextNonWsSpanVisible(): OrderedSpan? {
     for (orderedSpan in currentPage.spans) {
         if (orderedSpan.order == currentOrder) {
             if (orderedSpan.visibility == SpanVisibility.GONE) {
                 orderedSpan.visibility = SpanVisibility.VISIBLE
                 if (orderedSpan.text.isNotBlank()) {
                     // non-WS counts
-                    return true
+                    return orderedSpan
                 }
             }
         }
     }
-    return false
+    return null
 }
 
 private fun advanceTimeout() {
@@ -273,6 +277,7 @@ private fun findNextPage() {
         for (span in renderedPage.spans) {
             if (span.order == currentOrder) {
                 currentPage = renderedPage
+                centerOn = currentPage.spans.first()
                 return
             }
         }
