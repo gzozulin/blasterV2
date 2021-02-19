@@ -33,8 +33,6 @@ class SimpleTextTechnique(
 
     private val texCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
 
-    private var currentLetter = 0
-    private var currentLine = 0
     private val cursor = mat4().identity()
 
     private val modelM = unifm4(cursor)
@@ -67,10 +65,10 @@ class SimpleTextTechnique(
         unifCenter.value!!.set(mat4().identity().translate(vec3(windowWidth / 2f, windowHeight / 2f, 0f)))
     }
 
-    private fun updateCursor() {
+    private fun updateCursor(line: Int, letter: Int) {
         cursor.identity().setTranslation(
-            currentLetter * LETTER_SIZE_U * FONT_STEP_U - windowWidth/2f,
-            windowHeight/2f - LETTER_SIZE_V * (currentLine + 1) * FONT_STEP_V,
+            letter * LETTER_SIZE_U * FONT_STEP_U - windowWidth/2f,
+            windowHeight/2f - LETTER_SIZE_V * (line + 1) * FONT_STEP_V,
             0f)
         modelM.value = cursor
     }
@@ -87,8 +85,8 @@ class SimpleTextTechnique(
 
     fun <T : TextSpan> page(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
         check(fromLine in 0 until toLine) { "wtf?!" }
-        currentLetter = 0
-        currentLine = 0
+        var currentLetter = 0
+        var currentLine = 0
         glBind(font) {
             simpleTechnique.draw {
                 for (span in page.spans) {
@@ -109,7 +107,7 @@ class SimpleTextTechnique(
                             return@draw
                         }
                         if (span.visibility == SpanVisibility.VISIBLE) {
-                            updateCursor()
+                            updateCursor(currentLine - fromLine, currentLetter)
                             updateGlyph(character)
                             simpleTechnique.instance(rect)
                         }
@@ -118,6 +116,13 @@ class SimpleTextTechnique(
                 }
             }
         }
+    }
+
+    fun <T : TextSpan> pageExcerpt(page: TextPage<T>, center: Int, linesCnt: Int) {
+        val cntHalf = linesCnt / 2
+        val fromLine = max(center - cntHalf, 0)
+        val toLine = center + cntHalf
+        page(page, fromLine, toLine)
     }
 }
 
@@ -180,7 +185,7 @@ fun main() {
         glUse(simpleTextTechnique) {
             window.show {
                 glClear(col3().ltGrey())
-                simpleTextTechnique.page(examplePage)
+                simpleTextTechnique.pageExcerpt(examplePage, 0, 100)
             }
         }
     }
