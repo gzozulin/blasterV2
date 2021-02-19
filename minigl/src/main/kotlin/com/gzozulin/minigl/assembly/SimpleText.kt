@@ -206,7 +206,7 @@ fun main() {
         glUse(simpleTextTechnique) {
             window.show {
                 glClear(col3().ltGrey())
-                simpleTextTechnique.pageExcerpt(examplePage, occasionSpan, 10)
+                simpleTextTechnique.pageExcerpt(examplePage, occasionSpan, 1000)
             }
         }
     }
