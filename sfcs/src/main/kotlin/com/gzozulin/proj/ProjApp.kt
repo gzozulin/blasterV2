@@ -62,7 +62,7 @@ private val capturer = GlCapturer()
 private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
 private var isAdvancingSpans = true // spans or timeout
-private var currentPage = TextPage<OrderedSpan>(emptyList())
+private lateinit var currentPage: TextPage<OrderedSpan>
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L

@@ -2,6 +2,8 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
+import java.lang.Integer.max
+import kotlin.math.min
 
 private const val FONT_CNT_UV = 16
 private const val FONT_GLYPH_SIDE = 12
@@ -83,7 +85,8 @@ class SimpleTextTechnique(
         uniformColor.value = vec4(span.color, 0f)
     }
 
-    fun <T : TextSpan> page(page: TextPage<T>) {
+    fun <T : TextSpan> page(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
+        check(fromLine in 0 until toLine) { "wtf?!" }
         currentLetter = 0
         currentLine = 0
         glBind(font) {
@@ -98,6 +101,12 @@ class SimpleTextTechnique(
                             currentLetter = 0
                             currentLine++
                             continue
+                        }
+                        if (currentLine < fromLine) {
+                            continue
+                        }
+                        if (currentLine >= toLine) {
+                            return@draw
                         }
                         if (span.visibility == SpanVisibility.VISIBLE) {
                             updateCursor()
