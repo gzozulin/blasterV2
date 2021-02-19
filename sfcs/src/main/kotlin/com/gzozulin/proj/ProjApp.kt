@@ -217,22 +217,22 @@ private fun advanceSpans() {
     currentFrame++
     if (currentFrame == FRAMES_PER_SPAN) {
         currentFrame = 0
-        val found = makeNextNonWsSpanVisible()
-        if (found == null) {
-            isAdvancingSpans = false
-        } else {
+        val found = makeNextSpanVisible()
+        if (found != null) {
             centerOn = found
+        } else {
+            isAdvancingSpans = false
         }
     }
 }
 
-private fun makeNextNonWsSpanVisible(): OrderedSpan? {
+private fun makeNextSpanVisible(): OrderedSpan? {
     for (orderedSpan in currentPage.spans) {
         if (orderedSpan.order == currentOrder) {
-            if (orderedSpan.visibility == SpanVisibility.GONE) {
+            if (orderedSpan.visibility == SpanVisibility.INVISIBLE) {
                 orderedSpan.visibility = SpanVisibility.VISIBLE
                 if (orderedSpan.text.isNotBlank()) {
-                    // non-WS counts
+                    // only non-WS counts
                     return orderedSpan
                 }
             }
@@ -261,15 +261,14 @@ private fun nextOrder() {
 
 private fun prepareOrder() {
     findNextPage()
-    showOrderWs()
+    makeOrderInvisible()
     findOrderTimeout(scenario)
 }
 
-private fun showOrderWs() {
+private fun makeOrderInvisible() {
     currentPage.spans
         .filter { it.order == currentOrder }
-        .filter { it.text.isBlank() }
-        .forEach { it.visibility = SpanVisibility.VISIBLE }
+        .forEach { it.visibility = SpanVisibility.INVISIBLE }
 }
 
 private fun findNextPage() {
