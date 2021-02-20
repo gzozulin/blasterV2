@@ -83,23 +83,23 @@ class SimpleTextTechnique(
     }
 
     fun <T : TextSpan> pageExcerpt(page: TextPage<T>, centerOn: T, linesCnt: Int) {
-        var center = -1
-        var currentLine = 0
-        for (span in page.spans) {
-            if (span == centerOn) {
-                center = currentLine
-                break
-            }
-            if (span.visibility == SpanVisibility.GONE) {
-                continue
-            }
-            for (character in span.text) {
-                if (character == '\n') {
-                    currentLine++
+        val center = page.run {
+            var currentLine = 0
+            for (span in page.spans) {
+                if (span == centerOn) {
+                    return@run currentLine
+                }
+                if (span.visibility == SpanVisibility.GONE) {
+                    continue
+                }
+                for (character in span.text) {
+                    if (character == '\n') {
+                        currentLine++
+                    }
                 }
             }
+            error("Span $centerOn not found in page $page")
         }
-        check(center >= 0) { "Span $centerOn not found in page $page" }
         pageCentered(page, center, linesCnt)
     }
 
