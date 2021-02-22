@@ -105,7 +105,7 @@ class SimpleTextTechnique(
 
     fun <T : TextSpan> pageCentered(page: TextPage<T>, centerLine: Int, linesCnt: Int) {
         val fromLine = max(centerLine - linesCnt, 0)
-        val toLine = centerLine + linesCnt
+        val toLine = fromLine + linesCnt * 2
         pageRange(page, fromLine, toLine)
     }
 

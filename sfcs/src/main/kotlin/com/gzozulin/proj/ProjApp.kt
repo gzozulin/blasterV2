@@ -18,9 +18,9 @@ import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.streams.toList
 
-private const val FRAMES_PER_SPAN = 5
+private const val FRAMES_PER_SPAN = 3
 private const val MILLIS_PER_FRAME = 16
-private const val LINES_TO_SHOW = 25
+private const val LINES_TO_SHOW = 20
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
