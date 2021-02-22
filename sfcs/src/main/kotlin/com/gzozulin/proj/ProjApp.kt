@@ -20,22 +20,13 @@ import kotlin.streams.toList
 
 private const val FRAMES_PER_SPAN = 5
 private const val MILLIS_PER_FRAME = 16
-private const val LINES_TO_SHOW = 2
+private const val LINES_TO_SHOW = 25
 
 private typealias DeclCtx = KotlinParser.DeclarationContext
 
 private data class ScenarioNode(val order: Int, val file: File, val identifier: String,
                                 val timeout: Long = TimeUnit.SECONDS.toMillis(1),
-                                val children: List<ScenarioNode>? = null) {
-
-    override fun toString(): String {
-        return super.toString()
-    }
-
-    override fun hashCode(): Int {
-        return super.hashCode()
-    }
-}
+                                val children: List<ScenarioNode>? = null)
 
 data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
@@ -48,12 +39,15 @@ private val thisFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozuli
 private val anotherFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/UtilityClass.kt")
 
 private val scenario = listOf(
-    ScenarioNode(scenarioNodeCnt++, thisFile, "ScenarioNode", children = listOf(
-        ScenarioNode(scenarioNodeCnt++, thisFile,"toString"),
-        ScenarioNode(scenarioNodeCnt++, thisFile, "hashCode")
-    )),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "ScenarioNode"),
     ScenarioNode(scenarioNodeCnt++, anotherFile, "highlevelFunction"),
-    ScenarioNode(scenarioNodeCnt++, thisFile, "main")
+    ScenarioNode(scenarioNodeCnt++, thisFile, "main"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "Visitor"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "identifier"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "predeclare"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "renderScenario"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "renderFile"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "addTrailingNl"),
 )
 
 private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
@@ -64,7 +58,7 @@ private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.h
 
 private var isAdvancingSpans = true // spans or timeout
 private lateinit var currentPage: TextPage<OrderedSpan>
-private lateinit var centerOn: OrderedSpan
+private lateinit var currentSpan: OrderedSpan
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
@@ -201,7 +195,7 @@ fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(),
 private fun onFrame() {
     glClear(col3().ltGrey())
     updateSpans()
-    simpleTextTechnique.pageExcerpt(currentPage, centerOn, LINES_TO_SHOW)
+    simpleTextTechnique.pageExcerpt(currentPage, currentSpan, LINES_TO_SHOW)
 }
 
 private fun updateSpans() {
@@ -217,29 +211,22 @@ private fun advanceSpans() {
     currentFrame++
     if (currentFrame == FRAMES_PER_SPAN) {
         currentFrame = 0
-        val found = makeNextSpanVisible()
+        val found = findNextInvisibleSpan()
         if (found != null) {
-            centerOn = found
+            found.visibility = SpanVisibility.VISIBLE
+            currentSpan = found
         } else {
             isAdvancingSpans = false
         }
     }
 }
 
-private fun makeNextSpanVisible(): OrderedSpan? {
-    for (orderedSpan in currentPage.spans) {
-        if (orderedSpan.order == currentOrder) {
-            if (orderedSpan.visibility == SpanVisibility.INVISIBLE) {
-                orderedSpan.visibility = SpanVisibility.VISIBLE
-                if (orderedSpan.text.isNotBlank()) {
-                    // only non-WS counts
-                    return orderedSpan
-                }
-            }
-        }
+private fun findNextInvisibleSpan() =
+    currentPage.spans.firstOrNull {
+        it.order == currentOrder &&
+        it.visibility == SpanVisibility.INVISIBLE &&
+        it.text.isNotBlank()
     }
-    return null
-}
 
 private fun advanceTimeout() {
     if (currentTimeout <= 0) {
@@ -260,28 +247,32 @@ private fun nextOrder() {
 }
 
 private fun prepareOrder() {
-    findNextPage()
-    makeOrderInvisible()
+    findCurrentPage()
+    updateOrderVisibility()
+    findCurrentSpan()
     findOrderTimeout(scenario)
 }
 
-private fun makeOrderInvisible() {
+private fun updateOrderVisibility() {
     currentPage.spans
         .filter { it.order == currentOrder }
         .forEach { it.visibility = SpanVisibility.INVISIBLE }
 }
 
-private fun findNextPage() {
+private fun findCurrentPage() {
     for (renderedPage in renderedPages) {
         for (span in renderedPage.spans) {
             if (span.order == currentOrder) {
                 currentPage = renderedPage
-                centerOn = currentPage.spans.first()
                 return
             }
         }
     }
     error("Did not found next page!")
+}
+
+private fun findCurrentSpan() {
+    currentSpan = findNextInvisibleSpan()!!
 }
 
 private fun findOrderTimeout(scenario: List<ScenarioNode>) {

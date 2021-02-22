@@ -86,7 +86,7 @@ class SimpleTextTechnique(
         val centerLine = page.run {
             var currentLine = 0
             for (span in page.spans) {
-                if (span == centerOn) {
+                if (span === centerOn) {
                     return@run currentLine
                 }
                 if (span.visibility == SpanVisibility.GONE) {
