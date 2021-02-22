@@ -18,6 +18,13 @@ import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.streams.toList
 
+// todo: scenario to nodes
+// todo: basic scene arrangement
+// todo: scene buffer copying
+// todo: video rendering
+// todo: cursor is not centered, utilizing all window space
+// todo: example project + video
+
 private const val FRAMES_PER_SPAN = 3
 private const val MILLIS_PER_FRAME = 16
 private const val LINES_TO_SHOW = 20
