@@ -22,7 +22,25 @@ interface TextSpan {
     var visibility: SpanVisibility
 }
 
-data class TextPage<T : TextSpan>(val spans: List<T>)
+data class TextPage<T : TextSpan>(val spans: List<T>) {
+    fun findLineNo(lookup: T) = run {
+        var currentLine = 0
+        for (span in spans) {
+            if (span === lookup) {
+                return@run currentLine
+            }
+            if (span.visibility == SpanVisibility.GONE) {
+                continue
+            }
+            for (character in span.text) {
+                if (character == '\n') {
+                    currentLine++
+                }
+            }
+        }
+        error("Span $lookup not found in page")
+    }
+}
 
 class SimpleTextTechnique(
     private var windowWidth: Int, private var windowHeight: Int) : GlResource() {
@@ -80,27 +98,6 @@ class SimpleTextTechnique(
 
     private fun updateSpan(span: TextSpan) {
         uniformColor.value = vec4(span.color, 0f)
-    }
-
-    fun <T : TextSpan> pageExcerpt(page: TextPage<T>, centerOn: T, linesCnt: Int) {
-        val centerLine = page.run {
-            var currentLine = 0
-            for (span in page.spans) {
-                if (span === centerOn) {
-                    return@run currentLine
-                }
-                if (span.visibility == SpanVisibility.GONE) {
-                    continue
-                }
-                for (character in span.text) {
-                    if (character == '\n') {
-                        currentLine++
-                    }
-                }
-            }
-            error("Span $centerOn not found in page $page")
-        }
-        pageCentered(page, centerLine, linesCnt)
     }
 
     fun <T : TextSpan> pageCentered(page: TextPage<T>, centerLine: Int, linesCnt: Int) {
@@ -206,7 +203,8 @@ fun main() {
         glUse(simpleTextTechnique) {
             window.show {
                 glClear(col3().ltGrey())
-                simpleTextTechnique.pageExcerpt(examplePage, occasionSpan, 1000)
+                val centerLine = examplePage.findLineNo(occasionSpan)
+                simpleTextTechnique.pageCentered(examplePage, centerLine, 1000)
             }
         }
     }

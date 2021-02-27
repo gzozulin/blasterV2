@@ -16,13 +16,13 @@ import org.antlr.v4.runtime.Token
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlin.streams.toList
 
 // todo: scenario to nodes
 // todo: basic scene arrangement
 // todo: scene buffer copying
 // todo: video rendering
-// todo: cursor is not centered, utilizing all window space
 // todo: example project + video
 
 private const val FRAMES_PER_SPAN = 3
@@ -49,7 +49,9 @@ private val scenario = listOf(
     ScenarioNode(scenarioNodeCnt++, thisFile, "ScenarioNode"),
     ScenarioNode(scenarioNodeCnt++, anotherFile, "highlevelFunction"),
     ScenarioNode(scenarioNodeCnt++, thisFile, "main"),
-    ScenarioNode(scenarioNodeCnt++, thisFile, "Visitor"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "findNextInvisibleSpan"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "updateCenter"),
+    ScenarioNode(scenarioNodeCnt++, thisFile, "advanceTimeout"),
     ScenarioNode(scenarioNodeCnt++, thisFile, "identifier"),
     ScenarioNode(scenarioNodeCnt++, thisFile, "predeclare"),
     ScenarioNode(scenarioNodeCnt++, thisFile, "renderScenario"),
@@ -65,7 +67,7 @@ private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.h
 
 private var isAdvancingSpans = true // spans or timeout
 private lateinit var currentPage: TextPage<OrderedSpan>
-private lateinit var currentSpan: OrderedSpan
+private var currentCenter = 0
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
@@ -202,7 +204,7 @@ fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(),
 private fun onFrame() {
     glClear(col3().ltGrey())
     updateSpans()
-    simpleTextTechnique.pageExcerpt(currentPage, currentSpan, LINES_TO_SHOW)
+    simpleTextTechnique.pageCentered(currentPage, currentCenter, LINES_TO_SHOW)
 }
 
 private fun updateSpans() {
@@ -221,7 +223,7 @@ private fun advanceSpans() {
         val found = findNextInvisibleSpan()
         if (found != null) {
             found.visibility = SpanVisibility.VISIBLE
-            currentSpan = found
+            updateCenter(found)
         } else {
             isAdvancingSpans = false
         }
@@ -234,6 +236,14 @@ private fun findNextInvisibleSpan() =
         it.visibility == SpanVisibility.INVISIBLE &&
         it.text.isNotBlank()
     }
+
+private fun updateCenter(span: OrderedSpan) {
+    val newCenter = currentPage.findLineNo(span)
+    val delta = newCenter - currentCenter
+    if (abs(delta) >= LINES_TO_SHOW) {
+        currentCenter += delta - (LINES_TO_SHOW - 1)
+    }
+}
 
 private fun advanceTimeout() {
     if (currentTimeout <= 0) {
@@ -256,7 +266,6 @@ private fun nextOrder() {
 private fun prepareOrder() {
     findCurrentPage()
     updateOrderVisibility()
-    findCurrentSpan()
     findOrderTimeout(scenario)
 }
 
@@ -276,10 +285,6 @@ private fun findCurrentPage() {
         }
     }
     error("Did not found next page!")
-}
-
-private fun findCurrentSpan() {
-    currentSpan = findNextInvisibleSpan()!!
 }
 
 private fun findOrderTimeout(scenario: List<ScenarioNode>) {
