@@ -44,4 +44,9 @@ data class Camera(
         rotation.identity().lookAlong(direction, vecUp)
         viewVersion.increment()
     }
+
+    fun tick() {
+        rotation.rotateAxis(0.001f, vecUp)
+        viewVersion.increment()
+    }
 }

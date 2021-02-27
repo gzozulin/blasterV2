@@ -5,6 +5,8 @@ import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -63,6 +65,9 @@ private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
 private val capturer = GlCapturer()
 
+private val camera = Camera()
+
+private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")
 private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
 private var isAdvancingSpans = true // spans or timeout
@@ -76,7 +81,7 @@ fun main() {
     renderScenario()
     prepareOrder()
     capturer.create {
-        glUse(simpleTextTechnique) {
+        glUse(skyboxTechnique, simpleTextTechnique) {
             capturer.show(::onFrame, ::onBuffer)
         }
     }
@@ -204,6 +209,8 @@ fun OrderedToken.toOrderedSpan() = OrderedSpan(order, token.text, token.color(),
 private fun onFrame() {
     glClear(col3().ltGrey())
     updateSpans()
+    camera.tick()
+    skyboxTechnique.skybox(camera)
     simpleTextTechnique.pageCentered(currentPage, currentCenter, LINES_TO_SHOW)
 }
 
