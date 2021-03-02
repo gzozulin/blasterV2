@@ -15,11 +15,20 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
+import org.bytedeco.javacpp.Pointer
+import org.bytedeco.opencv.opencv_core.Mat
+import org.bytedeco.opencv.opencv_core.Scalar
+import org.bytedeco.opencv.opencv_core.Size
+import org.bytedeco.opencv.opencv_videoio.VideoWriter
 import java.io.File
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
+import org.opencv.core.CvType
+
+
+
 
 // todo: scenario to nodes
 // todo: basic scene arrangement
@@ -77,6 +86,13 @@ private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
 
+private var videoWriter = VideoWriter().also {
+        it.open(File("1vid.avi").absolutePath,
+            VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
+            60.0, Size(1, 1))
+        check(it.isOpened)
+    }
+
 fun main() {
     renderScenario()
     prepareOrder()
@@ -85,6 +101,7 @@ fun main() {
             capturer.show(::onFrame, ::onBuffer)
         }
     }
+    videoWriter.release()
 }
 
 private fun renderScenario() {
@@ -306,5 +323,8 @@ private fun findOrderTimeout(scenario: List<ScenarioNode>) {
 }
 
 private fun onBuffer(buffer: ByteBuffer) {
-    // todo: store the buffer
+    //val frame = Mat(capturer.height, capturer.width, CvType.CV_8UC3)
+    //val pointer = Pointer(buffer)
+    //frame.put<Pointer>(pointer)
+    videoWriter.write(Mat(1, 1, CvType.CV_8UC3, Scalar.all(1.0)))
 }

@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.gl
 
+import com.gzozulin.minigl.scene.Version
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
@@ -64,9 +65,9 @@ class GlCapturer {
         glfwShowWindow(handle)
         while (!glfwWindowShouldClose(handle)) {
             onFrame.invoke()
+            glfwSwapBuffers(handle)
             copyWindowBuffer()
             onBuffer.invoke(FRAME_BUFFER)
-            glfwSwapBuffers(handle)
             glfwPollEvents()
             updateFps()
             GlProgram.stopComplaining()
@@ -81,15 +82,19 @@ class GlCapturer {
 
 private val capturer = GlCapturer()
 
+var once = Version()
+
 fun main() {
     capturer.create {
         capturer.show(
             onFrame = {
-                glClear(col3().cyan())
+                glClear(col3(1f, 1f, 0f))
                 GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT) // clear the framebuffer
             },
             onBuffer = { buffer ->
-                println(buffer[4444])
+                if (once.check()) {
+                    println("RGBA: ${buffer[0]}, ${buffer[1]}, ${buffer[2]}, ${buffer[3]}")
+                }
             })
     }
 }

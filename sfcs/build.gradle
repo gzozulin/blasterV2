@@ -14,6 +14,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation "org.antlr:antlr4:4.9.1"
+    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4'
 }
 
 sourceCompatibility = "7"
