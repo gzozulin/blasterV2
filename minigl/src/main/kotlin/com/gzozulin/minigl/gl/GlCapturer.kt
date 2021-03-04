@@ -1,22 +1,20 @@
 package com.gzozulin.minigl.gl
 
 import com.gzozulin.minigl.scene.Version
-import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
-private const val WIDTH: Int = 1000
-private const val HEIGHT: Int = 900
+private const val WIDTH: Int = 800
+private const val HEIGHT: Int = 600
 
-private const val WIN_X: Int = 500
-private const val WIN_Y: Int = 100
+private const val WIN_X: Int = 0
+private const val WIN_Y: Int = 0
 
-private const val BPP = 4
+private const val BPP = 4 // RGBA, 1 byte each
 
 private val keyCallbackInternal = object : GLFWKeyCallback() {
     override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
@@ -30,7 +28,7 @@ class GlCapturer {
     var handle = NULL
 
     val frameBuffer: ByteBuffer by lazy {
-        ByteBuffer.allocateDirect(width * height * 4)
+        ByteBuffer.allocateDirect(width * height * BPP)
     }
 
     private var fps = 0
