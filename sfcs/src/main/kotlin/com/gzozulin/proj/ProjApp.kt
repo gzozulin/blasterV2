@@ -17,6 +17,7 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.opencv.global.opencv_core.flip
+import org.bytedeco.opencv.global.opencv_videoio.VIDEOWRITER_PROP_QUALITY
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.Size
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
@@ -29,6 +30,7 @@ import org.opencv.core.CvType
 // todo: scenario to nodes
 // todo: basic scene arrangement
 // todo: example project + video
+// todo: write in original quality
 
 private const val FRAMES_PER_SPAN = 3
 private const val MILLIS_PER_FRAME = 16
@@ -67,6 +69,18 @@ private val scenario = listOf(
 private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
 private val capturer = GlCapturer()
+
+private var videoWriter = VideoWriter().apply {
+    open(
+        File("1vid.avi").absolutePath,
+        VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
+        60.0,
+        Size(capturer.width, capturer.height)
+    )
+    set(VIDEOWRITER_PROP_QUALITY, 100.0)
+    check(isOpened)
+}
+
 private val framePointer = BytePointer(capturer.frameBuffer)
 private val originalFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4, framePointer) }
 private val flippedFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4) }
@@ -83,12 +97,7 @@ private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
 
-private var videoWriter = VideoWriter().also {
-        it.open(File("1vid.avi").absolutePath,
-            VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
-            60.0, Size(capturer.width, capturer.height))
-        check(it.isOpened)
-    }
+
 
 fun main() {
     renderScenario()
