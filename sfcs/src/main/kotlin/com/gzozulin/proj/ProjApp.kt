@@ -16,11 +16,11 @@ import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.Size
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
 import java.io.File
-import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
@@ -28,8 +28,6 @@ import org.opencv.core.CvType
 
 // todo: scenario to nodes
 // todo: basic scene arrangement
-// todo: scene buffer copying
-// todo: video rendering
 // todo: example project + video
 
 private const val FRAMES_PER_SPAN = 3
@@ -69,6 +67,9 @@ private val scenario = listOf(
 private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
 private val capturer = GlCapturer()
+private val framePointer = BytePointer(capturer.frameBuffer)
+private val originalFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4, framePointer) }
+private val flippedFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4) }
 
 private val camera = Camera()
 
@@ -318,8 +319,7 @@ private fun findOrderTimeout(scenario: List<ScenarioNode>) {
     }
 }
 
-private fun onBuffer(buffer: ByteBuffer) {
-    val frame = Mat(capturer.height, capturer.width, CvType.CV_8UC4)
-    frame.put<BytePointer>(BytePointer(buffer))
-    videoWriter.write(frame)
+private fun onBuffer() {
+    flip(originalFrame, flippedFrame, 0) // vertical flip
+    videoWriter.write(flippedFrame)
 }

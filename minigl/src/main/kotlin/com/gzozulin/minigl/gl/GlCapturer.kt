@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 private const val WIDTH: Int = 1000
 private const val HEIGHT: Int = 900
@@ -16,7 +17,6 @@ private const val WIN_X: Int = 500
 private const val WIN_Y: Int = 100
 
 private const val BPP = 4
-private val FRAME_BUFFER by lazy { BufferUtils.createByteBuffer(WIDTH * HEIGHT * BPP) }
 
 private val keyCallbackInternal = object : GLFWKeyCallback() {
     override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
@@ -28,6 +28,10 @@ private val keyCallbackInternal = object : GLFWKeyCallback() {
 
 class GlCapturer {
     var handle = NULL
+
+    val frameBuffer: ByteBuffer by lazy {
+        ByteBuffer.allocateDirect(width * height * 4)
+    }
 
     private var fps = 0
     private var last = System.currentTimeMillis()
@@ -59,7 +63,7 @@ class GlCapturer {
         glfwDestroyWindow(handle)
     }
 
-    fun show(onFrame: () -> Unit, onBuffer: (byteBuffer: ByteBuffer) -> Unit) {
+    fun show(onFrame: () -> Unit, onBuffer: () -> Unit) {
         check(handle != NULL) { "Window is not yet created!" }
         glCheck { backend.glViewport(0, 0, width, height) }
         glfwShowWindow(handle)
@@ -67,7 +71,7 @@ class GlCapturer {
             onFrame.invoke()
             glfwSwapBuffers(handle)
             copyWindowBuffer()
-            onBuffer.invoke(FRAME_BUFFER)
+            onBuffer.invoke()
             glfwPollEvents()
             updateFps()
             GlProgram.stopComplaining()
@@ -76,7 +80,7 @@ class GlCapturer {
 
     private fun copyWindowBuffer() {
         GL11.glReadBuffer(GL11.GL_FRONT)
-        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, FRAME_BUFFER)
+        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, frameBuffer)
     }
 }
 
@@ -91,9 +95,9 @@ fun main() {
                 glClear(col3(1f, 1f, 0f))
                 GL11.glClear(GL11.GL_COLOR_BUFFER_BIT or GL11.GL_DEPTH_BUFFER_BIT) // clear the framebuffer
             },
-            onBuffer = { buffer ->
+            onBuffer = {
                 if (once.check()) {
-                    println("RGBA: ${buffer[0]}, ${buffer[1]}, ${buffer[2]}, ${buffer[3]}")
+                    println("RGBA: ${capturer.frameBuffer[0]}, ${capturer.frameBuffer[1]}, ${capturer.frameBuffer[2]}, ${capturer.frameBuffer[3]}")
                 }
             })
     }
