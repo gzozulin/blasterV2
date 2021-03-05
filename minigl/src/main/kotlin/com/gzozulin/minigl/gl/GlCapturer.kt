@@ -8,14 +8,6 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 
-private const val WIDTH: Int = 800
-private const val HEIGHT: Int = 600
-
-private const val WIN_X: Int = 0
-private const val WIN_Y: Int = 0
-
-private const val BPP = 4 // RGBA, 1 byte each
-
 private val keyCallbackInternal = object : GLFWKeyCallback() {
     override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
         if (key == GLFW_KEY_ESCAPE) {
@@ -24,18 +16,15 @@ private val keyCallbackInternal = object : GLFWKeyCallback() {
     }
 }
 
-class GlCapturer {
+class GlCapturer(val width: Int = 800, val height: Int = 600, private val isFullscreen: Boolean = false) {
     var handle = NULL
 
     val frameBuffer: ByteBuffer by lazy {
-        ByteBuffer.allocateDirect(width * height * BPP)
+        ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
     }
 
     private var fps = 0
     private var last = System.currentTimeMillis()
-
-    val width: Int = WIDTH
-    val height: Int = HEIGHT
 
     private fun updateFps() {
         fps++
@@ -50,8 +39,10 @@ class GlCapturer {
     fun create(onCreated: () -> Unit) {
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
-        val result = glfwCreateWindow(width, height, "Blaster!", NULL, handle)
-        glfwSetWindowPos(result, WIN_X, WIN_Y)
+        val primaryMonitor = glfwGetPrimaryMonitor()
+        val videoMode = glfwGetVideoMode(primaryMonitor)
+        val result = glfwCreateWindow(width, height, "Blaster!", if (isFullscreen) primaryMonitor else NULL, handle)
+        glfwSetWindowPos(result, videoMode!!.width()/2 - width/2, videoMode.height()/2 - height/2)
         glfwSetKeyCallback(result, keyCallbackInternal)
         glfwMakeContextCurrent(result)
         glfwSwapInterval(1)

@@ -68,7 +68,7 @@ private val scenario = listOf(
 
 private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
-private val capturer = GlCapturer()
+private val capturer = GlCapturer(800, 600, isFullscreen = false)
 
 private var videoWriter = VideoWriter().apply {
     open(
@@ -96,8 +96,6 @@ private var currentCenter = 0
 private var currentFrame = 0
 private var currentOrder = 0
 private var currentTimeout = 0L
-
-
 
 fun main() {
     renderScenario()
