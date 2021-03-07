@@ -17,8 +17,8 @@ import java.io.File
 // todo: basic scene arrangement
 // todo: example project + video
 
-class ProjActivity {
-    private val viewModel = ProjViewModel()
+class ProjScene {
+    private val model = ProjModel()
 
     private val capturer = GlCapturer(1024, 1024, isFullscreen = false)
 
@@ -43,7 +43,7 @@ class ProjActivity {
     private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
     fun loop() {
-        viewModel.renderScenario()
+        model.renderScenario()
         capturer.create {
             glUse(skyboxTechnique, simpleTextTechnique) {
                 capturer.show(::onFrame, ::onBuffer)
@@ -54,10 +54,10 @@ class ProjActivity {
 
     private fun onFrame() {
         glClear(col3().ltGrey())
-        viewModel.updateSpans()
+        model.updateSpans()
         camera.tick()
         skyboxTechnique.skybox(camera)
-        simpleTextTechnique.pageCentered(viewModel.currentPage, viewModel.currentCenter, LINES_TO_SHOW)
+        simpleTextTechnique.pageCentered(model.currentPage, model.currentCenter, LINES_TO_SHOW)
     }
 
     private fun onBuffer() {
@@ -66,4 +66,4 @@ class ProjActivity {
     }
 }
 
-fun main() = ProjActivity().loop()
+fun main() = ProjScene().loop()

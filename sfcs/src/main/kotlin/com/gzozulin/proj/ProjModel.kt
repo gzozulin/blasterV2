@@ -37,7 +37,7 @@ private val scenario = listOf(
     )
 )
 
-class ProjViewModel {
+class ProjModel {
     private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
     private var isAdvancingSpans = true // spans or timeout
