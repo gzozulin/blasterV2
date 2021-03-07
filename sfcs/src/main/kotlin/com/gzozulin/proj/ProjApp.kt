@@ -17,16 +17,16 @@ import org.kodein.di.singleton
 class ProjApp {
     companion object {
         val injector = DI {
-            bind<GlCapturer>() with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
-            bind<StaticSkyboxTechnique>() with singleton { StaticSkyboxTechnique("textures/snowy") }
-            bind<SimpleTextTechnique>() with singleton { SimpleTextTechnique(capturer.width, capturer.height) }
-            bind<VideoWriter>() with singleton { VideoWriter() }
-            bind<ManagerCapture>() with singleton { ManagerCapture() }
-            bind<Repository>() with singleton { Repository() }
-            bind<CaseScenario>() with singleton { CaseScenario() }
-            bind<CasePlayback>() with singleton { CasePlayback() }
-            bind<ProjScene>() with singleton { ProjScene() }
-            bind<ProjModel>() with singleton { ProjModel() }
+            bind<GlCapturer>()              with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
+            bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
+            bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(capturer.width, capturer.height) }
+            bind<VideoWriter>()             with singleton { VideoWriter() }
+            bind<ManagerCapture>()          with singleton { ManagerCapture() }
+            bind<Repository>()              with singleton { Repository() }
+            bind<CaseScenario>()            with singleton { CaseScenario() }
+            bind<CasePlayback>()            with singleton { CasePlayback() }
+            bind<ProjScene>()               with singleton { ProjScene() }
+            bind<ProjModel>()               with singleton { ProjModel() }
         }
     }
 }
