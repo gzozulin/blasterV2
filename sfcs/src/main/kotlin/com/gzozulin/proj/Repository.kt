@@ -20,4 +20,7 @@ class Repository {
     )
 
     val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
+
+    lateinit var currentPage: TextPage<OrderedSpan>
+    var currentCenter = 0
 }

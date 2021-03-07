@@ -16,7 +16,6 @@ import java.io.File
 
 class ProjScene {
     private val model: ProjModel by ProjApp.injector.instance()
-    private val repo: Repository by ProjApp.injector.instance()
     private val casePlayback: CasePlayback by ProjApp.injector.instance()
 
     private val capturer = GlCapturer(1024, 1024, isFullscreen = false)
@@ -60,7 +59,7 @@ class ProjScene {
         casePlayback.updateSpans()
         camera.tick()
         skyboxTechnique.skybox(camera)
-        simpleTextTechnique.pageCentered(casePlayback.currentPage, casePlayback.currentCenter, LINES_TO_SHOW)
+        simpleTextTechnique.pageCentered(model.page, model.center, LINES_TO_SHOW)
     }
 
     private fun onBuffer() {

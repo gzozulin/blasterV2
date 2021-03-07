@@ -1,7 +1,6 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.assembly.SpanVisibility
-import com.gzozulin.minigl.assembly.TextPage
 import org.kodein.di.instance
 import kotlin.math.abs
 
@@ -16,9 +15,6 @@ class CasePlayback {
     private var currentOrder = 0
     private var currentTimeout = 0L
 
-    lateinit var currentPage: TextPage<OrderedSpan>
-    var currentCenter = 0
-
     fun prepareOrder() {
         findCurrentPage()
         updateOrderVisibility()
@@ -29,7 +25,7 @@ class CasePlayback {
         for (renderedPage in repo.renderedPages) {
             for (span in renderedPage.spans) {
                 if (span.order == currentOrder) {
-                    currentPage = renderedPage
+                    repo.currentPage = renderedPage
                     return
                 }
             }
@@ -49,7 +45,7 @@ class CasePlayback {
     }
 
     private fun updateOrderVisibility() {
-        currentPage.spans
+        repo.currentPage.spans
             .filter { it.order == currentOrder }
             .forEach { it.visibility = SpanVisibility.INVISIBLE }
     }
@@ -78,17 +74,17 @@ class CasePlayback {
     }
 
     private fun findNextInvisibleSpan() =
-        currentPage.spans.firstOrNull {
+        repo.currentPage.spans.firstOrNull {
             it.order == currentOrder &&
                     it.visibility == SpanVisibility.INVISIBLE &&
                     it.text.isNotBlank()
         }
 
     private fun updateCenter(span: OrderedSpan) {
-        val newCenter = currentPage.findLineNo(span)
-        val delta = newCenter - currentCenter
+        val newCenter = repo.currentPage.findLineNo(span)
+        val delta = newCenter - repo.currentCenter
         if (abs(delta) >= LINES_TO_SHOW) {
-            currentCenter += delta - (LINES_TO_SHOW - 1)
+            repo.currentCenter += delta - (LINES_TO_SHOW - 1)
         }
     }
 
