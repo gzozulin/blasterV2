@@ -10,28 +10,18 @@ import org.bytedeco.opencv.global.opencv_videoio
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.Size
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
+import org.kodein.di.instance
 import org.opencv.core.CvType
 import java.io.File
 
-// todo: scenario to nodes
-// todo: basic scene arrangement
-// todo: example project + video
-
 class ProjScene {
-    private val model = ProjModel()
+    private val model: ProjModel by ProjApp.injector.instance()
+    private val repo: Repository by ProjApp.injector.instance()
+    private val casePlayback: CasePlayback by ProjApp.injector.instance()
 
     private val capturer = GlCapturer(1024, 1024, isFullscreen = false)
 
-    private var videoWriter = VideoWriter().apply {
-        open(
-            File("1vid.avi").absolutePath,
-            VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
-            60.0,
-            Size(capturer.width, capturer.height)
-        )
-        set(opencv_videoio.VIDEOWRITER_PROP_QUALITY, 100.0)
-        check(isOpened)
-    }
+    private var videoWriter = VideoWriter()
 
     private val framePointer = BytePointer(capturer.frameBuffer)
     private val originalFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4, framePointer) }
@@ -43,7 +33,7 @@ class ProjScene {
     private val simpleTextTechnique = SimpleTextTechnique(capturer.width, capturer.height)
 
     fun loop() {
-        model.renderScenario()
+        openVideo()
         capturer.create {
             glUse(skyboxTechnique, simpleTextTechnique) {
                 capturer.show(::onFrame, ::onBuffer)
@@ -52,12 +42,25 @@ class ProjScene {
         videoWriter.release()
     }
 
+    private fun openVideo() {
+        videoWriter.apply {
+            open(
+                File("1vid.avi").absolutePath,
+                VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
+                60.0,
+                Size(capturer.width, capturer.height)
+            )
+            set(opencv_videoio.VIDEOWRITER_PROP_QUALITY, 100.0)
+            check(isOpened)
+        }
+    }
+
     private fun onFrame() {
         glClear(col3().ltGrey())
-        model.updateSpans()
+        casePlayback.updateSpans()
         camera.tick()
         skyboxTechnique.skybox(camera)
-        simpleTextTechnique.pageCentered(model.currentPage, model.currentCenter, LINES_TO_SHOW)
+        simpleTextTechnique.pageCentered(casePlayback.currentPage, casePlayback.currentCenter, LINES_TO_SHOW)
     }
 
     private fun onBuffer() {
@@ -65,5 +68,3 @@ class ProjScene {
         videoWriter.write(flippedFrame)
     }
 }
-
-fun main() = ProjScene().loop()
