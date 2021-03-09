@@ -108,7 +108,7 @@ class SimpleTextTechnique(
         pageRange(page, fromLine, toLine)
     }
 
-    fun <T : TextSpan> pageRange(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
+    private fun <T : TextSpan> pageRange(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
         check(fromLine in 0 until toLine) { "wtf?!" }
         var currentLetter = 0
         var currentLine = 0
@@ -195,7 +195,12 @@ private val examplePage = TextPage(listOf(
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().rose())
 ))
 
-private val simpleTextTechnique = SimpleTextTechnique(windowWidth = window.width, windowHeight = window.height)
+private val fontDescription = FontDescription(
+    textureFilename = "textures/font_hires.png",
+    glyphSidePxU = 64, glyphSidePxV = 64,
+    fontScaleU = 0.5f, fontScaleV = 0.6f,
+    fontStepScaleU = 0.6f, fontStepScaleV = 0.6f)
+private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)
 
 fun main() {
     window.create(isHoldingCursor = false) {
