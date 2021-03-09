@@ -200,6 +200,7 @@ private val fontDescription = FontDescription(
     glyphSidePxU = 64, glyphSidePxV = 64,
     fontScaleU = 0.5f, fontScaleV = 0.6f,
     fontStepScaleU = 0.6f, fontStepScaleV = 0.6f)
+
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)
 
 fun main() {

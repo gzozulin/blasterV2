@@ -1,5 +1,6 @@
 package com.gzozulin.proj
 
+import com.gzozulin.minigl.assembly.FontDescription
 import com.gzozulin.minigl.assembly.SimpleTextTechnique
 import com.gzozulin.minigl.gl.GlCapturer
 import com.gzozulin.minigl.gl.glUse
@@ -15,12 +16,18 @@ import org.lwjgl.glfw.GLFW
 // todo: basic scene arrangement
 // todo: example project + video
 
+private val fontDescription = FontDescription(
+    textureFilename = "textures/font_hires.png",
+    glyphSidePxU = 64, glyphSidePxV = 64,
+    fontScaleU = 0.3f, fontScaleV = 0.4f,
+    fontStepScaleU = 0.55f, fontStepScaleV = 0.75f)
+
 class ProjApp {
     companion object {
         val injector = DI {
             bind<GlCapturer>()              with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
             bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
-            bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(windowWidth = capturer.width, windowHeight = capturer.height) }
+            bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(fontDescription, capturer.width, capturer.height) }
             bind<VideoWriter>()             with singleton { VideoWriter() }
             bind<ManagerCapture>()          with singleton { ManagerCapture() }
             bind<Repository>()              with singleton { Repository() }
