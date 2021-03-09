@@ -12,9 +12,27 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.lwjgl.glfw.GLFW
 
+const val IS_CAPTURING = false
+const val IS_TRACING = true
+
 // todo: scenario to nodes
 // todo: basic scene arrangement
 // todo: example project + video
+
+class Tracker {
+    private val startup = System.currentTimeMillis()
+    private var last = startup
+
+    fun mark(section: String) {
+        if (IS_TRACING) {
+            val current = System.currentTimeMillis()
+            val elapsedFromLast = (current - last).toFloat() / 1000f
+            val elapsedFromStartup = (current - startup).toFloat() / 1000f
+            last = current
+            println("$section: elapsed from last: $elapsedFromLast, from startup: $elapsedFromStartup")
+        }
+    }
+}
 
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
@@ -25,6 +43,7 @@ private val fontDescription = FontDescription(
 class ProjApp {
     companion object {
         val injector = DI {
+            bind<Tracker>()                 with singleton { Tracker() }
             bind<GlCapturer>()              with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
             bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
             bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(fontDescription, capturer.width, capturer.height) }
@@ -39,6 +58,7 @@ class ProjApp {
     }
 }
 
+private val tracker: Tracker by ProjApp.injector.instance()
 private val capturer: GlCapturer by ProjApp.injector.instance()
 private val skyboxTechnique: StaticSkyboxTechnique by ProjApp.injector.instance()
 private val simpleTextTechnique: SimpleTextTechnique by ProjApp.injector.instance()
@@ -49,14 +69,18 @@ private val scene: ProjScene by ProjApp.injector.instance()
 
 fun main() {
     caseScenario.renderScenario()
+    tracker.mark("Scenario rendered")
     casePlayback.prepareNextOrder()
+    tracker.mark("Order prepared")
     capturer.create {
+        tracker.mark("Capturer created")
         capturer.keyCallback = { key, isPressed ->
             if (key == GLFW.GLFW_KEY_SPACE && isPressed) {
                 casePlayback.proceed()
             }
         }
         managerCapture.capture {
+            tracker.mark("Video capturing")
             glUse(skyboxTechnique, simpleTextTechnique) {
                 capturer.show(scene::onFrame, managerCapture::onBuffer)
             }

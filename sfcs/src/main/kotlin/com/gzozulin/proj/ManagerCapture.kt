@@ -3,7 +3,7 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.gl.GlCapturer
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.opencv.global.opencv_core.flip
-import org.bytedeco.opencv.global.opencv_videoio
+import org.bytedeco.opencv.global.opencv_videoio.VIDEOWRITER_PROP_QUALITY
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.Size
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
@@ -12,6 +12,7 @@ import org.opencv.core.CvType
 import java.io.File
 
 class ManagerCapture {
+    private val tracer: Tracker by ProjApp.injector.instance()
     private val capturer: GlCapturer by ProjApp.injector.instance()
     private val videoWriter: VideoWriter by ProjApp.injector.instance()
 
@@ -20,21 +21,25 @@ class ManagerCapture {
     private val flippedFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4) }
 
     fun capture(frames: () -> Unit) {
-        videoWriter.apply {
-            open(
-                File("1vid.avi").absolutePath,
-                VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
-                60.0, Size(capturer.width, capturer.height)
-            )
-            set(opencv_videoio.VIDEOWRITER_PROP_QUALITY, 100.0)
-            check(isOpened)
+        if (IS_CAPTURING) {
+            val fourcc = VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte())
+            tracer.mark("Fourcc")
+            videoWriter.open(File("1vid.avi").absolutePath, fourcc, 60.0, Size(capturer.width, capturer.height))
+            tracer.mark("Video file opened")
+            videoWriter.set(VIDEOWRITER_PROP_QUALITY, 100.0)
+            tracer.mark("Quality set to 100%")
+            check(videoWriter.isOpened)
         }
         frames.invoke()
-        videoWriter.release()
+        if (IS_CAPTURING) {
+            videoWriter.release()
+        }
     }
 
     fun onBuffer() {
-        flip(originalFrame, flippedFrame, 0) // vertical flip
-        videoWriter.write(flippedFrame)
+        if (IS_CAPTURING) {
+            flip(originalFrame, flippedFrame, 0) // vertical flip
+            videoWriter.write(flippedFrame)
+        }
     }
 }
