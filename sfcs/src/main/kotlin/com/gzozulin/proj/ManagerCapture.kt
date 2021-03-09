@@ -24,8 +24,7 @@ class ManagerCapture {
             open(
                 File("1vid.avi").absolutePath,
                 VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte()),
-                60.0,
-                Size(capturer.width, capturer.height)
+                60.0, Size(capturer.width, capturer.height)
             )
             set(opencv_videoio.VIDEOWRITER_PROP_QUALITY, 100.0)
             check(isOpened)

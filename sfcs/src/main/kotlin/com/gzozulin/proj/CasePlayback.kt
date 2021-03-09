@@ -5,20 +5,23 @@ import org.kodein.di.instance
 import kotlin.math.abs
 
 private const val FRAMES_PER_SPAN = 3
-private const val MILLIS_PER_FRAME = 16
 
 class CasePlayback {
     private val repo: Repository by ProjApp.injector.instance()
 
+    private var isRequestedToProceed = false
     private var isAdvancingSpans = true // spans or timeout
+
     private var currentFrame = 0
     private var currentOrder = 0
-    private var currentTimeout = 0L
 
-    fun prepareOrder() {
+    fun proceed() {
+        isRequestedToProceed = true
+    }
+
+    fun prepareNextOrder() {
         findCurrentPage()
         updateOrderVisibility()
-        findOrderTimeout(repo.scenario)
     }
 
     private fun findCurrentPage() {
@@ -33,17 +36,6 @@ class CasePlayback {
         error("Did not found next page!")
     }
 
-    private fun findOrderTimeout(scenario: List<ScenarioNode>) {
-        for (scenarioNode in scenario) {
-            if (scenarioNode.order == currentOrder) {
-                currentTimeout = scenarioNode.timeout
-                return
-            } else if (scenarioNode.children != null) {
-                findOrderTimeout(scenarioNode.children)
-            }
-        }
-    }
-
     private fun updateOrderVisibility() {
         repo.currentPage.spans
             .filter { it.order == currentOrder }
@@ -51,7 +43,6 @@ class CasePlayback {
     }
 
     fun updateSpans() {
-        currentTimeout -= MILLIS_PER_FRAME
         if (isAdvancingSpans) {
             advanceSpans()
         } else {
@@ -89,10 +80,11 @@ class CasePlayback {
     }
 
     private fun advanceTimeout() {
-        if (currentTimeout <= 0) {
+        if (isRequestedToProceed) {
+            isRequestedToProceed = false
             isAdvancingSpans = true
             nextOrder()
-            prepareOrder()
+            prepareNextOrder()
         }
     }
 

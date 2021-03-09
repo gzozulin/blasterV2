@@ -9,6 +9,7 @@ import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
 import org.kodein.di.singleton
+import org.lwjgl.glfw.GLFW
 
 // todo: scenario to nodes
 // todo: basic scene arrangement
@@ -41,8 +42,13 @@ private val scene: ProjScene by ProjApp.injector.instance()
 
 fun main() {
     caseScenario.renderScenario()
-    casePlayback.prepareOrder()
+    casePlayback.prepareNextOrder()
     capturer.create {
+        capturer.keyCallback = { key, isPressed ->
+            if (key == GLFW.GLFW_KEY_SPACE && isPressed) {
+                casePlayback.proceed()
+            }
+        }
         managerCapture.capture {
             glUse(skyboxTechnique, simpleTextTechnique) {
                 capturer.show(scene::onFrame, managerCapture::onBuffer)

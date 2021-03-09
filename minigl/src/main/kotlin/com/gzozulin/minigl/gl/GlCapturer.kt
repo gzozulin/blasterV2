@@ -8,19 +8,25 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 
-private val keyCallbackInternal = object : GLFWKeyCallback() {
-    override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
-        if (key == GLFW_KEY_ESCAPE) {
-            glfwSetWindowShouldClose(window, true)
-        }
-    }
-}
-
 class GlCapturer(val width: Int = 800, val height: Int = 600, private val isFullscreen: Boolean = false) {
     var handle = NULL
 
     val frameBuffer: ByteBuffer by lazy {
         ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
+    }
+
+    var keyCallback: KeyCallback? = null
+    private val keyCallbackInternal = object : GLFWKeyCallback() {
+        override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
+            if (key == GLFW_KEY_ESCAPE) {
+                glfwSetWindowShouldClose(window, true)
+            }
+            if (action == GLFW_PRESS) {
+                keyCallback?.invoke(key, true)
+            } else if (action == GLFW_RELEASE) {
+                keyCallback?.invoke(key, false)
+            }
+        }
     }
 
     private var fps = 0
