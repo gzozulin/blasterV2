@@ -4,15 +4,16 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.gl.*
 import java.lang.Integer.max
 
-private const val FONT_CNT_UV = 16
-private const val FONT_GLYPH_SIDE = 12
-private const val FONT_SCALE_U = 1f
-private const val FONT_SCALE_V = 1.5f
-private const val FONT_STEP_U = .6f
-private const val FONT_STEP_V = 1f
-
-private const val LETTER_SIZE_U = FONT_GLYPH_SIDE * FONT_SCALE_U
-private const val LETTER_SIZE_V = FONT_GLYPH_SIDE * FONT_SCALE_V
+data class FontDescription(
+    val textureFilename: String = "textures/font.png",
+    val fontCntU: Int = 16, val fontCntV: Int = 16,
+    val glyphSidePxU: Int = 12, val glyphSidePxV: Int = 12,
+    val fontScaleU: Float = 1f, val fontScaleV: Float = 1.5f,
+    val fontStepScaleU: Float = 0.6f, val fontStepScaleV: Float = 1f
+) {
+    val letterSizeU = glyphSidePxU * fontScaleU
+    val letterSizeV = glyphSidePxV * fontScaleV
+}
 
 enum class SpanVisibility { VISIBLE, INVISIBLE, GONE }
 
@@ -43,10 +44,11 @@ data class TextPage<T : TextSpan>(val spans: List<T>) {
 }
 
 class SimpleTextTechnique(
+    private val fontDescription: FontDescription = FontDescription(),
     private var windowWidth: Int, private var windowHeight: Int) : GlResource() {
 
-    private val rect = GlMesh.rect(0f, LETTER_SIZE_U, 0f, LETTER_SIZE_V)
-    private val font = texturesLib.loadTexture("textures/font.png")
+    private val font = texturesLib.loadTexture(fontDescription.textureFilename)
+    private val rect = GlMesh.rect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
 
     private val texCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
 
@@ -63,7 +65,7 @@ class SimpleTextTechnique(
 
     private val tileUV = vec2i(0)
     private val unifTileUV = unifv2i(tileUV)
-    private val texCoordTiled = tile(texCoord, unifTileUV, constv2i(vec2i(FONT_CNT_UV)))
+    private val texCoordTiled = tile(texCoord, unifTileUV, constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
 
     private val uniformColor = unifv4()
     private val fontCheck = eq(tex(texCoordTiled, unifsampler(font)), constv4(vec4(1f)))
@@ -84,15 +86,15 @@ class SimpleTextTechnique(
 
     private fun updateCursor(line: Int, letter: Int) {
         cursor.identity().setTranslation(
-            letter * LETTER_SIZE_U * FONT_STEP_U - windowWidth/2f,
-            windowHeight/2f - LETTER_SIZE_V * (line + 1) * FONT_STEP_V,
+            letter * fontDescription.letterSizeU * fontDescription.fontStepScaleU - windowWidth/2f,
+            windowHeight/2f - fontDescription.letterSizeV * (line + 1) * fontDescription.fontStepScaleV,
             0f)
         modelM.value = cursor
     }
 
     private fun updateGlyph(character: Char) {
-        tileUV.x = character.toInt() % FONT_CNT_UV
-        tileUV.y = FONT_CNT_UV - character.toInt() / FONT_CNT_UV - 1
+        tileUV.x = character.toInt() % fontDescription.fontCntU
+        tileUV.y = fontDescription.fontCntV - character.toInt() / fontDescription.fontCntV - 1
         unifTileUV.value = tileUV
     }
 
@@ -193,7 +195,7 @@ private val examplePage = TextPage(listOf(
             "software like Aldus PageMaker including versions of Lorem Ipsum.\n\n", color = col3().rose())
 ))
 
-private val simpleTextTechnique = SimpleTextTechnique(window.width, window.height)
+private val simpleTextTechnique = SimpleTextTechnique(windowWidth = window.width, windowHeight = window.height)
 
 fun main() {
     window.create(isHoldingCursor = false) {

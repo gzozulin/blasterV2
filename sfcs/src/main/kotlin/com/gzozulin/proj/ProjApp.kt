@@ -20,7 +20,7 @@ class ProjApp {
         val injector = DI {
             bind<GlCapturer>()              with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
             bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
-            bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(capturer.width, capturer.height) }
+            bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(windowWidth = capturer.width, windowHeight = capturer.height) }
             bind<VideoWriter>()             with singleton { VideoWriter() }
             bind<ManagerCapture>()          with singleton { ManagerCapture() }
             bind<Repository>()              with singleton { Repository() }
