@@ -14,9 +14,13 @@ class Repository {
             scenarioNodeCnt++, thisFile, "CaseScenario", children = listOf(
                 ScenarioNode(scenarioNodeCnt++, thisFile, "renderScenario"),
                 ScenarioNode(scenarioNodeCnt++, thisFile, "preparePage"),
-                ScenarioNode(scenarioNodeCnt++, thisFile, "renderFile"),
+                ScenarioNode(scenarioNodeCnt++, thisFile, "renderFile")
             )
-        )
+        ),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "predeclare"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "define"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "postdeclare"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "Visitor"),
     )
 
     val renderedPages = mutableListOf<TextPage<OrderedSpan>>()

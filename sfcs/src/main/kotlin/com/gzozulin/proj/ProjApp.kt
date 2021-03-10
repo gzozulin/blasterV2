@@ -12,10 +12,12 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.lwjgl.glfw.GLFW
 
+const val LINES_TO_SHOW = 20
 const val IS_CAPTURING = false
 const val IS_TRACING = true
 
 // todo: scenario to nodes
+// todo: center on function (stop - start)/2
 // todo: basic scene arrangement
 // todo: example project + video
 
@@ -45,7 +47,7 @@ class ProjApp {
         val injector = DI {
             bind<Tracker>()                 with singleton { Tracker() }
             bind<GlCapturer>()              with singleton { GlCapturer(1920, 1080, isFullscreen = true) }
-            bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
+            bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/darkskies") }
             bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(fontDescription, capturer.width, capturer.height) }
             bind<VideoWriter>()             with singleton { VideoWriter() }
             bind<ManagerCapture>()          with singleton { ManagerCapture() }
