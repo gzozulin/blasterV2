@@ -142,14 +142,17 @@ private fun List<Token>.withOrder(step: Int) = stream().map { OrderedToken(step,
 private fun OrderedToken.toOrderedSpan() =
     OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
 
-private val white = col3().white()
-private val red = col3().red()
-private val cyan = col3().cyan()
-private val green = col3().green()
+private val kotlin_white = vec3(0.659f, 0.718f, 0.776f)
+private val kotlin_orange = vec3(0.922f, 0.537f, 0.239f)
+private val kotlin_blue = vec3(0.314f, 0.553f, 0.631f)
+private val kotlin_green = vec3(0.282f, 0.451f, 0.337f)
 
 fun Token.color(): col3 = when (type) {
-    KotlinLexer.IF -> red
-    KotlinLexer.CLASS -> green
-    KotlinLexer.FUN -> cyan
-    else -> white
+    KotlinLexer.CLASS, KotlinLexer.FUN, KotlinLexer.VAL, KotlinLexer.WHEN, KotlinLexer.IF,
+    KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
+    KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE -> kotlin_orange
+    KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
+    KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_blue
+    KotlinLexer.LineStrText -> kotlin_green
+    else -> kotlin_white
 }

@@ -37,14 +37,14 @@ class Tracker {
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.3f, fontScaleV = 0.4f,
-    fontStepScaleU = 0.55f, fontStepScaleV = 0.75f)
+    fontScaleU = 0.5f, fontScaleV = 0.5f,
+    fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 class ProjApp {
     companion object {
         val injector = DI {
             bind<Tracker>()                 with singleton { Tracker() }
-            bind<GlCapturer>()              with singleton { GlCapturer(1024, 1024, isFullscreen = false) }
+            bind<GlCapturer>()              with singleton { GlCapturer(1920, 1080, isFullscreen = true) }
             bind<StaticSkyboxTechnique>()   with singleton { StaticSkyboxTechnique("textures/snowy") }
             bind<SimpleTextTechnique>()     with singleton { SimpleTextTechnique(fontDescription, capturer.width, capturer.height) }
             bind<VideoWriter>()             with singleton { VideoWriter() }

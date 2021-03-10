@@ -99,7 +99,7 @@ class SimpleTextTechnique(
     }
 
     private fun updateSpan(span: TextSpan) {
-        uniformColor.value = vec4(span.color, 0f)
+        uniformColor.value = vec4(span.color, 1f)
     }
 
     fun <T : TextSpan> pageCentered(page: TextPage<T>, centerLine: Int, linesCnt: Int) {
