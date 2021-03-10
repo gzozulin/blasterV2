@@ -68,7 +68,7 @@ class SimpleTextTechnique(
     private val texCoordTiled = tile(texCoord, unifTileUV, constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
 
     private val uniformColor = unifv4()
-    private val fontCheck = eq(tex(texCoordTiled, unifsampler(font)), constv4(vec4(1f)))
+    private val fontCheck = near(tex(texCoordTiled, unifsampler(font)), constv4(vec4(1f)))
     private val result = ifexp(fontCheck, uniformColor, discard())
 
     private val simpleTechnique = SimpleTechnique(modelM, unifCenter, unifProj, result)
@@ -198,8 +198,8 @@ private val examplePage = TextPage(listOf(
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.5f, fontScaleV = 0.6f,
-    fontStepScaleU = 0.6f, fontStepScaleV = 0.6f)
+    fontScaleU = 0.296875f, fontScaleV = 0.40625f,
+    fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)
 

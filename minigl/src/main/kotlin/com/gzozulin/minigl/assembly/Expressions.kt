@@ -25,8 +25,22 @@ private const val EXPR_DISCARD =
             "    return vec4(1.0);\n" +
             "}\n"
 
+private const val EXPR_NEAR =
+    "bool expr_near(float left, float right) {\n" +
+            "    return abs(left - right) < 0.001;\n" +
+            "}\n"
+
+private const val EXPR_NEAR_V4 =
+    "bool expr_near(vec4 left, vec4 right) {\n" +
+            "    return " +
+            "       expr_near(left.x, right.x) && " +
+            "       expr_near(left.y, right.y) && " +
+            "       expr_near(left.z, right.z) && " +
+            "       expr_near(left.w, right.w);\n" +
+            "}\n"
+
 const val DECLARATIONS_VERT = EXPR_TILE
-const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD
+const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
@@ -251,6 +265,17 @@ fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Bool
     override fun decl() = left.decl() + right.decl()
     override fun vrbl() = left.vrbl() + right.vrbl()
     override fun expr() = "(${left.expr()} == ${right.expr()})"
+
+    override fun submit(program: GlProgram) {
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
+fun <R> near(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun decl() = left.decl() + right.decl()
+    override fun vrbl() = left.vrbl() + right.vrbl()
+    override fun expr() = "expr_near(${left.expr()}, ${right.expr()})"
 
     override fun submit(program: GlProgram) {
         left.submit(program)
