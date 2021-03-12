@@ -50,6 +50,12 @@ class GlMesh(
     }
 
     companion object {
+        fun rect(width: Float, height: Float): GlMesh {
+            val hw = width/2f
+            val hh = height/2f
+            return rect(-hw, hw, -hh, hh)
+        }
+
         fun rect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f,
             additionalAttributes: List<Pair<GlAttribute, GlBuffer>> = listOf()): GlMesh {
             val vertices = floatArrayOf(

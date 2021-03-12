@@ -23,6 +23,11 @@ interface TextSpan {
     var visibility: SpanVisibility
 }
 
+data class SimpleSpan(
+    override val text: String,
+    override val color: col3,
+    override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
+
 data class TextPage<T : TextSpan>(val spans: List<T>) {
     fun findLineNo(lookup: T) = run {
         var currentLine = 0
@@ -102,6 +107,10 @@ class SimpleTextTechnique(
         uniformColor.value = vec4(span.color, 1f)
     }
 
+    fun <T : TextSpan> page(page: TextPage<T>) {
+        pageRange(page, 0, Int.MAX_VALUE)
+    }
+
     fun <T : TextSpan> pageCentered(page: TextPage<T>, centerLine: Int, linesCnt: Int) {
         val fromLine = max(centerLine - linesCnt, 0)
         val toLine = fromLine + linesCnt * 2
@@ -145,11 +154,6 @@ class SimpleTextTechnique(
 }
 
 private val window = GlWindow()
-
-private data class SimpleSpan(
-    override val text: String,
-    override val color: col3,
-    override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
 
 private val occasionSpan = SimpleSpan("What an occasion, we met again!!\n", color = col3().blue())
 
