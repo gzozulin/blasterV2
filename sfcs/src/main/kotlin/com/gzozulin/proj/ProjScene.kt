@@ -28,6 +28,11 @@ class ProjScene {
         casePlayback.updateSpans()
         camera.tick()
         skyboxTechnique.skybox(camera)
+        glBlend {
+            backgroundTech.draw {
+                backgroundTech.instance(backgroundMesh)
+            }
+        }
         simpleTextTechnique.pageCentered(model.page, model.center, LINES_TO_SHOW)
     }
 }

@@ -4,7 +4,7 @@ import com.gzozulin.minigl.assembly.SpanVisibility
 import org.kodein.di.instance
 import kotlin.math.abs
 
-private const val FRAMES_PER_SPAN = 3
+private const val FRAMES_PER_SPAN = 2
 
 class CasePlayback {
     private val repo: Repository by ProjApp.injector.instance()

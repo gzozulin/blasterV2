@@ -1,9 +1,7 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.assembly.FontDescription
-import com.gzozulin.minigl.assembly.SimpleTextTechnique
-import com.gzozulin.minigl.gl.GlCapturer
-import com.gzozulin.minigl.gl.glUse
+import com.gzozulin.minigl.assembly.*
+import com.gzozulin.minigl.gl.*
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
 import org.kodein.di.DI
@@ -12,7 +10,7 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.lwjgl.glfw.GLFW
 
-const val LINES_TO_SHOW = 20
+const val LINES_TO_SHOW = 22
 const val IS_CAPTURING = false
 const val IS_TRACING = true
 
@@ -39,7 +37,7 @@ class Tracker {
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.5f, fontScaleV = 0.5f,
+    fontScaleU = 0.4f, fontScaleV = 0.5f,
     fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 class ProjApp {
@@ -69,6 +67,12 @@ private val caseScenario: CaseScenario by ProjApp.injector.instance()
 private val casePlayback: CasePlayback by ProjApp.injector.instance()
 private val scene: ProjScene by ProjApp.injector.instance()
 
+val backgroundModelM = constm4(mat4().identity().translate(capturer.width.toFloat()/2f, 0f, 0f))
+val backgroundViewM = constm4(mat4().identity())
+val backgroundProjM = constm4(mat4().ortho(0f, capturer.width.toFloat(), 0f, capturer.height.toFloat(), -1f, 1f))
+val backgroundMesh = GlMesh.rect(1600f, capturer.height.toFloat() * 2)
+val backgroundTech = SimpleTechnique(backgroundModelM, backgroundViewM, backgroundProjM, constv4(vec4(0f, 0f, 0f, 0.8f)))
+
 fun main() {
     caseScenario.renderScenario()
     tracker.mark("Scenario rendered")
@@ -83,7 +87,7 @@ fun main() {
         }
         managerCapture.capture {
             tracker.mark("Video capturing")
-            glUse(skyboxTechnique, simpleTextTechnique) {
+            glUse(skyboxTechnique, simpleTextTechnique, backgroundTech, backgroundMesh) {
                 capturer.show(scene::onFrame, managerCapture::onBuffer)
             }
         }
