@@ -6,7 +6,7 @@ import kotlin.math.abs
 
 private const val FRAMES_PER_SPAN = 2
 
-class CasePlayback {
+class MechanicPlayback {
     private val repo: Repository by ProjApp.injector.instance()
 
     private var isRequestedToProceed = false

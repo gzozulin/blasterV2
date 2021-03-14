@@ -18,7 +18,7 @@ import org.kodein.di.instance
 import java.io.File
 import kotlin.streams.toList
 
-class CaseScenario {
+class MechanicScenario {
     private val repo: Repository by ProjApp.injector.instance()
 
     fun renderScenario() {
