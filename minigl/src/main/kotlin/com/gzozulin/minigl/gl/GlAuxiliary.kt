@@ -32,6 +32,11 @@ fun glClear(color: col3 = col3().cyan()) {
     backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT)
 }
 
+fun glClear(color: vec4) {
+    backend.glClearColor(color.x, color.y, color.z, color.w)
+    backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT)
+}
+
 fun glDepthTest(depthFunc: Int = backend.GL_LEQUAL, action: () -> Unit) {
     backend.glEnable(backend.GL_DEPTH_TEST)
     backend.glDepthFunc(depthFunc)

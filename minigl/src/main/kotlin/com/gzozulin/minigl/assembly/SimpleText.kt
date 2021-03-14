@@ -86,7 +86,7 @@ class SimpleTextTechnique(
         windowWidth = width
         windowHeight = height
         unifProj.value!!.set(mat4().ortho(0f, windowWidth.toFloat(), 0f, windowHeight.toFloat(), -1f, 1f))
-        unifCenter.value!!.set(mat4().identity().translate(vec3(windowWidth.toFloat() - 700, windowHeight / 2f, 0f)))
+        unifCenter.value!!.set(mat4().identity().translate(vec3(windowWidth / 2f, windowHeight / 2f, 0f)))
     }
 
     private fun updateCursor(line: Int, letter: Int) {
