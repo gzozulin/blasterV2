@@ -1,4 +1,4 @@
-package com.gzozulin.proj
+package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.meshLib
@@ -46,10 +46,34 @@ private val spans = text.run {
 
 private val examplePage = TextPage(spans)
 
-private val framebuffer = GlFrameBuffer()
-private var textTex = GlTexture(
-    width = 1920, height = 1080, internalFormat = backend.GL_RGBA,
-    pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
+class RttTechnique(val width: Int, val height: Int) : GlResource() {
+    private val framebuffer = GlFrameBuffer()
+
+    val colorAttachment0 = GlTexture(
+        width = width, height = height, internalFormat = backend.GL_RGBA,
+        pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
+
+    private val prevViewport = IntArray(4)
+
+    init {
+        addChildren(framebuffer, colorAttachment0)
+    }
+
+    fun render(draw: () -> Unit) {
+        glCheck { backend.glGetIntegerv(backend.GL_VIEWPORT, prevViewport) }
+        glBind(framebuffer, colorAttachment0) {
+            glCheck { backend.glViewport(0, 0, width, height) }
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT0, colorAttachment0)
+            framebuffer.setOutputs(intArrayOf(backend.GL_COLOR_ATTACHMENT0))
+            framebuffer.checkIsComplete()
+            draw.invoke()
+        }
+        glCheck { backend.glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]) }
+    }
+}
+
+private val rttTechnique = RttTechnique(800, 600)
+
 private val textRect = GlMesh.rect(.35f, .5f)
 private val textMatrix = mat4().identity().translate(.065f, .11f, .151f)
 
@@ -77,10 +101,7 @@ private fun updateScene() {
 }
 
 private fun renderText() {
-    glBind(framebuffer, textTex) {
-        framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT0, textTex)
-        framebuffer.setOutputs(intArrayOf(backend.GL_COLOR_ATTACHMENT0))
-        framebuffer.checkIsComplete()
+    rttTechnique.render {
         glClear()
         simpleTextTechnique.page(examplePage)
     }
@@ -94,7 +115,7 @@ private fun renderScene() {
             simpleTechnique.draw(camera.calculateViewM(), camera.projectionM) {
                 simpleTechnique.instance(pcjr.mesh, pcjrtex, matrixStack.peekMatrix())
                 matrixStack.pushMatrix(textMatrix) {
-                    simpleTechnique.instance(textRect, textTex, matrixStack.peekMatrix())
+                    simpleTechnique.instance(textRect, rttTechnique.colorAttachment0, matrixStack.peekMatrix())
                 }
             }
         }
@@ -120,7 +141,7 @@ fun main() {
             camera.setPerspective(width, height)
         }
         glUse(simpleTechnique, skyboxTechnique, simpleTextTechnique,
-            framebuffer, pcjr.mesh, pcjrtex, textRect, textTex) {
+            rttTechnique, pcjr.mesh, pcjrtex, textRect) {
             window.show {
                 updateScene()
                 renderText()

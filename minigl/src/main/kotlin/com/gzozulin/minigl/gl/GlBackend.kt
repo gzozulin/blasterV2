@@ -80,6 +80,7 @@ class GlBackend {
     val GL_LESS:               Int get() = GL11.GL_LESS
     val GL_MODELVIEW:          Int get() = GL11.GL_MODELVIEW
     val GL_PROJECTION:         Int get() = GL11.GL_PROJECTION
+    val GL_VIEWPORT:           Int get() = GL11.GL_VIEWPORT
 
     fun glEnable(cap: Int) = glCheck { GL11.glEnable(cap) }
     fun glDisable(cap: Int) = glCheck { GL11.glDisable(cap) }
@@ -131,6 +132,7 @@ class GlBackend {
     fun glGetUniformLocation(program: Int, name: String) = glCheck { GL20.glGetUniformLocation(program, name) }
     fun glDeleteProgram(program: Int) = glCheck { GL20.glDeleteProgram(program) }
     fun glUseProgram(program: Int) = glCheck { GL20.glUseProgram(program) }
+    fun glGetIntegerv(pname: Int, value: IntArray) = glCheck { GL11.glGetIntegerv(pname, value) }
     fun glUniform1i(location: Int, x: Int) = glCheck { GL20.glUniform1i(location, x) }
     fun glUniform1f(location: Int, x: Float) = glCheck { GL20.glUniform1f(location, x) }
     fun glUniform2fv(location: Int, v: FloatBuffer) = glCheck { GL20.glUniform2fv(location, v) }
