@@ -21,12 +21,12 @@ class CrossFadeTechnique(private val color: col3 = col3().back(),
 
     private val rect = GlMesh.rect()
 
+    private var current = 0L
+    private var isFadeOut = false
+
     init {
         addChildren(fadeTechnique, rect)
     }
-
-    private var current = 0L
-    private var isFadeOut = false
 
     fun fadeIn() {
         current = timeout

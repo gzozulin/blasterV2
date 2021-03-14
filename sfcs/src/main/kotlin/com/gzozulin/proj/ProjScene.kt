@@ -17,6 +17,7 @@ private val fontDescription = FontDescription(
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, capturer.width, capturer.height)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/darkskies")
 private val rttTechnique = RttTechnique(1600, 1080)
+private val crossFadeTechnique = CrossFadeTechnique(timeout = 3000)
 
 private val camera = Camera()
 
@@ -35,7 +36,8 @@ class ProjScene : GlResource() {
     private val mechanicPlayback: MechanicPlayback by ProjApp.injector.instance()
 
     init {
-        addChildren(simpleTextTechnique, skyboxTechnique, rttTechnique, backgroundTech, backgroundMesh)
+        addChildren(simpleTextTechnique, skyboxTechnique, rttTechnique, crossFadeTechnique, backgroundTech, backgroundMesh)
+        crossFadeTechnique.fadeIn()
     }
 
     fun onFrame() {
@@ -66,5 +68,6 @@ class ProjScene : GlResource() {
                 }
             }
         }
+        crossFadeTechnique.draw()
     }
 }
