@@ -1,0 +1,125 @@
+package com.gzozulin.minigl.assembly
+
+import com.gzozulin.minigl.assets.meshLib
+import com.gzozulin.minigl.assets.texturesLib
+import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.WasdInput
+import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
+import org.lwjgl.glfw.GLFW
+import java.util.concurrent.TimeUnit
+
+private const val MILLIS_PER_FRAME = 16
+
+class CrossFadeTechnique(private val color: col3 = col3().back(),
+                         private val timeout: Long = TimeUnit.SECONDS.toMillis(1)) : GlResource() {
+
+    private val colorUnif = unifv4(vec4())
+    private val constProjM = constm4(mat4().ortho(-1f, 1f, -1f, 1f, 1f, -1f))
+    private val fadeTechnique = SimpleTechnique(constm4(mat4().identity()), constm4(mat4().identity()), constProjM, colorUnif)
+
+    private val rect = GlMesh.rect()
+
+    init {
+        addChildren(fadeTechnique, rect)
+    }
+
+    private var current = 0L
+    private var isFadeOut = false
+
+    fun fadeIn() {
+        current = timeout
+        isFadeOut = false
+    }
+
+    fun fadeOut() {
+        current = timeout
+        isFadeOut = true
+    }
+
+    fun switch() {
+        if (isFadeOut) {
+            fadeIn()
+        } else {
+            fadeOut()
+        }
+    }
+
+    fun draw() {
+        if (current > 0L) {
+            current -= MILLIS_PER_FRAME
+            val progress = 1f - current.toFloat() / timeout.toFloat()
+            val alpha = if (isFadeOut) progress else 1f - progress
+            val color = vec4(color, alpha)
+            colorUnif.value = color
+            glBlend {
+                fadeTechnique.draw {
+                    fadeTechnique.instance(rect)
+                }
+            }
+        } else if (isFadeOut) {
+            glClear(color)
+        }
+    }
+}
+
+private val window = GlWindow()
+private var mouseLook = false
+
+private val camera = Camera()
+private val controller = Controller(position = vec3().front())
+private val wasdInput = WasdInput(controller)
+
+private val model = meshLib.loadMesh("models/pcjr/pcjr.obj")
+private val diffuse = texturesLib.loadTexture("models/pcjr/pcjr.jpeg")
+
+private val unifViewM = unifm4()
+private val unifSampler = unifsampler()
+private val attribTexCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
+private val simpleTechnique = SimpleTechnique(
+    constm4(mat4().identity()), unifViewM, constm4(camera.projectionM), tex(attribTexCoord, unifSampler))
+private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")
+private val crossFadeTechnique = CrossFadeTechnique()
+
+fun main() {
+    window.create(isHoldingCursor = false) {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
+                mouseLook = pressed
+            }
+        }
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }
+        window.keyCallback = { key, pressed ->
+            if (key == GLFW.GLFW_KEY_SPACE && !pressed) {
+                crossFadeTechnique.switch()
+            }
+            wasdInput.onKeyPressed(key, pressed)
+        }
+        glUse(simpleTechnique, skyboxTechnique, crossFadeTechnique, model.mesh, diffuse) {
+            window.show {
+                glClear()
+                controller.apply { position, direction ->
+                    camera.setPosition(position)
+                    camera.lookAlong(direction)
+                }
+                skyboxTechnique.skybox(camera)
+                glDepthTest {
+                    glBind(diffuse) {
+                        unifSampler.value = diffuse
+                        unifViewM.value = camera.calculateViewM()
+                        simpleTechnique.draw {
+                            simpleTechnique.instance(model.mesh)
+                        }
+
+                    }
+                }
+                crossFadeTechnique.draw()
+            }
+        }
+    }
+}
