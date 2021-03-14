@@ -3,8 +3,8 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.assembly.TextPage
 import org.kodein.di.instance
 
-class ProjModel {
-    private val repo: Repository by ProjApp.injector.instance()
+class ModelCozyRoom {
+    private val repo: RepoProjector by ProjectorApp.injector.instance()
 
     val page: TextPage<OrderedSpan>
         get() = repo.currentPage

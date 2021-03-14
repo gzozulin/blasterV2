@@ -5,6 +5,7 @@ import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
+import com.gzozulin.minigl.assembly.TextSpan
 import com.gzozulin.minigl.gl.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -18,8 +19,17 @@ import org.kodein.di.instance
 import java.io.File
 import kotlin.streams.toList
 
+typealias DeclCtx = KotlinParser.DeclarationContext
+
+data class ScenarioNode(val order: Int, val file: File, val identifier: String,
+                        val children: List<ScenarioNode>? = null)
+
+data class OrderedToken(val order: Int, val token: Token)
+data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
+                       override var visibility: SpanVisibility) : TextSpan
+
 class MechanicScenario {
-    private val repo: Repository by ProjApp.injector.instance()
+    private val repo: RepoProjector by ProjectorApp.injector.instance()
 
     fun renderScenario() {
         val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()

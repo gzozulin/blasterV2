@@ -7,7 +7,7 @@ import kotlin.math.abs
 private const val FRAMES_PER_SPAN = 2
 
 class MechanicPlayback {
-    private val repo: Repository by ProjApp.injector.instance()
+    private val repo: RepoProjector by ProjectorApp.injector.instance()
 
     private var isRequestedToProceed = false
     private var isAdvancingSpans = true // spans or timeout

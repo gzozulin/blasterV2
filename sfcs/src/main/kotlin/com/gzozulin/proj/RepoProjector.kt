@@ -6,7 +6,7 @@ import java.io.File
 // todo: assert that children file is same as parent
 private val thisFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/MechanicScenario.kt")
 
-class Repository {
+class RepoProjector {
     var scenarioNodeCnt = 0
 
     val scenario = listOf(

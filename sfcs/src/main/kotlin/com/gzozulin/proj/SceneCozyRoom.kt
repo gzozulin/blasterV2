@@ -6,7 +6,7 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.kodein.di.instance
 
-private val capturer: GlCapturer by ProjApp.injector.instance()
+private val capturer: GlCapturer by ProjectorApp.injector.instance()
 
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
@@ -31,9 +31,9 @@ private val backgroundTech = SimpleTechnique(backgroundModelM, backgroundViewM, 
 private val backgroundColor = vec4(0f, 0f, 0f, 0.8f)
 private val backgroundMesh = GlMesh.rect(1600f, 1080f)
 
-class ProjScene : GlResource() {
-    private val model: ProjModel by ProjApp.injector.instance()
-    private val mechanicPlayback: MechanicPlayback by ProjApp.injector.instance()
+class SceneCozyRoom : GlResource() {
+    private val modelCozyRoom: ModelCozyRoom by ProjectorApp.injector.instance()
+    private val mechanicPlayback: MechanicPlayback by ProjectorApp.injector.instance()
 
     init {
         addChildren(simpleTextTechnique, skyboxTechnique, rttTechnique, crossFadeTechnique, backgroundTech, backgroundMesh)
@@ -54,7 +54,7 @@ class ProjScene : GlResource() {
     private fun renderCode() {
         rttTechnique.render {
             glClear(backgroundColor)
-            simpleTextTechnique.pageCentered(model.page, model.center, LINES_TO_SHOW)
+            simpleTextTechnique.pageCentered(modelCozyRoom.page, modelCozyRoom.center, LINES_TO_SHOW)
         }
     }
 

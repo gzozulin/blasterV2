@@ -49,7 +49,8 @@ class CrossFadeTechnique(private val color: col3 = col3().back(),
     fun draw() {
         if (current > 0L) {
             current -= MILLIS_PER_FRAME
-            val progress = 1f - current.toFloat() / timeout.toFloat()
+            val progress = powf(1f - current.toFloat() / timeout.toFloat(), 3f)
+            println(progress)
             val alpha = if (isFadeOut) progress else 1f - progress
             val color = vec4(color, alpha)
             colorUnif.value = color
@@ -80,7 +81,7 @@ private val attribTexCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
 private val simpleTechnique = SimpleTechnique(
     constm4(mat4().identity()), unifViewM, constm4(camera.projectionM), tex(attribTexCoord, unifSampler))
 private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")
-private val crossFadeTechnique = CrossFadeTechnique()
+private val crossFadeTechnique = CrossFadeTechnique(color = col3().orange())
 
 fun main() {
     window.create(isHoldingCursor = false) {
