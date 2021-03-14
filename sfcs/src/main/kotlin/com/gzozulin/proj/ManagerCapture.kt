@@ -12,7 +12,6 @@ import org.opencv.core.CvType
 import java.io.File
 
 class ManagerCapture {
-    private val tracer: Tracker by ProjectorApp.injector.instance()
     private val capturer: GlCapturer by ProjectorApp.injector.instance()
     private val videoWriter: VideoWriter by ProjectorApp.injector.instance()
 
@@ -23,11 +22,8 @@ class ManagerCapture {
     fun capture(frames: () -> Unit) {
         if (IS_CAPTURING) {
             val fourcc = VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte())
-            tracer.mark("Fourcc")
             videoWriter.open(File("1vid.avi").absolutePath, fourcc, 60.0, Size(capturer.width, capturer.height))
-            tracer.mark("Video file opened")
             videoWriter.set(VIDEOWRITER_PROP_QUALITY, 100.0)
-            tracer.mark("Quality set to 100%")
             check(videoWriter.isOpened)
         }
         frames.invoke()

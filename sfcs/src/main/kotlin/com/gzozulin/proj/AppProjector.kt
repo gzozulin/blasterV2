@@ -61,19 +61,19 @@ class ProjectorApp {
 
 fun main() {
     mechanicScenario.renderScenario()
-    tracker.mark("Scenario rendered")
     mechanicPlayback.prepareNextOrder()
-    tracker.mark("Order prepared")
     capturer.create {
-        tracker.mark("Capturer created")
         capturer.keyCallback = { key, pressed ->
             controller.keyPressed(key, pressed)
         }
         managerCapture.capture {
-            tracker.mark("Video capturing")
             glUse(sceneCozyRoom) {
-                capturer.show(sceneCozyRoom::onFrame, managerCapture::onBuffer)
+                capturer.show(::onFrame, managerCapture::onBuffer)
             }
         }
     }
+}
+
+private fun onFrame() {
+    controller.frame()
 }
