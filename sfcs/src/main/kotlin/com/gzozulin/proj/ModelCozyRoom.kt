@@ -5,15 +5,10 @@ import org.kodein.di.instance
 
 class ModelCozyRoom {
     private val repo: RepoProjector by ProjectorApp.injector.instance()
-    private val mechanicPlayback: MechanicPlayback by ProjectorApp.injector.instance()
 
     val page: TextPage<OrderedSpan>
         get() = repo.currentPage
 
     val center: Int
         get() = repo.currentCenter
-
-    fun proceed() {
-        mechanicPlayback.proceed()
-    }
 }

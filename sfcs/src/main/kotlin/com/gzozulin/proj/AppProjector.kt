@@ -68,12 +68,8 @@ fun main() {
         }
         managerCapture.capture {
             glUse(sceneCozyRoom) {
-                capturer.show(::onFrame, managerCapture::onBuffer)
+                capturer.show(controller::frame, managerCapture::onBuffer)
             }
         }
     }
-}
-
-private fun onFrame() {
-    controller.frame()
 }

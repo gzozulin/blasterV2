@@ -31,7 +31,9 @@ class Controller(private var current: State = StateIdle()) {
 open class State {
     open fun onEnter() {}
     open fun onLeave() {}
+
     open fun onFrame() {}
+
     open fun onKey(key: Int, pressed: Boolean) {}
 }
 
@@ -52,8 +54,8 @@ class StateIdle : State() {
 }
 
 class StateCozyRoomIntro: State() {
-    private val model: ModelCozyRoom by ProjectorApp.injector.instance()
     private val view: SceneCozyRoom by ProjectorApp.injector.instance()
+    private val mechanicPlayback: MechanicPlayback by ProjectorApp.injector.instance()
 
     override fun onFrame() {
         super.onFrame()
@@ -63,7 +65,7 @@ class StateCozyRoomIntro: State() {
     override fun onKey(key: Int, pressed: Boolean) {
         super.onKey(key, pressed)
         if (!pressed) {
-            model.proceed()
+            mechanicPlayback.proceed()
         }
     }
 }
