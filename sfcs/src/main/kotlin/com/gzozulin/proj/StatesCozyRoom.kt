@@ -54,12 +54,39 @@ class StateIdle : State() {
 }
 
 class StateCozyRoomIntro: State() {
-    private val view: SceneCozyRoom by ProjectorApp.injector.instance()
+    private val controller: Controller by ProjectorApp.injector.instance()
+    private val scene: SceneCozyRoom by ProjectorApp.injector.instance()
+
+    override fun onEnter() {
+        super.onEnter()
+        scene.fadeIn()
+    }
+
+    override fun onFrame() {
+        scene.tickCamera()
+        scene.renderScene()
+        scene.renderCrossFade()
+    }
+
+    override fun onKey(key: Int, pressed: Boolean) {
+        super.onKey(key, pressed)
+        if (!pressed) {
+            controller.switch(StateCozyRoomTyping())
+        }
+    }
+}
+
+class StateCozyRoomTyping: State() {
+    private val scene: SceneCozyRoom by ProjectorApp.injector.instance()
     private val mechanicPlayback: MechanicPlayback by ProjectorApp.injector.instance()
 
     override fun onFrame() {
         super.onFrame()
-        view.onFrame()
+        mechanicPlayback.updateSpans()
+        scene.tickCamera()
+        scene.prepareCode()
+        scene.renderScene()
+        scene.renderCode()
     }
 
     override fun onKey(key: Int, pressed: Boolean) {
@@ -68,12 +95,4 @@ class StateCozyRoomIntro: State() {
             mechanicPlayback.proceed()
         }
     }
-}
-
-class StateCozyRoomTyping: State() {
-
-}
-
-class StateCozyRoomImage: State() {
-
 }
