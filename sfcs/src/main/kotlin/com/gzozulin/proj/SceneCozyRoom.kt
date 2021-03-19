@@ -53,9 +53,11 @@ class SceneCozyRoom : GlResource() {
     }
 
     fun prepareCode() {
-        rttTechnique.render {
-            glClear(backgroundColor)
-            simpleTextTechnique.pageCentered(modelCozyRoom.page, modelCozyRoom.center, LINES_TO_SHOW)
+        glMultisample {
+            rttTechnique.render {
+                glClear(backgroundColor)
+                simpleTextTechnique.pageCentered(modelCozyRoom.page, modelCozyRoom.center, LINES_TO_SHOW)
+            }
         }
     }
 

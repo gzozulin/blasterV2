@@ -15,6 +15,7 @@ const val IS_TRACING = true
 // todo: center on function (stop - start)/2
 // todo: basic scene arrangement
 // todo: example project + video
+// todo: off-screen MSAA for code
 
 class Tracker {
     private val startup = System.currentTimeMillis()
@@ -33,7 +34,7 @@ class Tracker {
 
 private val tracker = Tracker()
 private val controller = Controller()
-private val capturer = GlCapturer(1920, 1080, isFullscreen = true)
+private val capturer = GlCapturer(1920, 1080, isFullscreen = true, isMultisampling = true)
 private val videoWriter = VideoWriter()
 private val managerCapture = ManagerCapture()
 private val repoProjector = RepoProjector()

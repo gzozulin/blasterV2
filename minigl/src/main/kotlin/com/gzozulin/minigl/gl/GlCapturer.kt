@@ -8,8 +8,14 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 
-class GlCapturer(val width: Int = 800, val height: Int = 600, private val isFullscreen: Boolean = false) {
-    var handle = NULL
+private const val MULTISAMPLING_HINT = 4
+
+class GlCapturer(
+    val width: Int = 800, val height: Int = 600,
+    private val isFullscreen: Boolean = false,
+    private val isMultisampling: Boolean = false
+) {
+    private var handle = NULL
 
     val frameBuffer: ByteBuffer by lazy {
         ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
@@ -45,6 +51,9 @@ class GlCapturer(val width: Int = 800, val height: Int = 600, private val isFull
     fun create(onCreated: () -> Unit) {
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
+        if (isMultisampling) {
+            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
+        }
         val primaryMonitor = glfwGetPrimaryMonitor()
         val videoMode = glfwGetVideoMode(primaryMonitor)
         val result = glfwCreateWindow(width, height, "Blaster!", if (isFullscreen) primaryMonitor else NULL, handle)
@@ -60,7 +69,8 @@ class GlCapturer(val width: Int = 800, val height: Int = 600, private val isFull
 
     fun show(onFrame: () -> Unit, onBuffer: () -> Unit) {
         check(handle != NULL) { "Window is not yet created!" }
-        glCheck { backend.glViewport(0, 0, width, height) }
+        backend.glViewport(0, 0, width, height)
+        backend.glDisable(backend.GL_MULTISAMPLE) // disabled by default
         glfwShowWindow(handle)
         while (!glfwWindowShouldClose(handle)) {
             onFrame.invoke()

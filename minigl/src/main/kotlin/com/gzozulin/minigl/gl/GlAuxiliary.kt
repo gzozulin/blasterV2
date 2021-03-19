@@ -57,3 +57,9 @@ fun glBlend(sfactor: Int = backend.GL_SRC_ALPHA, dfactor: Int = backend.GL_ONE_M
     action.invoke()
     backend.glDisable(backend.GL_BLEND)
 }
+
+fun glMultisample(action: () -> Unit) {
+    backend.glEnable(backend.GL_MULTISAMPLE)
+    action.invoke()
+    backend.glDisable(backend.GL_MULTISAMPLE)
+}
