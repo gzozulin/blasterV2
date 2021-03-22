@@ -1,4 +1,4 @@
 package com.gzozulin.minigl.assembly
 
-class PBRLighting {
+class ShadingPhong {
 }
