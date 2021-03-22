@@ -1,8 +1,8 @@
 package com.gzozulin.minigl.assets
 
-import com.gzozulin.minigl.gl.GlTexData
-import com.gzozulin.minigl.gl.GlTexture
-import com.gzozulin.minigl.gl.backend
+import com.gzozulin.minigl.api.GlTexData
+import com.gzozulin.minigl.api.GlTexture
+import com.gzozulin.minigl.api.backend
 import com.gzozulin.minigl.scene.PbrMaterial
 import java.awt.Color
 import java.io.File

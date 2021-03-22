@@ -1,7 +1,7 @@
 package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import java.lang.Integer.max
 
 data class FontDescription(

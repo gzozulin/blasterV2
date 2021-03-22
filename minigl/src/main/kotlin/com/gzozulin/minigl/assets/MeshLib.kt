@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.assets
 
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
@@ -27,9 +27,19 @@ private class Intermediate {
     val indicesList = mutableListOf<Int>()
 }
 
-interface Material
-data class Object(val mesh: GlMesh, val material: Material)
-data class Model(val objects: List<Object>)
+open class Material : GlResource()
+
+data class Object(val mesh: GlMesh, val material: Material, val aabb: aabb): GlResource() {
+    init {
+        addChildren(mesh, material)
+    }
+}
+
+data class Model(val objects: List<Object>, val aabb: aabb) : GlResource() {
+    init {
+        addChildren(objects)
+    }
+}
 
 val meshLib = MeshLib()
 

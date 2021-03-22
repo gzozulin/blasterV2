@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 class GlRenderBuffer(
     private val component: Int = backend.GL_DEPTH_COMPONENT24,

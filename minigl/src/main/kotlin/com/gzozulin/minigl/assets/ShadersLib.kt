@@ -1,8 +1,8 @@
 package com.gzozulin.minigl.assets
 
-import com.gzozulin.minigl.gl.GlProgram
-import com.gzozulin.minigl.gl.GlShader
-import com.gzozulin.minigl.gl.GlShaderType
+import com.gzozulin.minigl.api.GlProgram
+import com.gzozulin.minigl.api.GlShader
+import com.gzozulin.minigl.api.GlShaderType
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.Charset

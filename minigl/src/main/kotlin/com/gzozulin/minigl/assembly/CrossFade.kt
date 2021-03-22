@@ -2,7 +2,7 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.meshLib
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput

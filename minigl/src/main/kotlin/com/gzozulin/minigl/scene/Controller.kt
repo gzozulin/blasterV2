@@ -1,8 +1,8 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.gl.down
-import com.gzozulin.minigl.gl.up
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.down
+import com.gzozulin.minigl.api.up
+import com.gzozulin.minigl.api.vec3
 import org.joml.Math
 import org.joml.Vector3f
 import kotlin.math.cos

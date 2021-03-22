@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.gl.mat4
+import com.gzozulin.minigl.api.mat4
 import java.util.*
 
 class MatrixStack {

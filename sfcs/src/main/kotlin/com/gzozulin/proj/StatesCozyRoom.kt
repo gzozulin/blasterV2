@@ -1,8 +1,8 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.gl.black
-import com.gzozulin.minigl.gl.col3
-import com.gzozulin.minigl.gl.glClear
+import com.gzozulin.minigl.api.black
+import com.gzozulin.minigl.api.col3
+import com.gzozulin.minigl.api.glClear
 import org.kodein.di.instance
 
 class Controller(private var current: State = StateIdle()) {

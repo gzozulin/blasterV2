@@ -1,6 +1,6 @@
 package com.gzozulin.alch
 
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance

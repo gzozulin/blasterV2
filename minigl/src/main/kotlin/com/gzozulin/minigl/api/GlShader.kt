@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 enum class GlShaderType(val type: Int) {
     VERTEX_SHADER(backend.GL_VERTEX_SHADER),

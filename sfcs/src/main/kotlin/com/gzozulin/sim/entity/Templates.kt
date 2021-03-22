@@ -1,7 +1,7 @@
 package com.gzozulin.sim.entity
 
-import com.gzozulin.minigl.gl.front
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.front
+import com.gzozulin.minigl.api.vec3
 
 data class Template(
     private var withSpatial: Boolean = false,

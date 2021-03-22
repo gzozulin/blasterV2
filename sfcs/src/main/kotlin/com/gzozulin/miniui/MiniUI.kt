@@ -1,7 +1,7 @@
 package com.gzozulin.miniui
 
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.techniques.StaticSimpleTechnique
 

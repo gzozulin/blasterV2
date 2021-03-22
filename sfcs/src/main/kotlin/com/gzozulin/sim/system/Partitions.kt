@@ -1,7 +1,7 @@
 package com.gzozulin.sim.system
 
 import com.gzozulin.sim.entity.Actor
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.vec3
 
 const val PARTITION_SIDE = 16
 

@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 class GlMesh(
     private val attributes: List<Pair<GlAttribute, GlBuffer>>,

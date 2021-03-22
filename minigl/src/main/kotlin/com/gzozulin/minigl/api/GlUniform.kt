@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 @Deprecated("Use assembly instead!")
 enum class GlUniform(val label: String) {

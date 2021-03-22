@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 class GlFrameBuffer : GlBindable() {
     private var handle: Int = -1

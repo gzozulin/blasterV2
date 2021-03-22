@@ -1,7 +1,7 @@
 package com.gzozulin.sim.entity
 
 import com.gzozulin.sim.system.Partition
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.vec3
 
 private const val MAX_CACHED_COMPONENTS = 100
 

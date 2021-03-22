@@ -4,9 +4,9 @@ import com.gzozulin.sim.entity.Repository
 import com.gzozulin.sim.system.PhysicsSystem
 import com.gzozulin.sim.system.PresentationSystem
 import com.gzozulin.sim.system.ProcreationSystem
-import com.gzozulin.minigl.gl.GlWindow
-import com.gzozulin.minigl.gl.MouseButton
-import com.gzozulin.minigl.gl.glUse
+import com.gzozulin.minigl.api.GlWindow
+import com.gzozulin.minigl.api.MouseButton
+import com.gzozulin.minigl.api.glUse
 
 private val profiler = Profiler()
 

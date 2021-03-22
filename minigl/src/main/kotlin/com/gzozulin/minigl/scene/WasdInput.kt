@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.gl.vec2
+import com.gzozulin.minigl.api.vec2
 import org.lwjgl.glfw.GLFW
 
 class WasdInput(private val controller: Controller) {

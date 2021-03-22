@@ -2,7 +2,7 @@ package com.gzozulin.sim.system
 
 import com.gzozulin.sim.entity.*
 import com.gzozulin.sim.simulation.*
-import com.gzozulin.minigl.gl.randf
+import com.gzozulin.minigl.api.randf
 import java.util.*
 
 private const val MAX_TTL = 1000

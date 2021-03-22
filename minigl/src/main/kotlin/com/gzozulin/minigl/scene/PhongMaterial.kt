@@ -1,9 +1,8 @@
 package com.gzozulin.minigl.scene
 
 import com.gzozulin.minigl.assets.Material
-import com.gzozulin.minigl.gl.GlResource
-import com.gzozulin.minigl.gl.GlTexture
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.GlTexture
+import com.gzozulin.minigl.api.vec3
 
 data class PhongMaterial(
     val ambient: vec3,
@@ -17,7 +16,7 @@ data class PhongMaterial(
     val mapSpecular: GlTexture? = null,
     val mapShine: GlTexture? = null,
     val mapTransparency: GlTexture? = null,
-) : GlResource(), Material {
+) : Material() {
     
     init {
         addChildren(listOfNotNull(mapAmbient, mapDiffuse, mapSpecular, mapShine, mapTransparency))

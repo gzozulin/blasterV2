@@ -6,7 +6,7 @@ import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

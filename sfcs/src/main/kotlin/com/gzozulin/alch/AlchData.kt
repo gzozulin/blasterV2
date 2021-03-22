@@ -1,6 +1,6 @@
 package com.gzozulin.alch
 
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 
 private val colorsTier1 = listOf(col3().red(), col3().green(), col3().blue())
 private val colorsTier2 = listOf(*colorsTier1.toTypedArray(), col3().yellow(), col3().cyan(), col3().magenta())

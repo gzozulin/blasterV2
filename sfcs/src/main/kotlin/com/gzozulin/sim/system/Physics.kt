@@ -2,7 +2,7 @@ package com.gzozulin.sim.system
 
 import com.gzozulin.sim.entity.*
 import com.gzozulin.sim.simulation.*
-import com.gzozulin.minigl.gl.vec3
+import com.gzozulin.minigl.api.vec3
 import kotlinx.coroutines.*
 
 private const val BODY_RADIUS_SQR = 1f

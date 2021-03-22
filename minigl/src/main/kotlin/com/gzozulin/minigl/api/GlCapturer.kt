@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 import com.gzozulin.minigl.scene.Version
 import org.lwjgl.glfw.GLFW.*

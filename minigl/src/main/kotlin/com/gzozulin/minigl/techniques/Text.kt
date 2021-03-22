@@ -2,7 +2,7 @@ package com.gzozulin.minigl.techniques
 
 import com.gzozulin.minigl.assets.shadersLib
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.gl.*
+import com.gzozulin.minigl.api.*
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW

@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 // divisor - how many attributes per draw call for instancing (0 - default == 1 item per vertex)
 enum class GlAttribute(val size: Int, val location: Int, val divisor: Int = 0) {

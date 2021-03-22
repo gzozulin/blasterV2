@@ -1,7 +1,7 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.gl.GlCapturer
-import com.gzozulin.minigl.gl.glUse
+import com.gzozulin.minigl.api.GlCapturer
+import com.gzozulin.minigl.api.glUse
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
 import org.kodein.di.DI
 import org.kodein.di.bind

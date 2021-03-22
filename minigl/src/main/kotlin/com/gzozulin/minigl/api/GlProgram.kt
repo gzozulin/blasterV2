@@ -1,8 +1,5 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
-import org.joml.Matrix4f
-import org.joml.Vector2f
-import org.joml.Vector3f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 

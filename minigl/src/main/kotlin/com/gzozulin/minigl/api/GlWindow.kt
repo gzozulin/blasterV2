@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.gl
+package com.gzozulin.minigl.api
 
 import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
