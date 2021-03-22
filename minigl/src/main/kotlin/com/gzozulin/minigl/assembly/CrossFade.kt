@@ -72,7 +72,7 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
-private val model = meshLib.loadMesh("models/pcjr/pcjr.obj")
+private val model = meshLib.loadModel("models/pcjr/pcjr.obj")
 private val diffuse = texturesLib.loadTexture("models/pcjr/pcjr.jpeg")
 
 private val unifViewM = unifm4()

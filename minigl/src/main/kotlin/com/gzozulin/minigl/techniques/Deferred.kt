@@ -148,7 +148,7 @@ class StaticDeferredTechnique : GlResource() {
         check(pointLightCnt + dirLightCnt < MAX_LIGHTS) { "More lights than defined in shader!" }
     }
 
-    fun instance(mesh: GlMesh, modelM: Matrix4f, diffuse: GlTexture, material: Material) {
+    fun instance(mesh: GlMesh, modelM: Matrix4f, diffuse: GlTexture, material: PhongMaterial) {
         checkReady()
         glBind(mesh, diffuse) {
             programGeomPass.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
@@ -179,7 +179,7 @@ private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3
 private val deferredTechnique = StaticDeferredTechnique()
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val textTechnique = StaticTextTechnique()
-private val mesh = meshLib.loadMesh("models/house/low.obj") { println("progress: $it") }.mesh
+private val mesh = meshLib.loadModel("models/house/low.obj") { println("progress: $it") }.mesh
 private val diffuse = texturesLib.loadTexture("models/house/house_diffuse.png")
 
 private var mouseLook = false
@@ -216,7 +216,7 @@ fun main() {
                 glDepthTest {
                     glCulling {
                         deferredTechnique.draw(camera, instances = {
-                            deferredTechnique.instance(mesh, objMatrix, diffuse, Material.CONCRETE)
+                            deferredTechnique.instance(mesh, objMatrix, diffuse, PhongMaterial.CONCRETE)
                         }, lights = {
                             deferredTechnique.light(light, lightMatrix)
                             deferredTechnique.light(light2, lightMatrix2)

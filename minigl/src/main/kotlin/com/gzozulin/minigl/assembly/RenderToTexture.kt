@@ -78,7 +78,7 @@ private val textRect = GlMesh.rect(.35f, .5f)
 private val textMatrix = mat4().identity().translate(.065f, .11f, .151f)
 
 private val pcjrtex = texturesLib.loadTexture("models/pcjr/pcjr.jpeg")
-private val pcjr = meshLib.loadMesh("models/pcjr/pcjr.obj") { println(it) }
+private val pcjr = meshLib.loadModel("models/pcjr/pcjr.obj") { println(it) }
 
 private var mouseLook = false
 

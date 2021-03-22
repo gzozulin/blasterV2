@@ -66,7 +66,7 @@ private val wasdInput = WasdInput(controller)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val pbrTechnique = StaticPbrTechnique()
 
-private val meshData = meshLib.loadMesh("models/mandalorian/mandalorian.obj") { println("loading $it") }
+private val meshData = meshLib.loadModel("models/mandalorian/mandalorian.obj") { println("loading $it") }
 private val material = texturesLib.loadPbr("models/mandalorian")
 
 private val light = Light(vec3(25f), true)

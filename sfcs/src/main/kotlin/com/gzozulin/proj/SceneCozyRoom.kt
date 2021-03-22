@@ -35,7 +35,7 @@ class SceneCozyRoom : GlResource() {
     private val backgroundMesh = GlMesh.rect(1600f, 1080f)
 
     private val bedroomUniformViewM = unifm4(camera.calculateViewM())
-    private val bedroomModel = meshLib.loadMesh("models/bedroom/bedroom.obj") { println("Loading model $it..") }
+    private val bedroomModel = meshLib.loadModel("models/bedroom/bedroom.obj") { println("Loading model $it..") }
     private val bedroomTechnique = SimpleTechnique(
         constm4(mat4().identity()), bedroomUniformViewM, constm4(camera.projectionM), constv4(vec4(1f)))
 

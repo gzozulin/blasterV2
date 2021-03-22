@@ -34,7 +34,7 @@ class Tracker {
 
 private val tracker = Tracker()
 private val controller = Controller()
-private val capturer = GlCapturer(1920, 1080, isFullscreen = true, isMultisampling = true)
+private val capturer = GlCapturer(1920, 1080, isFullscreen = true, isMultisampling = false)
 private val videoWriter = VideoWriter()
 private val managerCapture = ManagerCapture()
 private val repoProjector = RepoProjector()

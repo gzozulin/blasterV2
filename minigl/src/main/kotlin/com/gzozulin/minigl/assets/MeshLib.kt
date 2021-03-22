@@ -2,7 +2,6 @@ package com.gzozulin.minigl.assets
 
 import com.gzozulin.minigl.gl.*
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -11,6 +10,7 @@ import java.nio.charset.Charset
 private val whitespaceRegex = "\\s+".toRegex()
 private val slashRegex = "/".toRegex()
 
+@Deprecated("Model instead")
 data class MeshData(
     val mesh: GlMesh,
     val aabb: aabb
@@ -27,13 +27,17 @@ private class Intermediate {
     val indicesList = mutableListOf<Int>()
 }
 
+interface Material
+data class Object(val mesh: GlMesh, val material: Material)
+data class Model(val objects: List<Object>)
+
 val meshLib = MeshLib()
 
 class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
 
-    fun loadMesh(meshFilename: String, progress: (Float) -> Unit = {}): MeshData {
+    fun loadModel(meshFilename: String, progress: (Float) -> Unit = {}): MeshData {
         val result = Intermediate()
         var linesCount = 0
         var lastProgress = 0f
@@ -194,4 +198,8 @@ class MeshLib internal constructor() {
         buffer.position(0)
         return buffer
     }
+}
+
+fun main() {
+
 }
