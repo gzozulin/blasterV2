@@ -12,21 +12,26 @@ import java.nio.charset.Charset
 private val whitespaceRegex = "\\s+".toRegex()
 private val slashRegex = "/".toRegex()
 
-@Deprecated("Model instead")
-data class MeshData(
-    val mesh: GlMesh,
-    val aabb: aabb
-)
+private class IntermediateObj {
+    var materialTag: String? = null
 
-private class Intermediate {
     val aabb = aabb()
-    val positionList = mutableListOf<Float>()
-    val texCoordList = mutableListOf<Float>()
-    val normalList = mutableListOf<Float>()
+
     val positions = mutableListOf<Float>()
     val texCoords = mutableListOf<Float>()
     val normals = mutableListOf<Float>()
-    val indicesList = mutableListOf<Int>()
+    val indices = mutableListOf<Int>()
+}
+
+private class Intermediate {
+    val positionList = mutableListOf<Float>()
+    val texCoordList = mutableListOf<Float>()
+    val normalList = mutableListOf<Float>()
+
+    val objects = mutableListOf<IntermediateObj>()
+
+    val current: IntermediateObj
+        get() = objects.last()
 }
 
 open class Material : GlResource()
@@ -45,21 +50,6 @@ data class Model(val objects: List<Object>, val aabb: aabb) : GlResource() {
 
 val meshLib = MeshLib()
 
-private fun String.toVec3f(): vec3 {
-    val split = split(whitespaceRegex)
-    return vec3(split[1].toDouble().toFloat(), split[2].toDouble().toFloat(), split[3].toDouble().toFloat())
-}
-
-private fun String.toFloat(): Float {
-    val split = split(whitespaceRegex)
-    return split[1].toDouble().toFloat()
-}
-
-private fun String.toName(): String {
-    val split = split(whitespaceRegex)
-    return split[1]
-}
-
 class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
@@ -69,65 +59,22 @@ class MeshLib internal constructor() {
     }
 
     fun load(objFilename: String, mtlFilename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
-        parseMtl(mtlFilename)
-        return Model(listOf(), aabb())
-    }
-
-    private fun parseObj() {
-
-    }
-
-    private fun parseMtl(mtlFilename: String): MutableList<Pair<String, PhongMaterial>> {
-        val parentDir = File(mtlFilename).parent
-        val result = mutableListOf<Pair<String, PhongMaterial>>()
-        fun updateLast(update: (PhongMaterial) -> PhongMaterial) {
-            val last = result.removeLast()
-            val updated = update.invoke(last.second)
-            result.add(last.first to updated)
+        val materials = parseMtl(mtlFilename)
+        val objects = parseObj(objFilename, materials, progress)
+        val allAabb = aabb()
+        objects.forEach { obj ->
+            allAabb.union(obj.aabb)
         }
-        openAsset(mtlFilename).useLines { lines ->
-            for (line in lines) {
-                if (line.startsWith("#")) {
-                    continue
-                }
-                when (line[0]) {
-                    'n' -> result.add(line.toName() to PhongMaterial.DEFAULT)
-                    'K' -> {
-                        when (line[1]) {
-                            'a' -> updateLast { it.copy(ambient = line.toVec3f()) }
-                            'd' -> updateLast { it.copy(diffuse = line.toVec3f()) }
-                            's' -> updateLast { it.copy(specular = line.toVec3f()) }
-                        }
-                    }
-                    'm' -> {
-                        when (line[4]) {
-                            'K' -> when (line[5]) {
-                                'a' -> updateLast { it.copy(mapAmbient = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                                'd' -> updateLast { it.copy(mapDiffuse = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                                's' -> updateLast { it.copy(mapSpecular = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                            }
-                            'N' -> updateLast { it.copy(mapShine = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                            'd' -> updateLast { it.copy(mapTransparency = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                        }
-                    }
-                    'N' -> {
-                        when (line[1]) {
-                            's' -> updateLast { it.copy(shine = line.toFloat()) }
-                        }
-                    }
-                    'd' -> updateLast { it.copy(transparency = line.toFloat()) }
-                }
-            }
-        }
-        return result
+        return Model(objects, allAabb)
     }
 
-    fun loadModel(meshFilename: String, progress: (Float) -> Unit = {}): MeshData {
+    private fun parseObj(objFilename: String, materials: Map<String, PhongMaterial>,
+                         progress: (Float) -> Unit): List<Object> {
         val result = Intermediate()
         var linesCount = 0
         var lastProgress = 0f
-        openAsset(meshFilename).useLines { linesCount = it.count() }
-        openAsset(meshFilename).useLines { lines ->
+        openAsset(objFilename).useLines { linesCount = it.count() }
+        openAsset(objFilename).useLines { lines ->
             lines.forEachIndexed { index, line ->
                 parseLine(line, result)
                 val currentProgress = index.toFloat() / linesCount.toFloat()
@@ -137,27 +84,49 @@ class MeshLib internal constructor() {
                 }
             }
         }
-        val positionBuff = toByteBufferFloat(result.positions)
-        val texCoordBuff = toByteBufferFloat(result.texCoords)
-        val normalBuff = toByteBufferFloat(result.normals)
-        val indicesBuff = toByteBufferInt(result.indicesList)
-        val mesh = GlMesh(
-            listOf(GlAttribute.ATTRIBUTE_POSITION to GlBuffer(backend.GL_ARRAY_BUFFER, positionBuff),
-                GlAttribute.ATTRIBUTE_TEXCOORD to GlBuffer(backend.GL_ARRAY_BUFFER, texCoordBuff),
-                GlAttribute.ATTRIBUTE_NORMAL to GlBuffer(backend.GL_ARRAY_BUFFER, normalBuff)),
-            GlBuffer(backend.GL_ELEMENT_ARRAY_BUFFER, indicesBuff), result.indicesList.size
-        )
-        return MeshData(mesh, result.aabb)
+        return createObjects(result, materials)
+    }
+
+    private fun createObjects(intermediate: Intermediate,
+                              materials: Map<String, PhongMaterial>): MutableList<Object> {
+        val result = mutableListOf<Object>()
+        intermediate.objects.forEach { intermediateObj ->
+            val positionBuff = toByteBufferFloat(intermediateObj.positions)
+            val texCoordBuff = toByteBufferFloat(intermediateObj.texCoords)
+            val normalBuff = toByteBufferFloat(intermediateObj.normals)
+            val indicesBuff = toByteBufferInt(intermediateObj.indices)
+            val mesh = GlMesh(
+                listOf(GlAttribute.ATTRIBUTE_POSITION to GlBuffer(backend.GL_ARRAY_BUFFER, positionBuff),
+                    GlAttribute.ATTRIBUTE_TEXCOORD to GlBuffer(backend.GL_ARRAY_BUFFER, texCoordBuff),
+                    GlAttribute.ATTRIBUTE_NORMAL to GlBuffer(backend.GL_ARRAY_BUFFER, normalBuff)),
+                GlBuffer(backend.GL_ELEMENT_ARRAY_BUFFER, indicesBuff), intermediateObj.indices.size
+            )
+            val material = materials[intermediateObj.materialTag]
+            result.add(Object(mesh, material!!, intermediateObj.aabb))
+        }
+        return result
     }
 
     private fun parseLine(line: String, result: Intermediate) {
-        if (line.isEmpty()) {
+        if (line.isCommentOrEmpty()) {
             return
         }
         when (line[0]) {
             'v' -> parseVertexAttribute(line, result)
             'f' -> parsePolygon(line, result)
+            'g' -> nextObject(result)
+            'u' -> useMaterial(line.toName(), result)
         }
+    }
+
+    private fun nextObject(result: Intermediate) {
+        val currMaterial = result.current.materialTag
+        result.objects.add(IntermediateObj())
+        result.current.materialTag = currMaterial
+    }
+
+    private fun useMaterial(tag: String, result: Intermediate) {
+        result.current.materialTag = tag
     }
 
     private fun parseVertexAttribute(line: String, result: Intermediate) {
@@ -193,7 +162,7 @@ class MeshLib internal constructor() {
         val split = line.split(whitespaceRegex)
         val verticesCnt = split.size - 1
         val indices = mutableListOf<Int>()
-        var nextIndex = result.positions.size / 3
+        var nextIndex = result.current.positions.size / 3
         for (vertex in 0 until verticesCnt) {
             addVertex(split[vertex + 1], result)
             indices.add(nextIndex)
@@ -201,7 +170,7 @@ class MeshLib internal constructor() {
         }
         val triangleCnt = verticesCnt - 2
         for (triangle in 0 until triangleCnt) {
-            addTriangle(indices[0], indices[triangle + 1], indices[triangle + 2], result.indicesList)
+            addTriangle(indices[0], indices[triangle + 1], indices[triangle + 2], result.current.indices)
         }
     }
 
@@ -214,33 +183,33 @@ class MeshLib internal constructor() {
         val vx = result.positionList[vertIndex * 3 + 0]
         val vy = result.positionList[vertIndex * 3 + 1]
         val vz = result.positionList[vertIndex * 3 + 2]
-        result.positions.add(vx)
-        result.positions.add(vy)
-        result.positions.add(vz)
-        updateAabb(result.aabb, vx, vy, vz)
+        result.current.positions.add(vx)
+        result.current.positions.add(vy)
+        result.current.positions.add(vz)
+        updateAabb(result.current.aabb, vx, vy, vz)
         if (result.texCoordList.isNotEmpty()) {
             var texIndex = vertSplit[1].toInt()  - 1
             if (texIndex < 0) {
                 texIndex += result.texCoordList.size / 2 + 1
             }
-            result.texCoords.add(result.texCoordList[texIndex  * 2 + 0])
-            result.texCoords.add(result.texCoordList[texIndex  * 2 + 1])
+            result.current.texCoords.add(result.texCoordList[texIndex  * 2 + 0])
+            result.current.texCoords.add(result.texCoordList[texIndex  * 2 + 1])
         } else {
-            result.texCoords.add(1f)
-            result.texCoords.add(1f)
+            result.current.texCoords.add(1f)
+            result.current.texCoords.add(1f)
         }
         if (result.normalList.isNotEmpty()) {
             var normIndex = vertSplit[2].toInt() - 1
             if (normIndex < 0) {
                 normIndex += result.normalList.size / 3 + 1
             }
-            result.normals.add(result.normalList[normIndex * 3 + 0])
-            result.normals.add(result.normalList[normIndex * 3 + 1])
-            result.normals.add(result.normalList[normIndex * 3 + 2])
+            result.current.normals.add(result.normalList[normIndex * 3 + 0])
+            result.current.normals.add(result.normalList[normIndex * 3 + 1])
+            result.current.normals.add(result.normalList[normIndex * 3 + 2])
         } else {
-            result.normals.add(0f)
-            result.normals.add(1f)
-            result.normals.add(0f)
+            result.current.normals.add(0f)
+            result.current.normals.add(1f)
+            result.current.normals.add(0f)
         }
     }
 
@@ -268,6 +237,55 @@ class MeshLib internal constructor() {
         }
     }
 
+    private fun parseMtl(mtlFilename: String): Map<String, PhongMaterial> {
+        val parentDir = File(mtlFilename).parent
+        val result = mutableListOf<Pair<String, PhongMaterial>>()
+        fun updateLast(update: (PhongMaterial) -> PhongMaterial) {
+            val last = result.removeLast()
+            val updated = update.invoke(last.second)
+            result.add(last.first to updated)
+        }
+        openAsset(mtlFilename).useLines { lines ->
+            for (line in lines) {
+                if (line.isCommentOrEmpty()) {
+                    continue
+                }
+                when (line[0]) {
+                    'n' -> result.add(line.toName() to PhongMaterial.DEFAULT)
+                    'K' -> {
+                        when (line[1]) {
+                            'a' -> updateLast { it.copy(ambient = line.toVec3f()) }
+                            'd' -> updateLast { it.copy(diffuse = line.toVec3f()) }
+                            's' -> updateLast { it.copy(specular = line.toVec3f()) }
+                        }
+                    }
+                    'm' -> {
+                        when (line[4]) {
+                            'K' -> when (line[5]) {
+                                'a' -> updateLast { it.copy(mapAmbient = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                                'd' -> updateLast { it.copy(mapDiffuse = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                                's' -> updateLast { it.copy(mapSpecular = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                            }
+                            'N' -> updateLast { it.copy(mapShine = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                            'd' -> updateLast { it.copy(mapTransparency = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                        }
+                    }
+                    'N' -> {
+                        when (line[1]) {
+                            's' -> updateLast { it.copy(shine = line.toFloat()) }
+                        }
+                    }
+                    'd' -> updateLast { it.copy(transparency = line.toFloat()) }
+                }
+            }
+        }
+        val map = mutableMapOf<String, PhongMaterial>()
+        result.forEach {
+            map[it.first] = it.second
+        }
+        return map
+    }
+
     private fun toByteBufferFloat(list: List<Float>): ByteBuffer {
         val buffer = ByteBuffer.allocateDirect(list.size * 4).order(ByteOrder.nativeOrder())
         val typed = buffer.asFloatBuffer()
@@ -283,6 +301,23 @@ class MeshLib internal constructor() {
         buffer.position(0)
         return buffer
     }
+}
+
+private fun String.isCommentOrEmpty() = isEmpty() || startsWith("#")
+
+private fun String.toVec3f(): vec3 {
+    val split = split(whitespaceRegex)
+    return vec3(split[1].toDouble().toFloat(), split[2].toDouble().toFloat(), split[3].toDouble().toFloat())
+}
+
+private fun String.toFloat(): Float {
+    val split = split(whitespaceRegex)
+    return split[1].toDouble().toFloat()
+}
+
+private fun String.toName(): String {
+    val split = split(whitespaceRegex)
+    return split[1]
 }
 
 fun main() {
