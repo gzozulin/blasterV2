@@ -1,7 +1,9 @@
 package com.gzozulin.minigl.assets
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.scene.PhongMaterial
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -43,12 +45,81 @@ data class Model(val objects: List<Object>, val aabb: aabb) : GlResource() {
 
 val meshLib = MeshLib()
 
+private fun String.toVec3f(): vec3 {
+    val split = split(whitespaceRegex)
+    return vec3(split[1].toDouble().toFloat(), split[2].toDouble().toFloat(), split[3].toDouble().toFloat())
+}
+
+private fun String.toFloat(): Float {
+    val split = split(whitespaceRegex)
+    return split[1].toDouble().toFloat()
+}
+
+private fun String.toName(): String {
+    val split = split(whitespaceRegex)
+    return split[1]
+}
+
 class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
 
-    fun lm(objFilename: String, mtlFilename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+    fun load(filename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+        return load("$filename.obj", "$filename.mtl", progress)
+    }
 
+    fun load(objFilename: String, mtlFilename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+        parseMtl(mtlFilename)
+        return Model(listOf(), aabb())
+    }
+
+    private fun parseObj() {
+
+    }
+
+    private fun parseMtl(mtlFilename: String): MutableList<Pair<String, PhongMaterial>> {
+        val parentDir = File(mtlFilename).parent
+        val result = mutableListOf<Pair<String, PhongMaterial>>()
+        fun updateLast(update: (PhongMaterial) -> PhongMaterial) {
+            val last = result.removeLast()
+            val updated = update.invoke(last.second)
+            result.add(last.first to updated)
+        }
+        openAsset(mtlFilename).useLines { lines ->
+            for (line in lines) {
+                if (line.startsWith("#")) {
+                    continue
+                }
+                when (line[0]) {
+                    'n' -> result.add(line.toName() to PhongMaterial.DEFAULT)
+                    'K' -> {
+                        when (line[1]) {
+                            'a' -> updateLast { it.copy(ambient = line.toVec3f()) }
+                            'd' -> updateLast { it.copy(diffuse = line.toVec3f()) }
+                            's' -> updateLast { it.copy(specular = line.toVec3f()) }
+                        }
+                    }
+                    'm' -> {
+                        when (line[4]) {
+                            'K' -> when (line[5]) {
+                                'a' -> updateLast { it.copy(mapAmbient = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                                'd' -> updateLast { it.copy(mapDiffuse = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                                's' -> updateLast { it.copy(mapSpecular = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                            }
+                            'N' -> updateLast { it.copy(mapShine = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                            'd' -> updateLast { it.copy(mapTransparency = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                        }
+                    }
+                    'N' -> {
+                        when (line[1]) {
+                            's' -> updateLast { it.copy(shine = line.toFloat()) }
+                        }
+                    }
+                    'd' -> updateLast { it.copy(transparency = line.toFloat()) }
+                }
+            }
+        }
+        return result
     }
 
     fun loadModel(meshFilename: String, progress: (Float) -> Unit = {}): MeshData {
@@ -215,5 +286,5 @@ class MeshLib internal constructor() {
 }
 
 fun main() {
-
+    val model = meshLib.load("models/akai/akai")
 }
