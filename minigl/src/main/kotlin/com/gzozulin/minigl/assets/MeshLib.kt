@@ -47,6 +47,10 @@ class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
 
+    fun lm(objFilename: String, mtlFilename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+
+    }
+
     fun loadModel(meshFilename: String, progress: (Float) -> Unit = {}): MeshData {
         val result = Intermediate()
         var linesCount = 0
@@ -117,7 +121,7 @@ class MeshLib internal constructor() {
     private fun parsePolygon(line: String, result: Intermediate) {
         val split = line.split(whitespaceRegex)
         val verticesCnt = split.size - 1
-        val indices = ArrayList<Int>()
+        val indices = mutableListOf<Int>()
         var nextIndex = result.positions.size / 3
         for (vertex in 0 until verticesCnt) {
             addVertex(split[vertex + 1], result)
