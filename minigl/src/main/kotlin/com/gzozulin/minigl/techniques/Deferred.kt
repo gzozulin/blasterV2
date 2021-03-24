@@ -33,9 +33,8 @@ class StaticDeferredTechnique : GlResource() {
         addChildren(programGeomPass, programLightPass, quadMesh, framebuffer)
     }
 
-    override fun release() {
+    override fun onRelease() {
         releaseFrame()
-        super.release()
     }
 
     private fun releaseFrame() {

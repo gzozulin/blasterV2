@@ -3,24 +3,20 @@ package com.gzozulin.minigl.api
 class GlFrameBuffer : GlBindable() {
     private var handle: Int = -1
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glGenFramebuffers()
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteFramebuffers(handle)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, 0)
-        super.unbind()
     }
 
     fun setTexture(attachement: Int, texture: GlTexture) {

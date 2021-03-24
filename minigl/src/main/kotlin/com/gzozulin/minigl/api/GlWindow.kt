@@ -20,6 +20,8 @@ private const val fullHeight: Int = 1080
 private const val winX: Int = 448
 private const val winY: Int = 156
 
+private const val MULTISAMPLING_HINT = 4
+
 enum class MouseButton { LEFT, RIGHT }
 
 typealias ResizeCallback = (width: Int, height: Int) -> Unit
@@ -107,10 +109,16 @@ class GlWindow {
         }
     }
 
-    fun create(isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, onCreated: () -> Unit) {
+    fun create(
+        isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, isMultisampling: Boolean = false,
+        onCreated: () -> Unit
+    ) {
         this.isFullscreen = isFullscreen
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
+        if (isMultisampling) {
+            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
+        }
         val result = if (isFullscreen) {
             glfwCreateWindow(fullWidth, fullHeight, "Blaster!", glfwGetPrimaryMonitor(), handle)
         } else {

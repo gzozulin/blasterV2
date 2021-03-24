@@ -4,6 +4,17 @@ import org.lwjgl.opengl.GL11
 
 const val STRICT_MODE = true
 
+fun <T> glCheck(action: () -> T): T {
+    val result = action.invoke()
+    if (STRICT_MODE) {
+        val errorCode = GL11.glGetError()
+        if (errorCode != GL11.GL_NO_ERROR) {
+            throw GlError(errorCode)
+        }
+    }
+    return result
+}
+
 fun glBind(vararg bindables: GlBindable, action: () -> Unit) {
     bindables.forEach { it.bind() }
     action.invoke()
@@ -14,17 +25,6 @@ fun glUse(vararg usables: GlResource, action: () -> Unit) {
     usables.forEach { it.use() }
     action.invoke()
     usables.forEach { it.release() }
-}
-
-fun <T> glCheck(action: () -> T): T {
-    val result = action.invoke()
-    if (STRICT_MODE) {
-        val errorCode = GL11.glGetError()
-        if (errorCode != GL11.GL_NO_ERROR) {
-            throw GlError(errorCode)
-        }
-    }
-    return result
 }
 
 fun glClear(color: col3 = col3().cyan()) {
@@ -58,7 +58,7 @@ fun glBlend(sfactor: Int = backend.GL_SRC_ALPHA, dfactor: Int = backend.GL_ONE_M
     backend.glDisable(backend.GL_BLEND)
 }
 
-fun glMultisample(action: () -> Unit) {
+fun glMultiSample(action: () -> Unit) {
     backend.glEnable(backend.GL_MULTISAMPLE)
     action.invoke()
     backend.glDisable(backend.GL_MULTISAMPLE)

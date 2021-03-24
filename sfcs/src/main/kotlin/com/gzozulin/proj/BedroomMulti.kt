@@ -2,6 +2,8 @@ package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assembly.*
+import com.gzozulin.minigl.assets.Material
+import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
@@ -34,7 +36,7 @@ private val texOnly = model.objects.filter { it.phong().mapDiffuse != null }
 private var mouseLook = false
 
 fun main() {
-    window.create(isHoldingCursor = false) {
+    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -57,7 +59,7 @@ fun main() {
                 }
                 skyboxTechnique.skybox(camera)
                 unifViewM.value = camera.calculateViewM()
-                glCulling {
+                glMultiSample {
                     glDepthTest {
                         flatColorTechnique.draw {
                             colorOnly.forEach {

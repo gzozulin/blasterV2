@@ -8,8 +8,7 @@ enum class GlShaderType(val type: Int) {
 class GlShader(val type: GlShaderType, private val source: String): GlResource() {
     private var handle: Int = -1
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glCreateShader(type.type)
         backend.glShaderSource(handle, source)
         backend.glCompileShader(handle)
@@ -25,9 +24,8 @@ class GlShader(val type: GlShaderType, private val source: String): GlResource()
         }
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteShader(handle)
-        super.release()
     }
 
     fun accessHandle(): Int {

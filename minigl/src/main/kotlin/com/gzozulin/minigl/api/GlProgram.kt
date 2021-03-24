@@ -39,8 +39,7 @@ class GlProgram(
     private val uniformLocations = HashMap<String, Int>()
     private val unsatisfiedUniforms = mutableListOf<String>()
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glCreateProgram()
         check(vertexShader.type == GlShaderType.VERTEX_SHADER)
         check(fragmentShader.type == GlShaderType.FRAGMENT_SHADER)
@@ -54,19 +53,16 @@ class GlProgram(
         cacheUniforms()
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteProgram(handle)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glUseProgram(handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glUseProgram(0)
-        super.unbind()
     }
 
     private fun cacheUniforms() {

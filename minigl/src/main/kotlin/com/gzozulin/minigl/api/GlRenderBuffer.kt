@@ -6,27 +6,23 @@ class GlRenderBuffer(
 
     private var handle: Int = -1
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glGenRenderbuffers()
         backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, handle)
         backend.glRenderbufferStorage(backend.GL_RENDERBUFFER, component, width, height)
         backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, 0)
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteRenderBuffers(handle)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, 0)
-        super.unbind()
     }
 
     fun accessHandle(): Int {

@@ -1,7 +1,6 @@
 package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL30.glGenerateMipmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer

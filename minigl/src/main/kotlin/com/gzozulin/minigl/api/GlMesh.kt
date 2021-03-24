@@ -12,25 +12,21 @@ class GlMesh(
 
     private var handle: Int = -1
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glGenVertexArrays()
         createVAO()
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteVertexArrays(handle)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glBindVertexArray(handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glBindVertexArray(0)
-        super.unbind()
     }
 
     private fun createVAO() {

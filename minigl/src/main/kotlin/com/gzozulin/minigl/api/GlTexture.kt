@@ -40,8 +40,7 @@ class GlTexture(
         width: Int, height: Int, pixels: ByteBuffer? = null
     ) : this(target, listOf(GlTexData(internalFormat, pixelFormat, pixelType, width, height, pixels)))
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glGenTextures()
         unit = holdTextureUnit()
         glBind(this) {
@@ -53,22 +52,19 @@ class GlTexture(
         }
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteTextures(handle)
         releaseTextureUnit(unit)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glActiveTexture(backend.GL_TEXTURE0 + unit)
         backend.glBindTexture(target, handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glActiveTexture(backend.GL_TEXTURE0 + unit)
         backend.glBindTexture(target, 0)
-        super.unbind()
     }
 
     private fun useTexture2D() {

@@ -14,27 +14,23 @@ class GlBuffer(
         check(target == backend.GL_ARRAY_BUFFER || target == backend.GL_ELEMENT_ARRAY_BUFFER)
     }
 
-    override fun use() {
-        super.use()
+    override fun onUse() {
         handle = backend.glGenBuffers()
         glBind(this) {
             backend.glBufferData(target, buffer, usage)
         }
     }
 
-    override fun release() {
+    override fun onRelease() {
         backend.glDeleteBuffers(handle)
-        super.release()
     }
 
-    override fun bind() {
-        super.bind()
+    override fun onBound() {
         backend.glBindBuffer(target, handle)
     }
 
-    override fun unbind() {
+    override fun onUnbound() {
         backend.glBindBuffer(target, 0)
-        super.unbind()
     }
 
     fun updateBuffer(access : Int = backend.GL_WRITE_ONLY, update: (mapped: ByteBuffer) -> Unit) {

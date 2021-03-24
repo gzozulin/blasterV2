@@ -3,7 +3,7 @@ package com.gzozulin.minigl.api
 // todo: reentry bindable?
 
 abstract class GlBindable : GlResource() {
-    private var isBound = false
+    private var bound = 0
 
     private val childBindable = mutableListOf<GlBindable>()
 
@@ -32,24 +32,31 @@ abstract class GlBindable : GlResource() {
         }
     }
 
-    open fun bind() {
+    fun bind() {
         super.checkReady()
         childBindable.forEach { it.bind() }
-        if (STRICT_MODE) {
-            check(!isBound) { "Already bound!" }
+        bound++
+        if (bound == 1) {
+            onBound()
         }
-        isBound = true
     }
 
-    open fun unbind() {
-        isBound = false
+    fun unbind() {
+        bound--
+        check(bound >= 0) { "Unbound more times than bound!" }
+        if (bound == 0) {
+            onUnbound()
+        }
         childBindable.reversed().forEach { it.unbind() }
     }
+
+    open fun onBound() { }
+    open fun onUnbound() { }
 
     override fun checkReady() {
         super.checkReady()
         if (STRICT_MODE) {
-            check(isBound) { "Is not bound!" }
+            check(bound > 0) { "Is not bound!" }
         }
     }
 }
