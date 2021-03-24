@@ -1,13 +1,35 @@
 package com.gzozulin.minigl.api
 
+// todo: reentry bindable?
+
 abstract class GlBindable : GlResource() {
     private var isBound = false
 
     private val childBindable = mutableListOf<GlBindable>()
 
-    fun addChild(vararg children: GlBindable) {
+    override fun addChildren(child: GlResource) {
+        super.addChildren(child)
+        if (child is GlBindable) {
+            childBindable.add(child)
+        }
+    }
+
+    override fun addChildren(vararg children: GlResource) {
         super.addChildren(*children)
-        childBindable.addAll(children)
+        children.forEach {
+            if (it is GlBindable) {
+                childBindable.add(it)
+            }
+        }
+    }
+
+    override fun addChildren(children: List<GlResource>) {
+        super.addChildren(children)
+        children.forEach {
+            if (it is GlBindable) {
+                childBindable.add(it)
+            }
+        }
     }
 
     open fun bind() {

@@ -6,8 +6,8 @@ class GlMesh(
     val indicesCount: Int) : GlBindable() {
 
     init {
-        attributes.forEach { addChild(it.second) }
-        addChild(indicesBuffer)
+        attributes.forEach { addChildren(it.second) }
+        addChildren(indicesBuffer)
     }
 
     private var handle: Int = -1

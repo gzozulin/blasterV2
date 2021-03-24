@@ -93,9 +93,7 @@ open class SimpleTechnique(private val modelM: Expression<mat4>,
     fun instance(mesh: GlMesh) {
         modelM.submit(program)
         color.submit(program)
-        glBind(mesh) {
-            program.draw(mesh)
-        }
+        program.draw(mesh)
     }
 }
 

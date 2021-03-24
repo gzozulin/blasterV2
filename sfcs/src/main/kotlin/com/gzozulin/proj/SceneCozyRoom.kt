@@ -34,14 +34,15 @@ class SceneCozyRoom : GlResource() {
     private val backgroundColor = vec4(0f, 0f, 0f, 0.8f)
     private val backgroundMesh = GlMesh.rect(1600f, 1080f)
 
-    private val bedroomUniformViewM = unifm4(camera.calculateViewM())
-    private val bedroomModel = meshLib.loadModel("models/bedroom/bedroom.obj") { println("Loading model $it..") }
-    private val bedroomTechnique = SimpleTechnique(
-        constm4(mat4().identity()), bedroomUniformViewM, constm4(camera.projectionM), constv4(vec4(1f)))
+    //private val bedroomUniformViewM = unifm4(camera.calculateViewM())
+    //private val bedroomModel = meshLib.load("models/bedroom/bedroom")
+    //private val bedroomTechnique = SimpleTechnique(
+    //    constm4(mat4().identity()), bedroomUniformViewM, constm4(camera.projectionM), constv4(vec4(1f)))
+    //private val
 
     init {
         addChildren(simpleTextTechnique, skyboxTechnique, rttTechnique, crossFadeTechnique,
-            backgroundTech, backgroundMesh, bedroomTechnique, bedroomModel.mesh)
+            backgroundTech, backgroundMesh, /*bedroomTechnique, bedroomModel*/)
     }
 
     fun fadeIn() {
@@ -63,10 +64,10 @@ class SceneCozyRoom : GlResource() {
 
     fun renderScene() {
         skyboxTechnique.skybox(camera)
-        bedroomTechnique.draw {
+        /*bedroomTechnique.draw {
             bedroomUniformViewM.value = camera.calculateViewM()
             bedroomTechnique.instance(bedroomModel.mesh)
-        }
+        }*/
     }
 
     fun renderCode() {

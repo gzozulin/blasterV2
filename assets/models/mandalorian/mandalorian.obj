@@ -9054,7 +9054,7 @@ vn 0.320118 0.007652 -0.947347
 vn 0.319961 0.013205 -0.947339
 s 1
 g Mandalorian_Helmet
-usemtl MandalorianHelmetSG
+usemtl mandalorian
 f 1050/1/1 5/2/2 4/3/3 1051/4/4
 f 1052/5/5 6/6/6 5/2/2 1050/1/1
 f 6/6/6 1052/5/5 1053/7/7 7/8/8

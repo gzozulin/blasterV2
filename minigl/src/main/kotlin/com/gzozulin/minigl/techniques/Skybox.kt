@@ -12,7 +12,7 @@ class StaticSkyboxTechnique(skybox: String) : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/skybox/skybox.vert", "shaders/skybox/skybox.frag")
     private val diffuse = texturesLib.loadSkybox(skybox)
-    private val cube = meshLib.loadModel("models/cube/cube.obj").mesh
+    private val cube = meshLib.load("models/cube/cube").first()
 
     init {
         addChildren(program, diffuse, cube)
@@ -25,11 +25,11 @@ class StaticSkyboxTechnique(skybox: String) : GlResource() {
         checkReady()
         onlyRotationM.set(camera.calculateViewM())
         noTranslationM.set(onlyRotationM)
-        glBind(program, cube, diffuse) {
+        glBind(program, cube.mesh, diffuse) {
             program.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
             program.setUniform(GlUniform.UNIFORM_VIEW_M.label, noTranslationM)
             program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
-            program.draw(indicesCount = cube.indicesCount)
+            program.draw(indicesCount = cube.mesh.indicesCount)
         }
     }
 }

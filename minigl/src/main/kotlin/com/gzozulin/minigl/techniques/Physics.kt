@@ -66,12 +66,12 @@ private val wasdInput = WasdInput(controller)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val pbrTechnique = StaticPbrTechnique()
 
-private val meshData = meshLib.loadModel("models/mandalorian/mandalorian.obj") { println("loading $it") }
-private val material = texturesLib.loadPbr("models/mandalorian")
+private val obj = meshLib.load("models/mandalorian/mandalorian").first()
+    .copy(material = texturesLib.loadPbr("models/mandalorian"))
 
 private val light = Light(vec3(25f), true)
 
-private val objMatrix = mat4().identity().scale(meshData.aabb.scaleTo(5f))
+private val objMatrix = mat4().identity().scale(obj.aabb.scaleTo(5f))
 private val lightMatrix = mat4().identity().translate(vec3(3f))
 
 private var mouseLook = false
@@ -94,7 +94,7 @@ fun main() {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
         }
-        glUse(skyboxTechnique, pbrTechnique, meshData.mesh, material) {
+        glUse(skyboxTechnique, pbrTechnique, obj) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -107,7 +107,7 @@ fun main() {
                         pbrTechnique.draw(camera, lights = {
                             pbrTechnique.light(light, lightMatrix)
                         }, meshes = {
-                            pbrTechnique.instance(meshData.mesh, objMatrix, material)
+                            pbrTechnique.instance(obj.mesh, objMatrix, obj.pbr())
                         })
                     }
                 }

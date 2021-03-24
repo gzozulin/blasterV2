@@ -12,55 +12,20 @@ import java.nio.charset.Charset
 private val whitespaceRegex = "\\s+".toRegex()
 private val slashRegex = "/".toRegex()
 
-private class IntermediateObj {
-    var materialTag: String? = null
-
-    val aabb = aabb()
-
-    val positions = mutableListOf<Float>()
-    val texCoords = mutableListOf<Float>()
-    val normals = mutableListOf<Float>()
-    val indices = mutableListOf<Int>()
-}
-
-private class Intermediate {
-    val positionList = mutableListOf<Float>()
-    val texCoordList = mutableListOf<Float>()
-    val normalList = mutableListOf<Float>()
-
-    val objects = mutableListOf<IntermediateObj>()
-
-    val current: IntermediateObj
-        get() = objects.last()
-}
-
-open class Material : GlResource()
-
-data class Object(val mesh: GlMesh, val material: Material, val aabb: aabb): GlResource() {
-    init {
-        addChildren(mesh, material)
-    }
-}
-
-data class Model(val objects: List<Object>, val aabb: aabb) : GlResource() {
-    init {
-        addChildren(objects)
-    }
-}
-
 val meshLib = MeshLib()
 
 class MeshLib internal constructor() {
     private fun openAsset(filename: String) =
         BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
 
-    fun load(filename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
-        return load("$filename.obj", "$filename.mtl", progress)
+    fun load(filename: String, join: Boolean = false, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+        return load("$filename.obj", "$filename.mtl", join, progress)
     }
 
-    fun load(objFilename: String, mtlFilename: String, progress: (Float) -> Unit = { println(it.toString()) }): Model {
+    fun load(objFilename: String, mtlFilename: String, join: Boolean = false,
+             progress: (Float) -> Unit = { println(it.toString()) }): Model {
         val materials = parseMtl(mtlFilename)
-        val objects = parseObj(objFilename, materials, progress)
+        val objects = parseObj(objFilename, materials, join, progress)
         val allAabb = aabb()
         objects.forEach { obj ->
             allAabb.union(obj.aabb)
@@ -69,14 +34,14 @@ class MeshLib internal constructor() {
     }
 
     private fun parseObj(objFilename: String, materials: Map<String, PhongMaterial>,
-                         progress: (Float) -> Unit): List<Object> {
+                         join: Boolean, progress: (Float) -> Unit): List<Object> {
         val result = Intermediate()
         var linesCount = 0
         var lastProgress = 0f
         openAsset(objFilename).useLines { linesCount = it.count() }
         openAsset(objFilename).useLines { lines ->
             lines.forEachIndexed { index, line ->
-                parseLine(line, result)
+                parseLine(line, join, result)
                 val currentProgress = index.toFloat() / linesCount.toFloat()
                 if (currentProgress - lastProgress > 0.01f) {
                     progress.invoke(currentProgress)
@@ -90,39 +55,44 @@ class MeshLib internal constructor() {
     private fun createObjects(intermediate: Intermediate,
                               materials: Map<String, PhongMaterial>): MutableList<Object> {
         val result = mutableListOf<Object>()
-        intermediate.objects.forEach { intermediateObj ->
-            val positionBuff = toByteBufferFloat(intermediateObj.positions)
-            val texCoordBuff = toByteBufferFloat(intermediateObj.texCoords)
-            val normalBuff = toByteBufferFloat(intermediateObj.normals)
-            val indicesBuff = toByteBufferInt(intermediateObj.indices)
+        for (obj in intermediate.objects) {
+            if (obj.positions.isEmpty()) {
+                continue
+            }
+            val positionBuff = toByteBufferFloat(obj.positions)
+            val texCoordBuff = toByteBufferFloat(obj.texCoords)
+            val normalBuff = toByteBufferFloat(obj.normals)
+            val indicesBuff = toByteBufferInt(obj.indices)
             val mesh = GlMesh(
                 listOf(GlAttribute.ATTRIBUTE_POSITION to GlBuffer(backend.GL_ARRAY_BUFFER, positionBuff),
                     GlAttribute.ATTRIBUTE_TEXCOORD to GlBuffer(backend.GL_ARRAY_BUFFER, texCoordBuff),
                     GlAttribute.ATTRIBUTE_NORMAL to GlBuffer(backend.GL_ARRAY_BUFFER, normalBuff)),
-                GlBuffer(backend.GL_ELEMENT_ARRAY_BUFFER, indicesBuff), intermediateObj.indices.size
+                GlBuffer(backend.GL_ELEMENT_ARRAY_BUFFER, indicesBuff), obj.indices.size
             )
-            val material = materials[intermediateObj.materialTag]
-            result.add(Object(mesh, material!!, intermediateObj.aabb))
+            val material = materials[obj.materialTag]
+            result.add(Object(mesh, material!!, obj.aabb))
         }
         return result
     }
 
-    private fun parseLine(line: String, result: Intermediate) {
+    private fun parseLine(line: String, join: Boolean, result: Intermediate) {
         if (line.isCommentOrEmpty()) {
             return
         }
         when (line[0]) {
             'v' -> parseVertexAttribute(line, result)
             'f' -> parsePolygon(line, result)
-            'g' -> nextObject(result)
-            'u' -> useMaterial(line.toName(), result)
+            'g' -> nextObject(join, result)
+            'u' -> useMaterial(line.getName(), result)
         }
     }
 
-    private fun nextObject(result: Intermediate) {
-        val currMaterial = result.current.materialTag
-        result.objects.add(IntermediateObj())
-        result.current.materialTag = currMaterial
+    private fun nextObject(join: Boolean, result: Intermediate) {
+        if (!join) {
+            val currMaterial = result.current.materialTag
+            result.objects.add(IntermediateObj())
+            result.current.materialTag = currMaterial
+        }
     }
 
     private fun useMaterial(tag: String, result: Intermediate) {
@@ -251,31 +221,31 @@ class MeshLib internal constructor() {
                     continue
                 }
                 when (line[0]) {
-                    'n' -> result.add(line.toName() to PhongMaterial.DEFAULT)
+                    'n' -> result.add(line.getName() to PhongMaterial.DEFAULT)
                     'K' -> {
                         when (line[1]) {
-                            'a' -> updateLast { it.copy(ambient = line.toVec3f()) }
-                            'd' -> updateLast { it.copy(diffuse = line.toVec3f()) }
-                            's' -> updateLast { it.copy(specular = line.toVec3f()) }
+                            'a' -> updateLast { it.copy(ambient = line.getVec3f()) }
+                            'd' -> updateLast { it.copy(diffuse = line.getVec3f()) }
+                            's' -> updateLast { it.copy(specular = line.getVec3f()) }
                         }
                     }
                     'm' -> {
                         when (line[4]) {
                             'K' -> when (line[5]) {
-                                'a' -> updateLast { it.copy(mapAmbient = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                                'd' -> updateLast { it.copy(mapDiffuse = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                                's' -> updateLast { it.copy(mapSpecular = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                                'a' -> updateLast { it.copy(mapAmbient = texturesLib.loadTexture("$parentDir/${line.getName()}")) }
+                                'd' -> updateLast { it.copy(mapDiffuse = texturesLib.loadTexture("$parentDir/${line.getName()}")) }
+                                's' -> updateLast { it.copy(mapSpecular = texturesLib.loadTexture("$parentDir/${line.getName()}")) }
                             }
-                            'N' -> updateLast { it.copy(mapShine = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
-                            'd' -> updateLast { it.copy(mapTransparency = texturesLib.loadTexture("$parentDir/${line.toName()}")) }
+                            'N' -> updateLast { it.copy(mapShine = texturesLib.loadTexture("$parentDir/${line.getName()}")) }
+                            'd' -> updateLast { it.copy(mapTransparency = texturesLib.loadTexture("$parentDir/${line.getName()}")) }
                         }
                     }
                     'N' -> {
                         when (line[1]) {
-                            's' -> updateLast { it.copy(shine = line.toFloat()) }
+                            's' -> updateLast { it.copy(shine = line.getFloat()) }
                         }
                     }
-                    'd' -> updateLast { it.copy(transparency = line.toFloat()) }
+                    'd' -> updateLast { it.copy(transparency = line.getFloat()) }
                 }
             }
         }
@@ -305,21 +275,44 @@ class MeshLib internal constructor() {
 
 private fun String.isCommentOrEmpty() = isEmpty() || startsWith("#")
 
-private fun String.toVec3f(): vec3 {
+private fun String.getVec3f(): vec3 {
     val split = split(whitespaceRegex)
     return vec3(split[1].toDouble().toFloat(), split[2].toDouble().toFloat(), split[3].toDouble().toFloat())
 }
 
-private fun String.toFloat(): Float {
+private fun String.getFloat(): Float {
     val split = split(whitespaceRegex)
     return split[1].toDouble().toFloat()
 }
 
-private fun String.toName(): String {
+private fun String.getName(): String {
     val split = split(whitespaceRegex)
     return split[1]
 }
 
+private class IntermediateObj {
+    var materialTag: String? = null
+
+    val aabb = aabb()
+
+    val positions = mutableListOf<Float>()
+    val texCoords = mutableListOf<Float>()
+    val normals = mutableListOf<Float>()
+    val indices = mutableListOf<Int>()
+}
+
+private class Intermediate {
+    val positionList = mutableListOf<Float>()
+    val texCoordList = mutableListOf<Float>()
+    val normalList = mutableListOf<Float>()
+
+    val objects = mutableListOf(IntermediateObj())
+
+    val current: IntermediateObj
+        get() = objects.last()
+}
+
 fun main() {
-    val model = meshLib.load("models/akai/akai")
+    val model = meshLib.load("models/pcjr/pcjr")
+    println("done")
 }

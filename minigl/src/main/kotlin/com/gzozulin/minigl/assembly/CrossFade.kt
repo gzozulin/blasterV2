@@ -5,6 +5,7 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.PhongMaterial
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
@@ -72,8 +73,7 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
-private val model = meshLib.loadModel("models/pcjr/pcjr.obj")
-private val diffuse = texturesLib.loadTexture("models/pcjr/pcjr.jpeg")
+private val obj = meshLib.load("models/pcjr/pcjr").first()
 
 private val unifViewM = unifm4()
 private val unifSampler = unifsampler()
@@ -101,7 +101,7 @@ fun main() {
             }
             wasdInput.onKeyPressed(key, pressed)
         }
-        glUse(simpleTechnique, skyboxTechnique, crossFadeTechnique, model.mesh, diffuse) {
+        glUse(simpleTechnique, skyboxTechnique, crossFadeTechnique, obj) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -110,13 +110,12 @@ fun main() {
                 }
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
-                    glBind(diffuse) {
-                        unifSampler.value = diffuse
+                    glBind(obj) {
+                        unifSampler.value = obj.phong().mapDiffuse
                         unifViewM.value = camera.calculateViewM()
                         simpleTechnique.draw {
-                            simpleTechnique.instance(model.mesh)
+                            simpleTechnique.instance(obj.mesh)
                         }
-
                     }
                 }
                 crossFadeTechnique.draw()

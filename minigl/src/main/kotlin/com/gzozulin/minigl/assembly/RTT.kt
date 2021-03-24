@@ -77,8 +77,7 @@ private val rttTechnique = RttTechnique(800, 600)
 private val textRect = GlMesh.rect(.35f, .5f)
 private val textMatrix = mat4().identity().translate(.065f, .11f, .151f)
 
-private val pcjrtex = texturesLib.loadTexture("models/pcjr/pcjr.jpeg")
-private val pcjr = meshLib.loadModel("models/pcjr/pcjr.obj") { println(it) }
+private val obj = meshLib.load("models/pcjr/pcjr").first()
 
 private var mouseLook = false
 
@@ -113,7 +112,7 @@ private fun renderScene() {
     glDepthTest {
         glCulling {
             simpleTechnique.draw(camera.calculateViewM(), camera.projectionM) {
-                simpleTechnique.instance(pcjr.mesh, pcjrtex, matrixStack.peekMatrix())
+                simpleTechnique.instance(obj.mesh, obj.phong().mapDiffuse!!, matrixStack.peekMatrix())
                 matrixStack.pushMatrix(textMatrix) {
                     simpleTechnique.instance(textRect, rttTechnique.colorAttachment0, matrixStack.peekMatrix())
                 }
@@ -140,8 +139,7 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleTechnique, skyboxTechnique, simpleTextTechnique,
-            rttTechnique, pcjr.mesh, pcjrtex, textRect) {
+        glUse(simpleTechnique, skyboxTechnique, simpleTextTechnique, rttTechnique, obj, textRect) {
             window.show {
                 updateScene()
                 renderText()

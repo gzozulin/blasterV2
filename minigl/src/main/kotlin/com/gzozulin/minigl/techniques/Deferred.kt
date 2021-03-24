@@ -179,8 +179,8 @@ private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3
 private val deferredTechnique = StaticDeferredTechnique()
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val textTechnique = StaticTextTechnique()
-private val mesh = meshLib.loadModel("models/house/low.obj") { println("progress: $it") }.mesh
-private val diffuse = texturesLib.loadTexture("models/house/house_diffuse.png")
+
+private val obj = meshLib.load("models/house/low").first()
 
 private var mouseLook = false
 
@@ -204,7 +204,7 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glUse(deferredTechnique, skyboxTechnique, textTechnique, mesh, diffuse) {
+        glUse(deferredTechnique, skyboxTechnique, textTechnique, obj) {
             console.success("ready to show..")
             window.show {
                 glClear()
@@ -216,7 +216,7 @@ fun main() {
                 glDepthTest {
                     glCulling {
                         deferredTechnique.draw(camera, instances = {
-                            deferredTechnique.instance(mesh, objMatrix, diffuse, PhongMaterial.CONCRETE)
+                            deferredTechnique.instance(obj.mesh, objMatrix, obj.phong().mapDiffuse!!, PhongMaterial.CONCRETE)
                         }, lights = {
                             deferredTechnique.light(light, lightMatrix)
                             deferredTechnique.light(light2, lightMatrix2)
