@@ -45,8 +45,6 @@ class GlTexture(
         handle = backend.glGenTextures()
         unit = holdTextureUnit()
         glBind(this) {
-            backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST)
-            backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_NEAREST)
             when (target) {
                 backend.GL_TEXTURE_2D -> useTexture2D()
                 backend.GL_TEXTURE_CUBE_MAP -> useTextureCubeMap()
@@ -76,18 +74,18 @@ class GlTexture(
     private fun useTexture2D() {
         check(texData.size == 1)
         val data = texData.first()
+        backend.glTexImage2D(target, 0, data.internalFormat, data.width, data.height,
+            0, data.pixelFormat, data.pixelType, data.pixels)
+        backend.glGenerateMipmap(target)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST_MIPMAP_LINEAR)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_LINEAR)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_S, backend.GL_REPEAT)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_T, backend.GL_REPEAT)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_R, backend.GL_REPEAT)
-        backend.glTexImage2D(target, 0, data.internalFormat,
-            data.width, data.height, 0, data.pixelFormat, data.pixelType, data.pixels)
     }
 
     private fun useTextureCubeMap() {
         check(texData.size == 6)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_S, backend.GL_CLAMP_TO_EDGE)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_T, backend.GL_CLAMP_TO_EDGE)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_R, backend.GL_CLAMP_TO_EDGE)
         texData.forEachIndexed { index, side ->
             backend.glTexImage2D(
                 backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, 0,
@@ -95,6 +93,12 @@ class GlTexture(
                 side.pixelFormat, side.pixelType, side.pixels
             )
         }
+        backend.glGenerateMipmap(target)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST_MIPMAP_LINEAR)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_LINEAR)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_S, backend.GL_CLAMP_TO_EDGE)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_T, backend.GL_CLAMP_TO_EDGE)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_R, backend.GL_CLAMP_TO_EDGE)
     }
 
     fun accessHandle(): Int {

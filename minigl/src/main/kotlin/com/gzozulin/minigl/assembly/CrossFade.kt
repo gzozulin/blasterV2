@@ -1,11 +1,9 @@
 package com.gzozulin.minigl.assembly
 
-import com.gzozulin.minigl.assets.meshLib
-import com.gzozulin.minigl.assets.texturesLib
+import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
-import com.gzozulin.minigl.scene.PhongMaterial
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
@@ -73,7 +71,7 @@ private val camera = Camera()
 private val controller = Controller(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
-private val obj = meshLib.load("models/pcjr/pcjr").first()
+private val obj = modelLib.load("models/pcjr/pcjr").first()
 
 private val unifViewM = unifm4()
 private val unifSampler = unifsampler()

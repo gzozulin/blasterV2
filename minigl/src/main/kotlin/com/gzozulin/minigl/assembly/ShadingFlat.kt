@@ -2,6 +2,7 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.WasdInput
@@ -94,6 +95,14 @@ open class SimpleTechnique(private val modelM: Expression<mat4>,
         modelM.submit(program)
         color.submit(program)
         program.draw(mesh)
+    }
+
+    fun instance(obj: Object) {
+        glBind(obj) {
+            modelM.submit(program)
+            color.submit(program)
+            program.draw(obj.mesh)
+        }
     }
 }
 

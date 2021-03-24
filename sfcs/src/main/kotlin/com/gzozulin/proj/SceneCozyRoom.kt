@@ -1,7 +1,6 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.meshLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique

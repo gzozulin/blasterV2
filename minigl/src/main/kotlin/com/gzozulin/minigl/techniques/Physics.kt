@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.meshLib
+import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.shadersLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
@@ -66,7 +66,7 @@ private val wasdInput = WasdInput(controller)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val pbrTechnique = StaticPbrTechnique()
 
-private val obj = meshLib.load("models/mandalorian/mandalorian").first()
+private val obj = modelLib.load("models/mandalorian/mandalorian").first()
     .copy(material = texturesLib.loadPbr("models/mandalorian"))
 
 private val light = Light(vec3(25f), true)

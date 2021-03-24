@@ -23,7 +23,7 @@ abstract class GlBindable : GlResource() {
         }
     }
 
-    override fun addChildren(children: List<GlResource>) {
+    override fun addChildren(children: Collection<GlResource>) {
         super.addChildren(children)
         children.forEach {
             if (it is GlBindable) {

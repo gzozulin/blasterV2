@@ -26,7 +26,7 @@ data class Camera(
     }
 
     fun setPerspective(aspectRatio: Float): Camera {
-        projectionM.identity().perspective(Math.toRadians(90.0).toFloat(), aspectRatio, 0.01f, 1000f)
+        projectionM.identity().perspective(Math.toRadians(90.0).toFloat(), aspectRatio, 0.1f, 1000f)
         viewVersion.increment()
         return this
     }

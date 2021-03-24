@@ -1,6 +1,7 @@
 package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.*
+import org.lwjgl.opengl.GL30.glGenerateMipmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -53,9 +54,12 @@ class GlBackend {
     val GL_TEXTURE_MIN_FILTER: Int get() = GL11.GL_TEXTURE_MIN_FILTER
     val GL_TEXTURE_MAG_FILTER: Int get() = GL11.GL_TEXTURE_MAG_FILTER
     val GL_NEAREST:            Int get() = GL11.GL_NEAREST
+    val GL_LINEAR:             Int get() = GL11.GL_LINEAR
+    val GL_NEAREST_MIPMAP_LINEAR: Int get() = GL11.GL_NEAREST_MIPMAP_LINEAR
     val GL_TEXTURE_WRAP_S:     Int get() = GL11.GL_TEXTURE_WRAP_S
     val GL_TEXTURE_WRAP_T:     Int get() = GL11.GL_TEXTURE_WRAP_T
     val GL_TEXTURE_WRAP_R:     Int get() = GL12.GL_TEXTURE_WRAP_R
+    val GL_TEXTURE_MAX_LEVEL:     Int get() = GL12.GL_TEXTURE_MAX_LEVEL
     val GL_REPEAT:             Int get() = GL11.GL_REPEAT
     val GL_CLAMP_TO_EDGE:      Int get() = GL12.GL_CLAMP_TO_EDGE
     val GL_RGBA16F:            Int get() = GL30.GL_RGBA16F
@@ -150,6 +154,7 @@ class GlBackend {
     fun glDeleteTextures(handle: Int) = glCheck { GL11.glDeleteTextures(handle) }
     fun glBindTexture(target: Int, texture: Int) = glCheck { GL11.glBindTexture(target, texture) }
     fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteBuffer?) = glCheck { GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) }
+    fun glGenerateMipmap(target: Int) = glCheck { GL30.glGenerateMipmap(target) }
     fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteBuffer) =
         glCheck { GL11.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels) }
     fun glTexParameteri(target: Int, pname: Int, param: Int) = glCheck { GL11.glTexParameteri(target, pname, param) }

@@ -12,7 +12,7 @@ class StaticSkyboxTechnique(skybox: String) : GlResource() {
     private val program = shadersLib.loadProgram(
         "shaders/skybox/skybox.vert", "shaders/skybox/skybox.frag")
     private val diffuse = texturesLib.loadSkybox(skybox)
-    private val cube = meshLib.load("models/cube/cube").first()
+    private val cube = modelLib.load("models/cube/cube").first()
 
     init {
         addChildren(program, diffuse, cube)

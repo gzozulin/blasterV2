@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Blinds_Roman_Hobbled_Blue.jpg
+map_Kd Blinds_Roman_Hobbled_Blue.jpg
 
 newmtl Carpet_Berber_Multi
 Ns 0.000000
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Carpet_Berber_Multi.jpg
+map_Kd Carpet_Berber_Multi.jpg
 
 newmtl FrontColor
 Ns 0.000000
@@ -42,7 +42,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Sketchy_Lines_Wavy_Vertical.jpg
+map_Kd Sketchy_Lines_Wavy_Vertical.jpg
 
 newmtl Wood_Board_Cork
 Ns 0.000000
@@ -53,7 +53,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Wood_Board_Cork.jpg
+map_Kd Wood_Board_Cork.jpg
 
 newmtl Wood_Cherry_Original
 Ns 0.000000
@@ -64,7 +64,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Wood_Cherry_Original.jpg
+map_Kd Wood_Cherry_Original.jpg
 
 newmtl Wood_Floor
 Ns 0.000000
@@ -75,7 +75,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Wood_Floor.jpg
+map_Kd Wood_Floor.jpg
 
 newmtl Wood_Lumber_ButtJoined
 Ns 0.000000
@@ -86,7 +86,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Wood_Lumber_ButtJoined.jpg
+map_Kd Wood_Lumber_ButtJoined.jpg
 
 newmtl Wood_Plywood_Knots
 Ns 0.000000
@@ -97,7 +97,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/Wood_Plywood_Knots.jpg
+map_Kd Wood_Plywood_Knots.jpg
 
 newmtl _
 Ns 0.000000
@@ -108,7 +108,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_.png
+map_Kd _.png
 
 newmtl _1
 Ns 0.000000
@@ -119,7 +119,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_1.jpg
+map_Kd _1.jpg
 
 newmtl _10
 Ns 0.000000
@@ -130,7 +130,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_10.png
+map_Kd _10.png
 
 newmtl _11
 Ns 0.000000
@@ -141,7 +141,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_11.jpg
+map_Kd _11.jpg
 
 newmtl _12
 Ns 0.000000
@@ -152,7 +152,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_12.jpg
+map_Kd _12.jpg
 
 newmtl _13
 Ns 0.000000
@@ -163,7 +163,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_13.jpg
+map_Kd _13.jpg
 
 newmtl _14
 Ns 0.000000
@@ -174,7 +174,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_14.jpg
+map_Kd _14.jpg
 
 newmtl _15
 Ns 0.000000
@@ -185,7 +185,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_15.jpg
+map_Kd _15.jpg
 
 newmtl _16
 Ns 0.000000
@@ -196,7 +196,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_16.jpg
+map_Kd _16.jpg
 
 newmtl _17
 Ns 0.000000
@@ -207,7 +207,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_17.jpg
+map_Kd _17.jpg
 
 newmtl _18
 Ns 0.000000
@@ -218,7 +218,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_18.jpg
+map_Kd _18.jpg
 
 newmtl _2
 Ns 0.000000
@@ -229,7 +229,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_2.png
+map_Kd _2.png
 
 newmtl _3
 Ns 0.000000
@@ -240,7 +240,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_3.png
+map_Kd _3.png
 
 newmtl _4
 Ns 0.000000
@@ -251,7 +251,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_4.jpg
+map_Kd _4.jpg
 
 newmtl _5
 Ns 0.000000
@@ -262,7 +262,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_5.jpg
+map_Kd _5.jpg
 
 newmtl _7
 Ns 0.000000
@@ -273,7 +273,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_7.png
+map_Kd _7.png
 
 newmtl _8
 Ns 0.000000
@@ -284,7 +284,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_8.jpg
+map_Kd _8.jpg
 
 newmtl _9
 Ns 0.000000
@@ -295,7 +295,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_9.jpg
+map_Kd _9.jpg
 
 newmtl _auto_
 Ns 0.000000
@@ -306,7 +306,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/_auto_.png
+map_Kd _auto_.png
 
 newmtl black
 Ns 0.000000
@@ -347,7 +347,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/blue_stucco.jpg
+map_Kd blue_stucco.jpg
 
 newmtl brown
 Ns 0.000000
@@ -368,7 +368,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/calendar.jpg
+map_Kd calendar.jpg
 
 newmtl cd_plastic
 Ns 0.000000
@@ -389,7 +389,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/ceiling.jpg
+map_Kd ceiling.jpg
 
 newmtl cloth_back_pack
 Ns 0.000000
@@ -400,7 +400,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_back_pack.jpg
+map_Kd cloth_back_pack.jpg
 
 newmtl cloth_green
 Ns 0.000000
@@ -411,7 +411,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_green.jpg
+map_Kd cloth_green.jpg
 
 newmtl cloth_orange
 Ns 0.000000
@@ -422,7 +422,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_orange.jpg
+map_Kd cloth_orange.jpg
 
 newmtl cloth_red
 Ns 0.000000
@@ -433,7 +433,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_red.jpg
+map_Kd cloth_red.jpg
 
 newmtl cloth_sport_bag
 Ns 0.000000
@@ -444,7 +444,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_sport_bag.jpg
+map_Kd cloth_sport_bag.jpg
 
 newmtl cloth_white
 Ns 0.000000
@@ -455,7 +455,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/cloth_white.jpg
+map_Kd cloth_white.jpg
 
 newmtl computer_cabinet
 Ns 0.000000
@@ -476,7 +476,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/fan.jpg
+map_Kd fan.jpg
 
 newmtl game_boy
 Ns 0.000000
@@ -597,7 +597,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/gris_compu.jpg
+map_Kd gris_compu.jpg
 
 newmtl leather_brown
 Ns 0.000000
@@ -608,7 +608,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/leather_brown.jpg
+map_Kd leather_brown.jpg
 
 newmtl leather_green
 Ns 0.000000
@@ -619,7 +619,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/leather_green.jpg
+map_Kd leather_green.jpg
 
 newmtl leela_teclado
 Ns 0.000000
@@ -690,7 +690,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/pad.jpg
+map_Kd pad.jpg
 
 newmtl plastic_clearer
 Ns 0.000000
@@ -711,7 +711,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/ps.jpg
+map_Kd ps.jpg
 
 newmtl red
 Ns 0.000000
@@ -742,7 +742,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/seda_clara.jpg
+map_Kd seda_clara.jpg
 
 newmtl seda_oscura
 Ns 0.000000
@@ -753,7 +753,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/seda_oscura.jpg
+map_Kd seda_oscura.jpg
 
 newmtl white
 Ns 0.000000
@@ -774,7 +774,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/white_material.jpg
+map_Kd white_material.jpg
 
 newmtl white_rough
 Ns 0.000000
@@ -785,7 +785,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/white_rough.jpg
+map_Kd white_rough.jpg
 
 newmtl wood
 Ns 0.000000
@@ -796,7 +796,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd bedroom/wood.jpg
+map_Kd wood.jpg
 
 newmtl yellow
 Ns 0.000000

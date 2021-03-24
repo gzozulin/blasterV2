@@ -13,7 +13,7 @@ abstract class GlResource {
         childResource.addAll(children)
     }
 
-    open fun addChildren(children: List<GlResource>) {
+    open fun addChildren(children: Collection<GlResource>) {
         childResource.addAll(children)
     }
 

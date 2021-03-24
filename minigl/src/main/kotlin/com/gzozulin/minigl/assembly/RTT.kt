@@ -1,8 +1,7 @@
 package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.meshLib
-import com.gzozulin.minigl.assets.texturesLib
+import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
@@ -77,7 +76,7 @@ private val rttTechnique = RttTechnique(800, 600)
 private val textRect = GlMesh.rect(.35f, .5f)
 private val textMatrix = mat4().identity().translate(.065f, .11f, .151f)
 
-private val obj = meshLib.load("models/pcjr/pcjr").first()
+private val obj = modelLib.load("models/pcjr/pcjr").first()
 
 private var mouseLook = false
 

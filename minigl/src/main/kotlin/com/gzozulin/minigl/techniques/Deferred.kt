@@ -1,8 +1,7 @@
 package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.assets.meshLib
+import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.shadersLib
-import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
@@ -180,7 +179,7 @@ private val deferredTechnique = StaticDeferredTechnique()
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 private val textTechnique = StaticTextTechnique()
 
-private val obj = meshLib.load("models/house/low").first()
+private val obj = modelLib.load("models/house/low").first()
 
 private var mouseLook = false
 
