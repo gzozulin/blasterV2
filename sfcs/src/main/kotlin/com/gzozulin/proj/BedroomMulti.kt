@@ -24,8 +24,8 @@ private val identityM = constm4(mat4().identity())
 private val unifViewM = unifm4(camera.calculateViewM())
 private val projM = constm4(camera.projectionM)
 
-private val flatTexTechnique = SimpleTechnique(identityM, unifViewM, projM, tex(texCoords, unifSampler))
-private val flatColorTechnique = SimpleTechnique(identityM, unifViewM, projM, unifColor)
+private val flatTexTechnique = FlatTechnique(identityM, unifViewM, projM, tex(texCoords, unifSampler))
+private val flatColorTechnique = FlatTechnique(identityM, unifViewM, projM, unifColor)
 
 private val model = modelLib.load("models/bedroom/bedroom", join = false)
 private val colorOnly = model.objects.filter { it.phong().mapDiffuse == null }

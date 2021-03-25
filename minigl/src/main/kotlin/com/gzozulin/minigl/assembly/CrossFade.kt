@@ -16,7 +16,7 @@ class CrossFadeTechnique(private val color: col3 = col3().back(),
 
     private val colorUnif = unifv4(vec4())
     private val constProjM = constm4(mat4().ortho(-1f, 1f, -1f, 1f, 1f, -1f))
-    private val fadeTechnique = SimpleTechnique(constm4(mat4().identity()), constm4(mat4().identity()), constProjM, colorUnif)
+    private val fadeTechnique = FlatTechnique(constm4(mat4().identity()), constm4(mat4().identity()), constProjM, colorUnif)
 
     private val rect = GlMesh.rect()
 
@@ -76,7 +76,7 @@ private val obj = modelLib.load("models/pcjr/pcjr").first()
 private val unifViewM = unifm4()
 private val unifSampler = unifsampler()
 private val attribTexCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
-private val simpleTechnique = SimpleTechnique(
+private val simpleTechnique = FlatTechnique(
     constm4(mat4().identity()), unifViewM, constm4(camera.projectionM), tex(attribTexCoord, unifSampler))
 private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")
 private val crossFadeTechnique = CrossFadeTechnique(color = col3().orange())

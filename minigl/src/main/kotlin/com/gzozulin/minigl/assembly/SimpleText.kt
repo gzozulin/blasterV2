@@ -76,7 +76,7 @@ class SimpleTextTechnique(
     private val fontCheck = near(tex(texCoordTiled, unifsampler(font)), constv4(vec4(1f)))
     private val result = ifexp(fontCheck, uniformColor, discard())
 
-    private val simpleTechnique = SimpleTechnique(modelM, unifCenter, unifProj, result)
+    private val simpleTechnique = FlatTechnique(modelM, unifCenter, unifProj, result)
 
     init {
         addChildren(simpleTechnique, rect, font)

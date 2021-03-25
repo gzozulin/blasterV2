@@ -29,7 +29,7 @@ class SceneCozyRoom : GlResource() {
 
     private val backgroundTexCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
     private val backgroundSampler = unifsampler()
-    private val backgroundTech = SimpleTechnique(backgroundModelM, backgroundViewM, backgroundProjM, tex(backgroundTexCoords, backgroundSampler))
+    private val backgroundTech = FlatTechnique(backgroundModelM, backgroundViewM, backgroundProjM, tex(backgroundTexCoords, backgroundSampler))
     private val backgroundColor = vec4(0f, 0f, 0f, 0.8f)
     private val backgroundMesh = GlMesh.rect(1600f, 1080f)
 

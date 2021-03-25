@@ -55,10 +55,10 @@ enum class SimpleVarrying {
 
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
-open class SimpleTechnique(private val modelM: Expression<mat4>,
-                           private val viewM: Expression<mat4>,
-                           private val projM: Expression<mat4>,
-                           private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {
+open class FlatTechnique(private val modelM: Expression<mat4>,
+                         private val viewM: Expression<mat4>,
+                         private val projM: Expression<mat4>,
+                         private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {
 
     private val program: GlProgram
 
@@ -142,7 +142,7 @@ private val unifDiffuse2 = unifsampler(diffuse2)
 private val unifDiffuse3 = unifsampler(diffuse3)
 private val unifDiffuse4 = unifsampler(diffuse4)
 
-private val simpleTechnique = SimpleTechnique(
+private val flatTechnique = FlatTechnique(
     identityM, unifViewM, unifProjM,
     mul(
         add(
@@ -174,7 +174,7 @@ fun main() {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
         }
-        glUse(simpleTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
+        glUse(flatTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
             window.show {
                 glBind(diffuse1, diffuse2, diffuse3, diffuse4) {
                     glClear()
@@ -183,8 +183,8 @@ fun main() {
                         camera.lookAlong(direction)
                     }
                     skyboxTechnique.skybox(camera)
-                    simpleTechnique.draw {
-                        simpleTechnique.instance(rectangle)
+                    flatTechnique.draw {
+                        flatTechnique.instance(rectangle)
                     }
                     proportion += delta
                     if (proportion < 0f || proportion > 1f) {
