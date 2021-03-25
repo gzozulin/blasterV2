@@ -2,8 +2,6 @@ package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.Material
-import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
