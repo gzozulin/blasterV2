@@ -179,6 +179,7 @@ class GlProgram(
     }
 
     fun draw(mesh: GlMesh) {
+        mesh.checkReady()
         draw(mode = backend.GL_TRIANGLES, indicesCount = mesh.indicesCount)
     }
 

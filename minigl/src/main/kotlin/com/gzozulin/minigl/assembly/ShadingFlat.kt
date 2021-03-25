@@ -183,8 +183,10 @@ fun main() {
                         camera.lookAlong(direction)
                     }
                     skyboxTechnique.skybox(camera)
-                    flatTechnique.draw {
-                        flatTechnique.instance(rectangle)
+                    glBind(rectangle) {
+                        flatTechnique.draw {
+                            flatTechnique.instance(rectangle)
+                        }
                     }
                     proportion += delta
                     if (proportion < 0f || proportion > 1f) {
