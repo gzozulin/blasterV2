@@ -3,9 +3,7 @@ package com.gzozulin.minigl.assembly
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
-import com.gzozulin.minigl.techniques.Console
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
-import com.gzozulin.minigl.techniques.StaticTextTechnique
 import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
@@ -142,56 +140,9 @@ private val deferredLightFrag = """
 
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
-    uniform Light uLights[128];
-
-    const float lightConstantAtt    = 0.9;
-    const float lightLinearAtt      = 0.7;
-    const float lightQuadraticAtt   = 0.3;
+    uniform Light uLights[$MAX_LIGHTS];
 
     out vec4 oFragColor;
-
-    // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
-    // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
-
-    float attenuation(float distance) {
-        return 1.0 / (lightConstantAtt + lightLinearAtt * distance + lightQuadraticAtt * distance * distance);
-    }
-
-    vec3 lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, vec3 lightIntensity, float attenuation,
-            vec3 matDiffuse, vec3 matSpecular, float shine) {
-        vec3 contribution = vec3(0.0);
-        if (attenuation < 0.01){
-            return contribution;
-        }
-        vec3 attenuatedLight = lightIntensity * attenuation;
-        // diffuse
-        float diffuseTerm = dot(fragNormal, lightDir);
-        if (diffuseTerm > 0.0) {
-            contribution += diffuseTerm * attenuatedLight * matDiffuse;
-        }
-        // specular
-        vec3 reflectDir = reflect(-lightDir, fragNormal);
-        float specularTerm = dot(viewDir, reflectDir);
-        if (specularTerm > 0.0) {
-            contribution += pow(specularTerm, shine) * attenuatedLight * matSpecular;
-        }
-        return contribution;
-    }
-
-    vec3 pointLightContrib(vec3 viewDir, vec3 fragPosition, vec3 fragNormal, vec3 lightVector, vec3 lightIntensity,
-            vec3 matDiffuse, vec3 matSpecular, float shine) {
-        vec3 direction = lightVector - fragPosition;
-        float attenuation = attenuation(length(direction));
-        vec3 lightDir = normalize(direction);
-        return lightContrib(viewDir, lightDir, fragNormal, lightIntensity, attenuation, matDiffuse, matSpecular, shine);
-    }
-
-    vec3 dirLightContrib(vec3 viewDir, vec3 fragNormal, vec3 lightVector, vec3 lightIntensity,
-            vec3 matDiffuse, vec3 matSpecular, float shine) {
-        float attenuation = 1.0; // no attenuation
-        vec3 lightDir = -normalize(lightVector);
-        return lightContrib(viewDir, lightDir, fragNormal, lightIntensity, attenuation, matDiffuse, matSpecular, shine);
-    }
 
     void main()
     {
@@ -212,12 +163,12 @@ private val deferredLightFrag = """
         vec3 lighting  = matAmbientShine.rgb;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
-            lighting += pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i].vector, uLights[i].intensity,
+            lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i].vector, uLights[i].intensity,
             matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
 
         for (int i = 0; i < uLightsDirCnt; ++i) {
-            lighting += dirLightContrib(viewDir, fragNormal, uLights[i].vector, uLights[i].intensity,
+            lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i].vector, uLights[i].intensity,
             matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
 

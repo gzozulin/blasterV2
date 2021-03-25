@@ -3,6 +3,7 @@
     <words>
       <w>addr</w>
       <w>alch</w>
+      <w>atten</w>
       <w>capturer</w>
       <w>constf</w>
       <w>coord</w>
@@ -11,6 +12,7 @@
       <w>defn</w>
       <w>gzozulin</w>
       <w>highlevel</w>
+      <w>highp</w>
       <w>phong</w>
       <w>postdeclare</w>
       <w>predeclare</w>

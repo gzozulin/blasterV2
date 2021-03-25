@@ -39,8 +39,65 @@ private const val EXPR_NEAR_V4 =
             "       expr_near(left.w, right.w);\n" +
             "}\n"
 
-const val DECLARATIONS_VERT = EXPR_TILE
-const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4
+private const val EXPR_ATTEN = """
+    const float lightConstantAtt    = 0.9;
+    const float lightLinearAtt      = 0.7;
+    const float lightQuadraticAtt   = 0.3;
+    
+    float expr_atten(float distance) {
+        return 1.0 / (lightConstantAtt + lightLinearAtt * distance + lightQuadraticAtt * distance * distance);
+    }
+"""
+
+private const val EXPR_LIGHT_CONTRIB = """
+    // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
+    // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
+    
+    vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, vec3 lightIntensity, float attenuation,
+                           vec3 matDiffuse, vec3 matSpecular, float shine) {
+        vec3 contribution = vec3(0.0);
+        if (attenuation < 0.01) {
+            return contribution;
+        }
+        vec3 attenuatedLight = lightIntensity * attenuation;
+        // diffuse
+        float diffuseTerm = dot(fragNormal, lightDir);
+        if (diffuseTerm > 0.0) {
+            contribution += diffuseTerm * attenuatedLight * matDiffuse;
+        }
+        // specular
+        vec3 reflectDir = reflect(-lightDir, fragNormal);
+        float specularTerm = dot(viewDir, reflectDir);
+        if (specularTerm > 0.0) {
+            contribution += pow(specularTerm, shine) * attenuatedLight * matSpecular;
+        }
+        return contribution;
+    }
+"""
+
+private const val EXPR_POINT_LIGHT_CONTRIB = """
+    vec3 expr_pointLightContrib(vec3 viewDir, vec3 fragPosition, vec3 fragNormal, vec3 lightVector, vec3 lightIntensity,
+                                vec3 matDiffuse, vec3 matSpecular, float shine) {
+        vec3 direction = lightVector - fragPosition;
+        float attenuation = expr_atten(length(direction));
+        vec3 lightDir = normalize(direction);
+        return expr_lightContrib(viewDir, lightDir, fragNormal, lightIntensity, attenuation, matDiffuse, matSpecular, shine);
+    }
+"""
+
+private const val EXPR_DIR_LIGHT_CONTRIB = """
+    vec3 expr_dirLightContrib(vec3 viewDir, vec3 fragNormal, vec3 lightVector, vec3 lightIntensity,
+                              vec3 matDiffuse, vec3 matSpecular, float shine) {
+        float attenuation = 1.0; // no attenuation
+        vec3 lightDir = -normalize(lightVector);
+        return expr_lightContrib(viewDir, lightDir, fragNormal, lightIntensity, attenuation, matDiffuse, matSpecular, shine);
+    }
+"""
+
+const val DECLARATIONS_VERT = EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4 + EXPR_ATTEN +
+        EXPR_LIGHT_CONTRIB + EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
+const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 + EXPR_ATTEN +
+        EXPR_LIGHT_CONTRIB + EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
