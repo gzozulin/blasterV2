@@ -55,7 +55,7 @@ enum class SimpleVarrying {
 
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
-open class FlatTechnique(private val modelM: Expression<mat4>,
+class FlatTechnique(private val modelM: Expression<mat4>,
                          private val viewM: Expression<mat4>,
                          private val projM: Expression<mat4>,
                          private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {

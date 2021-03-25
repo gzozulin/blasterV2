@@ -3,7 +3,7 @@ package com.gzozulin.minigl.assembly
 import com.gzozulin.minigl.api.*
 import java.util.concurrent.atomic.AtomicInteger
 
-const val VERSION = "#version 300 es"
+const val VERSION = "#version 460"
 const val PRECISION_HIGH = "precision highp float;"
 
 private const val EXPR_TILE =
