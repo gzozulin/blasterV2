@@ -67,8 +67,6 @@ private val deferredGeomFrag = """
     in float vMatShine;
     in float vMatTransp;
 
-    uniform sampler2D uTexDiffuse;
-
     layout (location = 0) out vec4 oPosition;
     layout (location = 1) out vec3 oNormal;
     layout (location = 2) out vec4 oDiffuse;
@@ -83,11 +81,7 @@ private val deferredGeomFrag = """
     {
         %VRBL%
         
-        vec4 diffuse = texture(uTexDiffuse, vTexCoord);
-        if (diffuse.a < 0.1) {
-            discard;
-        }
-        oDiffuse = diffuse;
+        oDiffuse = %ALBEDO%;
         oPosition = vFragPosition;
         oNormal = normalize(vNormal);
         oMatAmbientShine.a = vMatShine;
@@ -189,6 +183,7 @@ class DeferredTechnique(
     private val modelM: Expression<mat4>,
     private val viewM: Expression<mat4>,
     private val projM: Expression<mat4>,
+    private val albedo: Expression<vec4> = constv4(vec4(1f)),
     private val matAmbient: Expression<vec3> = constv3(vec3(1f)),
     private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
     private val matSpecular: Expression<vec3> = constv3(vec3(1f)),
@@ -211,7 +206,8 @@ class DeferredTechnique(
             .replace("%MAT_SHINE%", matShine.expr())
             .replace("%MAT_TRANSPARENCY%", matTransparency.expr())
 
-        val geomFragSrc = deferredGeomFrag.substituteDeclVrbl()
+        val geomFragSrc = deferredGeomFrag.substituteDeclVrbl(albedo)
+            .replace("%ALBEDO%", albedo.expr())
 
         programGeomPass = GlProgram(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, geomVertSrc),
@@ -356,18 +352,16 @@ class DeferredTechnique(
         }
     }
 
-    fun instance(mesh: GlMesh, diffuse: GlTexture) {
+    fun instance(mesh: GlMesh) {
         checkReady()
-        glBind(mesh, diffuse) {
-            modelM.submit(programLightPass)
-            matAmbient.submit(programLightPass)
-            matDiffuse.submit(programLightPass)
-            matSpecular.submit(programLightPass)
-            matShine.submit(programLightPass)
-            matTransparency.submit(programLightPass)
-            programGeomPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
-            programGeomPass.draw(indicesCount = mesh.indicesCount)
-        }
+        albedo.submit(programLightPass)
+        modelM.submit(programLightPass)
+        matAmbient.submit(programLightPass)
+        matDiffuse.submit(programLightPass)
+        matSpecular.submit(programLightPass)
+        matShine.submit(programLightPass)
+        matTransparency.submit(programLightPass)
+        programGeomPass.draw(indicesCount = mesh.indicesCount)
     }
 }
 
@@ -375,9 +369,15 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
+private val obj = modelLib.load("models/house/low").first()
+
 private val constModelM = constm4(mat4().identity())
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
+
+private val unifSampler = unifsampler(obj.phong().mapDiffuse!!)
+private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
+private val albedo = tex(texCoords, unifSampler)
 
 private val light = Light(vec3(1f), false)
 private val light2 = Light(vec3(1f), false)
@@ -386,7 +386,7 @@ private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3()
 private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
 
 private val deferredTechnique = DeferredTechnique(
-    constModelM, unifViewM, unifProjM,
+    constModelM, unifViewM, unifProjM, albedo,
     constv3(PhongMaterial.CONCRETE.ambient),
     constv3(PhongMaterial.CONCRETE.diffuse),
     constv3(PhongMaterial.CONCRETE.specular),
@@ -395,8 +395,6 @@ private val deferredTechnique = DeferredTechnique(
 )
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
-
-private val obj = modelLib.load("models/house/low").first()
 
 private var mouseLook = false
 
@@ -430,14 +428,16 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
-                        deferredTechnique.draw(camera,
-                            lights = {
-                                deferredTechnique.light(light, lightMatrix)
-                                deferredTechnique.light(light2, lightMatrix2)
-                            },
-                            instances = {
-                                deferredTechnique.instance(obj.mesh, obj.phong().mapDiffuse!!, PhongMaterial.CONCRETE)
-                            })
+                        glBind(obj) {
+                            deferredTechnique.draw(camera,
+                                lights = {
+                                    deferredTechnique.light(light, lightMatrix)
+                                    deferredTechnique.light(light2, lightMatrix2)
+                                },
+                                instances = {
+                                    deferredTechnique.instance(obj.mesh)
+                                })
+                        }
                     }
                 }
             }
