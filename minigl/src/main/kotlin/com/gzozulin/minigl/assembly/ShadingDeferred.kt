@@ -17,12 +17,6 @@ private val deferredGeomVert = """
     layout (location = 1) in vec2 aTexCoord;
     layout (location = 2) in vec3 aNormal;
 
-    uniform vec3 uMatAmbient;
-    uniform vec3 uMatDiffuse;
-    uniform vec3 uMatSpecular;
-    uniform float uMatShine;
-    uniform float uMatTransp;
-
     out vec4 vFragPosition;
     out vec2 vTexCoord;
     out vec3 vNormal;
@@ -49,11 +43,11 @@ private val deferredGeomVert = """
 
         gl_Position = %PROJ% * %VIEW% * worldPos;
 
-        vMatAmbient = uMatAmbient;
-        vMatDiffuse = uMatDiffuse;
-        vMatSpecular = uMatSpecular;
-        vMatShine = uMatShine;
-        vMatTransp = uMatTransp;
+        vMatAmbient = %MAT_AMBIENT%;
+        vMatDiffuse = %MAT_DIFFUSE%;
+        vMatSpecular = %MAT_SPECULAR%;
+        vMatShine = %MAT_SHINE%;
+        vMatTransp = %MAT_TRANSPARENCY%;
     }
 """.trimIndent()
 
@@ -69,6 +63,7 @@ private val deferredGeomFrag = """
     in vec3 vMatAmbient;
     in vec3 vMatDiffuse;
     in vec3 vMatSpecular;
+    
     in float vMatShine;
     in float vMatTransp;
 
@@ -193,16 +188,28 @@ private val deferredLightFrag = """
 class DeferredTechnique(
     private val modelM: Expression<mat4>,
     private val viewM: Expression<mat4>,
-    private val projM: Expression<mat4>) : GlResource() {
+    private val projM: Expression<mat4>,
+    private val matAmbient: Expression<vec3> = constv3(vec3(1f)),
+    private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
+    private val matSpecular: Expression<vec3> = constv3(vec3(1f)),
+    private val matShine: Expression<Float> = constf(1f),
+    private val matTransparency: Expression<Float> = constf(1f),
+) : GlResource() {
 
     private val programGeomPass: GlProgram
     private val programLightPass: GlProgram
 
     init {
-        val geomVertSrc = deferredGeomVert.substituteDeclVrbl(modelM, viewM, projM)
+        val geomVertSrc = deferredGeomVert.substituteDeclVrbl(
+            modelM, viewM, projM, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
             .replace("%MODEL%", modelM.expr())
             .replace("%VIEW%", viewM.expr())
             .replace("%PROJ%", projM.expr())
+            .replace("%MAT_AMBIENT%", matAmbient.expr())
+            .replace("%MAT_DIFFUSE%", matDiffuse.expr())
+            .replace("%MAT_SPECULAR%", matSpecular.expr())
+            .replace("%MAT_SHINE%", matShine.expr())
+            .replace("%MAT_TRANSPARENCY%", matTransparency.expr())
 
         val geomFragSrc = deferredGeomFrag.substituteDeclVrbl()
 
@@ -315,10 +322,8 @@ class DeferredTechnique(
         glBind(framebuffer) {
             glCheck { backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT) }
             glBind(programGeomPass) {
-                projM.submit(programGeomPass)
                 viewM.submit(programGeomPass)
-                programGeomPass.setUniform(GlUniform.UNIFORM_VIEW_M.label, camera.calculateViewM())
-                programGeomPass.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
+                projM.submit(programGeomPass)
                 instances.invoke()
             }
         }
@@ -335,6 +340,7 @@ class DeferredTechnique(
 
     private val lightVectorBuf = vec3()
     fun light(light: Light, modelM: Matrix4f) {
+        check(pointLightCnt + dirLightCnt + 1 < MAX_LIGHTS) { "More lights than defined in shader!" }
         checkReady()
         if (light.point) {
             modelM.getColumn(3, lightVectorBuf)
@@ -348,18 +354,17 @@ class DeferredTechnique(
             programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, dirLightCnt, light.intensity)
             dirLightCnt++
         }
-        check(pointLightCnt + dirLightCnt < MAX_LIGHTS) { "More lights than defined in shader!" }
     }
 
-    fun instance(mesh: GlMesh, diffuse: GlTexture, material: PhongMaterial) {
+    fun instance(mesh: GlMesh, diffuse: GlTexture) {
         checkReady()
         glBind(mesh, diffuse) {
-            viewM.submit(programGeomPass)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_AMBIENT.label, material.ambient)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_DIFFUSE.label, material.diffuse)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SPECULAR.label, material.specular)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SHINE.label, material.shine)
-            programGeomPass.setUniform(GlUniform.UNIFORM_MAT_TRANSP.label, material.transparency)
+            modelM.submit(programLightPass)
+            matAmbient.submit(programLightPass)
+            matDiffuse.submit(programLightPass)
+            matSpecular.submit(programLightPass)
+            matShine.submit(programLightPass)
+            matTransparency.submit(programLightPass)
             programGeomPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
             programGeomPass.draw(indicesCount = mesh.indicesCount)
         }
@@ -380,7 +385,15 @@ private val light2 = Light(vec3(1f), false)
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())
 private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
 
-private val deferredTechnique = DeferredTechnique(constModelM, unifViewM, unifProjM)
+private val deferredTechnique = DeferredTechnique(
+    constModelM, unifViewM, unifProjM,
+    constv3(PhongMaterial.CONCRETE.ambient),
+    constv3(PhongMaterial.CONCRETE.diffuse),
+    constv3(PhongMaterial.CONCRETE.specular),
+    constf(PhongMaterial.CONCRETE.shine),
+    constf(PhongMaterial.CONCRETE.transparency),
+)
+
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 
 private val obj = modelLib.load("models/house/low").first()

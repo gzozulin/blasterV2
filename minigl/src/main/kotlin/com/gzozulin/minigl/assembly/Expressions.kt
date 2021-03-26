@@ -192,14 +192,19 @@ fun constb(value: Boolean) = object : Const<Boolean>(value) {
     override val type = "bool"
 }
 
-fun constv4(value: vec4) = object : Const<vec4>(value) {
-    override val type = "vec4"
-    override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
-}
-
 fun constv2i(value: vec2i) = object : Const<vec2i>(value) {
     override val type = "ivec2"
     override fun decl() = listOf("const $type $name = ivec2(${value.x}, ${value.y});")
+}
+
+fun constv3(value: vec3) = object : Const<vec3>(value) {
+    override val type = "vec3"
+    override fun decl() = listOf("const $type $name = vec3(${value.x}, ${value.y}, ${value.z});")
+}
+
+fun constv4(value: vec4) = object : Const<vec4>(value) {
+    override val type = "vec4"
+    override fun decl() = listOf("const $type $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});")
 }
 
 fun constm4(value: mat4) = object : Const<mat4>(value) {
