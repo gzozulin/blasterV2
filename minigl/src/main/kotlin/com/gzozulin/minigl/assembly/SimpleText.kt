@@ -121,32 +121,30 @@ class SimpleTextTechnique(
         check(fromLine in 0 until toLine) { "wtf?!" }
         var currentLetter = 0
         var currentLine = 0
-        glBind(font) {
-            simpleTechnique.draw {
-                for (span in page.spans) {
-                    if (span.visibility == SpanVisibility.GONE) {
+        simpleTechnique.draw {
+            for (span in page.spans) {
+                if (span.visibility == SpanVisibility.GONE) {
+                    continue
+                }
+                updateSpan(span)
+                for (character in span.text) {
+                    if (character == '\n') {
+                        currentLetter = 0
+                        currentLine++
                         continue
                     }
-                    updateSpan(span)
-                    for (character in span.text) {
-                        if (character == '\n') {
-                            currentLetter = 0
-                            currentLine++
-                            continue
-                        }
-                        if (currentLine < fromLine) {
-                            continue
-                        }
-                        if (currentLine >= toLine) {
-                            return@draw
-                        }
-                        if (span.visibility == SpanVisibility.VISIBLE) {
-                            updateCursor(currentLine - fromLine, currentLetter)
-                            updateGlyph(character)
-                            simpleTechnique.instance(rect)
-                        }
-                        currentLetter ++
+                    if (currentLine < fromLine) {
+                        continue
                     }
+                    if (currentLine >= toLine) {
+                        return@draw
+                    }
+                    if (span.visibility == SpanVisibility.VISIBLE) {
+                        updateCursor(currentLine - fromLine, currentLetter)
+                        updateGlyph(character)
+                        simpleTechnique.instance(rect, font)
+                    }
+                    currentLetter ++
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
@@ -352,15 +353,29 @@ class DeferredTechnique(
         }
     }
 
-    fun instance(mesh: GlMesh) {
+    fun instance(mesh: GlMesh, vararg bindables: GlBindable) {
+        glBind(mesh) {
+            glBind(bindables.toList()) {
+                renderInstance(mesh)
+            }
+        }
+    }
+
+    fun instance(obj: Object) {
+        glBind(obj) {
+            renderInstance(obj.mesh)
+        }
+    }
+
+    private fun renderInstance(mesh: GlMesh) {
         checkReady()
-        albedo.submit(programLightPass)
-        modelM.submit(programLightPass)
-        matAmbient.submit(programLightPass)
-        matDiffuse.submit(programLightPass)
-        matSpecular.submit(programLightPass)
-        matShine.submit(programLightPass)
-        matTransparency.submit(programLightPass)
+        albedo.submit(programGeomPass)
+        modelM.submit(programGeomPass)
+        matAmbient.submit(programGeomPass)
+        matDiffuse.submit(programGeomPass)
+        matSpecular.submit(programGeomPass)
+        matShine.submit(programGeomPass)
+        matTransparency.submit(programGeomPass)
         programGeomPass.draw(indicesCount = mesh.indicesCount)
     }
 }
@@ -428,16 +443,14 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
-                        glBind(obj) {
-                            deferredTechnique.draw(camera,
-                                lights = {
-                                    deferredTechnique.light(light, lightMatrix)
-                                    deferredTechnique.light(light2, lightMatrix2)
-                                },
-                                instances = {
-                                    deferredTechnique.instance(obj.mesh)
-                                })
-                        }
+                        deferredTechnique.draw(camera,
+                            lights = {
+                                deferredTechnique.light(light, lightMatrix)
+                                deferredTechnique.light(light2, lightMatrix2)
+                            },
+                            instances = {
+                                deferredTechnique.instance(obj)
+                            })
                     }
                 }
             }

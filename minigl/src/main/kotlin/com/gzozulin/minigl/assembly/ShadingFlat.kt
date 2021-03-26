@@ -96,16 +96,24 @@ class FlatTechnique(private val modelM: Expression<mat4>,
         }
     }
 
-    fun instance(mesh: GlMesh) {
-        modelM.submit(program)
-        color.submit(program)
-        program.draw(mesh)
+    fun instance(mesh: GlMesh, vararg bindables: GlBindable) {
+        glBind(mesh) {
+            glBind(bindables.toList()) {
+                renderInstance(mesh)
+            }
+        }
     }
 
     fun instance(obj: Object) {
         glBind(obj) {
-            instance(obj.mesh)
+            renderInstance(obj.mesh)
         }
+    }
+
+    private fun renderInstance(mesh: GlMesh) {
+        modelM.submit(program)
+        color.submit(program)
+        program.draw(mesh)
     }
 }
 

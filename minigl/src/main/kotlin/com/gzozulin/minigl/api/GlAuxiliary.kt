@@ -21,6 +21,12 @@ fun glBind(vararg bindables: GlBindable, action: () -> Unit) {
     bindables.reversed().forEach { it.unbind() }
 }
 
+fun glBind(bindables: Collection<GlBindable>, action: () -> Unit) {
+    bindables.forEach { it.bind() }
+    action.invoke()
+    bindables.reversed().forEach { it.unbind() }
+}
+
 fun glUse(vararg usables: GlResource, action: () -> Unit) {
     usables.forEach { it.use() }
     action.invoke()
