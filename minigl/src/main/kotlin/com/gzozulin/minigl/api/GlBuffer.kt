@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
 
-private val bindStack = Stack<Int>()
+private val bindStack = Stack<Pair<Int, Int>>()
 
 class GlBuffer(
     private val target: Int,
@@ -30,7 +30,7 @@ class GlBuffer(
 
     override fun onBound() {
         backend.glBindBuffer(target, handle)
-        bindStack.push(handle)
+        bindStack.push(target to handle)
     }
 
     override fun onUnbound() {
@@ -38,7 +38,7 @@ class GlBuffer(
         if (bindStack.empty()) {
             backend.glBindBuffer(target, 0)
         } else {
-            backend.glBindBuffer(target, bindStack.peek())
+            backend.glBindBuffer(bindStack.peek().first, bindStack.peek().second)
         }
     }
 

@@ -132,8 +132,8 @@ private val tiledCoords = cachev2(tile(texCoords, constv2i(vec2i(15, 15)), const
 private val tiledShiftedCoords = cachev2(add(tiledCoords, unifShiftUV))
 
 private val identityM = constm4(mat4().identity())
-private val unifViewM = unifm4(camera.calculateViewM())
-private val unifProjM = unifm4(camera.projectionM)
+private val unifViewM = unifm4 { camera.calculateViewM() }
+private val unifProjM = unifm4 { camera.projectionM }
 
 private val unifFont = unifsampler(diffuse1)
 private val unifDiffuse2 = unifsampler(diffuse2)
@@ -179,7 +179,6 @@ fun main() {
                     controller.apply { position, direction ->
                         camera.setPosition(position)
                         camera.lookAlong(direction)
-                        unifViewM.value = camera.calculateViewM()
                     }
                     skyboxTechnique.skybox(camera)
                     flatTechnique.draw {
