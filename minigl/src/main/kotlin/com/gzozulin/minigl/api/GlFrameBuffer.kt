@@ -1,5 +1,9 @@
 package com.gzozulin.minigl.api
 
+import java.util.*
+
+private val bindStack = Stack<Int>()
+
 class GlFrameBuffer : GlBindable() {
     private var handle: Int = -1
 
@@ -13,10 +17,16 @@ class GlFrameBuffer : GlBindable() {
 
     override fun onBound() {
         backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, handle)
+        bindStack.push(handle)
     }
 
     override fun onUnbound() {
-        backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, 0)
+        bindStack.pop()
+        if (bindStack.empty()) {
+            backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, 0)
+        } else {
+            backend.glBindFramebuffer(backend.GL_FRAMEBUFFER, bindStack.peek())
+        }
     }
 
     fun setTexture(attachement: Int, texture: GlTexture) {

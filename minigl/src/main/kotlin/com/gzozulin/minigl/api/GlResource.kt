@@ -35,7 +35,6 @@ abstract class GlResource {
     }
 
     open fun onUse() { }
-
     open fun onRelease() { }
 
     open fun checkReady() {

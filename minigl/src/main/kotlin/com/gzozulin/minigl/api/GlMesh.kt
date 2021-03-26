@@ -1,5 +1,9 @@
 package com.gzozulin.minigl.api
 
+import java.util.*
+
+private val bindStack = Stack<Int>()
+
 class GlMesh(
     private val attributes: List<Pair<GlAttribute, GlBuffer>>,
     private val indicesBuffer: GlBuffer,
@@ -13,7 +17,6 @@ class GlMesh(
     private var handle: Int = -1
 
     override fun onUse() {
-        handle = backend.glGenVertexArrays()
         createVAO()
     }
 
@@ -23,20 +26,27 @@ class GlMesh(
 
     override fun onBound() {
         backend.glBindVertexArray(handle)
+        bindStack.push(handle)
     }
 
     override fun onUnbound() {
-        backend.glBindVertexArray(0)
+        bindStack.pop()
+        if (bindStack.empty()) {
+            backend.glBindVertexArray(0)
+        } else {
+            backend.glBindVertexArray(bindStack.peek())
+        }
     }
 
     private fun createVAO() {
+        handle = backend.glGenVertexArrays()
         backend.glBindVertexArray(handle)
-        attributes.forEach {
-            backend.glEnableVertexAttribArray(it.first.location)
-            it.second.bind()
-            backend.glVertexAttribPointer(it.first.location, it.first.size, backend.GL_FLOAT, false, 0, 0)
-            if (it.first.divisor != 0) {
-                backend.glVertexAttribDivisor(it.first.location, it.first.divisor)
+        attributes.forEach { (attribute, buffer) ->
+            backend.glEnableVertexAttribArray(attribute.location)
+            buffer.bind()
+            backend.glVertexAttribPointer(attribute.location, attribute.size, backend.GL_FLOAT, false, 0, 0)
+            if (attribute.divisor != 0) {
+                backend.glVertexAttribDivisor(attribute.location, attribute.divisor)
             }
         }
         indicesBuffer.bind()

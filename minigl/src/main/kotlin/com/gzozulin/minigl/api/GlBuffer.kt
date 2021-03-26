@@ -2,6 +2,9 @@ package com.gzozulin.minigl.api
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.*
+
+private val bindStack = Stack<Int>()
 
 class GlBuffer(
     private val target: Int,
@@ -27,10 +30,16 @@ class GlBuffer(
 
     override fun onBound() {
         backend.glBindBuffer(target, handle)
+        bindStack.push(handle)
     }
 
     override fun onUnbound() {
-        backend.glBindBuffer(target, 0)
+        bindStack.pop()
+        if (bindStack.empty()) {
+            backend.glBindBuffer(target, 0)
+        } else {
+            backend.glBindBuffer(target, bindStack.peek())
+        }
     }
 
     fun updateBuffer(access : Int = backend.GL_WRITE_ONLY, update: (mapped: ByteBuffer) -> Unit) {

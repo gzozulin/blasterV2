@@ -99,9 +99,7 @@ class FlatTechnique(private val modelM: Expression<mat4>,
 
     fun instance(obj: Object) {
         glBind(obj) {
-            modelM.submit(program)
-            color.submit(program)
-            program.draw(obj.mesh)
+            instance(obj.mesh)
         }
     }
 }
@@ -176,17 +174,16 @@ fun main() {
         }
         glUse(flatTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
             window.show {
-                glBind(diffuse1, diffuse2, diffuse3, diffuse4) {
+                glBind(rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
                     glClear()
                     controller.apply { position, direction ->
                         camera.setPosition(position)
                         camera.lookAlong(direction)
+                        unifViewM.value = camera.calculateViewM()
                     }
                     skyboxTechnique.skybox(camera)
-                    glBind(rectangle) {
-                        flatTechnique.draw {
-                            flatTechnique.instance(rectangle)
-                        }
+                    flatTechnique.draw {
+                        flatTechnique.instance(rectangle)
                     }
                     proportion += delta
                     if (proportion < 0f || proportion > 1f) {

@@ -2,6 +2,8 @@ package com.gzozulin.minigl.api
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.*
+import kotlin.collections.HashMap
 
 private var complainAboutUniforms = true
 
@@ -24,6 +26,8 @@ private val bufferVec4 = ByteBuffer.allocateDirect(4 * 4)
 private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4)
     .order(ByteOrder.nativeOrder())
     .asFloatBuffer()
+
+private val bindStack = Stack<Int>()
 
 class GlProgram(
     private val vertexShader: GlShader,
@@ -59,10 +63,16 @@ class GlProgram(
 
     override fun onBound() {
         backend.glUseProgram(handle)
+        bindStack.push(handle)
     }
 
     override fun onUnbound() {
-        backend.glUseProgram(0)
+        bindStack.pop()
+        if (bindStack.empty()) {
+            backend.glUseProgram(0)
+        } else {
+            backend.glUseProgram(bindStack.peek())
+        }
     }
 
     private fun cacheUniforms() {
@@ -179,6 +189,7 @@ class GlProgram(
     }
 
     fun draw(mesh: GlMesh) {
+        checkReady()
         mesh.checkReady()
         draw(mode = backend.GL_TRIANGLES, indicesCount = mesh.indicesCount)
     }

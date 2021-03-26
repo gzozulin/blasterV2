@@ -1,7 +1,5 @@
 package com.gzozulin.minigl.api
 
-// todo: reentry bindable?
-
 abstract class GlBindable : GlResource() {
     private var bound = 0
 

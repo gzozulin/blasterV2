@@ -1,5 +1,9 @@
 package com.gzozulin.minigl.api
 
+import java.util.*
+
+private val bindStack = Stack<Int>()
+
 class GlRenderBuffer(
     private val component: Int = backend.GL_DEPTH_COMPONENT24,
     private val width: Int, private val height: Int) : GlBindable() {
@@ -19,10 +23,16 @@ class GlRenderBuffer(
 
     override fun onBound() {
         backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, handle)
+        bindStack.push(handle)
     }
 
     override fun onUnbound() {
-        backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, 0)
+        bindStack.pop()
+        if (bindStack.empty()) {
+            backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, 0)
+        } else {
+            backend.glBindRenderbuffer(backend.GL_RENDERBUFFER, bindStack.peek())
+        }
     }
 
     fun accessHandle(): Int {
