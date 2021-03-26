@@ -109,7 +109,7 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glBind(obj) {
-                        unifSampler.value = obj.phong().mapDiffuse
+                        unifSampler.value = obj.phong().mapDiffuse!!
                         unifViewM.value = camera.calculateViewM()
                         simpleTechnique.draw {
                             simpleTechnique.instance(obj.mesh)

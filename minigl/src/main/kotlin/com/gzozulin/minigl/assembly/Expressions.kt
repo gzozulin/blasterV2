@@ -121,55 +121,56 @@ fun <R> varying(givenName: String) = object : Expression<R>() {
 
 // ------------------------- Uniforms -------------------------
 
-abstract class Uniform<R>(private var p: (() -> R)?, private var v: R?) : Expression<R>() {
+abstract class Uniform<R>(private val p: (() -> R)?, private var v: R?) : Expression<R>() {
     override fun decl() = listOf("uniform $type $name;")
     override fun expr() = name
 
-    var value: R?
-        get() = if (p != null) { p!!.invoke() } else { v }
+    var value: R
+        get() = if (p != null) { p.invoke() } else { v!! }
         set(new) {
+            check(p == null) { "This uniform already has a provider!" }
             v = new
         }
 }
 
 fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
     override val type = "float"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifi(v: Int? = null) = object : Uniform<Int>(null, v) {
     override val type = "int"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifm4(v: mat4? = null) = object : Uniform<mat4>(null, v) {
     override val type = "mat4"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
     override val type = "mat4"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifv4(v: vec4? = null) = object : Uniform<vec4>(null, v) {
     override val type = "vec4"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifv2(v: vec2? = null) = object : Uniform<vec2>(null, v) {
     override val type = "vec2"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
     override val type = "ivec2"
-    override fun submit(program: GlProgram) { program.setUniform(name, checkNotNull(value)) }
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
 fun unifsampler(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override val type = "sampler2D"
-    override fun submit(program: GlProgram) { program.setTexture(name, checkNotNull(value))}
+    override fun submit(program: GlProgram) { program.setTexture(name, value)}
 }
 
 // ------------------------- Constants -------------------------

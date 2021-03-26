@@ -67,7 +67,7 @@ fun main() {
                         }
                         flatTexTechnique.draw {
                             texOnly.forEach {
-                                unifSampler.value = it.phong().mapDiffuse
+                                unifSampler.value = it.phong().mapDiffuse!!
                                 flatTexTechnique.instance(it)
                             }
                         }
