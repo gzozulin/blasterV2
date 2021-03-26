@@ -55,27 +55,32 @@ enum class SimpleVarrying {
 
 private fun List<String>.toSrc() = distinct().joinToString("\n")
 
+fun String.substituteDeclVrbl(vararg expression: Expression<*>): String {
+    val declarations = mutableListOf<String>()
+    val variables = mutableListOf<String>()
+    expression.forEach {
+        declarations += it.decl()
+        variables += it.vrbl()
+    }
+    return replace("%DECL%", declarations.toSrc())
+        .replace("%VRBL%", variables.toSrc())
+}
+
 class FlatTechnique(private val modelM: Expression<mat4>,
-                         private val viewM: Expression<mat4>,
-                         private val projM: Expression<mat4>,
-                         private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {
+                    private val viewM: Expression<mat4>,
+                    private val projM: Expression<mat4>,
+                    private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {
 
     private val program: GlProgram
 
     init {
-        val vertDecl = (modelM.decl() + viewM.decl() + projM.decl()).toSrc()
-        val vertVrbl = (modelM.vrbl() + modelM.vrbl() + modelM.vrbl()).toSrc()
         val vertSrc = TEMPL_SIMPLE_VERT
-            .replace("%DECL%", vertDecl)
-            .replace("%VRBL%", vertVrbl)
+            .substituteDeclVrbl(modelM, viewM, projM)
             .replace("%MODEL%", modelM.expr())
             .replace("%VIEW%", viewM.expr())
             .replace("%PROJ%", projM.expr())
-        val fragDecl = color.decl().toSrc()
-        val fragVrbl = color.vrbl().toSrc()
         val fragSrc = TEMPL_SIMPLE_FRAG
-            .replace("%DECL%", fragDecl)
-            .replace("%VRBL%", fragVrbl)
+            .substituteDeclVrbl(color)
             .replace("%COLOR%", color.expr())
         program = GlProgram(
             GlShader(GlShaderType.VERTEX_SHADER, vertSrc),

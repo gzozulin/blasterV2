@@ -17,10 +17,6 @@ private val deferredGeomVert = """
     layout (location = 1) in vec2 aTexCoord;
     layout (location = 2) in vec3 aNormal;
 
-    uniform mat4 uModelM;
-    uniform mat4 uViewM;
-    uniform mat4 uProjectionM;
-
     uniform vec3 uMatAmbient;
     uniform vec3 uMatDiffuse;
     uniform vec3 uMatSpecular;
@@ -36,18 +32,22 @@ private val deferredGeomVert = """
     out vec3 vMatSpecular;
     out float vMatShine;
     out float vMatTransp;
+    
+    %DECL%
 
     void main()
     {
-        vec4 worldPos = uModelM * vec4(aPosition, 1.0);
+        %VRBL%
+        
+        vec4 worldPos = %MODEL% * vec4(aPosition, 1.0);
         vFragPosition = worldPos;
 
         vTexCoord = aTexCoord;
 
-        mat3 normalMatrix = transpose(inverse(mat3(uModelM)));
+        mat3 normalMatrix = transpose(inverse(mat3(%MODEL%)));
         vNormal = normalMatrix * aNormal;
 
-        gl_Position = uProjectionM * uViewM * worldPos;
+        gl_Position = %PROJ% * %VIEW% * worldPos;
 
         vMatAmbient = uMatAmbient;
         vMatDiffuse = uMatDiffuse;
@@ -81,9 +81,13 @@ private val deferredGeomFrag = """
     layout (location = 3) out vec4 oMatAmbientShine;
     layout (location = 4) out vec4 oMatDiffTransp;
     layout (location = 5) out vec3 oMatSpecular;
+    
+    %DECL%
 
     void main()
     {
+        %VRBL%
+        
         vec4 diffuse = texture(uTexDiffuse, vTexCoord);
         if (diffuse.a < 0.1) {
             discard;
@@ -108,9 +112,13 @@ private val deferredLightVert = """
     layout (location = 1) in vec2 aTexCoord;
 
     out vec2 vTexCoord;
+    
+    %DECL%
 
     void main()
     {
+        %VRBL%
+        
         vTexCoord = aTexCoord;
         gl_Position = vec4(aPosition, 1.0);
     }
@@ -143,9 +151,13 @@ private val deferredLightFrag = """
     uniform Light uLights[$MAX_LIGHTS];
 
     out vec4 oFragColor;
+    
+    %DECL%
 
     void main()
     {
+        %VRBL%
+    
         vec4 positionLookup = texture(uTexPosition, vTexCoord);
         if (positionLookup.a != 1.0) {
             discard;
@@ -178,14 +190,33 @@ private val deferredLightFrag = """
     }
 """.trimIndent()
 
-class DeferredTechnique : GlResource() {
-    private val programGeomPass = GlProgram(
-        vertexShader = GlShader(GlShaderType.VERTEX_SHADER, deferredGeomVert),
-        fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, deferredGeomFrag))
+class DeferredTechnique(
+    private val modelM: Expression<mat4>,
+    private val viewM: Expression<mat4>,
+    private val projM: Expression<mat4>) : GlResource() {
 
-    private val programLightPass = GlProgram(
-        vertexShader = GlShader(GlShaderType.VERTEX_SHADER, deferredLightVert),
-        fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, deferredLightFrag))
+    private val programGeomPass: GlProgram
+    private val programLightPass: GlProgram
+
+    init {
+        val geomVertSrc = deferredGeomVert.substituteDeclVrbl(modelM, viewM, projM)
+            .replace("%MODEL%", modelM.expr())
+            .replace("%VIEW%", viewM.expr())
+            .replace("%PROJ%", projM.expr())
+
+        val geomFragSrc = deferredGeomFrag.substituteDeclVrbl()
+
+        programGeomPass = GlProgram(
+            vertexShader = GlShader(GlShaderType.VERTEX_SHADER, geomVertSrc),
+            fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, geomFragSrc))
+
+        val lightVertSrc = deferredLightVert.substituteDeclVrbl()
+        val lightFragSrc = deferredLightFrag.substituteDeclVrbl()
+
+        programLightPass = GlProgram(
+            vertexShader = GlShader(GlShaderType.VERTEX_SHADER, lightVertSrc),
+            fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, lightFragSrc))
+    }
 
     private val quadMesh = GlMesh.rect()
 
@@ -277,13 +308,15 @@ class DeferredTechnique : GlResource() {
 
     private var pointLightCnt = 0
     private var dirLightCnt = 0
-    fun draw(camera: Camera, instances: () -> Unit, lights: () -> Unit) {
+    fun draw(camera: Camera, lights: () -> Unit, instances: () -> Unit) {
         checkReady()
         pointLightCnt = 0
         dirLightCnt = 0
         glBind(framebuffer) {
             glCheck { backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT) }
             glBind(programGeomPass) {
+                projM.submit(programGeomPass)
+                viewM.submit(programGeomPass)
                 programGeomPass.setUniform(GlUniform.UNIFORM_VIEW_M.label, camera.calculateViewM())
                 programGeomPass.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
                 instances.invoke()
@@ -318,10 +351,10 @@ class DeferredTechnique : GlResource() {
         check(pointLightCnt + dirLightCnt < MAX_LIGHTS) { "More lights than defined in shader!" }
     }
 
-    fun instance(mesh: GlMesh, modelM: Matrix4f, diffuse: GlTexture, material: PhongMaterial) {
+    fun instance(mesh: GlMesh, diffuse: GlTexture, material: PhongMaterial) {
         checkReady()
         glBind(mesh, diffuse) {
-            programGeomPass.setUniform(GlUniform.UNIFORM_MODEL_M.label, modelM)
+            viewM.submit(programGeomPass)
             programGeomPass.setUniform(GlUniform.UNIFORM_MAT_AMBIENT.label, material.ambient)
             programGeomPass.setUniform(GlUniform.UNIFORM_MAT_DIFFUSE.label, material.diffuse)
             programGeomPass.setUniform(GlUniform.UNIFORM_MAT_SPECULAR.label, material.specular)
@@ -337,14 +370,17 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
+private val constModelM = constm4(mat4().identity())
+private val unifViewM = unifm4 { camera.calculateViewM() }
+private val unifProjM = unifm4 { camera.projectionM }
+
 private val light = Light(vec3(1f), false)
 private val light2 = Light(vec3(1f), false)
 
-private val objMatrix = mat4().identity()
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())
 private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
 
-private val deferredTechnique = DeferredTechnique()
+private val deferredTechnique = DeferredTechnique(constModelM, unifViewM, unifProjM)
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 
 private val obj = modelLib.load("models/house/low").first()
@@ -381,12 +417,14 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
-                        deferredTechnique.draw(camera, instances = {
-                            deferredTechnique.instance(obj.mesh, objMatrix, obj.phong().mapDiffuse!!, PhongMaterial.CONCRETE)
-                        }, lights = {
-                            deferredTechnique.light(light, lightMatrix)
-                            deferredTechnique.light(light2, lightMatrix2)
-                        })
+                        deferredTechnique.draw(camera,
+                            lights = {
+                                deferredTechnique.light(light, lightMatrix)
+                                deferredTechnique.light(light2, lightMatrix2)
+                            },
+                            instances = {
+                                deferredTechnique.instance(obj.mesh, obj.phong().mapDiffuse!!, PhongMaterial.CONCRETE)
+                            })
                     }
                 }
             }
