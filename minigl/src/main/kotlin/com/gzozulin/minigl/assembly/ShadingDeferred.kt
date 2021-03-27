@@ -9,6 +9,10 @@ import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
 
+private var pointLightCnt = 0
+private var dirLightCnt = 0
+private val lightVectorBuf = vec3()
+
 private val deferredGeomVert = """
     $VERSION
     $PRECISION_HIGH
@@ -129,8 +133,6 @@ private val deferredLightFrag = """
     uniform sampler2D uTexMatDiffTransp;
     uniform sampler2D uTexMatSpecular;
 
-    uniform vec3 uEye;
-
     struct Light {
         vec3 vector;
         vec3 intensity;
@@ -161,17 +163,18 @@ private val deferredLightFrag = """
         vec4 matDiffuseTransp = texture(uTexMatDiffTransp, vTexCoord);
         vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
 
-        vec3 viewDir  = normalize(uEye - fragPosition);
-        vec3 lighting  = matAmbientShine.rgb;
+        vec3 eye = vec3(%VIEW%[3][0], %VIEW%[3][1], %VIEW%[3][2]);
+        vec3 viewDir = normalize(eye - fragPosition);
+        vec3 lighting = matAmbientShine.rgb;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
             lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i].vector, uLights[i].intensity,
-            matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
+                 matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
 
         for (int i = 0; i < uLightsDirCnt; ++i) {
             lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i].vector, uLights[i].intensity,
-            matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
+                 matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
 
         lighting *= fragDiffuse;
@@ -206,17 +209,14 @@ class DeferredTechnique(
             .replace("%MAT_SPECULAR%", matSpecular.expr())
             .replace("%MAT_SHINE%", matShine.expr())
             .replace("%MAT_TRANSPARENCY%", matTransparency.expr())
-
         val geomFragSrc = deferredGeomFrag.substituteDeclVrbl(albedo)
             .replace("%ALBEDO%", albedo.expr())
-
         programGeomPass = GlProgram(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, geomVertSrc),
             fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, geomFragSrc))
-
         val lightVertSrc = deferredLightVert.substituteDeclVrbl()
-        val lightFragSrc = deferredLightFrag.substituteDeclVrbl()
-
+        val lightFragSrc = deferredLightFrag.substituteDeclVrbl(viewM)
+            .replace("%VIEW%", viewM.expr())
         programLightPass = GlProgram(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, lightVertSrc),
             fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, lightFragSrc))
@@ -241,78 +241,19 @@ class DeferredTechnique(
     }
 
     override fun onRelease() {
-        releaseFrame()
-    }
-
-    private fun releaseFrame() {
-        positionStorage.release()
-        normalStorage.release()
-        diffuseStorage.release()
-        matAmbShineStorage.release()
-        matDiffTranspStorage.release()
-        matSpecularStorage.release()
-        depthBuffer.release()
+        releaseStorage()
     }
 
     fun resize(width: Int, height: Int) {
         checkReady()
         if (::positionStorage.isInitialized) {
-            releaseFrame()
+            releaseStorage()
         }
-        positionStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
-        positionStorage.use()
-        normalStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB16F,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
-        normalStorage.use()
-        diffuseStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
-        diffuseStorage.use()
-        matAmbShineStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
-        matAmbShineStorage.use()
-        matDiffTranspStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
-        matDiffTranspStorage.use()
-        matSpecularStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB16F,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
-        matSpecularStorage.use()
-        depthBuffer = GlRenderBuffer(width = width, height = height)
-        depthBuffer.use()
-        glBind(framebuffer, positionStorage, normalStorage, diffuseStorage,
-            matAmbShineStorage, matDiffTranspStorage, matSpecularStorage, depthBuffer) {
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT0, positionStorage)
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT1, normalStorage)
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT2, diffuseStorage)
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT3, matAmbShineStorage)
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT4, matDiffTranspStorage)
-            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT5, matSpecularStorage)
-            framebuffer.setOutputs(intArrayOf(
-                backend.GL_COLOR_ATTACHMENT0, backend.GL_COLOR_ATTACHMENT1, backend.GL_COLOR_ATTACHMENT2,
-                backend.GL_COLOR_ATTACHMENT3, backend.GL_COLOR_ATTACHMENT4, backend.GL_COLOR_ATTACHMENT5
-            ))
-            framebuffer.setRenderBuffer(backend.GL_DEPTH_ATTACHMENT, depthBuffer)
-            framebuffer.checkIsComplete()
-            glBind(programLightPass) {
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_POSITION.label, positionStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_NORMAL.label, normalStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuseStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_AMB_SHINE.label, matAmbShineStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_DIFF_TRANSP.label, matDiffTranspStorage)
-                programLightPass.setTexture(GlUniform.UNIFORM_TEXTURE_MAT_SPECULAR.label, matSpecularStorage)
-            }
-        }
+        createStorage(width, height)
+        bindFramebuffer()
     }
 
-    private var pointLightCnt = 0
-    private var dirLightCnt = 0
-    fun draw(camera: Camera, lights: () -> Unit, instances: () -> Unit) {
+    fun draw(lights: () -> Unit, instances: () -> Unit) {
         checkReady()
         pointLightCnt = 0
         dirLightCnt = 0
@@ -328,14 +269,13 @@ class DeferredTechnique(
             positionStorage, normalStorage, diffuseStorage,
             matAmbShineStorage, matDiffTranspStorage, matSpecularStorage) {
             lights.invoke()
-            programLightPass.setUniform(GlUniform.UNIFORM_EYE.label, camera.position)
+            viewM.submit(programLightPass)
             programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT.label, pointLightCnt)
             programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT.label, dirLightCnt)
             programLightPass.draw(indicesCount = quadMesh.indicesCount)
         }
     }
 
-    private val lightVectorBuf = vec3()
     fun light(light: Light, modelM: Matrix4f) {
         check(pointLightCnt + dirLightCnt + 1 < MAX_LIGHTS) { "More lights than defined in shader!" }
         checkReady()
@@ -364,6 +304,71 @@ class DeferredTechnique(
     fun instance(obj: Object) {
         glBind(obj) {
             renderInstance(obj.mesh)
+        }
+    }
+
+    private fun createStorage(width: Int, height: Int) {
+        positionStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGBA16F,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
+        positionStorage.use()
+        normalStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGB16F,
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
+        normalStorage.use()
+        diffuseStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGBA,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
+        diffuseStorage.use()
+        matAmbShineStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGBA16F,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
+        matAmbShineStorage.use()
+        matDiffTranspStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGBA16F,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
+        matDiffTranspStorage.use()
+        matSpecularStorage = GlTexture(
+            width = width, height = height, internalFormat = backend.GL_RGB16F,
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
+        matSpecularStorage.use()
+        depthBuffer = GlRenderBuffer(width = width, height = height)
+        depthBuffer.use()
+    }
+
+    private fun releaseStorage() {
+        positionStorage.release()
+        normalStorage.release()
+        diffuseStorage.release()
+        matAmbShineStorage.release()
+        matDiffTranspStorage.release()
+        matSpecularStorage.release()
+        depthBuffer.release()
+    }
+
+    private fun bindFramebuffer() {
+        glBind(framebuffer, positionStorage, normalStorage, diffuseStorage,
+            matAmbShineStorage, matDiffTranspStorage, matSpecularStorage, depthBuffer) {
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT0, positionStorage)
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT1, normalStorage)
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT2, diffuseStorage)
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT3, matAmbShineStorage)
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT4, matDiffTranspStorage)
+            framebuffer.setTexture(backend.GL_COLOR_ATTACHMENT5, matSpecularStorage)
+            framebuffer.setOutputs(intArrayOf(
+                backend.GL_COLOR_ATTACHMENT0, backend.GL_COLOR_ATTACHMENT1, backend.GL_COLOR_ATTACHMENT2,
+                backend.GL_COLOR_ATTACHMENT3, backend.GL_COLOR_ATTACHMENT4, backend.GL_COLOR_ATTACHMENT5
+            ))
+            framebuffer.setRenderBuffer(backend.GL_DEPTH_ATTACHMENT, depthBuffer)
+            framebuffer.checkIsComplete()
+            glBind(programLightPass) {
+                programLightPass.setTexture("uTexPosition",         positionStorage)
+                programLightPass.setTexture("uTexNormal",           normalStorage)
+                programLightPass.setTexture("uTexDiffuse",          diffuseStorage)
+                programLightPass.setTexture("uTexMatAmbientShine",  matAmbShineStorage)
+                programLightPass.setTexture("uTexMatDiffTransp",    matDiffTranspStorage)
+                programLightPass.setTexture("uTexMatSpecular",      matSpecularStorage)
+            }
         }
     }
 
@@ -443,7 +448,7 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
-                        deferredTechnique.draw(camera,
+                        deferredTechnique.draw(
                             lights = {
                                 deferredTechnique.light(light, lightMatrix)
                                 deferredTechnique.light(light2, lightMatrix2)
