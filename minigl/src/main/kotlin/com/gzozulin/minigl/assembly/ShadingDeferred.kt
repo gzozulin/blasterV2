@@ -54,7 +54,7 @@ private val deferredGeomFrag = """
     layout (location = 1) out vec3 oNormal;
     layout (location = 2) out vec4 oDiffuse;
     layout (location = 3) out vec4 oMatAmbientShine;
-    layout (location = 4) out vec4 oMatDiffTransp;
+    layout (location = 4) out vec4 oMatDiffuseTransp;
     layout (location = 5) out vec3 oMatSpecular;
     
     %DECL%
@@ -65,10 +65,8 @@ private val deferredGeomFrag = """
         oDiffuse = %ALBEDO%;
         oPosition = vPosition;
         oNormal = normalize(vNormal);
-        oMatAmbientShine.rgb = %MAT_AMBIENT%;
-        oMatAmbientShine.a = %MAT_SHINE%;
-        oMatDiffTransp.rgb = %MAT_DIFFUSE%;
-        oMatDiffTransp.a = %MAT_TRANSPARENT%;
+        oMatAmbientShine = vec4(%MAT_AMBIENT%, %MAT_SHINE%);
+        oMatDiffuseTransp = vec4(%MAT_DIFFUSE%, %MAT_TRANSPARENT%);
         oMatSpecular = %MAT_SPECULAR%;
     }
 """.trimIndent()
