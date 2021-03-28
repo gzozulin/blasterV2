@@ -413,8 +413,8 @@ private val unifProjM = unifm4 { camera.projectionM }
 private val deferredTechnique = DeferredTechnique(
     unifModelM, unifViewM, unifProjM, unifEye,
     matAmbient = constv3(vec3(0.1f)),
-    matDiffuse = constv3(vec3(1f)),
-    matSpecular = constv3(vec3(1f)),
+    matDiffuse = constv3(vec3(0.7f)),
+    matSpecular = constv3(vec3(0.9f)),
     matShine = constf(50f)
 )
 
@@ -479,7 +479,7 @@ fun main() {
                             lightTechnique.draw {
                                 lights.forEach { light ->
                                     lightModelM.value = mat4().identity().translate(light.vector)
-                                    lightColor.value = vec4(vec3(light.color).normalize(), 1f)
+                                    lightColor.value = vec4(vec3(light.color), 1f)
                                     lightTechnique.instance(obj)
                                 }
                             }
