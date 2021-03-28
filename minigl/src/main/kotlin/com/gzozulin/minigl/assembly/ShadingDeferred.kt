@@ -4,7 +4,6 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
-import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
 
 // todo: create/release is probably working improperly
@@ -122,7 +121,6 @@ private val deferredLightFrag = """
         vec3 fragPosition = positionLookup.rgb;
         vec3 fragNormal = texture(uTexNormal, vTexCoord).rgb;
         vec3 fragDiffuse = texture(uTexDiffuse, vTexCoord).rgb;
-        
         vec4 matAmbientShine = texture(uTexMatAmbientShine, vTexCoord);
         vec4 matDiffuseTransp = texture(uTexMatDiffTransp, vTexCoord);
         vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
@@ -136,12 +134,11 @@ private val deferredLightFrag = """
         };
 
         vec3 viewDir = normalize(%EYE% - fragPosition);
-        vec3 lighting = matAmbientShine.rgb;
+        vec3 lighting = vec3(0.0); //matAmbientShine.rgb;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
             lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
         }
-
         for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
             lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
         }
@@ -398,42 +395,28 @@ private val controller = Controller(velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val obj = modelLib.load("models/sphere/sphere").first()
-
-private val unifModelM = unifm4 {
-    mat4()
-        .identity()
-        .translate(camera.position)
-        .translate(vec3(controller.forward).mul(8f))
-}
-
-private val unifEye = unifv3 { camera.position }
-private val unifViewM = unifm4 { camera.calculateViewM() }
-private val unifProjM = unifm4 { camera.projectionM }
-
-private val deferredTechnique = DeferredTechnique(
-    unifModelM, unifViewM, unifProjM, unifEye,
-    matAmbient = constv3(vec3(0.1f)),
-    matDiffuse = constv3(vec3(0.7f)),
-    matSpecular = constv3(vec3(0.9f)),
-    matShine = constf(50f)
-)
-
-private val lights = mutableListOf<Light>().apply {
-    repeat((0 until 128).count()) {
-        val position = vec3().rand(vec3(-30f), vec3(30f))
-        val color = when(randi(3)) {
-            0 -> vec3().red()
-            1 -> vec3().green()
-            2 -> vec3().blue()
-            else -> error("wtf?!")
-        }
-        add(PointLight(position, color))
+private val sphereMs = mutableListOf<mat4>().apply {
+    (1..64).count {
+        add(mat4().identity().translate(vec3().rand(vec3(-30f), vec3(30f))))
     }
 }
 
-private val lightModelM = unifm4()
-private val lightColor = unifv4()
-private val lightTechnique = FlatTechnique(lightModelM, unifViewM, unifProjM, lightColor)
+private val unifEye = unifv3 { camera.position }
+private val unifModelM = unifm4()
+private val unifViewM = unifm4 { camera.calculateViewM() }
+private val unifProjM = unifm4 { camera.projectionM }
+
+private val material = PhongMaterial.POLISHED_GOLD
+
+private val deferredTechnique = DeferredTechnique(
+    unifModelM, unifViewM, unifProjM, unifEye,
+    matAmbient = constv3(material.ambient),
+    matDiffuse = constv3(material.diffuse),
+    matSpecular = constv3(material.specular),
+    matShine = constf(material.shine)
+)
+
+private val light = PointLight(camera.position, col3().white(), 1000f)
 
 private var mouseLook = false
 
@@ -463,7 +446,7 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glUse(deferredTechnique, lightTechnique, obj) {
+        glUse(deferredTechnique, obj) {
             window.show {
                 glClear(col3().black())
                 controller.apply { position, direction ->
@@ -472,16 +455,10 @@ fun main() {
                 }
                 glDepthTest {
                     glCulling {
-                        deferredTechnique.draw(lights) {
-                            deferredTechnique.instance(obj)
-                        }
-                        if (!deferredDebug) {
-                            lightTechnique.draw {
-                                lights.forEach { light ->
-                                    lightModelM.value = mat4().identity().translate(light.vector).scale(0.1f)
-                                    lightColor.value = vec4(vec3(light.color), 1f)
-                                    lightTechnique.instance(obj)
-                                }
+                        deferredTechnique.draw(listOf(light)) {
+                            sphereMs.forEach {
+                                unifModelM.value = it
+                                deferredTechnique.instance(obj)
                             }
                         }
                     }

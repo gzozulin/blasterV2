@@ -49,8 +49,8 @@ private const val EXPR_LIGHT_DECL = """
     };
 """
 
-private const val EXPR_ATTEN = """
-    float expr_atten(float distance, Light light) {
+private const val EXPR_LUMINOSITY = """
+    float expr_luminosity(float distance, Light light) {
         return 1.0 / (light.attenConstant + light.attenLinear * distance + light.attenQuadratic * distance * distance);
     }
 """
@@ -68,35 +68,48 @@ private const val EXPR_PHONG_MATERIAL_DECL = """
 private const val EXPR_POINT_LIGHT_CONTRIB = """
     vec3 expr_pointLightContrib(vec3 viewDir, vec3 fragPosition, vec3 fragNormal, Light light, PhongMaterial material) {
         vec3 direction = light.vector - fragPosition;
-        float attenuation = expr_atten(length(direction), light);
+        float distance = length(direction);
+        float luminosity = expr_luminosity(distance, light);
         vec3 lightDir = normalize(direction);
-        return expr_lightContrib(viewDir, lightDir, fragNormal, attenuation, light, material);
+        return expr_lightContrib(viewDir, lightDir, fragNormal, luminosity, light, material);
     }
 """
 
 private const val EXPR_DIR_LIGHT_CONTRIB = """
     vec3 expr_dirLightContrib(vec3 viewDir, vec3 fragNormal, Light light, PhongMaterial material) {
-        float attenuation = 1.0; // no attenuation
         vec3 lightDir = -normalize(light.vector);
-        return expr_lightContrib(viewDir, lightDir, fragNormal, attenuation, light, material);
+        return expr_lightContrib(viewDir, lightDir, fragNormal, 1.0, light, material);
     }
 """
 
 private const val EXPR_LIGHT_CONTRIB = """
     vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, 
                            float attenuation, Light light, PhongMaterial material) {
+        vec3 lighting = vec3(0.0);
+        lighting += expr_diffuseContrib(lightDir, fragNormal, material);
+        lighting += expr_specularContrib(viewDir, lightDir, fragNormal, material);
+        return light.color * attenuation * lighting;
+    }
+"""
+
+private const val EXPR_DIFFUSE_CONTRIB = """
+    vec3 expr_diffuseContrib(vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
         vec3 contribution = vec3(0.0);
-        vec3 attenuatedLight = light.color * attenuation;
-        // diffuse
         float diffuseTerm = dot(fragNormal, lightDir);
         if (diffuseTerm > 0.0) {
-            contribution += diffuseTerm * attenuatedLight * material.diffuse;
+            contribution = material.diffuse * diffuseTerm;
         }
-        // specular
-        vec3 reflectDir = reflect(-lightDir, fragNormal);
-        float specularTerm = dot(viewDir, reflectDir);
+        return contribution;
+    }
+"""
+
+private const val EXPR_SPECULAR_CONTRIB = """
+    vec3 expr_specularContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
+        vec3 contribution = vec3(0.0);
+        vec3 halfVector = normalize(viewDir + lightDir);
+        float specularTerm = dot(halfVector, fragNormal);
         if (specularTerm > 0.0) {
-            contribution += pow(specularTerm, material.shine) * attenuatedLight * material.specular;
+            contribution = material.specular * pow(specularTerm, material.shine);
         }
         return contribution;
     }
@@ -105,8 +118,9 @@ private const val EXPR_LIGHT_CONTRIB = """
 const val DECLARATIONS_VERT = EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
 
 const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
-        EXPR_LIGHT_DECL + EXPR_ATTEN + EXPR_PHONG_MATERIAL_DECL +
-        EXPR_LIGHT_CONTRIB + EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
+        EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
+        EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
+        EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"

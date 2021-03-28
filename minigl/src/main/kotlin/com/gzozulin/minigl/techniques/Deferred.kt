@@ -167,8 +167,8 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val light = DirectionLight(vec3(1f, -1f, -1f), vec3(1f))
-private val light2 = DirectionLight(vec3(-1f, -1f, -1f), vec3(1f))
+private val light = DirectionalLight(vec3(1f, -1f, -1f), vec3(1f), 100f)
+private val light2 = DirectionalLight(vec3(-1f, -1f, -1f), vec3(1f), 100f)
 
 private val objMatrix = mat4().identity()
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())

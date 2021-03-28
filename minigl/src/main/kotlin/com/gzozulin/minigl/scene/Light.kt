@@ -10,22 +10,33 @@ interface Light {
     val attenQuadratic: Float
 }
 
-data class PointLight(val position: vec3,
-                      override val color: vec3,
-                      override val attenConstant: Float = 0.9f,
-                      override val attenLinear: Float = 0.7f,
-                      override val attenQuadratic: Float = 0.3f
-) : Light {
+// Based on:
+// http://wiki.ogre3d.org/Light+Attenuation+Shortcut
+// http://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation
+
+private const val LINEAR_COEFF = 4.5f
+private const val QUADRATIC_COEFF = 75f
+
+data class PointLight(var position: vec3,
+                      override var color: vec3,
+                      var range: Float) : Light {
+
     override val vector: vec3
         get() = position
+
+    override var attenConstant: Float = 1f
+    override var attenLinear: Float = LINEAR_COEFF / range
+    override var attenQuadratic: Float = QUADRATIC_COEFF / (range * range)
 }
 
-data class DirectionLight(val direction: vec3,
-                          override val color: vec3,
-                          override val attenConstant: Float = 0.9f,
-                          override val attenLinear: Float = 0.7f,
-                          override val attenQuadratic: Float = 0.3f
-) : Light {
+data class DirectionalLight(var direction: vec3,
+                      override var color: vec3,
+                      var range: Float) : Light {
+
     override val vector: vec3
         get() = direction
+
+    override var attenConstant: Float = 1f
+    override var attenLinear: Float = LINEAR_COEFF / range
+    override var attenQuadratic: Float = QUADRATIC_COEFF / (range * range)
 }

@@ -69,7 +69,7 @@ private val pbrTechnique = StaticPbrTechnique()
 private val obj = modelLib.load("models/mandalorian/mandalorian").first()
     .copy(material = texturesLib.loadPbr("models/mandalorian"))
 
-private val light = PointLight(vec3(3f), vec3(25f))
+private val light = PointLight(vec3(3f), vec3(25f), 100f)
 
 private val objMatrix = mat4().identity().scale(obj.aabb.scaleTo(5f))
 private val lightMatrix = mat4().identity().translate(vec3(3f))
