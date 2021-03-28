@@ -34,7 +34,7 @@ data class Controller(
     private val right: vec3 = Vector3f()
     private val left: vec3 = Vector3f()
 
-    private val forward = Vector3f(0f, 0f, -1f)
+    val forward = Vector3f(0f, 0f, -1f)
 
     fun yaw(radians: Float) {
         yaw += (radians * sensitivity)
