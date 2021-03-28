@@ -134,13 +134,13 @@ class StaticDeferredTechnique : GlResource() {
         if (light is PointLight) {
             modelM.getColumn(3, lightVectorBuf)
             programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.color)
             pointLightCnt++
         } else {
             modelM.getRow(2, lightVectorBuf) // transpose
             lightVectorBuf.negate() // -Z
             programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, dirLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, dirLightCnt, light.intensity)
+            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, dirLightCnt, light.color)
             dirLightCnt++
         }
         check(pointLightCnt + dirLightCnt < MAX_LIGHTS) { "More lights than defined in shader!" }

@@ -23,7 +23,8 @@ data class PhongMaterial(
     }
     
     companion object {
-        val DEFAULT         = PhongMaterial(vec3(0.1f), vec3(0.1f), vec3(0.1f), 10f)
+        val DEBUG         = PhongMaterial(vec3(1f, 0f, 0f), vec3(0f, 1f, 0f), vec3(0f, 0f, 1f), 10f)
+        val DEFAULT         = PhongMaterial(vec3(0.5f), vec3(0.5f), vec3(0.5f), 10f)
         val CONCRETE        = PhongMaterial(vec3(0.329412f, 0.223529f, 0.027451f), vec3(0.75f, 0.75f, 0.73f), vec3(0.01f, 0.01f, 0.01f), 1f)
         val BRASS           = PhongMaterial(vec3(0.329412f, 0.223529f, 0.027451f), vec3(0.780392f, 0.568627f, 0.113725f), vec3(0.992157f, 0.941176f, 0.807843f), 27.8974f)
         val BRONZE          = PhongMaterial(vec3(0.2125f, 0.1275f, 0.054f), vec3(0.714f, 0.4284f, 0.18144f), vec3(0.393548f, 0.271906f, 0.166721f), 25.6f)

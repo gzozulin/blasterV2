@@ -62,7 +62,7 @@ private val deferredGeomFrag = """
     void main()
     {
         %VRBL%
-        oDiffuse = %ALBEDO%;
+        oDiffuse = %DIFFUSE%;
         oPosition = vPosition;
         oNormal = normalize(vNormal);
         oMatAmbientShine = vec4(%MAT_AMBIENT%, %MAT_SHINE%);
@@ -92,6 +92,8 @@ private val deferredLightFrag = """
     $VERSION
     $PRECISION_HIGH
     $DECLARATIONS_FRAG
+    
+    %DECL%
 
     in vec2 vTexCoord;
 
@@ -102,18 +104,11 @@ private val deferredLightFrag = """
     uniform sampler2D uTexMatDiffTransp;
     uniform sampler2D uTexMatSpecular;
 
-    struct Light {
-        vec3 vector;
-        vec3 intensity;
-    };
-
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
     uniform Light uLights[$MAX_LIGHTS];
 
     out vec4 oFragColor;
-    
-    %DECL%
 
     void main()
     {
@@ -127,21 +122,28 @@ private val deferredLightFrag = """
         vec3 fragPosition = positionLookup.rgb;
         vec3 fragNormal = texture(uTexNormal, vTexCoord).rgb;
         vec3 fragDiffuse = texture(uTexDiffuse, vTexCoord).rgb;
+        
         vec4 matAmbientShine = texture(uTexMatAmbientShine, vTexCoord);
         vec4 matDiffuseTransp = texture(uTexMatDiffTransp, vTexCoord);
         vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
+        
+        PhongMaterial material = {
+            vec3(matAmbientShine.rgb),
+            vec3(matDiffuseTransp.rgb),
+            matSpecular,
+            matAmbientShine.a,
+            matDiffuseTransp.a
+        };
 
         vec3 viewDir = normalize(%EYE% - fragPosition);
         vec3 lighting = matAmbientShine.rgb;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
-            lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i].vector, uLights[i].intensity,
-                 matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
+            lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
         }
 
         for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
-            lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i].vector, uLights[i].intensity,
-                 matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
+            lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
         }
 
         lighting *= fragDiffuse;
@@ -154,7 +156,7 @@ class DeferredTechnique(
     private val viewM: Expression<mat4>,
     private val projM: Expression<mat4>,
     private val eye: Expression<vec3>,
-    private val albedo: Expression<vec4> = constv4(vec4(1f)),
+    private val diffuse: Expression<vec4> = constv4(vec4(1f)),
     private val matAmbient: Expression<vec3> = constv3(vec3(1f)),
     private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
     private val matSpecular: Expression<vec3> = constv3(vec3(1f)),
@@ -171,8 +173,8 @@ class DeferredTechnique(
             .replace("%VIEW%", viewM.expr())
             .replace("%PROJ%", projM.expr())
         val geomFragSrc = deferredGeomFrag.substituteDeclVrbl(
-            albedo, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
-            .replace("%ALBEDO%", albedo.expr())
+            diffuse, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
+            .replace("%DIFFUSE%", diffuse.expr())
             .replace("%MAT_AMBIENT%", matAmbient.expr())
             .replace("%MAT_DIFFUSE%", matDiffuse.expr())
             .replace("%MAT_SPECULAR%", matSpecular.expr())
@@ -295,8 +297,11 @@ class DeferredTechnique(
         var pointLightCnt = 0
         var dirLightCnt = 0
         sorted.forEachIndexed { index, light ->
-            programLightPass.setArrayUniform("uLights[%d].vector",    index, light.vector)
-            programLightPass.setArrayUniform("uLights[%d].intensity", index, light.intensity)
+            programLightPass.setArrayUniform("uLights[%d].vector",          index, light.vector)
+            programLightPass.setArrayUniform("uLights[%d].color",           index, light.color)
+            programLightPass.setArrayUniform("uLights[%d].attenConstant",   index, light.attenConstant)
+            programLightPass.setArrayUniform("uLights[%d].attenLinear",     index, light.attenLinear)
+            programLightPass.setArrayUniform("uLights[%d].attenQuadratic",  index, light.attenQuadratic)
             if (light is PointLight) {
                 pointLightCnt++
             } else {
@@ -321,16 +326,16 @@ class DeferredTechnique(
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
         diffuseStorage.use()
         matAmbShineStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
+            width = width, height = height, internalFormat = backend.GL_RGBA,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
         matAmbShineStorage.use()
         matDiffTranspStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
+            width = width, height = height, internalFormat = backend.GL_RGBA,
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
         matDiffTranspStorage.use()
         matSpecularStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB16F,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
+            width = width, height = height, internalFormat = backend.GL_RGBA,
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
         matSpecularStorage.use()
         depthBuffer = GlRenderBuffer(width = width, height = height)
         depthBuffer.use()
@@ -374,7 +379,7 @@ class DeferredTechnique(
 
     private fun renderInstance(mesh: GlMesh) {
         checkReady()
-        albedo.submit(programGeomPass)
+        diffuse.submit(programGeomPass)
         modelM.submit(programGeomPass)
         matAmbient.submit(programGeomPass)
         matDiffuse.submit(programGeomPass)
@@ -402,16 +407,15 @@ private val unifEye = unifv3 { camera.position }
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
 
-private val material = PhongMaterial.CONCRETE
+private val material = PhongMaterial.DEBUG
 
 private val deferredTechnique = DeferredTechnique(
     unifModelM, unifViewM, unifProjM, unifEye,
-    constv4(vec4(1f)),
-    constv3(material.ambient),
-    constv3(material.diffuse),
-    constv3(material.specular),
-    constf(material.shine),
-    constf(material.transparency),
+    matAmbient = constv3(material.ambient),
+    matDiffuse = constv3(material.diffuse),
+    matSpecular = constv3(material.specular),
+    matShine = constf(material.shine),
+    matTransparency = constf(material.transparency)
 )
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
@@ -478,7 +482,7 @@ fun main() {
                             lightTechnique.draw {
                                 lights.forEach { light ->
                                     lightModelM.value = mat4().identity().translate(light.vector)
-                                    lightColor.value = vec4(vec3(light.intensity).normalize(), 1f)
+                                    lightColor.value = vec4(vec3(light.color).normalize(), 1f)
                                     lightTechnique.instance(obj)
                                 }
                             }

@@ -173,6 +173,11 @@ class GlProgram(
         backend.glUniform3fv(getArrayUniformLocation(uniform, index), bufferVec3)
     }
 
+    fun setArrayUniform(uniform: String, index: Int, value: Float) {
+        checkReady()
+        backend.glUniform1f(getArrayUniformLocation(uniform, index), value)
+    }
+
     fun setArrayTexture(uniform: String, index: Int, texture: GlTexture) {
         checkReady()
         backend.glUniform1i(getArrayUniformLocation(uniform, index), texture.accessUnit())

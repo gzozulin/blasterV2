@@ -36,7 +36,7 @@ class StaticPbrTechnique: GlResource() {
         if (light is PointLight) {
             modelM.getColumn(3, lightVectorBuf)
             program.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
-            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
+            program.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.color)
             pointLightCnt++
         } else {
             TODO()
