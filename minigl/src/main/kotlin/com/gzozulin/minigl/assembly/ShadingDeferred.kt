@@ -9,10 +9,6 @@ import org.joml.Matrix4f
 
 const val MAX_LIGHTS = 128
 
-private var pointLightCnt = 0
-private var dirLightCnt = 0
-private val lightVectorBuf = vec3()
-
 private val deferredGeomVert = """
     $VERSION
     $PRECISION_HIGH
@@ -163,8 +159,7 @@ private val deferredLightFrag = """
         vec4 matDiffuseTransp = texture(uTexMatDiffTransp, vTexCoord);
         vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
 
-        vec3 eye = vec3(%VIEW%[3][0], %VIEW%[3][1], %VIEW%[3][2]);
-        vec3 viewDir = normalize(eye - fragPosition);
+        vec3 viewDir = normalize(%EYE% - fragPosition);
         vec3 lighting = matAmbientShine.rgb;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
@@ -172,7 +167,7 @@ private val deferredLightFrag = """
                  matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
 
-        for (int i = 0; i < uLightsDirCnt; ++i) {
+        for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
             lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i].vector, uLights[i].intensity,
                  matDiffuseTransp.rgb, matSpecular, matAmbientShine.a);
         }
@@ -187,6 +182,7 @@ class DeferredTechnique(
     private val modelM: Expression<mat4>,
     private val viewM: Expression<mat4>,
     private val projM: Expression<mat4>,
+    private val eye: Expression<vec3>,
     private val albedo: Expression<vec4> = constv4(vec4(1f)),
     private val matAmbient: Expression<vec3> = constv3(vec3(1f)),
     private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
@@ -215,8 +211,8 @@ class DeferredTechnique(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, geomVertSrc),
             fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, geomFragSrc))
         val lightVertSrc = deferredLightVert.substituteDeclVrbl()
-        val lightFragSrc = deferredLightFrag.substituteDeclVrbl(viewM)
-            .replace("%VIEW%", viewM.expr())
+        val lightFragSrc = deferredLightFrag.substituteDeclVrbl(eye)
+            .replace("%EYE%", eye.expr())
         programLightPass = GlProgram(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, lightVertSrc),
             fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, lightFragSrc))
@@ -253,10 +249,8 @@ class DeferredTechnique(
         bindFramebuffer()
     }
 
-    fun draw(lights: () -> Unit, instances: () -> Unit) {
+    fun draw(lights: List<Light>, instances: () -> Unit) {
         checkReady()
-        pointLightCnt = 0
-        dirLightCnt = 0
         glBind(framebuffer) {
             glCheck { backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT) }
             glBind(programGeomPass) {
@@ -268,28 +262,9 @@ class DeferredTechnique(
         glBind(programLightPass, quadMesh, depthBuffer,
             positionStorage, normalStorage, diffuseStorage,
             matAmbShineStorage, matDiffTranspStorage, matSpecularStorage) {
-            lights.invoke()
-            viewM.submit(programLightPass)
-            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_POINT_CNT.label, pointLightCnt)
-            programLightPass.setUniform(GlUniform.UNIFORM_LIGHTS_DIR_CNT.label, dirLightCnt)
+            eye.submit(programLightPass)
+            submitLights(lights)
             programLightPass.draw(indicesCount = quadMesh.indicesCount)
-        }
-    }
-
-    fun light(light: Light, modelM: Matrix4f) {
-        check(pointLightCnt + dirLightCnt + 1 < MAX_LIGHTS) { "More lights than defined in shader!" }
-        checkReady()
-        if (light.point) {
-            modelM.getColumn(3, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
-            pointLightCnt++
-        } else {
-            modelM.getRow(2, lightVectorBuf) // transpose
-            lightVectorBuf.negate() // -Z
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, dirLightCnt, lightVectorBuf)
-            programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, dirLightCnt, light.intensity)
-            dirLightCnt++
         }
     }
 
@@ -305,6 +280,24 @@ class DeferredTechnique(
         glBind(obj) {
             renderInstance(obj.mesh)
         }
+    }
+
+    private fun submitLights(lights: List<Light>) {
+        check(lights.size <= MAX_LIGHTS) { "More lights than defined in shader!" }
+        val sorted = lights.sortedBy { it is PointLight }
+        var pointLightCnt = 0
+        var dirLightCnt = 0
+        sorted.forEachIndexed { index, light ->
+            programLightPass.setArrayUniform("uLights[%d].vector",    index, light.vector)
+            programLightPass.setArrayUniform("uLights[%d].intensity", index, light.intensity)
+            if (light is PointLight) {
+                pointLightCnt++
+            } else {
+                dirLightCnt++
+            }
+        }
+        programLightPass.setUniform("uLightsPointCnt", pointLightCnt)
+        programLightPass.setUniform("uLightsDirCnt",   dirLightCnt)
     }
 
     private fun createStorage(width: Int, height: Int) {
@@ -386,35 +379,54 @@ class DeferredTechnique(
 }
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
+private val controller = Controller(position = vec3(0f, 0f, 10f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val obj = modelLib.load("models/house/low").first()
+private val obj = modelLib.load("models/sphere/sphere").first()
 
-private val constModelM = constm4(mat4().identity())
+private val unifModelM = unifm4 {
+    mat4()
+        .identity()
+        .translate(camera.position)
+        .translate(vec3(0f, 0f, -10f))
+}
+
+private val unifEye = unifv3 { camera.position }
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
 
-private val unifSampler = unifsampler(obj.phong().mapDiffuse!!)
-private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
-private val albedo = tex(texCoords, unifSampler)
-
-private val light = Light(vec3(1f), false)
-private val light2 = Light(vec3(1f), false)
-
-private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())
-private val lightMatrix2 = mat4().identity().lookAlong(vec3(-1f, -1f, -1f), vec3().up())
+private val material = PhongMaterial.POLISHED_GOLD
 
 private val deferredTechnique = DeferredTechnique(
-    constModelM, unifViewM, unifProjM, albedo,
-    constv3(PhongMaterial.CONCRETE.ambient),
-    constv3(PhongMaterial.CONCRETE.diffuse),
-    constv3(PhongMaterial.CONCRETE.specular),
-    constf(PhongMaterial.CONCRETE.shine),
-    constf(PhongMaterial.CONCRETE.transparency),
+    unifModelM, unifViewM, unifProjM, unifEye,
+    constv4(vec4(1f)),
+    constv3(material.ambient),
+    constv3(material.diffuse),
+    constv3(material.specular),
+    constf(material.shine),
+    constf(material.transparency),
 )
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
+
+private val lights = mutableListOf<Light>().apply {
+    repeat((0 until 128).count()) {
+        val color = when(randi(3)) {
+            0 -> vec3().red()
+            1 -> vec3().green()
+            2 -> vec3().blue()
+            else -> error("wtf?!")
+        }
+        add(PointLight(
+            vec3().rand(vec3(-30f), vec3(30f)),
+            color.mul(randf(5f, 10f))
+        ))
+    }
+}
+
+private val lightModelM = unifm4()
+private val lightColor = unifv4()
+private val lightTechnique = FlatTechnique(lightModelM, unifViewM, unifProjM, lightColor)
 
 private var mouseLook = false
 
@@ -438,7 +450,7 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glUse(deferredTechnique, skyboxTechnique, obj) {
+        glUse(deferredTechnique, skyboxTechnique, lightTechnique, obj) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -448,14 +460,19 @@ fun main() {
                 skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
-                        deferredTechnique.draw(
-                            lights = {
-                                deferredTechnique.light(light, lightMatrix)
-                                deferredTechnique.light(light2, lightMatrix2)
-                            },
-                            instances = {
-                                deferredTechnique.instance(obj)
-                            })
+                        deferredTechnique.draw(lights) {
+                            deferredTechnique.instance(obj)
+                        }
+                        lightTechnique.draw {
+                            lights.forEach {
+                                lightModelM.value = mat4()
+                                    .identity()
+                                    .scale(0.5f)
+                                    .translate(it.vector)
+                                lightColor.value = vec4(vec3(it.intensity).normalize(), 1f)
+                                lightTechnique.instance(obj)
+                            }
+                        }
                     }
                 }
             }

@@ -143,13 +143,23 @@ fun unifi(v: Int? = null) = object : Uniform<Int>(null, v) {
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
-fun unifm4(v: mat4? = null) = object : Uniform<mat4>(null, v) {
-    override val type = "mat4"
+fun unifv2(v: vec2? = null) = object : Uniform<vec2>(null, v) {
+    override val type = "vec2"
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
-fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
-    override val type = "mat4"
+fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
+    override val type = "ivec2"
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
+}
+
+fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
+    override val type = "vec3"
+    override fun submit(program: GlProgram) { program.setUniform(name, value) }
+}
+
+fun unifv3(p: () -> vec3) = object : Uniform<vec3>(p, null) {
+    override val type = "vec3"
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
@@ -158,13 +168,13 @@ fun unifv4(v: vec4? = null) = object : Uniform<vec4>(null, v) {
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
-fun unifv2(v: vec2? = null) = object : Uniform<vec2>(null, v) {
-    override val type = "vec2"
+fun unifm4(v: mat4? = null) = object : Uniform<mat4>(null, v) {
+    override val type = "mat4"
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 
-fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
-    override val type = "ivec2"
+fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
+    override val type = "mat4"
     override fun submit(program: GlProgram) { program.setUniform(name, value) }
 }
 

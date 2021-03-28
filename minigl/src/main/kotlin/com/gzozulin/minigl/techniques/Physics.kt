@@ -33,7 +33,7 @@ class StaticPbrTechnique: GlResource() {
 
     private val lightVectorBuf = vec3()
     fun light(light: Light, modelM: Matrix4f) {
-        if (light.point) {
+        if (light is PointLight) {
             modelM.getColumn(3, lightVectorBuf)
             program.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
             program.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
@@ -69,7 +69,7 @@ private val pbrTechnique = StaticPbrTechnique()
 private val obj = modelLib.load("models/mandalorian/mandalorian").first()
     .copy(material = texturesLib.loadPbr("models/mandalorian"))
 
-private val light = Light(vec3(25f), true)
+private val light = PointLight(vec3(3f), vec3(25f))
 
 private val objMatrix = mat4().identity().scale(obj.aabb.scaleTo(5f))
 private val lightMatrix = mat4().identity().translate(vec3(3f))

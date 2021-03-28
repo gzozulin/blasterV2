@@ -131,7 +131,7 @@ class StaticDeferredTechnique : GlResource() {
     private val lightVectorBuf = vec3()
     fun light(light: Light, modelM: Matrix4f) {
         checkReady()
-        if (light.point) {
+        if (light is PointLight) {
             modelM.getColumn(3, lightVectorBuf)
             programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_VECTOR.label, pointLightCnt, lightVectorBuf)
             programLightPass.setArrayUniform(GlUniform.UNIFORM_LIGHT_INTENSITY.label, pointLightCnt, light.intensity)
@@ -167,8 +167,8 @@ private val camera = Camera()
 private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val light = Light(vec3(1f), false)
-private val light2 = Light(vec3(1f), false)
+private val light = DirectionLight(vec3(1f, -1f, -1f), vec3(1f))
+private val light2 = DirectionLight(vec3(-1f, -1f, -1f), vec3(1f))
 
 private val objMatrix = mat4().identity()
 private val lightMatrix = mat4().identity().lookAlong(vec3(1f, -1f, -1f), vec3().up())

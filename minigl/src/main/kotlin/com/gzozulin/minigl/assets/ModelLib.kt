@@ -38,7 +38,11 @@ class ModelLib internal constructor() {
         openAsset(objFilename).useLines { linesCount = it.count() }
         openAsset(objFilename).useLines { lines ->
             lines.forEachIndexed { index, line ->
-                parseLine(line, join, result)
+                try {
+                    parseLine(line, join, result)
+                } catch (e: Throwable) {
+                    error("Invalid line ${index+1}: $e")
+                }
                 val currentProgress = index.toFloat() / linesCount.toFloat()
                 if (currentProgress - lastProgress > 0.1f) {
                     progress.invoke(currentProgress)
@@ -66,14 +70,14 @@ class ModelLib internal constructor() {
                     GlAttribute.ATTRIBUTE_NORMAL to GlBuffer(backend.GL_ARRAY_BUFFER, normalBuff)),
                 GlBuffer(backend.GL_ELEMENT_ARRAY_BUFFER, indicesBuff), obj.indices.size
             )
-            val material = materials[obj.materialTag]
-            result.add(Object(mesh, material!!, obj.aabb))
+            val material = materials[obj.materialTag]!!
+            result.add(Object(mesh, material, obj.aabb))
         }
         return result
     }
 
     private fun parseLine(line: String, join: Boolean, result: Intermediate) {
-        if (line.isCommentOrEmpty()) {
+        if (line.isEmptyOrCommented()) {
             return
         }
         when (line[0]) {
@@ -128,7 +132,7 @@ class ModelLib internal constructor() {
     }
 
     private fun parsePolygon(line: String, result: Intermediate) {
-        val split = line.split(whitespaceRegex)
+        val split = line.trimEnd().split(whitespaceRegex)
         val verticesCnt = split.size - 1
         val indices = mutableListOf<Int>()
         var nextIndex = result.current.positions.size / 3
@@ -216,7 +220,7 @@ class ModelLib internal constructor() {
         }
         openAsset(mtlFilename).useLines { lines ->
             for (line in lines) {
-                if (line.isCommentOrEmpty()) {
+                if (line.isEmptyOrCommented()) {
                     continue
                 }
                 when (line[0]) {
@@ -270,7 +274,7 @@ class ModelLib internal constructor() {
     }
 }
 
-private fun String.isCommentOrEmpty() = isEmpty() || isBlank() || startsWith("#")
+private fun String.isEmptyOrCommented() = isEmpty() || isBlank() || startsWith("#")
 
 private fun String.getVec3f(): vec3 {
     val split = split(whitespaceRegex)
