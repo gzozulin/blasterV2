@@ -145,6 +145,9 @@ private val deferredLightFrag = """
         for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
             lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
         }
+        
+        // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
+        // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
 
         lighting *= fragDiffuse;
         oFragColor = vec4(lighting, matDiffuseTransp.a);
@@ -160,7 +163,7 @@ class DeferredTechnique(
     private val matAmbient: Expression<vec3> = constv3(vec3(1f)),
     private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
     private val matSpecular: Expression<vec3> = constv3(vec3(1f)),
-    private val matShine: Expression<Float> = constf(1f),
+    private val matShine: Expression<Float> = constf(10f),
     private val matTransparency: Expression<Float> = constf(1f), ) : GlResource() {
 
     private val programGeomPass: GlProgram
@@ -407,18 +410,13 @@ private val unifEye = unifv3 { camera.position }
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
 
-private val material = PhongMaterial.DEBUG
-
 private val deferredTechnique = DeferredTechnique(
     unifModelM, unifViewM, unifProjM, unifEye,
-    matAmbient = constv3(material.ambient),
-    matDiffuse = constv3(material.diffuse),
-    matSpecular = constv3(material.specular),
-    matShine = constf(material.shine),
-    matTransparency = constf(material.transparency)
+    matAmbient = constv3(vec3(0.1f)),
+    matDiffuse = constv3(vec3(1f)),
+    matSpecular = constv3(vec3(1f)),
+    matShine = constf(50f)
 )
-
-private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")
 
 private val lights = mutableListOf<Light>().apply {
     repeat((0 until 128).count()) {
@@ -465,14 +463,13 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glUse(deferredTechnique, skyboxTechnique, lightTechnique, obj) {
+        glUse(deferredTechnique, lightTechnique, obj) {
             window.show {
-                glClear()
+                glClear(col3().black())
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
                 }
-                skyboxTechnique.skybox(camera)
                 glDepthTest {
                     glCulling {
                         deferredTechnique.draw(lights) {

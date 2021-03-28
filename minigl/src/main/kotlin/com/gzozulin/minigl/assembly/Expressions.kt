@@ -83,15 +83,9 @@ private const val EXPR_DIR_LIGHT_CONTRIB = """
 """
 
 private const val EXPR_LIGHT_CONTRIB = """
-    // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
-    // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
-    
     vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, 
                            float attenuation, Light light, PhongMaterial material) {
         vec3 contribution = vec3(0.0);
-        if (attenuation < 0.01) {
-            return contribution;
-        }
         vec3 attenuatedLight = light.color * attenuation;
         // diffuse
         float diffuseTerm = dot(fragNormal, lightDir);
