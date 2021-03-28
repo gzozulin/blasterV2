@@ -478,7 +478,7 @@ fun main() {
                         if (!deferredDebug) {
                             lightTechnique.draw {
                                 lights.forEach { light ->
-                                    lightModelM.value = mat4().identity().translate(light.vector)
+                                    lightModelM.value = mat4().identity().translate(light.vector).scale(0.1f)
                                     lightColor.value = vec4(vec3(light.color), 1f)
                                     lightTechnique.instance(obj)
                                 }
