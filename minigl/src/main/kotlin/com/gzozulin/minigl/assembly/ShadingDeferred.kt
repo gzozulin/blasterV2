@@ -23,37 +23,21 @@ private val deferredGeomVert = """
     layout (location = 1) in vec2 aTexCoord;
     layout (location = 2) in vec3 aNormal;
 
-    out vec4 vFragPosition;
+    out vec4 vPosition;
     out vec2 vTexCoord;
     out vec3 vNormal;
-
-    out vec3 vMatAmbient;
-    out vec3 vMatDiffuse;
-    out vec3 vMatSpecular;
-    out float vMatShine;
-    out float vMatTransp;
     
     %DECL%
 
     void main()
     {
         %VRBL%
-        
         vec4 worldPos = %MODEL% * vec4(aPosition, 1.0);
-        vFragPosition = worldPos;
-
+        vPosition = worldPos;
         vTexCoord = aTexCoord;
-
-        mat3 normalMatrix = transpose(inverse(mat3(%MODEL%)));
-        vNormal = normalMatrix * aNormal;
-
+        mat3 normalM = transpose(inverse(mat3(%MODEL%)));
+        vNormal = normalM * aNormal;
         gl_Position = %PROJ% * %VIEW% * worldPos;
-
-        vMatAmbient = %MAT_AMBIENT%;
-        vMatDiffuse = %MAT_DIFFUSE%;
-        vMatSpecular = %MAT_SPECULAR%;
-        vMatShine = %MAT_SHINE%;
-        vMatTransp = %MAT_TRANSPARENCY%;
     }
 """.trimIndent()
 
@@ -62,15 +46,9 @@ private val deferredGeomFrag = """
     $PRECISION_HIGH
     $DECLARATIONS_FRAG
 
-    in vec4 vFragPosition;
+    in vec4 vPosition;
     in vec2 vTexCoord;
     in vec3 vNormal;
-
-    in vec3 vMatAmbient;
-    in vec3 vMatDiffuse;
-    in vec3 vMatSpecular;
-    in float vMatShine;
-    in float vMatTransp;
 
     layout (location = 0) out vec4 oPosition;
     layout (location = 1) out vec3 oNormal;
@@ -85,13 +63,13 @@ private val deferredGeomFrag = """
     {
         %VRBL%
         oDiffuse = %ALBEDO%;
-        oPosition = vFragPosition;
+        oPosition = vPosition;
         oNormal = normalize(vNormal);
-        oMatAmbientShine.a = vMatShine;
-        oMatAmbientShine.rgb = vMatAmbient;
-        oMatDiffTransp.a = vMatTransp;
-        oMatDiffTransp.rgb = vMatDiffuse;
-        oMatSpecular = vMatSpecular;
+        oMatAmbientShine.rgb = %MAT_AMBIENT%;
+        oMatAmbientShine.a = %MAT_SHINE%;
+        oMatDiffTransp.rgb = %MAT_DIFFUSE%;
+        oMatDiffTransp.a = %MAT_TRANSPARENT%;
+        oMatSpecular = %MAT_SPECULAR%;
     }
 """.trimIndent()
 
@@ -104,12 +82,9 @@ private val deferredLightVert = """
     layout (location = 1) in vec2 aTexCoord;
 
     out vec2 vTexCoord;
-    
-    %DECL%
 
     void main()
     {
-        %VRBL%
         vTexCoord = aTexCoord;
         gl_Position = vec4(aPosition, 1.0);
     }
@@ -125,7 +100,6 @@ private val deferredLightFrag = """
     uniform sampler2D uTexPosition;
     uniform sampler2D uTexNormal;
     uniform sampler2D uTexDiffuse;
-
     uniform sampler2D uTexMatAmbientShine;
     uniform sampler2D uTexMatDiffTransp;
     uniform sampler2D uTexMatSpecular;
@@ -155,7 +129,6 @@ private val deferredLightFrag = """
         vec3 fragPosition = positionLookup.rgb;
         vec3 fragNormal = texture(uTexNormal, vTexCoord).rgb;
         vec3 fragDiffuse = texture(uTexDiffuse, vTexCoord).rgb;
-
         vec4 matAmbientShine = texture(uTexMatAmbientShine, vTexCoord);
         vec4 matDiffuseTransp = texture(uTexMatDiffTransp, vTexCoord);
         vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
@@ -174,8 +147,7 @@ private val deferredLightFrag = """
         }
 
         lighting *= fragDiffuse;
-        // todo: oFragColor = vec4(lighting, matDiffuseTransp.a);
-        oFragColor = vec4(lighting, 1.0);
+        oFragColor = vec4(lighting, matDiffuseTransp.a);
     }
 """.trimIndent()
 
@@ -196,17 +168,18 @@ class DeferredTechnique(
 
     init {
         val geomVertSrc = deferredGeomVert.substituteDeclVrbl(
-            modelM, viewM, projM, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
+            modelM, viewM, projM)
             .replace("%MODEL%", modelM.expr())
             .replace("%VIEW%", viewM.expr())
             .replace("%PROJ%", projM.expr())
+        val geomFragSrc = deferredGeomFrag.substituteDeclVrbl(
+            albedo, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
+            .replace("%ALBEDO%", albedo.expr())
             .replace("%MAT_AMBIENT%", matAmbient.expr())
             .replace("%MAT_DIFFUSE%", matDiffuse.expr())
             .replace("%MAT_SPECULAR%", matSpecular.expr())
             .replace("%MAT_SHINE%", matShine.expr())
-            .replace("%MAT_TRANSPARENCY%", matTransparency.expr())
-        val geomFragSrc = deferredGeomFrag.substituteDeclVrbl(albedo)
-            .replace("%ALBEDO%", albedo.expr())
+            .replace("%MAT_TRANSPARENT%", matTransparency.expr())
         programGeomPass = GlProgram(
             vertexShader = GlShader(GlShaderType.VERTEX_SHADER, geomVertSrc),
             fragmentShader = GlShader(GlShaderType.FRAGMENT_SHADER, geomFragSrc))
@@ -232,7 +205,6 @@ class DeferredTechnique(
     private lateinit var positionStorage: GlTexture
     private lateinit var normalStorage: GlTexture
     private lateinit var diffuseStorage: GlTexture
-
     private lateinit var matAmbShineStorage: GlTexture // ambient + shine
     private lateinit var matDiffTranspStorage: GlTexture // diffuse + transparency
     private lateinit var matSpecularStorage: GlTexture
