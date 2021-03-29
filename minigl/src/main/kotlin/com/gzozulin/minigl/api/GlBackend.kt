@@ -26,6 +26,7 @@ class GlBackend {
     val GL_FLOAT:              Int get() = GL11.GL_FLOAT
     val GL_INT:                Int get() = GL11.GL_INT
     val GL_UNSIGNED_INT:       Int get() = GL11.GL_UNSIGNED_INT
+    val GL_UNSIGNED_SHORT:     Int get() = GL11.GL_UNSIGNED_SHORT
     val GL_UNSIGNED_BYTE:      Int get() = GL11.GL_UNSIGNED_BYTE
     val GL_BYTE:               Int get() = GL11.GL_BYTE
     val GL_TRIANGLES:          Int get() = GL11.GL_TRIANGLES

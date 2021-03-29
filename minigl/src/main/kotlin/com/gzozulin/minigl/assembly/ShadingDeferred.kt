@@ -346,8 +346,8 @@ class DeferredTechnique(
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
         matSpecularStorage.use()
         matShineTranspStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
+            width = width, height = height, internalFormat = backend.GL_RGB16F,
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matShineTranspStorage.use()
         depthBuffer = GlRenderBuffer(width = width, height = height)
         depthBuffer.use()
