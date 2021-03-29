@@ -414,11 +414,10 @@ private val wasdInput = WasdInput(controller)
 
 private val obj = modelLib.load("models/sphere/sphere").first()
 private val sphereMaterials = mutableListOf<PhongMaterial>()
-private val sphereMatrices = mutableListOf<mat4>().apply {
-    (1..64).count {
-        sphereMaterials.add(PHONG_MATERIALS.random())
-        add(mat4().identity().translate(vec3().rand(vec3(-30f), vec3(30f))))
-    }
+private val sphereMatrices = mutableListOf<mat4>()
+private val sphereFill = (1..64).count {
+    sphereMaterials.add(PHONG_MATERIALS.random())
+    sphereMatrices.add(mat4().identity().translate(vec3().rand(vec3(-30f), vec3(30f))))
 }
 
 private val unifEye = unifv3 { camera.position }
