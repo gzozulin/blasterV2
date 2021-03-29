@@ -57,3 +57,36 @@ data class PhongMaterial(
         val YELLOW_RUBBER   = PhongMaterial(vec3(0.05f, 0.05f, 0.0f), vec3(0.5f, 0.5f, 0.4f), vec3(0.7f, 0.7f, 0.04f), 10.0f)
     }
 }
+
+val PHONG_MATERIALS = listOf(
+    PhongMaterial.CONCRETE,
+    PhongMaterial.BRASS,
+    PhongMaterial.BRONZE,
+    PhongMaterial.POLISHED_BRONZE,
+    PhongMaterial.CHROME,
+    PhongMaterial.COPPER,
+    PhongMaterial.POLISHED_COPPER,
+    PhongMaterial.GOLD,
+    PhongMaterial.POLISHED_GOLD,
+    PhongMaterial.TIN,
+    PhongMaterial.SILVER,
+    PhongMaterial.POLISHED_SILVER,
+    PhongMaterial.EMERALD,
+    PhongMaterial.JADE,
+    PhongMaterial.OBSIDIAN,
+    PhongMaterial.PERL,
+    PhongMaterial.RUBY,
+    PhongMaterial.TURQUOISE,
+    PhongMaterial.BLACK_PLASTIC,
+    PhongMaterial.CIAN_PLASTIC,
+    PhongMaterial.GREEN_PLASTIC,
+    PhongMaterial.RED_PLASTIC,
+    PhongMaterial.WHITE_PLASTIC,
+    PhongMaterial.YELLOW_PLASTIC,
+    PhongMaterial.BLACK_RUBBER,
+    PhongMaterial.CIAN_RUBBER,
+    PhongMaterial.GREEN_RUBBER,
+    PhongMaterial.RED_RUBBER,
+    PhongMaterial.WHITE_RUBBER,
+    PhongMaterial.YELLOW_RUBBER,
+)

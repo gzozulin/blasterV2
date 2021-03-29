@@ -5,6 +5,8 @@ import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
 import org.lwjgl.glfw.GLFW
+import java.lang.Float.max
+import java.lang.Float.min
 
 // todo: create/release is probably working improperly
 
@@ -411,8 +413,10 @@ private val controller = Controller(velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val obj = modelLib.load("models/sphere/sphere").first()
-private val sphereMs = mutableListOf<mat4>().apply {
+private val sphereMaterials = mutableListOf<PhongMaterial>()
+private val sphereMatrices = mutableListOf<mat4>().apply {
     (1..64).count {
+        sphereMaterials.add(PHONG_MATERIALS.random())
         add(mat4().identity().translate(vec3().rand(vec3(-30f), vec3(30f))))
     }
 }
@@ -422,20 +426,26 @@ private val unifModelM = unifm4()
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
 
-private val material = PhongMaterial.EMERALD
+private val unifMaterialAmbient = unifv3()
+private val unifMaterialDiffuse = unifv3()
+private val unifMaterialSpecular = unifv3()
+private val unifMaterialShine = uniff()
+private val unifMaterialTransp = uniff()
 
 private val deferredTechnique = DeferredTechnique(
     unifModelM, unifViewM, unifProjM, unifEye,
-    matAmbient = constv3(material.ambient),
-    matDiffuse = constv3(material.diffuse),
-    matSpecular = constv3(material.specular),
-    matShine = constf(material.shine),
-    matTransparency = constf(material.transparency)
+    matAmbient = constv3(vec3(0.01f)),
+    matDiffuse = unifMaterialDiffuse,
+    matSpecular = unifMaterialSpecular,
+    matShine = unifMaterialShine,
+    matTransparency = unifMaterialTransp
 )
 
-private val light = PointLight(camera.position, col3().white(), 1000f)
+private val light = PointLight(camera.position, col3().white(), 300f)
 
 private var mouseLook = false
+private var lightsUp = false
+private var lightsDown = false
 
 fun main() {
     val window = GlWindow()
@@ -446,11 +456,18 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
-            if (key == GLFW.GLFW_KEY_DELETE && pressed) {
-                deferredDebug = !deferredDebug
-            }
-            if (key == GLFW.GLFW_KEY_SPACE && pressed) {
-                debugItem++
+            if (pressed) {
+                when (key) {
+                    GLFW.GLFW_KEY_DELETE    -> deferredDebug = !deferredDebug
+                    GLFW.GLFW_KEY_SPACE     -> debugItem++
+                    GLFW.GLFW_KEY_UP        -> lightsUp = true
+                    GLFW.GLFW_KEY_DOWN      -> lightsDown = true
+                }
+            } else {
+                when (key) {
+                    GLFW.GLFW_KEY_UP        -> lightsUp = false
+                    GLFW.GLFW_KEY_DOWN      -> lightsDown = false
+                }
             }
         }
         window.buttonCallback = { button, pressed ->
@@ -465,6 +482,14 @@ fun main() {
         }
         glUse(deferredTechnique, obj) {
             window.show {
+                if (lightsUp) {
+                    light.range += 5f
+                    println(light.range)
+                } else if (lightsDown) {
+                    light.range -= 5f
+                    println(light.range)
+                }
+                light.range = max(0f, light.range)
                 glClear(col3().black())
                 controller.apply { position, direction ->
                     camera.setPosition(position)
@@ -473,8 +498,14 @@ fun main() {
                 glDepthTest {
                     glCulling {
                         deferredTechnique.draw(listOf(light)) {
-                            sphereMs.forEach {
-                                unifModelM.value = it
+                            sphereMatrices.forEachIndexed { index, mat ->
+                                unifModelM.value = mat
+                                val material = sphereMaterials[index]
+                                unifMaterialAmbient.value = material.ambient
+                                unifMaterialDiffuse.value = material.diffuse
+                                unifMaterialSpecular.value = material.specular
+                                unifMaterialShine.value = material.shine
+                                unifMaterialTransp.value = material.transparency
                                 deferredTechnique.instance(obj)
                             }
                         }

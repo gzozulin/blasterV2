@@ -24,9 +24,13 @@ data class PointLight(var position: vec3,
     override val vector: vec3
         get() = position
 
-    override var attenConstant: Float = 1f
-    override var attenLinear: Float = LINEAR_COEFF / range
-    override var attenQuadratic: Float = QUADRATIC_COEFF / (range * range)
+    override val attenConstant: Float = 1f
+
+    override val attenLinear: Float
+        get() = LINEAR_COEFF / range
+
+    override val attenQuadratic: Float
+        get() = QUADRATIC_COEFF / (range * range)
 }
 
 data class DirectionalLight(var direction: vec3,
@@ -36,7 +40,11 @@ data class DirectionalLight(var direction: vec3,
     override val vector: vec3
         get() = direction
 
-    override var attenConstant: Float = 1f
-    override var attenLinear: Float = LINEAR_COEFF / range
-    override var attenQuadratic: Float = QUADRATIC_COEFF / (range * range)
+    override val attenConstant: Float = 1f
+
+    override val attenLinear: Float
+        get() = LINEAR_COEFF / range
+
+    override val attenQuadratic: Float
+        get() = QUADRATIC_COEFF / (range * range)
 }
