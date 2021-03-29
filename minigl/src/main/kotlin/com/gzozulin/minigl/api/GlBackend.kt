@@ -62,6 +62,8 @@ class GlBackend {
     val GL_REPEAT:             Int get() = GL11.GL_REPEAT
     val GL_CLAMP_TO_EDGE:      Int get() = GL12.GL_CLAMP_TO_EDGE
     val GL_RGBA16F:            Int get() = GL30.GL_RGBA16F
+    val GL_RGBA32F:            Int get() = GL30.GL_RGBA32F
+    val GL_RGB32F:             Int get() = GL30.GL_RGB32F
     val GL_RGB16F:             Int get() = GL30.GL_RGB16F
     val GL_COLOR_ATTACHMENT0:  Int get() = GL30.GL_COLOR_ATTACHMENT0
     val GL_COLOR_ATTACHMENT1:  Int get() = GL30.GL_COLOR_ATTACHMENT1
@@ -69,6 +71,7 @@ class GlBackend {
     val GL_COLOR_ATTACHMENT3:  Int get() = GL30.GL_COLOR_ATTACHMENT3
     val GL_COLOR_ATTACHMENT4:  Int get() = GL30.GL_COLOR_ATTACHMENT4
     val GL_COLOR_ATTACHMENT5:  Int get() = GL30.GL_COLOR_ATTACHMENT5
+    val GL_COLOR_ATTACHMENT6:  Int get() = GL30.GL_COLOR_ATTACHMENT6
     val GL_DEPTH_ATTACHMENT:   Int get() = GL30.GL_DEPTH_ATTACHMENT
     val GL_MAP_WRITE_BIT:      Int get() = GL30.GL_MAP_WRITE_BIT
     val GL_MAP_UNSYNCHRONIZED_BIT: Int get() = GL30.GL_MAP_UNSYNCHRONIZED_BIT
