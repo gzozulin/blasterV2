@@ -422,7 +422,7 @@ private val unifModelM = unifm4()
 private val unifViewM = unifm4 { camera.calculateViewM() }
 private val unifProjM = unifm4 { camera.projectionM }
 
-private val material = PhongMaterial.POLISHED_GOLD
+private val material = PhongMaterial.EMERALD
 
 private val deferredTechnique = DeferredTechnique(
     unifModelM, unifViewM, unifProjM, unifEye,
