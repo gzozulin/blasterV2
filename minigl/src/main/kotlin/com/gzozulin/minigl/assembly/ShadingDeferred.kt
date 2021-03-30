@@ -4,7 +4,6 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
-import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
 import java.lang.Float.max
 
@@ -12,10 +11,10 @@ import java.lang.Float.max
 
 private const val MAX_LIGHTS = 128
 
-private var deferredDebug = false
-private var debugItem = 0
+private var debugDeferred = false
+private var debugStorage = 0
 
-private val deferredGeomVert = """
+private const val deferredGeomVert = """
     $VERSION
     $PRECISION_HIGH
     $DECLARATIONS_VERT
@@ -40,9 +39,9 @@ private val deferredGeomVert = """
         vNormal = normalM * aNormal;
         gl_Position = %PROJ% * %VIEW% * worldPos;
     }
-""".trimIndent()
+"""
 
-private val deferredGeomFrag = """
+private const val deferredGeomFrag = """
     $VERSION
     $PRECISION_HIGH
     $DECLARATIONS_FRAG
@@ -64,17 +63,17 @@ private val deferredGeomFrag = """
     void main()
     {
         %VRBL%
-        oDiffuse = %DIFFUSE%;
         oPosition = vPosition;
         oNormal = normalize(vNormal);
+        oDiffuse = %DIFFUSE%;
         oMatAmbient = %MAT_AMBIENT%;
         oMatDiffuse = %MAT_DIFFUSE%;
         oMatSpecular = %MAT_SPECULAR%;
         oMatShineTransp = vec3(%MAT_SHINE%, %MAT_TRANSPARENCY%, 1.0);
     }
-""".trimIndent()
+"""
 
-private val deferredLightVert = """
+private const val deferredLightVert = """
     $VERSION
     $PRECISION_HIGH
     $DECLARATIONS_VERT
@@ -89,9 +88,9 @@ private val deferredLightVert = """
         vTexCoord = aTexCoord;
         gl_Position = vec4(aPosition, 1.0);
     }
-""".trimIndent()
+"""
 
-private val deferredLightFrag = """
+private const val deferredLightFrag = """
     $VERSION
     $PRECISION_HIGH
     $DECLARATIONS_FRAG
@@ -133,31 +132,25 @@ private val deferredLightFrag = """
         float shine = matShineTransp[0];
         float transparency = matShineTransp[1];
         
-        PhongMaterial material = {
-            matAmbient,
-            matDiffuse,
-            matSpecular,
-            shine,
-            transparency
-        };
+        PhongMaterial material = { matAmbient, matDiffuse, matSpecular, shine, transparency };
 
         vec3 viewDir = normalize(%EYE% - fragPosition);
-        vec3 lighting = matAmbient;
+        vec3 color = matAmbient;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
-            lighting += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
+            color += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
         }
         for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
-            lighting += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
+            color += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
         }
         
         // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
         // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
 
-        lighting *= fragDiffuse;
-        oFragColor = vec4(lighting, transparency);
+        color *= fragDiffuse;
+        oFragColor = vec4(color, transparency);
     }
-""".trimIndent()
+"""
 
 class DeferredTechnique(
     private val modelM: Expression<mat4>,
@@ -240,7 +233,7 @@ class DeferredTechnique(
     fun draw(lights: List<Light>, instances: () -> Unit) {
         checkReady()
         geomPass(instances)
-        if (deferredDebug) {
+        if (debugDeferred) {
             debugPass()
         } else {
             lightPass(lights)
@@ -273,7 +266,7 @@ class DeferredTechnique(
     }
 
     private fun debugPass() {
-        val debug = when (debugItem % 7) {
+        val debug = when (debugStorage % 7) {
             0 -> positionStorage
             1 -> normalStorage
             2 -> diffuseStorage
@@ -348,7 +341,7 @@ class DeferredTechnique(
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matSpecularStorage.use()
         matShineTranspStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB32F,
+            width = width, height = height, internalFormat = backend.GL_RGB16F,
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matShineTranspStorage.use()
         depthBuffer = GlRenderBuffer(width = width, height = height)
@@ -457,8 +450,8 @@ fun main() {
             wasdInput.onKeyPressed(key, pressed)
             if (pressed) {
                 when (key) {
-                    GLFW.GLFW_KEY_DELETE    -> deferredDebug = !deferredDebug
-                    GLFW.GLFW_KEY_SPACE     -> debugItem++
+                    GLFW.GLFW_KEY_DELETE    -> debugDeferred = !debugDeferred
+                    GLFW.GLFW_KEY_SPACE     -> debugStorage++
                     GLFW.GLFW_KEY_UP        -> lightsUp = true
                     GLFW.GLFW_KEY_DOWN      -> lightsDown = true
                 }

@@ -93,24 +93,22 @@ private const val EXPR_LIGHT_CONTRIB = """
 
 private const val EXPR_DIFFUSE_CONTRIB = """
     vec3 expr_diffuseContrib(vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
-        vec3 contribution = vec3(0.0);
         float diffuseTerm = dot(fragNormal, lightDir);
         if (diffuseTerm > 0.0) {
-            contribution = material.diffuse * diffuseTerm;
+            return material.diffuse * diffuseTerm;
         }
-        return contribution;
+        return vec3(0.0);
     }
 """
 
 private const val EXPR_SPECULAR_CONTRIB = """
     vec3 expr_specularContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
-        vec3 contribution = vec3(0.0);
         vec3 halfVector = normalize(viewDir + lightDir);
         float specularTerm = dot(halfVector, fragNormal);
         if (specularTerm > 0.0) {
-            contribution = material.specular * pow(specularTerm, material.shine);
+            return material.specular * pow(specularTerm, material.shine);
         }
-        return contribution;
+        return vec3(0.0);
     }
 """
 
