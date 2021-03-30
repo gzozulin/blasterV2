@@ -83,8 +83,7 @@ private const val EXPR_DIR_LIGHT_CONTRIB = """
 """
 
 private const val EXPR_LIGHT_CONTRIB = """
-    vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, 
-                           float attenuation, Light light, PhongMaterial material) {
+    vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, float attenuation, Light light, PhongMaterial material) {
         vec3 lighting = vec3(0.0);
         lighting += expr_diffuseContrib(lightDir, fragNormal, material);
         lighting += expr_specularContrib(viewDir, lightDir, fragNormal, material);

@@ -24,6 +24,7 @@ class GlBackend {
     val GL_FRAMEBUFFER:        Int get() = ARBFramebufferObject.GL_FRAMEBUFFER
     val GL_FRAMEBUFFER_COMPLETE: Int get() = ARBFramebufferObject.GL_FRAMEBUFFER_COMPLETE
     val GL_FLOAT:              Int get() = GL11.GL_FLOAT
+    val GL_DOUBLE:              Int get() = GL11.GL_DOUBLE
     val GL_INT:                Int get() = GL11.GL_INT
     val GL_UNSIGNED_INT:       Int get() = GL11.GL_UNSIGNED_INT
     val GL_UNSIGNED_SHORT:     Int get() = GL11.GL_UNSIGNED_SHORT

@@ -4,9 +4,9 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.scene.*
+import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
 import java.lang.Float.max
-import java.lang.Float.min
 
 // todo: create/release is probably working improperly
 
@@ -324,31 +324,31 @@ class DeferredTechnique(
 
     private fun createStorage(width: Int, height: Int) {
         positionStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGBA16F,
+            width = width, height = height, internalFormat = backend.GL_RGBA32F,
             pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
         positionStorage.use()
         normalStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB16F,
+            width = width, height = height, internalFormat = backend.GL_RGB32F,
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         normalStorage.use()
         diffuseStorage = GlTexture(
             width = width, height = height, internalFormat = backend.GL_RGBA,
-            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_UNSIGNED_BYTE)
+            pixelFormat = backend.GL_RGBA, pixelType = backend.GL_FLOAT)
         diffuseStorage.use()
         matAmbientStorage = GlTexture(
             width = width, height = height, internalFormat = backend.GL_RGB,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matAmbientStorage.use()
         matDiffuseStorage = GlTexture(
             width = width, height = height, internalFormat = backend.GL_RGB,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matDiffuseStorage.use()
         matSpecularStorage = GlTexture(
             width = width, height = height, internalFormat = backend.GL_RGB,
-            pixelFormat = backend.GL_RGB, pixelType = backend.GL_UNSIGNED_BYTE)
+            pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matSpecularStorage.use()
         matShineTranspStorage = GlTexture(
-            width = width, height = height, internalFormat = backend.GL_RGB16F,
+            width = width, height = height, internalFormat = backend.GL_RGB32F,
             pixelFormat = backend.GL_RGB, pixelType = backend.GL_FLOAT)
         matShineTranspStorage.use()
         depthBuffer = GlRenderBuffer(width = width, height = height)
@@ -448,7 +448,7 @@ private var lightsDown = false
 
 fun main() {
     val window = GlWindow()
-    window.create(isFullscreen = false, isHoldingCursor = false) {
+    window.create(isFullscreen = true, isHoldingCursor = false) {
         window.resizeCallback = { width, height ->
             camera.setPerspective(width, height)
             deferredTechnique.resize(width, height)
@@ -481,15 +481,15 @@ fun main() {
         }
         glUse(deferredTechnique, obj) {
             window.show {
+                glClear(vec3().black())
                 if (lightsUp) {
-                    light.range += 5f
+                    light.range += 10f
                     println(light.range)
                 } else if (lightsDown) {
-                    light.range -= 5f
+                    light.range -= 10f
                     println(light.range)
                 }
                 light.range = max(0f, light.range)
-                glClear(col3().black())
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
