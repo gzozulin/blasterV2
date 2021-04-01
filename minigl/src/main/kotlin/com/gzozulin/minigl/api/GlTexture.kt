@@ -26,9 +26,11 @@ data class GlTexData(
     val width: Int, val height: Int,
     val pixels: ByteBuffer?)
 
-class GlTexture(
+data class GlTexture(
     val target: Int,
-    private val texData: List<GlTexData>
+    private val texData: List<GlTexData>,
+    private val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR,
+    private val magFilter: Int = backend.GL_LINEAR
 ) : GlBindable() {
 
     private var handle: Int = -1
@@ -73,8 +75,8 @@ class GlTexture(
         backend.glTexImage2D(target, 0, data.internalFormat, data.width, data.height,
             0, data.pixelFormat, data.pixelType, data.pixels)
         backend.glGenerateMipmap(target)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST_MIPMAP_LINEAR)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_LINEAR)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, minFilter)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, magFilter)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_S, backend.GL_REPEAT)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_T, backend.GL_REPEAT)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_R, backend.GL_REPEAT)
@@ -90,8 +92,8 @@ class GlTexture(
             )
         }
         backend.glGenerateMipmap(target)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, backend.GL_NEAREST_MIPMAP_LINEAR)
-        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, backend.GL_LINEAR)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MIN_FILTER, minFilter)
+        backend.glTexParameteri(target, backend.GL_TEXTURE_MAG_FILTER, magFilter)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_S, backend.GL_CLAMP_TO_EDGE)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_T, backend.GL_CLAMP_TO_EDGE)
         backend.glTexParameteri(target, backend.GL_TEXTURE_WRAP_R, backend.GL_CLAMP_TO_EDGE)

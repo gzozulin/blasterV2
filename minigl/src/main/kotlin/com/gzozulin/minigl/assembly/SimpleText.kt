@@ -52,8 +52,9 @@ class SimpleTextTechnique(
     private val fontDescription: FontDescription = FontDescription(),
     private var windowWidth: Int, private var windowHeight: Int) : GlResource() {
 
-    private val font = texturesLib.loadTexture(fontDescription.textureFilename)
     private val rect = GlMesh.rect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
+    private val font = texturesLib.loadTexture(fontDescription.textureFilename)
+        .copy(minFilter = backend.GL_NEAREST, magFilter = backend.GL_NEAREST)
 
     private val texCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
 
@@ -85,8 +86,8 @@ class SimpleTextTechnique(
     fun resize(width: Int, height: Int) {
         windowWidth = width
         windowHeight = height
-        unifProj.value!!.set(mat4().ortho(0f, windowWidth.toFloat(), 0f, windowHeight.toFloat(), -1f, 1f))
-        unifCenter.value!!.set(mat4().identity().translate(vec3(windowWidth / 2f, windowHeight / 2f, 0f)))
+        unifProj.value.set(mat4().ortho(0f, windowWidth.toFloat(), 0f, windowHeight.toFloat(), -1f, 1f))
+        unifCenter.value.set(mat4().identity().translate(vec3(windowWidth / 2f, windowHeight / 2f, 0f)))
     }
 
     private fun updateCursor(line: Int, letter: Int) {
