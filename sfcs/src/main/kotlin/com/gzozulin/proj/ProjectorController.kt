@@ -3,6 +3,8 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.api.black
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.api.glClear
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 open class State(
     protected val parent: ProjectorController,
@@ -17,35 +19,17 @@ open class State(
     open fun onKey(key: Int, pressed: Boolean) {}
 }
 
-class StateIdle(
-    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
-
-    override fun onEnter() {
-        model.renderScenario()
-    }
-
-    override fun onFrame() {
-        super.onFrame()
-        glClear(col3().black())
-    }
-
-    override fun onKey(key: Int, pressed: Boolean) {
-        super.onKey(key, pressed)
-        if (!pressed) {
-            parent.switch(StateCozyRoomIntro(parent, model, view))
-        }
-    }
-}
-
 class StateCozyRoomIntro(
     parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
 
     override fun onEnter() {
         super.onEnter()
+        GlobalScope.launch { model.renderScenario() }
         view.fadeIn()
     }
 
     override fun onFrame() {
+        glClear(col3().black())
         view.tickCamera()
         view.renderScene()
         view.renderCrossFade()
@@ -53,7 +37,7 @@ class StateCozyRoomIntro(
 
     override fun onKey(key: Int, pressed: Boolean) {
         super.onKey(key, pressed)
-        if (!pressed) {
+        if (!pressed) { // todo: when loaded and faded in
             parent.switch(StateCozyRoomTyping(parent, model, view))
         }
     }
@@ -85,7 +69,7 @@ class ProjectorController(model: ProjectorModel, view: ProjectorView) {
     private var next: State? = null
 
     init {
-        switch(StateIdle(this, model, view))
+        switch(StateCozyRoomIntro(this, model, view))
     }
 
     fun keyPressed(key: Int, pressed: Boolean) {
