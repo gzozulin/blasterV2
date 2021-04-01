@@ -69,6 +69,7 @@ fun main() {
         }
         managerCapture.capture {
             glUse(sceneCozyRoom) {
+                sceneCozyRoom.resize(capturer.width, capturer.height)
                 capturer.show(controller::frame, managerCapture::onBuffer)
             }
         }

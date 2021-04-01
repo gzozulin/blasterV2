@@ -8,7 +8,6 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
-import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()
