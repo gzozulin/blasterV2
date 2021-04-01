@@ -2,20 +2,30 @@ package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.scene.*
+import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.PointLight
+import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
+import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()
 
+private val model = modelLib.load("models/bedroom/bedroom", join = false)
+private val empty = texturesLib.loadTexture("textures/snow.png")
+
 private val camera = Camera()
-private val controller = Controller(position = vec3().front(), velocity = 1f)
+private val controller = Controller(position = model.aabb.center(), velocity = 1f)
 private val wasdInput = WasdInput(controller)
 
-private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")
+private val cameraLight = PointLight(model.aabb.center(), vec3(1f), 350f)
+private val lights = listOf(cameraLight,
+    PointLight(vec3(178.7f, 91.33f, -107.6f), vec3().yellow(), 500f),
+    PointLight(vec3(-113.8f, 104.5f, -91.5f), vec3().azure(), 1000f),
+    PointLight(vec3(28.2f, 112.2f, 193.7f), vec3().cyan(), 300f),
+)
 
 private val modelM = constm4(mat4().identity())
 private val viewM = unifm4 { camera.calculateViewM() }
@@ -25,7 +35,6 @@ private val projM = unifm4 { camera.projectionM }
 private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
 private val sampler = unifsampler()
 private val diffuseMap = tex(texCoords, sampler)
-private val diffuseColor = constv4(vec4(1f))
 
 private val matAmbient = unifv3()
 private val matDiffuse = unifv3()
@@ -36,16 +45,10 @@ private val matTransparency = uniff()
 private val deferredTextureTechnique = DeferredTechnique(
     modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
-private val model = modelLib.load("models/bedroom/bedroom", join = false)
-private val empty = texturesLib.loadTexture("textures/snow.png")
-
-private val light = PointLight(model.aabb.center(), vec3(1f), 1000f)
-private val lights = listOf(light)
-
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
+    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -58,33 +61,33 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
+            if (pressed && key == GLFW.GLFW_KEY_SPACE) {
+                println(camera.position)
+            }
         }
         window.resizeCallback = { width: Int, height: Int ->
             deferredTextureTechnique.resize(width, height)
         }
-        glUse(skyboxTechnique, deferredTextureTechnique, model, empty) {
+        glUse(deferredTextureTechnique, model, empty) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
                     camera.setPosition(position)
                     camera.lookAlong(direction)
                 }
-                skyboxTechnique.skybox(camera)
-                light.position.set(camera.position)
-                glMultiSample {
-                    glDepthTest {
-                        glBind(empty) {
-                            deferredTextureTechnique.draw(lights) {
-                                model.objects.forEach { obj ->
-                                    val material = obj.phong()
-                                    sampler.value = material.mapDiffuse ?: empty
-                                    matAmbient.value = vec3(0f)
-                                    matDiffuse.value = material.diffuse
-                                    matSpecular.value = material.specular
-                                    matShine.value = material.shine
-                                    matTransparency.value = material.transparency
-                                    deferredTextureTechnique.instance(obj)
-                                }
+                cameraLight.position.set(camera.position)
+                glDepthTest {
+                    glBind(empty) {
+                        deferredTextureTechnique.draw(lights) {
+                            model.objects.forEach { obj ->
+                                val material = obj.phong()
+                                sampler.value = material.mapDiffuse ?: empty
+                                matAmbient.value = vec3(0f)
+                                matDiffuse.value = material.diffuse
+                                matSpecular.value = material.specular
+                                matShine.value = material.shine
+                                matTransparency.value = material.transparency
+                                deferredTextureTechnique.instance(obj)
                             }
                         }
                     }
