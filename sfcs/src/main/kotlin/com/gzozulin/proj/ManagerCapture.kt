@@ -11,9 +11,8 @@ import org.kodein.di.instance
 import org.opencv.core.CvType
 import java.io.File
 
-class ManagerCapture {
-    private val capturer: GlCapturer by ProjectorApp.injector.instance()
-    private val videoWriter: VideoWriter by ProjectorApp.injector.instance()
+/*class ManagerCapture() {
+    private val videoWriter = VideoWriter()
 
     private val framePointer = BytePointer(capturer.frameBuffer)
     private val originalFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4, framePointer) }
@@ -38,4 +37,4 @@ class ManagerCapture {
             videoWriter.write(flippedFrame)
         }
     }
-}
+}*/

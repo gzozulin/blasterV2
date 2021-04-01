@@ -3,10 +3,11 @@ package com.gzozulin.proj
 import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
+import com.gzozulin.minigl.api.col3
+import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
-import com.gzozulin.minigl.api.*
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,9 +16,12 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
-import org.kodein.di.instance
 import java.io.File
+import kotlin.math.abs
 import kotlin.streams.toList
+
+const val LINES_TO_SHOW = 22
+const val FRAMES_PER_SPAN = 2
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
@@ -28,12 +32,40 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-class MechanicScenario {
-    private val repo: RepoProjector by ProjectorApp.injector.instance()
+// todo: assert that children file is same as parent
+private val thisFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt")
+
+class ProjectorModel {
+    private var scenarioNodeCnt = 0
+
+    private val scenario = listOf(
+        ScenarioNode(
+            scenarioNodeCnt++, thisFile, "ProjectorModel", children = listOf(
+                ScenarioNode(scenarioNodeCnt++, thisFile, "renderScenario"),
+                ScenarioNode(scenarioNodeCnt++, thisFile, "preparePage"),
+                ScenarioNode(scenarioNodeCnt++, thisFile, "renderFile")
+            )
+        ),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "predeclare"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "define"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "postdeclare"),
+        ScenarioNode(scenarioNodeCnt++, thisFile, "Visitor"),
+    )
+
+    private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
+
+    lateinit var currentPage: TextPage<OrderedSpan>
+    var currentCenter = 0
+
+    private var isRequestedToProceed = false
+    private var isAdvancingSpans = true // spans or timeout
+
+    private var currentFrame = 0
+    private var currentOrder = 0
 
     fun renderScenario() {
         val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()
-        for (scenarioNode in repo.scenario) {
+        for (scenarioNode in scenario) {
             if (!nodesToFiles.containsKey(scenarioNode.file)) {
                 nodesToFiles[scenarioNode.file] = mutableListOf()
             }
@@ -44,8 +76,26 @@ class MechanicScenario {
             for (pairs in nodesToFiles) {
                 deferred.add(async { renderFile(pairs.key, pairs.value) })
             }
-            repo.renderedPages.addAll(deferred.awaitAll())
+            renderedPages.addAll(deferred.awaitAll())
         }
+        prepareNextOrder()
+    }
+
+    fun proceed() {
+        isRequestedToProceed = true
+    }
+
+    fun updateSpans() {
+        if (isAdvancingSpans) {
+            advanceSpans()
+        } else {
+            advanceTimeout()
+        }
+    }
+
+    fun prepareNextOrder() {
+        findCurrentPage()
+        updateOrderVisibility()
     }
 
     private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
@@ -71,6 +121,72 @@ class MechanicScenario {
             spans.add(orderedToken.toOrderedSpan())
         }
         return TextPage(spans)
+    }
+
+    private fun findCurrentPage() {
+        for (renderedPage in renderedPages) {
+            for (span in renderedPage.spans) {
+                if (span.order == currentOrder) {
+                    currentPage = renderedPage
+                    return
+                }
+            }
+        }
+        error("Did not found next page!")
+    }
+
+    private fun updateOrderVisibility() {
+        currentPage.spans
+            .filter { it.order == currentOrder }
+            .forEach { it.visibility = SpanVisibility.INVISIBLE }
+    }
+
+    private fun advanceSpans() {
+        currentFrame++
+        if (currentFrame == FRAMES_PER_SPAN) {
+            currentFrame = 0
+            val found = findNextInvisibleSpan()
+            if (found != null) {
+                found.visibility = SpanVisibility.VISIBLE
+                updateCenter(found)
+            } else {
+                isAdvancingSpans = false
+            }
+        }
+    }
+
+    private fun findNextInvisibleSpan() =
+        currentPage.spans.firstOrNull {
+            it.order == currentOrder &&
+                    it.visibility == SpanVisibility.INVISIBLE &&
+                    it.text.isNotBlank()
+        }
+
+    private fun updateCenter(span: OrderedSpan) {
+        val newCenter = currentPage.findLineNo(span)
+        val delta = newCenter - currentCenter
+        if (abs(delta) >= LINES_TO_SHOW) {
+            currentCenter += delta - (LINES_TO_SHOW - 1)
+        }
+    }
+
+    private fun advanceTimeout() {
+        if (isRequestedToProceed) {
+            isRequestedToProceed = false
+            isAdvancingSpans = true
+            nextOrder()
+            prepareNextOrder()
+        }
+    }
+
+    private fun nextOrder() {
+        currentOrder++
+        if (currentOrder == scenarioNodeCnt) {
+            currentOrder = 0
+            renderedPages.forEach {
+                it.spans.forEach { span -> span.visibility = SpanVisibility.GONE }
+            }
+        }
     }
 }
 
