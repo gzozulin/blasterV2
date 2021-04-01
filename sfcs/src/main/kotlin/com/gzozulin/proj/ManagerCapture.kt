@@ -1,6 +1,5 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api.GlCapturer
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.global.opencv_videoio.VIDEOWRITER_PROP_QUALITY

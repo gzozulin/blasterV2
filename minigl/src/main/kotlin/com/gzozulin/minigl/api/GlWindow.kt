@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.api
 
-import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
 import org.lwjgl.glfw.GLFWMouseButtonCallback
@@ -38,6 +37,8 @@ class GlWindow {
     var deltaCallback: DeltaCallback? = null
 
     private var isFullscreen: Boolean = false
+    private var isCapturing: Boolean = false
+
     var handle = NULL
 
     val width: Int
@@ -48,6 +49,8 @@ class GlWindow {
     private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
     private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
 
+    var frameBuffer = ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
+
     private val cursorPos = vec2()
     private val lastCursorPos = vec2()
 
@@ -57,6 +60,7 @@ class GlWindow {
     private val resizeCallbackInternal = object : GLFWWindowSizeCallback() {
         override fun invoke(window: Long, width: Int, height: Int) {
             glCheck { backend.glViewport(0, 0, width, height) }
+            frameBuffer = ByteBuffer.allocateDirect(width * height * 4)
             resizeCallback?.invoke(width, height)
         }
     }
@@ -85,35 +89,13 @@ class GlWindow {
         }
     }
 
-    private fun updateCursor(window: Long) {
-        xbuf.rewind()
-        ybuf.rewind()
-        glfwGetCursorPos(window, xbuf, ybuf)
-        cursorPos.set(xbuf.get().toFloat(), ybuf.get().toFloat())
-        if (lastCursorPos.x == 0f && lastCursorPos.y == 0f) {
-            lastCursorPos.set(cursorPos.x, cursorPos.y)
-        }
-        positionCallback?.invoke(cursorPos)
-        cursorPos.sub(lastCursorPos, lastCursorPos)
-        deltaCallback?.invoke(lastCursorPos)
-        lastCursorPos.set(cursorPos)
-    }
-
-    private fun updateFps() {
-        fps++
-        val current = System.currentTimeMillis()
-        if (current - last >= 1000L) {
-            glfwSetWindowTitle(handle, "Blaster! $fps fps")
-            last = current
-            fps = 0
-        }
-    }
-
     fun create(
-        isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, isMultisampling: Boolean = false,
+        isHoldingCursor: Boolean = true, isFullscreen: Boolean = false,
+        isMultisampling: Boolean = false, isCapturing: Boolean = false,
         onCreated: () -> Unit
     ) {
         this.isFullscreen = isFullscreen
+        this.isCapturing = isCapturing
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         if (isMultisampling) {
@@ -150,18 +132,42 @@ class GlWindow {
             updateCursor(handle)
             onFrame.invoke()
             glfwSwapBuffers(handle)
+            copyWindowBuffer()
             glfwPollEvents()
             updateFps()
             GlProgram.stopComplaining()
         }
     }
 
-    fun copyWindowBuffer(): ByteBuffer {
-        GL11.glReadBuffer(GL11.GL_FRONT)
-        val bpp = 4
-        val buffer = BufferUtils.createByteBuffer(width * height * bpp)
-        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer)
-        return buffer
+    private fun updateCursor(window: Long) {
+        xbuf.rewind()
+        ybuf.rewind()
+        glfwGetCursorPos(window, xbuf, ybuf)
+        cursorPos.set(xbuf.get().toFloat(), ybuf.get().toFloat())
+        if (lastCursorPos.x == 0f && lastCursorPos.y == 0f) {
+            lastCursorPos.set(cursorPos.x, cursorPos.y)
+        }
+        positionCallback?.invoke(cursorPos)
+        cursorPos.sub(lastCursorPos, lastCursorPos)
+        deltaCallback?.invoke(lastCursorPos)
+        lastCursorPos.set(cursorPos)
+    }
+
+    private fun updateFps() {
+        fps++
+        val current = System.currentTimeMillis()
+        if (current - last >= 1000L) {
+            glfwSetWindowTitle(handle, "Blaster! $fps fps")
+            last = current
+            fps = 0
+        }
+    }
+
+    private fun copyWindowBuffer() {
+        if (isCapturing) {
+            GL11.glReadBuffer(GL11.GL_FRONT)
+            GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, frameBuffer)
+        }
     }
 }
 

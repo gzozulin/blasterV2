@@ -124,9 +124,7 @@ private val billboardsProvider = object : BillboardsProvider() {
 }
 
 class BillboardsApp {
-    lateinit var firstFrame: ByteBuffer
-
-    fun launch(oneFrame: Boolean = false) {
+    fun launch() {
         window.create(isFullscreen = false, isHoldingCursor = false) {
             window.resizeCallback = { width, height ->
                 camera.setPerspective(width, height)
@@ -157,10 +155,6 @@ class BillboardsApp {
                             billboardsTechnique.instance(billboardsProvider, identityM, diffuse, 1f, 1f,
                                 updateScale = false, updateTransparency = false)
                         }
-                    }
-                    firstFrame = window.copyWindowBuffer()
-                    if (oneFrame) {
-                        GLFW.glfwSetWindowShouldClose(window.handle, true)
                     }
                 }
             }

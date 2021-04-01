@@ -6,6 +6,8 @@ import com.gzozulin.minigl.api.glClear
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+private var scenarioLoaded = false
+
 open class State(
     protected val parent: ProjectorController,
     protected val model: ProjectorModel,
@@ -24,7 +26,10 @@ class StateCozyRoomIntro(
 
     override fun onEnter() {
         super.onEnter()
-        GlobalScope.launch { model.renderScenario() }
+        GlobalScope.launch {
+            model.renderScenario()
+            scenarioLoaded = true
+        }
         view.fadeIn()
     }
 
@@ -33,11 +38,7 @@ class StateCozyRoomIntro(
         view.tickCamera()
         view.renderScene()
         view.renderCrossFade()
-    }
-
-    override fun onKey(key: Int, pressed: Boolean) {
-        super.onKey(key, pressed)
-        if (!pressed) { // todo: when loaded and faded in
+        if (scenarioLoaded) {
             parent.switch(StateCozyRoomTyping(parent, model, view))
         }
     }
