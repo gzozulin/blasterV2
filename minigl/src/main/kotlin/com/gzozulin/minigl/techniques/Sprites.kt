@@ -4,7 +4,7 @@ import com.gzozulin.minigl.assets.shadersLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.ValueCache
 import com.gzozulin.minigl.scene.WasdInput
 import java.util.*
@@ -99,7 +99,7 @@ private val spritesTechnique = StaticSpritesTechnique()
 private val skyboxTechnique = StaticSkyboxTechnique("textures/darkskies")
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(50f, 5f, 70f), pitch = radf(-30f), velocity = 0.1f)
+private val controller = ControllerFirstPerson(position = vec3(50f, 5f, 70f), pitch = radf(-30f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val field = GlMesh.rect(0f, 100f, 0f, 100f)

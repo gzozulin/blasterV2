@@ -3,7 +3,7 @@ package com.gzozulin.sim.system
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.BillboardsProvider
 import com.gzozulin.minigl.techniques.StaticBillboardsTechnique
@@ -13,7 +13,7 @@ import com.gzozulin.sim.entity.*
 import java.nio.FloatBuffer
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().up().mul(3f), velocity = 1f)
+private val controller = ControllerFirstPerson(position = vec3().up().mul(3f), velocity = 1f)
 private val wasdInput = WasdInput(controller)
 
 private val identityM = mat4().identity()

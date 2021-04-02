@@ -16,7 +16,7 @@ private val projectorView = ProjectorView(projectorModel, window.width, window.h
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {
-    window.create(isFullscreen = true) {
+    window.create(isFullscreen = false) {
         window.keyCallback = { key, pressed ->
             projectorController.keyPressed(key, pressed)
         }

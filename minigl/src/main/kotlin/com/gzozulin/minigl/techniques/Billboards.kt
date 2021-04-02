@@ -4,9 +4,8 @@ import com.gzozulin.minigl.assets.shadersLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
-import org.lwjgl.glfw.GLFW
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -104,7 +103,7 @@ private val skyboxTechnique = StaticSkyboxTechnique("textures/nuke")
 private val billboardsTechnique = StaticBillboardsTechnique(1000)
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().front().mul(10f), velocity = 0.1f)
+private val controller = ControllerFirstPerson(position = vec3().front().mul(10f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val identityM = mat4().identity()

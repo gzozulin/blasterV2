@@ -3,7 +3,7 @@ package com.gzozulin.minigl.techniques
 import com.gzozulin.minigl.assets.*
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 import org.joml.Matrix4f
 import java.nio.ByteBuffer
@@ -58,7 +58,7 @@ class StaticTileMapTechnique : GlResource() {
 }
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(2.5f, 10f, 2.5f), pitch = radf(-90f), velocity = 0.1f)
+private val controller = ControllerFirstPerson(position = vec3(2.5f, 10f, 2.5f), pitch = radf(-90f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/hills")

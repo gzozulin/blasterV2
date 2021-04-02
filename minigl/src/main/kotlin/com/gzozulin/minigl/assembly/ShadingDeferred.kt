@@ -402,7 +402,7 @@ class DeferredTechnique(
 }
 
 private val camera = Camera()
-private val controller = Controller(velocity = 0.1f)
+private val controller = ControllerFirstPerson(velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val obj = modelLib.load("models/sphere/sphere").first()

@@ -5,7 +5,7 @@ import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
 import org.lwjgl.glfw.GLFW
@@ -16,7 +16,7 @@ private val model = modelLib.load("models/bedroom/bedroom", join = false)
 private val empty = texturesLib.loadTexture("textures/snow.png")
 
 private val camera = Camera()
-private val controller = Controller(position = model.aabb.center(), velocity = 1f)
+private val controller = ControllerFirstPerson(position = model.aabb.center(), velocity = 1f)
 private val wasdInput = WasdInput(controller)
 
 private val cameraLight = PointLight(model.aabb.center(), vec3(1f), 350f)
@@ -47,7 +47,7 @@ private val deferredTextureTechnique = DeferredTechnique(
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = false) {
+    window.create(isFullscreen = false, isHoldingCursor = false, isMultisampling = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -61,7 +61,7 @@ fun main() {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
             if (pressed && key == GLFW.GLFW_KEY_SPACE) {
-                println(camera.position)
+                println("Pos: ${controller.position} dir: ${controller.direction}")
             }
         }
         window.resizeCallback = { width: Int, height: Int ->

@@ -4,10 +4,7 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
-import com.gzozulin.minigl.scene.PointLight
-import com.gzozulin.minigl.scene.WasdInput
+import com.gzozulin.minigl.scene.*
 
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
@@ -40,8 +37,11 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     private val empty = texturesLib.loadTexture("textures/snow.png")
 
     private val camera = Camera()
-    private val controller = Controller(position = bedroom.aabb.center(), velocity = 1f)
-    private val wasdInput = WasdInput(controller)
+    private val controller = ControllerScenic(points = listOf(
+        PointOfInterest(vec3(1.138e2f, 1.388e2f, -5.025e1f), vec3(4.844e-1f, -3.756e-1f, -7.901e-1f)),
+        PointOfInterest(vec3(-8.189e1f, 1.131e2f, -3.284e1f), vec3(-2.556e-1f, -3.802e-1f, -8.889e-1f)),
+        PointOfInterest(vec3(8.531e1f, 1.210e2f, 1.509e2f), vec3(-2.779e-1f, -3.098e-1f, 9.093e-1f)),
+    ))
 
     private val cameraLight = PointLight(bedroom.aabb.center(), vec3(1f), 350f)
     private val lights = listOf(cameraLight,
@@ -85,7 +85,10 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     }
 
     fun tickCamera() {
-        camera.tick()
+        controller.apply { position, direction ->
+            camera.setPosition(position)
+            camera.lookAlong(direction)
+        }
     }
 
     fun prepareCode() {

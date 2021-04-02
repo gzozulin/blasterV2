@@ -4,7 +4,7 @@ import com.gzozulin.minigl.assets.shadersLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.MatrixStack
 import com.gzozulin.minigl.scene.WasdInput
 import org.joml.Matrix4f
@@ -46,7 +46,7 @@ private val window = GlWindow()
 
 private val matrixStack = MatrixStack()
 private val camera = Camera()
-private val controller = Controller(position = vec3().front())
+private val controller = ControllerFirstPerson(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")

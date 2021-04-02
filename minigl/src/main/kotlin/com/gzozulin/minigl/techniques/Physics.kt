@@ -60,7 +60,7 @@ class StaticPbrTechnique: GlResource() {
 private val window = GlWindow()
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(0f, 2.5f, 4f), velocity = 0.1f)
+private val controller = ControllerFirstPerson(position = vec3(0f, 2.5f, 4f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/miramar")

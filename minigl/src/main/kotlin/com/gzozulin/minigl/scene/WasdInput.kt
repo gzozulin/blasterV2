@@ -3,7 +3,7 @@ package com.gzozulin.minigl.scene
 import com.gzozulin.minigl.api.vec2
 import org.lwjgl.glfw.GLFW
 
-class WasdInput(private val controller: Controller) {
+class WasdInput(private val controller: ControllerFirstPerson) {
     fun onCursorDelta(delta: vec2) {
         controller.yaw(delta.x)
         controller.pitch(-delta.y)

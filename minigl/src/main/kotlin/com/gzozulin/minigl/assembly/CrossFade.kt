@@ -3,7 +3,7 @@ package com.gzozulin.minigl.assembly
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 import org.lwjgl.glfw.GLFW
@@ -68,7 +68,7 @@ private val window = GlWindow()
 private var mouseLook = false
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().front())
+private val controller = ControllerFirstPerson(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
 private val obj = modelLib.load("models/pcjr/pcjr").first()

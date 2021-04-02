@@ -164,7 +164,7 @@ class StaticDeferredTechnique : GlResource() {
 private val console = Console()
 
 private val camera = Camera()
-private val controller = Controller(position = vec3(1f, 4f, 6f), velocity = 0.1f)
+private val controller = ControllerFirstPerson(position = vec3(1f, 4f, 6f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
 private val light = DirectionalLight(vec3(1f, -1f, -1f), vec3(1f), 100f)

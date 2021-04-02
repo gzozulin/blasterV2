@@ -4,7 +4,7 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
 
@@ -120,7 +120,7 @@ class FlatTechnique(private val modelM: Expression<mat4>,
 private val window = GlWindow()
 
 private val camera = Camera()
-private val controller = Controller(position = vec3().front())
+private val controller = ControllerFirstPerson(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
 private val skyboxTechnique = StaticSkyboxTechnique("textures/snowy")

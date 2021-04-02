@@ -3,7 +3,7 @@ package com.gzozulin.minigl.techniques
 import com.gzozulin.minigl.assets.*
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Camera
-import com.gzozulin.minigl.scene.Controller
+import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 
 @Deprecated("Use assembly instead!")
@@ -35,7 +35,7 @@ class StaticSkyboxTechnique(skybox: String) : GlResource() {
 }
 
 private val camera = Camera()
-private val controller = Controller()
+private val controller = ControllerFirstPerson()
 private val wasdInput = WasdInput(controller)
 
 private val technique = StaticSkyboxTechnique("textures/snowy")
