@@ -3,27 +3,30 @@ package com.gzozulin.minigl.scene
 import com.gzozulin.minigl.api.*
 import org.joml.Vector3f
 
-private const val TIMEOUT_FLIGHT = 7000L
-private const val TIMEOUT_HOVER = 5000L
+private const val TIMEOUT_FLIGHT = 150000L
+private const val TIMEOUT_HOVER = 0L
 private const val TIMEOUT_FRAME = 16L
+
+private val upVec = vec3().up()
 
 data class PointOfInterest(val position: vec3, val direction: vec3)
 
 class ControllerScenic(private val points: List<PointOfInterest>) {
-    private var current = 0
-    private var next = current + 1
-
-    private lateinit var from: PointOfInterest
-    private lateinit var to: PointOfInterest
 
     private var isHovering = true
     private var timeout = TIMEOUT_HOVER
 
-    private val position = points.first().position
-    private val direction = points.first().direction
+    private var currPoi: PointOfInterest = points.first()
+    private var nextPoi: PointOfInterest = points.first()
+
+    private val position = vec3(points.first().position)
+    private val direction = vec3(points.first().direction)
+
+    private val rotationFrom = quat().identity()
+    private val rotationTo = quat().identity()
+    private val rotation = quat().identity()
 
     fun apply(apply: (position: Vector3f, direction: Vector3f) -> Unit) {
-        println("$current $next")
         if (isHovering) {
             if (timeout < 0) {
                 selectNext()
@@ -42,21 +45,19 @@ class ControllerScenic(private val points: List<PointOfInterest>) {
     }
 
     private fun selectNext() {
-        current++
-        if (current == points.size) {
-            current = 0
-        }
-        next++
-        if (next == points.size) {
-            next = 0
-        }
-        from = points[current]
-        to = points[next]
+        currPoi = nextPoi
+        val noCurrent = points.toMutableList()
+        noCurrent.remove(currPoi)
+        nextPoi = noCurrent.random()
+        rotationFrom.identity().lookAlong(currPoi.direction, upVec)
+        rotationTo.identity().lookAlong(nextPoi.direction, upVec)
     }
 
     private fun interpolate() {
         val progress = 1f - (timeout.toFloat() / TIMEOUT_FLIGHT.toFloat())
-        position.lerp(to.position, progress)
-        direction.lerp(to.direction, progress) // yaw, pitch, roll instead
+        position.set(currPoi.position).lerp(nextPoi.position, progress)
+        rotationFrom.slerp(rotationTo, progress, rotation)
+        direction.set(vec3().back())
+        rotation.transformInverse(direction)
     }
 }

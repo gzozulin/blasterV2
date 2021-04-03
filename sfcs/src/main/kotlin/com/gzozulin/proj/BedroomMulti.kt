@@ -47,7 +47,7 @@ private val deferredTextureTechnique = DeferredTechnique(
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = false, isHoldingCursor = false, isMultisampling = false) {
+    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
