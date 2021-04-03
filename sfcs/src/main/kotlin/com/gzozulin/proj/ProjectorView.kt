@@ -59,11 +59,11 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     private val sampler = unifsampler()
     private val diffuseMap = tex(texCoords, sampler)
 
-    private val matAmbient = unifv3()
+    private val matAmbient = constv3(vec3(0.05f))
     private val matDiffuse = unifv3()
-    private val matSpecular = unifv3()
-    private val matShine = uniff()
-    private val matTransparency = uniff()
+    private val matSpecular = constv3(vec3(0.33f))
+    private val matShine = constf(1f)
+    private val matTransparency = constf(1f)
 
     private val deferredTextureTechnique = DeferredTechnique(
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
@@ -112,11 +112,7 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
                     bedroom.objects.forEach { obj ->
                         val material = obj.phong()
                         sampler.value = material.mapDiffuse ?: empty
-                        matAmbient.value = vec3(0f)
                         matDiffuse.value = material.diffuse
-                        matSpecular.value = material.specular
-                        matShine.value = material.shine
-                        matTransparency.value = material.transparency
                         deferredTextureTechnique.instance(obj)
                     }
                 }

@@ -3,6 +3,9 @@ package com.gzozulin.minigl.scene
 import com.gzozulin.minigl.api.*
 import org.joml.Vector3f
 
+// todo: spline for positions
+// todo: points of interest: lookat
+
 private const val TIMEOUT_FLIGHT = 150000L
 private const val TIMEOUT_HOVER = 0L
 private const val TIMEOUT_FRAME = 16L

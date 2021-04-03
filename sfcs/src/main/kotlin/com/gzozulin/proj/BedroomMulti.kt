@@ -84,7 +84,7 @@ fun main() {
                                 matAmbient.value = vec3(0f)
                                 matDiffuse.value = material.diffuse
                                 matSpecular.value = material.specular
-                                matShine.value = material.shine
+                                matShine.value = 1f
                                 matTransparency.value = material.transparency
                                 deferredTextureTechnique.instance(obj)
                             }
