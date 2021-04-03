@@ -55,13 +55,6 @@ class StateCozyRoomTyping(
         view.renderScene()
         view.renderCode()
     }
-
-    override fun onKey(key: Int, pressed: Boolean) {
-        super.onKey(key, pressed)
-        if (!pressed) {
-            model.proceed()
-        }
-    }
 }
 
 class ProjectorController(model: ProjectorModel, view: ProjectorView) {

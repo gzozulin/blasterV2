@@ -17,15 +17,18 @@ import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Token
 import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
 
 const val LINES_TO_SHOW = 22
 const val FRAMES_PER_SPAN = 2
+const val MILLIS_PER_FRAME = 16
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class ScenarioNode(val order: Int, val file: File, val identifier: String,
+                        val timeout: Long = TimeUnit.SECONDS.toMillis(5),
                         val children: List<ScenarioNode>? = null)
 
 data class OrderedToken(val order: Int, val token: Token)
@@ -57,11 +60,11 @@ class ProjectorModel {
     lateinit var currentPage: TextPage<OrderedSpan>
     var currentCenter = 0
 
-    private var isRequestedToProceed = false
     private var isAdvancingSpans = true // spans or timeout
 
     private var currentFrame = 0
     private var currentOrder = 0
+    private var currentTimeout = 0L
 
     fun renderScenario() {
         val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()
@@ -81,21 +84,13 @@ class ProjectorModel {
         prepareNextOrder()
     }
 
-    fun proceed() {
-        isRequestedToProceed = true
-    }
-
     fun updateSpans() {
+        currentTimeout -= MILLIS_PER_FRAME
         if (isAdvancingSpans) {
             advanceSpans()
         } else {
             advanceTimeout()
         }
-    }
-
-    fun prepareNextOrder() {
-        findCurrentPage()
-        updateOrderVisibility()
     }
 
     private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
@@ -113,6 +108,12 @@ class ProjectorModel {
         }
         visitor.visitKotlinFile(parser.kotlinFile())
         return preparePage(orderedTokens)
+    }
+
+    private fun prepareNextOrder() {
+        findCurrentPage()
+        updateOrderVisibility()
+        findOrderTimeout(scenario)
     }
 
     private fun preparePage(orderedTokens: MutableList<OrderedToken>): TextPage<OrderedSpan> {
@@ -133,6 +134,17 @@ class ProjectorModel {
             }
         }
         error("Did not found next page!")
+    }
+
+    private fun findOrderTimeout(scenario: List<ScenarioNode>) {
+        for (scenarioNode in scenario) {
+            if (scenarioNode.order == currentOrder) {
+                currentTimeout = scenarioNode.timeout
+                return
+            } else if (scenarioNode.children != null) {
+                findOrderTimeout(scenarioNode.children)
+            }
+        }
     }
 
     private fun updateOrderVisibility() {
@@ -171,8 +183,7 @@ class ProjectorModel {
     }
 
     private fun advanceTimeout() {
-        if (isRequestedToProceed) {
-            isRequestedToProceed = false
+        if (currentTimeout <= 0) {
             isAdvancingSpans = true
             nextOrder()
             prepareNextOrder()
