@@ -1,0 +1,11 @@
+alias ModelFile=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
+
+----    ModelFile
+2000        ProjectorModel
+2000            renderScenario
+2000            preparePage
+2000            renderFile
+3000        predeclare
+4000        define
+5000        postdeclare
+5000        Visitor

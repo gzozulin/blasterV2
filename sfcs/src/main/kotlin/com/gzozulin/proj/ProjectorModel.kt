@@ -8,6 +8,7 @@ import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
+import com.gzozulin.minigl.assembly.sub
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -35,25 +36,9 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-// todo: assert that children file is same as parent
-private val thisFile = File("/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt")
-
 class ProjectorModel {
-    private var scenarioNodeCnt = 0
-
-    private val scenario = listOf(
-        ScenarioNode(
-            scenarioNodeCnt++, thisFile, "ProjectorModel", children = listOf(
-                ScenarioNode(scenarioNodeCnt++, thisFile, "renderScenario"),
-                ScenarioNode(scenarioNodeCnt++, thisFile, "preparePage"),
-                ScenarioNode(scenarioNodeCnt++, thisFile, "renderFile")
-            )
-        ),
-        ScenarioNode(scenarioNodeCnt++, thisFile, "predeclare"),
-        ScenarioNode(scenarioNodeCnt++, thisFile, "define"),
-        ScenarioNode(scenarioNodeCnt++, thisFile, "postdeclare"),
-        ScenarioNode(scenarioNodeCnt++, thisFile, "Visitor"),
-    )
+    private val projectScenario = ProjectorScenario(
+        File("sfcs/scenarios/1_ProjectorModel").readText())
 
     private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
@@ -68,7 +53,7 @@ class ProjectorModel {
 
     fun renderScenario() {
         val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()
-        for (scenarioNode in scenario) {
+        for (scenarioNode in projectScenario.scenario) {
             if (!nodesToFiles.containsKey(scenarioNode.file)) {
                 nodesToFiles[scenarioNode.file] = mutableListOf()
             }
@@ -113,7 +98,7 @@ class ProjectorModel {
     private fun prepareNextOrder() {
         findCurrentPage()
         updateOrderVisibility()
-        findOrderTimeout(scenario)
+        findOrderTimeout(projectScenario.scenario)
     }
 
     private fun preparePage(orderedTokens: MutableList<OrderedToken>): TextPage<OrderedSpan> {
@@ -192,7 +177,7 @@ class ProjectorModel {
 
     private fun nextOrder() {
         currentOrder++
-        if (currentOrder == scenarioNodeCnt) {
+        if (currentOrder == projectScenario.nodesCnt) {
             currentOrder = 0
             renderedPages.forEach {
                 it.spans.forEach { span -> span.visibility = SpanVisibility.GONE }
