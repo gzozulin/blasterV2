@@ -8,7 +8,6 @@ import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
-import com.gzozulin.minigl.assembly.sub
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
