@@ -12,10 +12,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonToken
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.Token
+import org.antlr.v4.runtime.*
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -35,9 +32,15 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
+data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
+                      val tokens: CommonTokenStream, val parser: KotlinParser)
+
 class ProjectorModel {
-    private val projectScenario = ProjectorScenario(
-        File("sfcs/scenarios/1_ProjectorModel").readText())
+    private val projectScenario by lazy {
+        ProjectorScenario(File("sfcs/scenarios/1_ProjectorModel").readText())
+    }
+
+    private val kotlinFiles = mutableMapOf<File, KotlinFile>()
 
     private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
@@ -51,20 +54,8 @@ class ProjectorModel {
     private var currentTimeout = 0L
 
     fun renderScenario() {
-        val nodesToFiles = mutableMapOf<File, MutableList<ScenarioNode>>()
-        for (scenarioNode in projectScenario.scenario) {
-            if (!nodesToFiles.containsKey(scenarioNode.file)) {
-                nodesToFiles[scenarioNode.file] = mutableListOf()
-            }
-            nodesToFiles[scenarioNode.file]!!.add(scenarioNode)
-        }
-        runBlocking {
-            val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
-            for (pairs in nodesToFiles) {
-                deferred.add(async { renderFile(pairs.key, pairs.value) })
-            }
-            renderedPages.addAll(deferred.awaitAll())
-        }
+        val nodesToFiles = nodesToFiles()
+        renderConcurrently(nodesToFiles)
         prepareNextOrder()
     }
 
@@ -77,35 +68,56 @@ class ProjectorModel {
         }
     }
 
+    private fun nodesToFiles(): MutableMap<File, MutableList<ScenarioNode>> {
+        val result = mutableMapOf<File, MutableList<ScenarioNode>>()
+        for (scenarioNode in projectScenario.scenario) {
+            if (!result.containsKey(scenarioNode.file)) {
+                result[scenarioNode.file] = mutableListOf()
+            }
+            result[scenarioNode.file]!!.add(scenarioNode)
+        }
+        return result
+    }
+
+    private fun renderConcurrently(nodesToFiles: MutableMap<File, MutableList<ScenarioNode>>) {
+        runBlocking {
+            val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
+            for (pairs in nodesToFiles) {
+                deferred.add(async { renderFile(pairs.key, pairs.value) })
+            }
+            renderedPages.addAll(deferred.awaitAll())
+        }
+    }
+
     private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
-        val chars = CharStreams.fromFileName(file.absolutePath)
-        val lexer = KotlinLexer(chars)
-        val tokens = CommonTokenStream(lexer)
-        val parser = KotlinParser(tokens).apply { reset() }
+        val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
-        val visitor = Visitor(nodes, tokens) { increment ->
+        val visitor = Visitor(nodes, kotlinFile.tokens) { increment ->
             if (increment.last().token.type != KotlinLexer.NL) {
                 orderedTokens += addTrailingNl(increment)
             } else {
                 orderedTokens += increment
             }
         }
-        visitor.visitKotlinFile(parser.kotlinFile())
+        visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
         return preparePage(orderedTokens)
     }
+
+    private fun parseKotlinFile(file: File) = kotlinFiles.computeIfAbsent(file) {
+        val chars = CharStreams.fromFileName(file.absolutePath)
+        val lexer = KotlinLexer(chars)
+        val tokens = CommonTokenStream(lexer)
+        val parser = KotlinParser(tokens).apply { reset() }
+        return@computeIfAbsent KotlinFile(chars, lexer, tokens, parser)
+    }
+
+    private fun preparePage(orderedTokens: MutableList<OrderedToken>) =
+        TextPage(orderedTokens.stream().map { it.toOrderedSpan() }.toList())
 
     private fun prepareNextOrder() {
         findCurrentPage()
         updateOrderVisibility()
         findOrderTimeout(projectScenario.scenario)
-    }
-
-    private fun preparePage(orderedTokens: MutableList<OrderedToken>): TextPage<OrderedSpan> {
-        val spans = mutableListOf<OrderedSpan>()
-        for (orderedToken in orderedTokens) {
-            spans.add(orderedToken.toOrderedSpan())
-        }
-        return TextPage(spans)
     }
 
     private fun findCurrentPage() {
