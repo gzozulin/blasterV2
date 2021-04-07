@@ -206,12 +206,11 @@ private class Visitor(val depth: Int,
 
     override fun visitDeclaration(decl: DeclCtx) {
         val identifier = decl.identifier()
-        val filtered = nodes.filter { it.path[depth] == identifier }
-        val first = filtered.firstOrNull() ?: return // first or none found
-        val hasChildren = filtered.firstOrNull { it.path.size > depth + 1 } != null
-        if (hasChildren) {
+        val children = nodes.filter { it.path[depth] == identifier }
+        val first = children.firstOrNull() ?: return // first or none found
+        if (children.size > 1) {
             result.invoke(decl.predeclare(tokens).withOrder(first.order))
-            decl.visitNext(depth + 1, filtered, tokens, result)
+            decl.visitNext(depth + 1, children, tokens, result)
             result.invoke(decl.postdeclare(tokens).withOrder(first.order))
         } else {
             result.invoke(decl.define(tokens).withOrder(first.order))
