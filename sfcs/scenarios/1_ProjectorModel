@@ -29,9 +29,6 @@ alias model=ProjectorModel
 # Scenario file representation after parsing
 # Order when to show, file and identifier, timeout to show and children
 
-2000 file/model
-# Main class
-
 2000 file/model/projectScenario
 2000 file/model/kotlinFiles
 2000 file/model/renderedPages
@@ -41,6 +38,7 @@ alias model=ProjectorModel
 2000 file/model/currentFrame
 2000 file/model/currentOrder
 2000 file/model/currentTimeout
+# Main class + variables
 # Creating variables to store the result
 # Variables contains: current scenario, rendered pages, information about current progress
 

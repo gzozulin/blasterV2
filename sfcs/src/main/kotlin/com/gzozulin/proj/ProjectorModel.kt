@@ -18,8 +18,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
 
-// TODO: linear scenario
-
 const val LINES_TO_SHOW = 22
 const val FRAMES_PER_SPAN = 2
 const val MILLIS_PER_FRAME = 16
