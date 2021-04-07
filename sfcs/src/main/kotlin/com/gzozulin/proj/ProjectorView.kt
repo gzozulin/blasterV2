@@ -95,7 +95,7 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
         glMultiSample {
             rttTechnique.render {
                 glClear(backgroundColor)
-                simpleTextTechnique.pageCentered(model.currentPage, model.currentCenter, LINES_TO_SHOW)
+                simpleTextTechnique.pageCentered(model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
             }
         }
     }

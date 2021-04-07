@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
 
+// TODO: linear scenario
+
 const val LINES_TO_SHOW = 22
 const val FRAMES_PER_SPAN = 2
 const val MILLIS_PER_FRAME = 16
@@ -29,6 +31,7 @@ data class ScenarioNode(val order: Int, val file: File, val identifier: String,
                         val children: List<ScenarioNode>? = null)
 
 data class OrderedToken(val order: Int, val token: Token)
+
 data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
@@ -45,7 +48,7 @@ class ProjectorModel {
     private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
     lateinit var currentPage: TextPage<OrderedSpan>
-    var currentCenter = 0
+    var currentPageCenter = 0
 
     private var isAdvancingSpans = true // spans or timeout
 
@@ -54,12 +57,12 @@ class ProjectorModel {
     private var currentTimeout = 0L
 
     fun renderScenario() {
-        val nodesToFiles = nodesToFiles()
+        val nodesToFiles = splitPerFile()
         renderConcurrently(nodesToFiles)
-        prepareNextOrder()
+        prepareOrder()
     }
 
-    fun updateSpans() {
+    fun advanceScenario() {
         currentTimeout -= MILLIS_PER_FRAME
         if (isAdvancingSpans) {
             advanceSpans()
@@ -68,7 +71,7 @@ class ProjectorModel {
         }
     }
 
-    private fun nodesToFiles(): MutableMap<File, MutableList<ScenarioNode>> {
+    private fun splitPerFile(): MutableMap<File, MutableList<ScenarioNode>> {
         val result = mutableMapOf<File, MutableList<ScenarioNode>>()
         for (scenarioNode in projectScenario.scenario) {
             if (!result.containsKey(scenarioNode.file)) {
@@ -114,9 +117,9 @@ class ProjectorModel {
     private fun preparePage(orderedTokens: MutableList<OrderedToken>) =
         TextPage(orderedTokens.stream().map { it.toOrderedSpan() }.toList())
 
-    private fun prepareNextOrder() {
+    private fun prepareOrder() {
         findCurrentPage()
-        updateOrderVisibility()
+        makeOrderInvisible()
         findOrderTimeout(projectScenario.scenario)
     }
 
@@ -132,6 +135,12 @@ class ProjectorModel {
         error("Did not found next page!")
     }
 
+    private fun makeOrderInvisible() {
+        currentPage.spans
+            .filter { it.order == currentOrder }
+            .forEach { it.visibility = SpanVisibility.INVISIBLE }
+    }
+
     private fun findOrderTimeout(scenario: List<ScenarioNode>) {
         for (scenarioNode in scenario) {
             if (scenarioNode.order == currentOrder) {
@@ -143,12 +152,6 @@ class ProjectorModel {
         }
     }
 
-    private fun updateOrderVisibility() {
-        currentPage.spans
-            .filter { it.order == currentOrder }
-            .forEach { it.visibility = SpanVisibility.INVISIBLE }
-    }
-
     private fun advanceSpans() {
         currentFrame++
         if (currentFrame == FRAMES_PER_SPAN) {
@@ -156,7 +159,7 @@ class ProjectorModel {
             val found = findNextInvisibleSpan()
             if (found != null) {
                 found.visibility = SpanVisibility.VISIBLE
-                updateCenter(found)
+                updatePageCenter(found)
             } else {
                 isAdvancingSpans = false
             }
@@ -170,11 +173,11 @@ class ProjectorModel {
                     it.text.isNotBlank()
         }
 
-    private fun updateCenter(span: OrderedSpan) {
+    private fun updatePageCenter(span: OrderedSpan) {
         val newCenter = currentPage.findLineNo(span)
-        val delta = newCenter - currentCenter
+        val delta = newCenter - currentPageCenter
         if (abs(delta) >= LINES_TO_SHOW) {
-            currentCenter += delta - (LINES_TO_SHOW - 1)
+            currentPageCenter += delta - (LINES_TO_SHOW - 1)
         }
     }
 
@@ -182,7 +185,7 @@ class ProjectorModel {
         if (currentTimeout <= 0) {
             isAdvancingSpans = true
             nextOrder()
-            prepareNextOrder()
+            prepareOrder()
         }
     }
 
@@ -270,7 +273,7 @@ private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, tokens: CommonTokenStre
     }
 }
 
-private fun List<Token>.withOrder(step: Int) = stream().map { OrderedToken(step, it) }.toList()
+private fun List<Token>.withOrder(order: Int) = stream().map { OrderedToken(order, it) }.toList()
 
 private fun OrderedToken.toOrderedSpan() =
     OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)

@@ -49,7 +49,7 @@ class StateCozyRoomTyping(
 
     override fun onFrame() {
         super.onFrame()
-        model.updateSpans()
+        model.advanceScenario()
         view.tickCamera()
         view.prepareCode()
         view.renderScene()
