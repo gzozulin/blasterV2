@@ -26,9 +26,8 @@ const val MILLIS_PER_FRAME = 16
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
-data class ScenarioNode(val order: Int, val file: File, val identifier: String,
-                        val timeout: Long = TimeUnit.SECONDS.toMillis(5),
-                        val children: List<ScenarioNode>? = null)
+data class ScenarioNode(val order: Int, val file: File, val path: List<String>,
+                        val timeout: Long = TimeUnit.SECONDS.toMillis(5))
 
 data class OrderedToken(val order: Int, val token: Token)
 
@@ -95,7 +94,7 @@ class ProjectorModel {
     private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
-        val visitor = Visitor(nodes, kotlinFile.tokens) { increment ->
+        val visitor = Visitor(0, nodes, kotlinFile.tokens) { increment ->
             if (increment.last().token.type != KotlinLexer.NL) {
                 orderedTokens += addTrailingNl(increment)
             } else {
@@ -146,10 +145,9 @@ class ProjectorModel {
             if (scenarioNode.order == currentOrder) {
                 currentTimeout = scenarioNode.timeout
                 return
-            } else if (scenarioNode.children != null) {
-                findOrderTimeout(scenarioNode.children)
             }
         }
+        error("Timeout not found!")
     }
 
     private fun advanceSpans() {
@@ -200,24 +198,22 @@ class ProjectorModel {
     }
 }
 
-private class Visitor(val nodes: List<ScenarioNode>,
+private class Visitor(val depth: Int,
+                      val nodes: List<ScenarioNode>,
                       val tokens: CommonTokenStream,
                       val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
 
     override fun visitDeclaration(decl: DeclCtx) {
         val identifier = decl.identifier()
-        val filtered = nodes.filter { it.identifier == identifier }
+        val filtered = nodes.filter { it.path[depth] == identifier }
         val first = filtered.firstOrNull() ?: return // first or none found
-        val withChildren = filtered.filter { it.children != null }
-        if (withChildren.isNotEmpty()) { // need to declare then
-            check(withChildren.size == filtered.size) { "All with children or none!" }
+        val hasChildren = filtered.firstOrNull { it.path.size > depth + 1 } != null
+        if (hasChildren) {
             result.invoke(decl.predeclare(tokens).withOrder(first.order))
-            withChildren.forEach {
-                decl.visitNext(it.children!!, tokens, result)
-            }
+            decl.visitNext(depth + 1, filtered, tokens, result)
             result.invoke(decl.postdeclare(tokens).withOrder(first.order))
-        } else { // just define
+        } else {
             result.invoke(decl.define(tokens).withOrder(first.order))
         }
     }
@@ -262,8 +258,8 @@ private fun Int.leftPadding(tokens: CommonTokenStream): Int {
     return result
 }
 
-private fun DeclCtx.visitNext(nodes: List<ScenarioNode>, tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
-    val visitor = Visitor(nodes, tokens, result)
+private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
+    val visitor = Visitor(depth, nodes, tokens, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
         functionDeclaration() != null -> visitor.visitFunctionDeclaration(functionDeclaration())
