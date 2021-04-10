@@ -31,7 +31,7 @@ data class OrderedSpan(val order: Int, override val text: String, override val c
 
 class ProjectorModel {
     private val projectScenario by lazy {
-        ProjectorScenario(File("/home/greg/ep0_scenario/scenario").readText())
+        ScenarioFile(File("/home/greg/ep0_scenario/scenario").readText())
     }
 
     private val kotlinFiles = mutableMapOf<File, KotlinFile>()
@@ -187,6 +187,7 @@ class ProjectorModel {
     private fun nextOrder() {
         currentOrder++
         if (currentOrder == projectScenario.scenario.size) {
+            currentFrame = 0
             currentOrder = 0
             renderedPages.forEach { textPage ->
                 textPage.spans.forEach { span ->

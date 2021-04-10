@@ -9,7 +9,7 @@ private val slashRegex = "/".toRegex()
 
 data class ScenarioNode(val file: File, val path: List<String>, val order: Int, val frame: Int)
 
-class ProjectorScenario(private val text: String) {
+class ScenarioFile(private val text: String) {
 
     val aliases = mutableMapOf<String, String>()
     val scenario = mutableListOf<ScenarioNode>()
@@ -64,6 +64,6 @@ fun main() {
         120 file/class/renderFile
         300 file/Visitor
     """.trimIndent()
-    val projScenario = ProjectorScenario(scenarioText)
+    val projScenario = ScenarioFile(scenarioText)
     println(projScenario.scenario)
 }
