@@ -14,30 +14,24 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.antlr.v4.runtime.*
 import java.io.File
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.streams.toList
 
 const val LINES_TO_SHOW = 22
 const val FRAMES_PER_SPAN = 2
-const val MILLIS_PER_FRAME = 16
 
 typealias DeclCtx = KotlinParser.DeclarationContext
-
-data class ScenarioNode(val order: Int, val file: File, val path: List<String>,
-                        val timeout: Long = TimeUnit.SECONDS.toMillis(5))
-
-data class OrderedToken(val order: Int, val token: Token)
-
-data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
-                       override var visibility: SpanVisibility) : TextSpan
 
 data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                       val tokens: CommonTokenStream, val parser: KotlinParser)
 
+data class OrderedToken(val order: Int, val token: Token)
+data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
+                       override var visibility: SpanVisibility) : TextSpan
+
 class ProjectorModel {
     private val projectScenario by lazy {
-        ProjectorScenario(File("sfcs/scenarios/1_ProjectorModel").readText())
+        ProjectorScenario(File("/home/greg/ep0_scenario/scenario").readText())
     }
 
     private val kotlinFiles = mutableMapOf<File, KotlinFile>()
@@ -51,7 +45,7 @@ class ProjectorModel {
 
     private var currentFrame = 0
     private var currentOrder = 0
-    private var currentTimeout = 0L
+    private var nextKeyFrame = 0
 
     fun renderScenario() {
         val nodesToFiles = splitPerFile()
@@ -60,15 +54,15 @@ class ProjectorModel {
     }
 
     fun advanceScenario() {
-        currentTimeout -= MILLIS_PER_FRAME
+        currentFrame++
         if (isAdvancingSpans) {
             advanceSpans()
         } else {
-            advanceTimeout()
+            waitForFrame()
         }
     }
 
-    private fun splitPerFile(): MutableMap<File, MutableList<ScenarioNode>> {
+    private fun splitPerFile(): Map<File, List<ScenarioNode>> {
         val result = mutableMapOf<File, MutableList<ScenarioNode>>()
         for (scenarioNode in projectScenario.scenario) {
             if (!result.containsKey(scenarioNode.file)) {
@@ -79,7 +73,7 @@ class ProjectorModel {
         return result
     }
 
-    private fun renderConcurrently(nodesToFiles: MutableMap<File, MutableList<ScenarioNode>>) {
+    private fun renderConcurrently(nodesToFiles: Map<File, List<ScenarioNode>>) {
         runBlocking {
             val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
             for (pairs in nodesToFiles) {
@@ -117,7 +111,7 @@ class ProjectorModel {
     private fun prepareOrder() {
         findCurrentPage()
         makeOrderInvisible()
-        findOrderTimeout(projectScenario.scenario)
+        findOrderFrame(projectScenario.scenario)
     }
 
     private fun findCurrentPage() {
@@ -138,20 +132,18 @@ class ProjectorModel {
             .forEach { it.visibility = SpanVisibility.INVISIBLE }
     }
 
-    private fun findOrderTimeout(scenario: List<ScenarioNode>) {
+    private fun findOrderFrame(scenario: List<ScenarioNode>) {
         for (scenarioNode in scenario) {
             if (scenarioNode.order == currentOrder) {
-                currentTimeout = scenarioNode.timeout
+                nextKeyFrame = scenarioNode.frame
                 return
             }
         }
-        error("Timeout not found!")
+        error("Key frame not found!")
     }
 
     private fun advanceSpans() {
-        currentFrame++
-        if (currentFrame == FRAMES_PER_SPAN) {
-            currentFrame = 0
+        if (currentFrame % FRAMES_PER_SPAN == 0) {
             val found = findNextInvisibleSpan()
             if (found != null) {
                 found.visibility = SpanVisibility.VISIBLE
@@ -177,8 +169,8 @@ class ProjectorModel {
         }
     }
 
-    private fun advanceTimeout() {
-        if (currentTimeout <= 0) {
+    private fun waitForFrame() {
+        if (currentFrame >= nextKeyFrame) {
             isAdvancingSpans = true
             nextOrder()
             prepareOrder()
@@ -187,7 +179,7 @@ class ProjectorModel {
 
     private fun nextOrder() {
         currentOrder++
-        if (currentOrder == projectScenario.nodesCnt) {
+        if (currentOrder == projectScenario.scenario.size) {
             currentOrder = 0
             renderedPages.forEach {
                 it.spans.forEach { span -> span.visibility = SpanVisibility.GONE }
@@ -196,23 +188,32 @@ class ProjectorModel {
     }
 }
 
-private class Visitor(val depth: Int,
-                      val nodes: List<ScenarioNode>,
-                      val tokens: CommonTokenStream,
-                      val result: (increment: List<OrderedToken>) -> Unit)
+private class Visitor(private val depth: Int,
+                      private val nodes: List<ScenarioNode>,
+                      private val tokens: CommonTokenStream,
+                      private val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
 
     override fun visitDeclaration(decl: DeclCtx) {
-        val identifier = decl.identifier()
-        val children = nodes.filter { it.path[depth] == identifier }
-        val first = children.firstOrNull() ?: return // first or none found
-        if (children.size > 1) {
-            result.invoke(decl.predeclare(tokens).withOrder(first.order))
-            decl.visitNext(depth + 1, children, tokens, result)
-            result.invoke(decl.postdeclare(tokens).withOrder(first.order))
-        } else {
-            result.invoke(decl.define(tokens).withOrder(first.order))
+        val matching = findMatching(decl)
+        when {
+            matching.isEmpty()  -> return
+            matching.size == 1  -> define(decl, matching)
+            matching.size > 1   -> declare(decl, matching)
         }
+    }
+
+    private fun findMatching(decl: DeclCtx) =
+        nodes.filter { it.path[depth] == decl.identifier() }
+
+    private fun define(decl: DeclCtx, matching: List<ScenarioNode>) =
+        result.invoke(decl.define(tokens).withOrder(matching.first().order))
+
+    private fun declare(decl: DeclCtx, matching: List<ScenarioNode>) {
+        val order = matching.first().order
+        result.invoke(decl.predeclare(tokens).withOrder(order))
+        decl.visitNext(depth + 1, matching, tokens, result)
+        result.invoke(decl.postdeclare(tokens).withOrder(order))
     }
 }
 
