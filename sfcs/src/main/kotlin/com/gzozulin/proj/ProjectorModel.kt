@@ -130,7 +130,7 @@ class ProjectorModel {
                 }
             }
         }
-        error("Did not found next page!")
+        error("Next page not found!")
     }
 
     private fun makeOrderInvisible() {
@@ -188,8 +188,10 @@ class ProjectorModel {
         currentOrder++
         if (currentOrder == projectScenario.scenario.size) {
             currentOrder = 0
-            renderedPages.forEach {
-                it.spans.forEach { span -> span.visibility = SpanVisibility.GONE }
+            renderedPages.forEach { textPage ->
+                textPage.spans.forEach { span ->
+                    span.visibility = SpanVisibility.GONE
+                }
             }
         }
     }
