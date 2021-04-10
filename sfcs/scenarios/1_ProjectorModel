@@ -27,7 +27,7 @@ alias model=ProjectorModel
 
 2000 file/ScenarioNode
 # Scenario file representation after parsing
-# Order when to show, file and identifier, timeout to show and children
+# Order when to show, file and identifier, timeout to show
 
 2000 file/model/projectScenario
 2000 file/model/kotlinFiles
@@ -57,6 +57,8 @@ alias model=ProjectorModel
 # Parsing Kotlin code first
 # Looking for code mentioned in scenario with Visitor
 # Finally, preparing the page with spans to draw later with OpenGL
+
+# -----------------------------------------------------------------------
 
 2000 file/model/parseKotlinFile
 # Using ANTLR to parse Kotlin
