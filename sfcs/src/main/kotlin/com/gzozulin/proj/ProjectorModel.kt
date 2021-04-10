@@ -86,7 +86,8 @@ class ProjectorModel {
     private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
-        val visitor = Visitor(0, nodes, kotlinFile.tokens) { increment ->
+        val claimedNodes = mutableListOf<ScenarioNode>()
+        val visitor = Visitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
             if (increment.last().token.type != KotlinLexer.NL) {
                 orderedTokens += addTrailingNl(increment)
             } else {
@@ -94,6 +95,12 @@ class ProjectorModel {
             }
         }
         visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
+        if (claimedNodes.size != projectScenario.scenario.size) {
+            val unclaimed = mutableListOf<ScenarioNode>()
+            unclaimed.addAll(projectScenario.scenario)
+            unclaimed.removeAll(claimedNodes)
+            error("Unclaimed nodes left! $unclaimed")
+        }
         return preparePage(orderedTokens)
     }
 
@@ -190,6 +197,7 @@ class ProjectorModel {
 
 private class Visitor(private val depth: Int,
                       private val nodes: List<ScenarioNode>,
+                      private val claimed: MutableList<ScenarioNode>,
                       private val tokens: CommonTokenStream,
                       private val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
@@ -206,14 +214,27 @@ private class Visitor(private val depth: Int,
     private fun findMatching(decl: DeclCtx) =
         nodes.filter { it.path[depth] == decl.identifier() }
 
-    private fun define(decl: DeclCtx, matching: List<ScenarioNode>) =
+    private fun define(decl: DeclCtx, matching: List<ScenarioNode>) {
         result.invoke(decl.define(tokens).withOrder(matching.first().order))
+        claimed.add(matching.first())
+    }
 
     private fun declare(decl: DeclCtx, matching: List<ScenarioNode>) {
-        val order = matching.first().order
-        result.invoke(decl.predeclare(tokens).withOrder(order))
-        decl.visitNext(depth + 1, matching, tokens, result)
-        result.invoke(decl.postdeclare(tokens).withOrder(order))
+        val nextDepth = depth + 1
+        val parents = mutableListOf<ScenarioNode>()
+        val children = mutableListOf<ScenarioNode>()
+        matching.forEach { node ->
+            when {
+                node.path.size <  nextDepth -> error("wtf?!")
+                node.path.size == nextDepth -> parents.add(node)
+                node.path.size >  nextDepth -> children.add(node)
+            }
+        }
+        check(parents.size == 1) { "Only one parent declaration allowed!" }
+        result.invoke(decl.predeclare(tokens).withOrder(parents.first().order))
+        decl.visitNext(depth + 1, children, claimed, tokens, result)
+        result.invoke(decl.postdeclare(tokens).withOrder(parents.first().order))
+        claimed.add(parents.first())
     }
 }
 
@@ -256,8 +277,9 @@ private fun Int.leftPadding(tokens: CommonTokenStream): Int {
     return result
 }
 
-private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
-    val visitor = Visitor(depth, nodes, tokens, result)
+private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, claimed: MutableList<ScenarioNode>,
+                              tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
+    val visitor = Visitor(depth, nodes, claimed, tokens, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
         functionDeclaration() != null -> visitor.visitFunctionDeclaration(functionDeclaration())
