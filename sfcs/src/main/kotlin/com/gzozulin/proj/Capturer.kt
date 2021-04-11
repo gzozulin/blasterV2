@@ -51,13 +51,16 @@ private val fourcc = listOf(
 fun main() {
     for (container in containers) {
         for (pair in fourcc) {
+            val writer = VideoWriter()
             try {
-                val writer = VideoWriter()
                 writer.open("123video123.$container", pair.second, 24.0, Size(100, 100))
                 check(writer.isOpened)
                 println("Succeeded with $container ${pair.first}")
+                writer.close()
             } catch (th: Throwable) {
                 println("Failed with $container ${pair.first}")
+            } finally {
+                writer.close()
             }
         }
     }
