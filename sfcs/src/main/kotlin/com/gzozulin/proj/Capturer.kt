@@ -12,6 +12,9 @@ import java.io.File
 
 private const val IS_CAPTURING = true
 
+private fun String.toFourcc() =
+    VideoWriter.fourcc(this[0].toByte(), this[1].toByte(), this[2].toByte(), this[3].toByte())
+
 class Capturer(window: GlWindow, private val width: Int, private val height: Int) {
     private val videoWriter = VideoWriter()
 
@@ -21,8 +24,7 @@ class Capturer(window: GlWindow, private val width: Int, private val height: Int
 
     fun capture(frames: () -> Unit) {
         if (IS_CAPTURING) {
-            val fourcc = VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte())
-            videoWriter.open(File("1vid.avi").absolutePath, fourcc, 60.0, Size(width, height))
+            videoWriter.open(File("output.avi").absolutePath, "MJPG".toFourcc(), 60.0, Size(width, height))
             videoWriter.set(VIDEOWRITER_PROP_QUALITY, 100.0)
             check(videoWriter.isOpened)
         }
@@ -36,6 +38,27 @@ class Capturer(window: GlWindow, private val width: Int, private val height: Int
         if (IS_CAPTURING) {
             flip(originalFrame, flippedFrame, 0) // vertical flip
             videoWriter.write(flippedFrame)
+        }
+    }
+}
+
+private val containers = listOf("avi", "mkv", "wmv")
+private val fourcc = listOf(
+    "uncompressed" to 0,
+    "MP4V" to "MP4V".toFourcc(),
+    "MJPG" to "MJPG".toFourcc())
+
+fun main() {
+    for (container in containers) {
+        for (pair in fourcc) {
+            try {
+                val writer = VideoWriter()
+                writer.open("123video123.$container", pair.second, 24.0, Size(100, 100))
+                check(writer.isOpened)
+                println("succeeded $container ${pair.first}")
+            } catch (th: Throwable) {
+                println("failed $container ${pair.first}")
+            }
         }
     }
 }
