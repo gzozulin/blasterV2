@@ -55,9 +55,9 @@ fun main() {
                 val writer = VideoWriter()
                 writer.open("123video123.$container", pair.second, 24.0, Size(100, 100))
                 check(writer.isOpened)
-                println("succeeded $container ${pair.first}")
+                println("Succeeded with $container ${pair.first}")
             } catch (th: Throwable) {
-                println("failed $container ${pair.first}")
+                println("Failed with $container ${pair.first}")
             }
         }
     }
