@@ -9,7 +9,11 @@ import com.gzozulin.minigl.api.glUse
 // todo: example project + video
 // todo: off-screen MSAA for code
 
+private const val FULL_WIDTH = 1920
+private const val FULL_HEIGHT = 1080
+
 private val window = GlWindow()
+private val capturer = Capturer(window, FULL_WIDTH, FULL_HEIGHT)
 
 private val projectorModel = ProjectorModel()
 private val projectorView = ProjectorView(projectorModel, window.width, window.height)
@@ -24,8 +28,14 @@ fun main() {
             projectorView.resize(width, height)
         }
         glUse(projectorView) {
-            window.show {
-                projectorController.onFrame()
+            capturer.capture {
+                window.show(
+                    onBuffer = {
+                        capturer.onBuffer()
+                    },
+                    onFrame = {
+                        projectorController.onFrame()
+                    })
             }
         }
     }

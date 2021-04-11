@@ -10,14 +10,12 @@ import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private const val winWidth: Int = 1024
-private const val winHeight: Int = 768
-
-private const val fullWidth: Int = 1920
-private const val fullHeight: Int = 1080
-
-private const val winX: Int = 448
-private const val winY: Int = 156
+const val WIN_WIDTH: Int = 1024
+const val WIN_HEIGHT: Int = 768
+const val FULL_WIDTH: Int = 1920
+const val FULL_HEIGHT: Int = 1080
+const val WIN_X: Int = 448
+const val WIN_Y: Int = 156
 
 private const val MULTISAMPLING_HINT = 4
 
@@ -37,19 +35,20 @@ class GlWindow {
     var deltaCallback: DeltaCallback? = null
 
     private var isFullscreen: Boolean = false
-    private var isCapturing: Boolean = false
 
     var handle = NULL
 
     val width: Int
-        get() = if (isFullscreen) fullWidth else winWidth
+        get() = if (isFullscreen) FULL_WIDTH else WIN_WIDTH
     val height: Int
-        get() = if (isFullscreen) fullHeight else winHeight
+        get() = if (isFullscreen) FULL_HEIGHT else WIN_HEIGHT
 
     private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
     private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
 
-    var frameBuffer = ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
+    val frameBuffer: ByteBuffer by lazy {
+        ByteBuffer.allocateDirect(FULL_WIDTH * FULL_HEIGHT * 4) // RGBA, 1 byte each
+    }
 
     private val cursorPos = vec2()
     private val lastCursorPos = vec2()
@@ -60,7 +59,6 @@ class GlWindow {
     private val resizeCallbackInternal = object : GLFWWindowSizeCallback() {
         override fun invoke(window: Long, width: Int, height: Int) {
             glCheck { backend.glViewport(0, 0, width, height) }
-            frameBuffer = ByteBuffer.allocateDirect(width * height * 4)
             resizeCallback?.invoke(width, height)
         }
     }
@@ -89,25 +87,21 @@ class GlWindow {
         }
     }
 
-    fun create(
-        isHoldingCursor: Boolean = true, isFullscreen: Boolean = false,
-        isMultisampling: Boolean = false, isCapturing: Boolean = false,
-        onCreated: () -> Unit
-    ) {
+    fun create(isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, isMultisampling: Boolean = false,
+               onCreated: () -> Unit) {
         this.isFullscreen = isFullscreen
-        this.isCapturing = isCapturing
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         if (isMultisampling) {
             glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
         }
         val result = if (isFullscreen) {
-            glfwCreateWindow(fullWidth, fullHeight, "Blaster!", glfwGetPrimaryMonitor(), handle)
+            glfwCreateWindow(FULL_WIDTH, FULL_HEIGHT, "Blaster!", glfwGetPrimaryMonitor(), handle)
         } else {
-            glfwCreateWindow(winWidth, winHeight, "Blaster!", NULL, handle)
+            glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Blaster!", NULL, handle)
         }
         if (!isFullscreen) {
-            glfwSetWindowPos(result, winX, winY)
+            glfwSetWindowPos(result, WIN_X, WIN_Y)
         }
         if (isHoldingCursor) {
             glfwSetInputMode(result, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
@@ -123,7 +117,7 @@ class GlWindow {
         glfwDestroyWindow(handle)
     }
 
-    fun show(onFrame: () -> Unit) {
+    fun show(onBuffer: (() -> Unit)? = null, onFrame: () -> Unit) {
         check(handle != NULL) { "Window is not yet created!" }
         glCheck { backend.glViewport(0, 0, width, height) }
         resizeCallback?.invoke(width, height)
@@ -132,7 +126,10 @@ class GlWindow {
             updateCursor(handle)
             onFrame.invoke()
             glfwSwapBuffers(handle)
-            copyWindowBuffer()
+            if (onBuffer != null) {
+                copyWindowBuffer()
+                onBuffer.invoke()
+            }
             glfwPollEvents()
             updateFps()
             GlProgram.stopComplaining()
@@ -164,10 +161,8 @@ class GlWindow {
     }
 
     private fun copyWindowBuffer() {
-        if (isCapturing) {
-            GL11.glReadBuffer(GL11.GL_FRONT)
-            GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, frameBuffer)
-        }
+        GL11.glReadBuffer(GL11.GL_FRONT)
+        GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, frameBuffer)
     }
 }
 

@@ -1,26 +1,28 @@
 package com.gzozulin.proj
 
+import com.gzozulin.minigl.api.GlWindow
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.global.opencv_videoio.VIDEOWRITER_PROP_QUALITY
 import org.bytedeco.opencv.opencv_core.Mat
 import org.bytedeco.opencv.opencv_core.Size
 import org.bytedeco.opencv.opencv_videoio.VideoWriter
-import org.kodein.di.instance
 import org.opencv.core.CvType
 import java.io.File
 
-/*class ManagerCapture() {
+private const val IS_CAPTURING = true
+
+class Capturer(window: GlWindow, private val width: Int, private val height: Int) {
     private val videoWriter = VideoWriter()
 
-    private val framePointer = BytePointer(capturer.frameBuffer)
-    private val originalFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4, framePointer) }
-    private val flippedFrame by lazy { Mat(capturer.height, capturer.width, CvType.CV_8UC4) }
+    private val framePointer = BytePointer(window.frameBuffer)
+    private val originalFrame by lazy { Mat(height, width, CvType.CV_8UC4, framePointer) }
+    private val flippedFrame by lazy { Mat(height, width, CvType.CV_8UC4) }
 
     fun capture(frames: () -> Unit) {
         if (IS_CAPTURING) {
             val fourcc = VideoWriter.fourcc('M'.toByte(), 'J'.toByte(), 'P'.toByte(), 'G'.toByte())
-            videoWriter.open(File("1vid.avi").absolutePath, fourcc, 60.0, Size(capturer.width, capturer.height))
+            videoWriter.open(File("1vid.avi").absolutePath, fourcc, 60.0, Size(width, height))
             videoWriter.set(VIDEOWRITER_PROP_QUALITY, 100.0)
             check(videoWriter.isOpened)
         }
@@ -36,4 +38,4 @@ import java.io.File
             videoWriter.write(flippedFrame)
         }
     }
-}*/
+}

@@ -41,7 +41,7 @@ class ProjectorModel {
     lateinit var currentPage: TextPage<OrderedSpan>
     var currentPageCenter = 0
 
-    private var isAdvancingSpans = true // spans or timeout
+    private var isWaitingKeyFrame = true
 
     private var currentFrame = 0
     private var currentOrder = 0
@@ -55,10 +55,10 @@ class ProjectorModel {
 
     fun advanceScenario() {
         currentFrame++
-        if (isAdvancingSpans) {
-            advanceSpans()
+        if (isWaitingKeyFrame) {
+            waitForKeyFrame()
         } else {
-            waitForFrame()
+            advanceSpans()
         }
     }
 
@@ -156,7 +156,9 @@ class ProjectorModel {
                 found.visibility = SpanVisibility.VISIBLE
                 updatePageCenter(found)
             } else {
-                isAdvancingSpans = false
+                nextOrder()
+                prepareOrder()
+                isWaitingKeyFrame = true
             }
         }
     }
@@ -176,11 +178,9 @@ class ProjectorModel {
         }
     }
 
-    private fun waitForFrame() {
+    private fun waitForKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
-            isAdvancingSpans = true
-            nextOrder()
-            prepareOrder()
+            isWaitingKeyFrame = false
         }
     }
 
