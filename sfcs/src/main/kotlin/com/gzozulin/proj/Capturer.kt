@@ -1,67 +1,51 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.GlWindow
+import org.bytedeco.ffmpeg.global.avcodec
+import org.bytedeco.ffmpeg.global.avutil
 import org.bytedeco.javacpp.BytePointer
+import org.bytedeco.javacv.DC1394FrameGrabber
+import org.bytedeco.javacv.FFmpegFrameRecorder
+import org.bytedeco.javacv.OpenCVFrameConverter
 import org.bytedeco.opencv.global.opencv_core.flip
-import org.bytedeco.opencv.global.opencv_videoio.VIDEOWRITER_PROP_QUALITY
 import org.bytedeco.opencv.opencv_core.Mat
-import org.bytedeco.opencv.opencv_core.Size
-import org.bytedeco.opencv.opencv_videoio.VideoWriter
 import org.opencv.core.CvType
-import java.io.File
 
 private const val IS_CAPTURING = true
 
-private fun String.toFourcc() =
-    VideoWriter.fourcc(this[0].toByte(), this[1].toByte(), this[2].toByte(), this[3].toByte())
-
 class Capturer(window: GlWindow, private val width: Int, private val height: Int) {
-    private val videoWriter = VideoWriter()
+    private val recorder = FFmpegFrameRecorder("out.avi", width, height, 0)
+    private val converter = OpenCVFrameConverter.ToMat()
 
-    private val framePointer = BytePointer(window.frameBuffer)
-    private val originalFrame by lazy { Mat(height, width, CvType.CV_8UC4, framePointer) }
+    init {
+        recorder.videoCodec = avcodec.AV_CODEC_ID_RAWVIDEO
+        recorder.pixelFormat = avutil.AV_PIX_FMT_YUV420P
+        recorder.frameRate = 60.0
+    }
+
+    private val bufferPointer = BytePointer(window.frameBuffer)
+    private val originalFrame by lazy { Mat(height, width, CvType.CV_8UC4, bufferPointer) }
     private val flippedFrame by lazy { Mat(height, width, CvType.CV_8UC4) }
+    private val frame = converter.convert(flippedFrame)
 
     fun capture(frames: () -> Unit) {
         if (IS_CAPTURING) {
-            videoWriter.open(File("output.avi").absolutePath, "MJPG".toFourcc(), 60.0, Size(width, height))
-            videoWriter.set(VIDEOWRITER_PROP_QUALITY, 100.0)
-            check(videoWriter.isOpened)
+            recorder.start()
         }
         frames.invoke()
         if (IS_CAPTURING) {
-            videoWriter.release()
+            recorder.release()
+            bufferPointer.close()
+            originalFrame.release()
+            flippedFrame.release()
+            frame.close()
         }
     }
 
     fun onBuffer() {
         if (IS_CAPTURING) {
             flip(originalFrame, flippedFrame, 0) // vertical flip
-            videoWriter.write(flippedFrame)
-        }
-    }
-}
-
-private val containers = listOf("avi", "mkv", "wmv")
-private val fourcc = listOf(
-    "uncompressed" to 0,
-    "MP4V" to "MP4V".toFourcc(),
-    "MJPG" to "MJPG".toFourcc())
-
-fun main() {
-    for (container in containers) {
-        for (pair in fourcc) {
-            val writer = VideoWriter()
-            try {
-                writer.open("123video123.$container", pair.second, 24.0, Size(100, 100))
-                check(writer.isOpened)
-                println("Succeeded with $container ${pair.first}")
-                writer.close()
-            } catch (th: Throwable) {
-                println("Failed with $container ${pair.first}")
-            } finally {
-                writer.close()
-            }
+            recorder.record(frame)
         }
     }
 }

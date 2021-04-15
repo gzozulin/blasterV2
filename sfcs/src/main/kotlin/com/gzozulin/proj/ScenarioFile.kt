@@ -3,6 +3,18 @@ package com.gzozulin.proj
 import java.io.File
 import kotlin.streams.toList
 
+private val scenarioExample = """
+    # Aliases are declared here
+    alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
+    alias class=ProjectorModel
+    
+    # Here we start parsing the scenario
+    0   file/class/renderScenario
+    100 file/class/preparePage
+    120 file/class/renderFile
+    300 file/Visitor
+""".trimIndent()
+
 private val whitespaceRegex = "\\s+".toRegex()
 private val equalsRegex = "=".toRegex()
 private val slashRegex = "/".toRegex()
@@ -19,13 +31,12 @@ class ScenarioFile(private val text: String) {
     }
 
     private fun parseScenario() {
-        val lines = text.lines()
-            .filter { it.isNotBlank() && !it.startsWith("#") }
+        val lines = text.lines().filter { it.isNotBlank() && !it.startsWith("#") }
         for (line in lines) {
             if (line.startsWith("alias")) {
                 parseAlias(line)
             } else {
-                parseStep(line)
+                parseNode(line)
             }
         }
     }
@@ -37,7 +48,7 @@ class ScenarioFile(private val text: String) {
         aliases[name] = substitute
     }
 
-    private fun parseStep(line: String) {
+    private fun parseNode(line: String) {
         val split = line.split(whitespaceRegex)
         val frame = split[0].toInt()
         if (scenario.isNotEmpty()) {
@@ -53,17 +64,6 @@ class ScenarioFile(private val text: String) {
 }
 
 fun main() {
-    val scenarioText = """
-        # Aliases are declared here
-        alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
-        alias class=ProjectorModel
-        
-        # Here we start parsing the scenario
-        0   file/class/renderScenario
-        100 file/class/preparePage
-        120 file/class/renderFile
-        300 file/Visitor
-    """.trimIndent()
-    val projScenario = ScenarioFile(scenarioText)
+    val projScenario = ScenarioFile(scenarioExample)
     println(projScenario.scenario)
 }
