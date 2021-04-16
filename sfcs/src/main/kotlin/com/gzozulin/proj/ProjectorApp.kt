@@ -3,11 +3,17 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 
-// todo: scenario to nodes
-// todo: center on function (stop - start)/2
-// todo: basic scene arrangement
-// todo: example project + video
+// todo: capture: codecs pipeline
+// todo: code page positioning on the screen
+// todo: multipage/multiclass projects
+// todo: better highlighting for code
+// todo: splines for camera animation
+// todo: better on-page scrolling: center on function (stop - start)/2
 // todo: off-screen MSAA for code
+// todo: introduce offset to do not count manually
+// todo: repository, assets, projects
+// todo: highlight sections of code
+// todo: new thumbnail, new backgrounds
 
 private const val FULL_WIDTH = 1920
 private const val FULL_HEIGHT = 1080

@@ -156,8 +156,12 @@ class ProjectorModel {
                 found.visibility = SpanVisibility.VISIBLE
                 updatePageCenter(found)
             } else {
-                nextOrder()
-                prepareOrder()
+                val haveNext = nextOrder()
+                if (haveNext) {
+                    prepareOrder()
+                } else {
+                    nextKeyFrame = Int.MAX_VALUE
+                }
                 isWaitingKeyFrame = true
             }
         }
@@ -184,17 +188,9 @@ class ProjectorModel {
         }
     }
 
-    private fun nextOrder() {
+    private fun nextOrder(): Boolean {
         currentOrder++
-        if (currentOrder == projectScenario.scenario.size) {
-            currentFrame = 0
-            currentOrder = 0
-            renderedPages.forEach { textPage ->
-                textPage.spans.forEach { span ->
-                    span.visibility = SpanVisibility.GONE
-                }
-            }
-        }
+        return currentOrder != projectScenario.scenario.size
     }
 }
 

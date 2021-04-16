@@ -68,11 +68,7 @@ class GlWindow {
             if (key == GLFW_KEY_ESCAPE) {
                 glfwSetWindowShouldClose(window, true)
             }
-            if (action == GLFW_PRESS) {
-                keyCallback?.invoke(key, true)
-            } else if (action == GLFW_RELEASE) {
-                keyCallback?.invoke(key, false)
-            }
+            keyCallback?.invoke(key, action == GLFW_PRESS)
         }
     }
 
