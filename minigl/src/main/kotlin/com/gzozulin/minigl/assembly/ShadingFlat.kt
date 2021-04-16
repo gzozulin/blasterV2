@@ -168,7 +168,7 @@ private val flatTechnique = FlatTechnique(
 )
 
 fun main() {
-    window.create(isHoldingCursor = false) {
+    window.create(resizables = listOf(camera), isHoldingCursor = false, isFullscreen = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -181,9 +181,6 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
-        }
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
         }
         glUse(flatTechnique, skyboxTechnique, rectangle, diffuse1, diffuse2, diffuse3, diffuse4) {
             window.show {

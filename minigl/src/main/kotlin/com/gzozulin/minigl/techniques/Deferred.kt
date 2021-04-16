@@ -9,7 +9,7 @@ import org.joml.Matrix4f
 const val MAX_LIGHTS = 128
 
 @Deprecated("Use assembly instead!")
-class StaticDeferredTechnique : GlResource() {
+class StaticDeferredTechnique : GlResource(), GlResizable {
     private val programGeomPass: GlProgram = shadersLib.loadProgram(
         "shaders/deferred/geom_pass.vert", "shaders/deferred/geom_pass.frag")
     private val programLightPass = shadersLib.loadProgram(
@@ -47,7 +47,7 @@ class StaticDeferredTechnique : GlResource() {
         depthBuffer.release()
     }
 
-    fun resize(width: Int, height: Int) {
+    override fun resize(width: Int, height: Int) {
         checkReady()
         if (::positionStorage.isInitialized) {
             releaseFrame()
@@ -184,11 +184,7 @@ private var mouseLook = false
 
 fun main() {
     val window = GlWindow()
-    window.create(isFullscreen = false, isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
-            deferredTechnique.resize(width, height)
-        }
+    window.create(resizables = listOf(camera, deferredTechnique), isFullscreen = false, isHoldingCursor = false) {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
         }

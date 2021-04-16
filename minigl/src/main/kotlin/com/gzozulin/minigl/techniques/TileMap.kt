@@ -98,7 +98,7 @@ fun main() {
         tileMaps.add(StaticTileMapTechnique.createTileMap(list.toIntArray()))
     }
     val window = GlWindow()
-    window.create(isHoldingCursor = false) {
+    window.create(resizables = listOf(camera), isHoldingCursor = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -111,9 +111,6 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
-        }
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
         }
         glUse(skyboxTechnique, tileMapTechnique, rect, *diffuseArray, *tileMaps.toTypedArray()) {
             window.show {

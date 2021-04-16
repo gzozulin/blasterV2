@@ -57,7 +57,7 @@ private val rectangle = GlMesh.rect()
 private var mouseLook = false
 
 fun main() {
-    window.create(isHoldingCursor = false) {
+    window.create(resizables = listOf(camera), isHoldingCursor = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -70,9 +70,6 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
-        }
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
         }
         glUse(simpleTechnique, skyboxTechnique, diffuse, rectangle) {
             window.show {

@@ -50,7 +50,7 @@ data class TextPage<T : TextSpan>(val spans: List<T>) {
 
 class SimpleTextTechnique(
     private val fontDescription: FontDescription = FontDescription(),
-    private var windowWidth: Int, private var windowHeight: Int) : GlResource() {
+    private var windowWidth: Int, private var windowHeight: Int) : GlResource(), GlResizable {
 
     private val rect = GlMesh.rect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
     private val font = texturesLib.loadTexture(fontDescription.textureFilename)
@@ -83,7 +83,7 @@ class SimpleTextTechnique(
         addChildren(simpleTechnique, rect, font)
     }
 
-    fun resize(width: Int, height: Int) {
+    override fun resize(width: Int, height: Int) {
         windowWidth = width
         windowHeight = height
         unifProj.value.set(mat4().ortho(0f, windowWidth.toFloat(), 0f, windowHeight.toFloat(), -1f, 1f))
@@ -207,10 +207,7 @@ private val fontDescription = FontDescription(
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)
 
 fun main() {
-    window.create(isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            simpleTextTechnique.resize(width, height)
-        }
+    window.create(resizables = listOf(simpleTextTechnique), isHoldingCursor = false) {
         glUse(simpleTextTechnique) {
             window.show {
                 glClear(col3().ltGrey())

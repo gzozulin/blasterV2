@@ -124,10 +124,7 @@ private val billboardsProvider = object : BillboardsProvider() {
 
 class BillboardsApp {
     fun launch() {
-        window.create(isFullscreen = false, isHoldingCursor = false) {
-            window.resizeCallback = { width, height ->
-                camera.setPerspective(width, height)
-            }
+        window.create(resizables = listOf(camera), isFullscreen = false, isHoldingCursor = false) {
             window.keyCallback = { key, pressed ->
                 wasdInput.onKeyPressed(key, pressed)
             }

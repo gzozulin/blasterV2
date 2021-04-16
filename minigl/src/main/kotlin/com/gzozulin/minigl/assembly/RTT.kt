@@ -121,7 +121,7 @@ private fun renderScene() {
 }
 
 fun main() {
-    window.create(isHoldingCursor = false, isFullscreen = true) {
+    window.create(resizables = listOf(camera), isHoldingCursor = false, isFullscreen = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -134,9 +134,6 @@ fun main() {
         }
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
-        }
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
         }
         glUse(simpleTechnique, skyboxTechnique, simpleTextTechnique, rttTechnique, obj, textRect) {
             window.show {

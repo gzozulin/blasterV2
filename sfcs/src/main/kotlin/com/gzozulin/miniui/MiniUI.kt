@@ -57,7 +57,7 @@ private class RenderingSystem : GlResource() {
     }
 }
 
-private class InputSystem {
+private class InputSystem : GlResizable {
     private var width = 0
     private var height = 0
 
@@ -65,7 +65,7 @@ private class InputSystem {
 
     private val matrixStack = MatrixStack()
 
-    fun onResize(width: Int, height: Int) {
+    override fun resize(width: Int, height: Int) {
         this.width = width
         this.height = height
     }
@@ -98,10 +98,7 @@ private val teapot2 = Widget(pos = vec2(0.5f), size = vec2(.5f), compBackground 
 private val guiRoot = Widget(size = vec2(1f), compBackground = CompBackground(utahTeapot), children = mutableListOf(teapot2, teapot3))
 
 fun main() {
-    window.create(isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            inputSystem.onResize(width, height)
-        }
+    window.create(resizables = listOf(inputSystem), isHoldingCursor = false) {
         window.positionCallback = { position ->
             inputSystem.onPosition(position)
         }

@@ -12,7 +12,7 @@ private val fontDescription = FontDescription(
     fontScaleU = 0.4f, fontScaleV = 0.5f,
     fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
-class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) : GlResource() {
+class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) : GlResource(), GlResizable {
 
     private val crossFadeTechnique = CrossFadeTechnique(timeout = 2000)
 
@@ -73,7 +73,7 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
             deferredTextureTechnique, bedroom, empty)
     }
 
-    fun resize(width: Int, height: Int) {
+    override fun resize(width: Int, height: Int) {
         deferredTextureTechnique.resize(width, height)
         simpleTextTechnique.resize(width, height)
         backgroundModelM.value = mat4().identity().translate(width.toFloat()/2f, height.toFloat()/2f, 0f)

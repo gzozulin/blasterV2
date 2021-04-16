@@ -14,6 +14,7 @@ import com.gzozulin.minigl.api.glUse
 // todo: repository, assets, projects
 // todo: highlight sections of code
 // todo: new thumbnail, new backgrounds
+// todo: capturing on/off
 
 private const val FULL_WIDTH = 1920
 private const val FULL_HEIGHT = 1080
@@ -26,12 +27,9 @@ private val projectorView = ProjectorView(projectorModel, window.width, window.h
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {
-    window.create(isFullscreen = true, isHoldingCursor = true) {
+    window.create(resizables = listOf(projectorView), isFullscreen = true, isHoldingCursor = true) {
         window.keyCallback = { key, pressed ->
             projectorController.keyPressed(key, pressed)
-        }
-        window.resizeCallback = { width, height ->
-            projectorView.resize(width, height)
         }
         glUse(projectorView) {
             capturer.capture {

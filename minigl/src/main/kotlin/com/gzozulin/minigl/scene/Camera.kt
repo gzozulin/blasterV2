@@ -8,13 +8,17 @@ data class Camera(
     val projectionM: mat4 = mat4(),
     val position: vec3 = vec3(),
     val rotation: quat = quat()
-) {
+) : GlResizable {
     private val viewVersion: Version = Version()
     private val viewM: mat4 = mat4()
     private val negatedBuf: vec3 = vec3()
 
     init {
         setPerspective(4f/3f)
+    }
+
+    override fun resize(width: Int, height: Int) {
+        setPerspective(width, height)
     }
 
     fun calculateViewM(): mat4 {
@@ -42,11 +46,6 @@ data class Camera(
 
     fun lookAlong(direction: vec3) {
         rotation.identity().lookAlong(direction, vecUp)
-        viewVersion.increment()
-    }
-
-    fun tick() {
-        rotation.rotateAxis(0.001f, vecUp)
         viewVersion.increment()
     }
 }

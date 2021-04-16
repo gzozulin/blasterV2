@@ -162,7 +162,7 @@ class DeferredTechnique(
     private val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
     private val matSpecular: Expression<vec3> = constv3(vec3(1f)),
     private val matShine: Expression<Float> = constf(10f),
-    private val matTransparency: Expression<Float> = constf(1f)) : GlResource() {
+    private val matTransparency: Expression<Float> = constf(1f)) : GlResource(), GlResizable {
 
     private val programGeomPass: GlProgram
     private val programLightPass: GlProgram
@@ -221,17 +221,16 @@ class DeferredTechnique(
         releaseStorage()
     }
 
-    fun resize(width: Int, height: Int) {
-        checkReady()
+    override fun resize(width: Int, height: Int) {
         if (::positionStorage.isInitialized) {
             releaseStorage()
         }
         createStorage(width, height)
-        bindFramebuffer()
     }
 
     fun draw(lights: List<Light>, instances: () -> Unit) {
         checkReady()
+        bindFramebuffer()
         geomPass(instances)
         if (debugDeferred) {
             debugPass()
@@ -441,11 +440,7 @@ private var lightsDown = false
 
 fun main() {
     val window = GlWindow()
-    window.create(isFullscreen = true, isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
-            deferredTechnique.resize(width, height)
-        }
+    window.create(resizables = listOf(camera, deferredTechnique), isFullscreen = true, isHoldingCursor = false) {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
             if (pressed) {

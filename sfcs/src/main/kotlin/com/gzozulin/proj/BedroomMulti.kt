@@ -47,7 +47,8 @@ private val deferredTextureTechnique = DeferredTechnique(
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = false) {
+    window.create(resizables = listOf(camera, deferredTextureTechnique),
+        isFullscreen = false, isHoldingCursor = false, isMultisampling = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -63,9 +64,6 @@ fun main() {
             if (pressed && key == GLFW.GLFW_KEY_SPACE) {
                 println("Pos: ${controller.position} dir: ${controller.direction}")
             }
-        }
-        window.resizeCallback = { width: Int, height: Int ->
-            deferredTextureTechnique.resize(width, height)
         }
         glUse(deferredTextureTechnique, model, empty) {
             window.show {

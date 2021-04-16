@@ -77,10 +77,7 @@ private val lightMatrix = mat4().identity().translate(vec3(3f))
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = false, isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
-        }
+    window.create(resizables = listOf(camera), isFullscreen = false, isHoldingCursor = false) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed

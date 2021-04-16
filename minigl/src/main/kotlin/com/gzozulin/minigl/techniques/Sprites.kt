@@ -218,10 +218,7 @@ private var mouseLook = false
 
 fun main() {
     createModels()
-    window.create(isFullscreen = false, isHoldingCursor = false) {
-        window.resizeCallback = { width, height ->
-            camera.setPerspective(width, height)
-        }
+    window.create(resizables = listOf(camera), isFullscreen = false, isHoldingCursor = false) {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
         }

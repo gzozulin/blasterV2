@@ -19,32 +19,34 @@ const val WIN_Y: Int = 156
 
 private const val MULTISAMPLING_HINT = 4
 
+private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
+
 enum class MouseButton { LEFT, RIGHT }
 
-typealias ResizeCallback = (width: Int, height: Int) -> Unit
 typealias KeyCallback = (key: Int, pressed: Boolean) -> Unit
 typealias ButtonCallback = (button: MouseButton, pressed: Boolean) -> Unit
 typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
 class GlWindow {
-    var resizeCallback: ResizeCallback? = null
     var keyCallback: KeyCallback? = null
     var buttonCallback: ButtonCallback? = null
     var positionCallback: PositionCallback? = null
     var deltaCallback: DeltaCallback? = null
 
-    private var isFullscreen: Boolean = false
+    private val resizables = mutableListOf<GlResizable>()
 
-    var handle = NULL
+    private var isHoldingCursor: Boolean = false
+    private var isFullscreen: Boolean = false
+    private var isMultisampling: Boolean = false
+
+    var handle: Long? = null
 
     val width: Int
         get() = if (isFullscreen) FULL_WIDTH else WIN_WIDTH
     val height: Int
         get() = if (isFullscreen) FULL_HEIGHT else WIN_HEIGHT
-
-    private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
-    private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
 
     val frameBuffer: ByteBuffer by lazy {
         ByteBuffer.allocateDirect(FULL_WIDTH * FULL_HEIGHT * 4) // RGBA, 1 byte each
@@ -58,17 +60,23 @@ class GlWindow {
 
     private val resizeCallbackInternal = object : GLFWWindowSizeCallback() {
         override fun invoke(window: Long, width: Int, height: Int) {
-            glCheck { backend.glViewport(0, 0, width, height) }
-            resizeCallback?.invoke(width, height)
+            onResize(width, height)
         }
     }
 
     private val keyCallbackInternal = object : GLFWKeyCallback() {
         override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
-            if (key == GLFW_KEY_ESCAPE) {
-                glfwSetWindowShouldClose(window, true)
+            if (action == GLFW_PRESS) {
+                when (key) {
+                    GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(window, true)
+                    GLFW_KEY_ENTER  -> {
+                        isFullscreen = !isFullscreen
+                        recreateWindow()
+                        onResize(width, height)
+                    }
+                }
             }
-            keyCallback?.invoke(key, action == GLFW_PRESS)
+            keyCallback?.invoke(key, action == GLFW_PRESS || action == GLFW_REPEAT)
         }
     }
 
@@ -83,45 +91,28 @@ class GlWindow {
         }
     }
 
-    fun create(isHoldingCursor: Boolean = true, isFullscreen: Boolean = false, isMultisampling: Boolean = false,
-               onCreated: () -> Unit) {
+    fun create(resizables: List<GlResizable> = listOf(),
+               isHoldingCursor: Boolean = true, isFullscreen: Boolean = false,
+               isMultisampling: Boolean = false, onCreated: () -> Unit) {
+        this.resizables.clear()
+        this.resizables.addAll(resizables)
+        this.isHoldingCursor = isHoldingCursor
         this.isFullscreen = isFullscreen
+        this.isMultisampling = isMultisampling
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
-        if (isMultisampling) {
-            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
-        }
-        val result = if (isFullscreen) {
-            glfwCreateWindow(FULL_WIDTH, FULL_HEIGHT, "Blaster!", glfwGetPrimaryMonitor(), handle)
-        } else {
-            glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Blaster!", NULL, handle)
-        }
-        if (!isFullscreen) {
-            glfwSetWindowPos(result, WIN_X, WIN_Y)
-        }
-        if (isHoldingCursor) {
-            glfwSetInputMode(result, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
-        }
-        glfwSetWindowSizeCallback(result, resizeCallbackInternal)
-        glfwSetMouseButtonCallback(result, buttonCallbackInternal)
-        glfwSetKeyCallback(result, keyCallbackInternal)
-        glfwMakeContextCurrent(result)
-        glfwSwapInterval(1)
-        handle = result
-        GL.createCapabilities();
+        recreateWindow()
+        onResize(width, height)
         onCreated.invoke()
-        glfwDestroyWindow(handle)
+        glfwDestroyWindow(handle!!)
     }
 
     fun show(onBuffer: (() -> Unit)? = null, onFrame: () -> Unit) {
-        check(handle != NULL) { "Window is not yet created!" }
-        glCheck { backend.glViewport(0, 0, width, height) }
-        resizeCallback?.invoke(width, height)
-        glfwShowWindow(handle)
-        while (!glfwWindowShouldClose(handle)) {
-            updateCursor(handle)
+        check(handle != null) { "Window is not yet created!" }
+        while (!glfwWindowShouldClose(handle!!)) {
+            updateCursor(handle!!)
             onFrame.invoke()
-            glfwSwapBuffers(handle)
+            glfwSwapBuffers(handle!!)
             if (onBuffer != null) {
                 copyWindowBuffer()
                 onBuffer.invoke()
@@ -130,6 +121,33 @@ class GlWindow {
             updateFps()
             GlProgram.stopComplaining()
         }
+    }
+
+    private fun recreateWindow() {
+        if (isMultisampling) {
+            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
+        }
+        handle = glfwCreateWindow(
+            width, height, "Blaster!",
+            if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)
+        if (!isFullscreen) {
+            glfwSetWindowPos(handle!!, WIN_X, WIN_Y)
+        }
+        if (isHoldingCursor) {
+            glfwSetInputMode(handle!!, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+        }
+        glfwSetWindowSizeCallback(handle!!, resizeCallbackInternal)
+        glfwSetMouseButtonCallback(handle!!, buttonCallbackInternal)
+        glfwSetKeyCallback(handle!!, keyCallbackInternal)
+        glfwMakeContextCurrent(handle!!)
+        GL.createCapabilities();
+        glfwSwapInterval(1)
+        glfwShowWindow(handle!!)
+    }
+
+    private fun onResize(width: Int, height: Int) {
+        glCheck { backend.glViewport(0, 0, width, height) }
+        resizables.forEach { it.resize(width, height) }
     }
 
     private fun updateCursor(window: Long) {
@@ -150,7 +168,7 @@ class GlWindow {
         fps++
         val current = System.currentTimeMillis()
         if (current - last >= 1000L) {
-            glfwSetWindowTitle(handle, "Blaster! $fps fps")
+            glfwSetWindowTitle(handle!!, "Blaster! $fps fps")
             last = current
             fps = 0
         }
