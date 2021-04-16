@@ -127,8 +127,7 @@ class GlWindow {
         if (isMultisampling) {
             glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
         }
-        handle = glfwCreateWindow(
-            width, height, "Blaster!",
+        handle = glfwCreateWindow(width, height, "Blaster!",
             if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)
         if (!isFullscreen) {
             glfwSetWindowPos(handle!!, WIN_X, WIN_Y)

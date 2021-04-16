@@ -3,6 +3,7 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 
+// todo: switching to fullscreen
 // todo: capture: codecs pipeline
 // todo: code page positioning on the screen
 // todo: multipage/multiclass projects
