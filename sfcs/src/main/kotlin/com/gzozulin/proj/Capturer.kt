@@ -10,7 +10,7 @@ import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.opencv_core.Mat
 import org.opencv.core.CvType
 
-// RAW > AV_CODEC_ID_HUFFYUV, mkv
+// Code > HuffYUV, mkv
 // Blender > H264, mp4
 
 private val converter = OpenCVFrameConverter.ToMat()

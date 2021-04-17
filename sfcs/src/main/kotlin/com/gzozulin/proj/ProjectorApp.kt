@@ -4,16 +4,15 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: capture: codecs pipeline
-// todo: code page positioning on the screen
-// todo: multipage/multiclass projects
-// todo: better highlighting for code
-// todo: splines for camera animation
-// todo: better on-page scrolling: center on function (stop - start)/2
-// todo: off-screen MSAA for code
 // todo: introduce offset to do not count manually
-// todo: repository, assets, projects
+// todo: splines for camera animation
+// todo: better highlighting for code
+// todo: code page positioning on the screen
+// todo: better on-page scrolling: center on function (stop - start)/2
 // todo: highlight sections of code
+// todo: multipage/multiclass projects
+// todo: off-screen MSAA for code
+// todo: repository, assets, projects
 // todo: new thumbnail, new backgrounds
 // todo: switching to fullscreen
 
