@@ -15,7 +15,6 @@ import org.lwjgl.glfw.GLFW
 // todo: repository, assets, projects
 // todo: highlight sections of code
 // todo: new thumbnail, new backgrounds
-// todo: capturing on/off
 // todo: switching to fullscreen
 
 private val window = GlWindow()
@@ -26,7 +25,7 @@ private val projectorView = ProjectorView(projectorModel, window.width, window.h
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {
-    window.create(resizables = listOf(capturer, projectorView), isFullscreen = false, isHoldingCursor = false) {
+    window.create(resizables = listOf(projectorView), isFullscreen = true, isHoldingCursor = false) {
         window.keyCallback = { key, pressed ->
             if (key == GLFW.GLFW_KEY_R && pressed) {
                 capturer.isCapturing = !capturer.isCapturing

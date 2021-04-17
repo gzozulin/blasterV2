@@ -48,7 +48,9 @@ class GlWindow {
     val height: Int
         get() = if (isFullscreen) FULL_HEIGHT else WIN_HEIGHT
 
-    lateinit var frameBuffer: ByteBuffer
+    val frameBuffer: ByteBuffer by lazy {
+        ByteBuffer.allocateDirect(FULL_WIDTH * FULL_HEIGHT * 4) // RGBA, 1 byte, fullscreen
+    }
 
     private val cursorPos = vec2()
     private val lastCursorPos = vec2()
@@ -139,7 +141,6 @@ class GlWindow {
     }
 
     private fun onResize(width: Int, height: Int) {
-        frameBuffer = ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
         glCheck { backend.glViewport(0, 0, width, height) }
         resizables.forEach { it.resize(width, height) }
     }
