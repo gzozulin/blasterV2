@@ -10,12 +10,12 @@ import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-const val WIN_WIDTH: Int = 1024
-const val WIN_HEIGHT: Int = 768
-const val FULL_WIDTH: Int = 1920
-const val FULL_HEIGHT: Int = 1080
-const val WIN_X: Int = 448
-const val WIN_Y: Int = 156
+private const val WIN_WIDTH: Int = 1024
+private const val WIN_HEIGHT: Int = 768
+private const val FULL_WIDTH: Int = 1920
+private const val FULL_HEIGHT: Int = 1080
+private const val WIN_X: Int = 448
+private const val WIN_Y: Int = 156
 
 private const val MULTISAMPLING_HINT = 4
 
@@ -30,10 +30,7 @@ typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
 class GlWindow {
-    var keyCallback: KeyCallback? = null
-    var buttonCallback: ButtonCallback? = null
-    var positionCallback: PositionCallback? = null
-    var deltaCallback: DeltaCallback? = null
+    var handle: Long? = null
 
     private val resizables = mutableListOf<GlResizable>()
 
@@ -41,16 +38,17 @@ class GlWindow {
     private var isFullscreen: Boolean = false
     private var isMultisampling: Boolean = false
 
-    var handle: Long? = null
+    var keyCallback: KeyCallback? = null
+    var buttonCallback: ButtonCallback? = null
+    var positionCallback: PositionCallback? = null
+    var deltaCallback: DeltaCallback? = null
 
     val width: Int
         get() = if (isFullscreen) FULL_WIDTH else WIN_WIDTH
     val height: Int
         get() = if (isFullscreen) FULL_HEIGHT else WIN_HEIGHT
 
-    val frameBuffer: ByteBuffer by lazy {
-        ByteBuffer.allocateDirect(FULL_WIDTH * FULL_HEIGHT * 4) // RGBA, 1 byte each
-    }
+    lateinit var frameBuffer: ByteBuffer
 
     private val cursorPos = vec2()
     private val lastCursorPos = vec2()
@@ -107,16 +105,12 @@ class GlWindow {
         glfwDestroyWindow(handle!!)
     }
 
-    fun show(onBuffer: (() -> Unit)? = null, onFrame: () -> Unit) {
+    fun show(onFrame: () -> Unit) {
         check(handle != null) { "Window is not yet created!" }
         while (!glfwWindowShouldClose(handle!!)) {
             updateCursor(handle!!)
             onFrame.invoke()
             glfwSwapBuffers(handle!!)
-            if (onBuffer != null) {
-                copyWindowBuffer()
-                onBuffer.invoke()
-            }
             glfwPollEvents()
             updateFps()
             GlProgram.stopComplaining()
@@ -145,6 +139,7 @@ class GlWindow {
     }
 
     private fun onResize(width: Int, height: Int) {
+        frameBuffer = ByteBuffer.allocateDirect(width * height * 4) // RGBA, 1 byte each
         glCheck { backend.glViewport(0, 0, width, height) }
         resizables.forEach { it.resize(width, height) }
     }
@@ -173,7 +168,7 @@ class GlWindow {
         }
     }
 
-    private fun copyWindowBuffer() {
+    fun copyWindowBuffer() {
         GL11.glReadBuffer(GL11.GL_FRONT)
         GL11.glReadPixels(0, 0, width, height, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, frameBuffer)
     }

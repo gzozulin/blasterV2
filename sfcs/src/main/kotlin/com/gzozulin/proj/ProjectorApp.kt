@@ -2,8 +2,8 @@ package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
+import org.lwjgl.glfw.GLFW
 
-// todo: switching to fullscreen
 // todo: capture: codecs pipeline
 // todo: code page positioning on the screen
 // todo: multipage/multiclass projects
@@ -16,31 +16,30 @@ import com.gzozulin.minigl.api.glUse
 // todo: highlight sections of code
 // todo: new thumbnail, new backgrounds
 // todo: capturing on/off
-
-private const val FULL_WIDTH = 1920
-private const val FULL_HEIGHT = 1080
+// todo: switching to fullscreen
 
 private val window = GlWindow()
-private val capturer = Capturer(window, FULL_WIDTH, FULL_HEIGHT)
+private val capturer = Capturer(window)
 
 private val projectorModel = ProjectorModel()
 private val projectorView = ProjectorView(projectorModel, window.width, window.height)
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {
-    window.create(resizables = listOf(projectorView), isFullscreen = true, isHoldingCursor = true) {
+    window.create(resizables = listOf(capturer, projectorView), isFullscreen = false, isHoldingCursor = false) {
         window.keyCallback = { key, pressed ->
+            if (key == GLFW.GLFW_KEY_R && pressed) {
+                capturer.isCapturing = !capturer.isCapturing
+            }
             projectorController.keyPressed(key, pressed)
         }
         glUse(projectorView) {
             capturer.capture {
-                window.show(
-                    onBuffer = {
-                        capturer.onBuffer()
-                    },
-                    onFrame = {
-                        projectorController.onFrame()
-                    })
+                window.show {
+                    projectorController.onFrame()
+                    window.copyWindowBuffer()
+                    capturer.frame()
+                }
             }
         }
     }
