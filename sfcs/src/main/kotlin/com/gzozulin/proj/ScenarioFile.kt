@@ -9,20 +9,22 @@ private val scenarioExample = """
     alias class=ProjectorModel
     
     # Here we start parsing the scenario
-    0   file/class/renderScenario
-    100 file/class/preparePage
+    offset 10
+    10  file/class/renderScenario
+    110 file/class/preparePage
     120 file/class/renderFile
-    300 file/Visitor
+    130 file/Visitor
 """.trimIndent()
 
 private val whitespaceRegex = "\\s+".toRegex()
 private val equalsRegex = "=".toRegex()
 private val slashRegex = "/".toRegex()
 
-data class ScenarioNode(val file: File, val path: List<String>, val order: Int, val frame: Int)
+data class ScenarioNode(val file: File, val path: List<String>, val frame: Int, val order: Int)
 
 class ScenarioFile(private val text: String) {
 
+    var offset = 0
     val aliases = mutableMapOf<String, String>()
     val scenario = mutableListOf<ScenarioNode>()
 
@@ -33,12 +35,17 @@ class ScenarioFile(private val text: String) {
     private fun parseScenario() {
         val lines = text.lines().filter { it.isNotBlank() && !it.startsWith("#") }
         for (line in lines) {
-            if (line.startsWith("alias")) {
-                parseAlias(line)
-            } else {
-                parseNode(line)
+            when {
+                line.startsWith("offset") -> parseOffset(line)
+                line.startsWith("alias")  -> parseAlias(line)
+                else                            -> parseNode(line)
             }
         }
+    }
+
+    private fun parseOffset(line: String) {
+        val split = line.split(whitespaceRegex)
+        offset = split[1].toInt()
     }
 
     private fun parseAlias(line: String) {
@@ -50,7 +57,8 @@ class ScenarioFile(private val text: String) {
 
     private fun parseNode(line: String) {
         val split = line.split(whitespaceRegex)
-        val frame = split[0].toInt()
+        val frame = split[0].toInt() - offset
+        check(frame >= 0) { "Frame should be positive of 0!" }
         if (scenario.isNotEmpty()) {
             check(frame >= scenario.last().frame) { "Key frames are not in order! $line" }
         }
@@ -59,7 +67,7 @@ class ScenarioFile(private val text: String) {
             .toList().toMutableList()
         val file = File(path.removeAt(0))
         check(file.exists()) { "File should exist and be reachable! $file" }
-        scenario.add(ScenarioNode(file, path, scenario.size, frame))
+        scenario.add(ScenarioNode(file, path, frame, scenario.size))
     }
 }
 

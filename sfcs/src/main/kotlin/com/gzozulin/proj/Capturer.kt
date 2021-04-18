@@ -19,7 +19,7 @@ class Capturer(window: GlWindow) : AutoCloseable {
     var isCapturing = true
 
     private val recorder by lazy {
-        FFmpegFrameRecorder("out.mkv", window.width, window.height, 0)
+        FFmpegFrameRecorder("output.mkv", window.width, window.height, 0)
             .apply {
                 videoCodec = AV_CODEC_ID_HUFFYUV
                 frameRate = 60.0

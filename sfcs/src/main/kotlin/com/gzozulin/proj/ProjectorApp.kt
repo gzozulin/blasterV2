@@ -7,14 +7,18 @@ import org.lwjgl.glfw.GLFW
 // todo: introduce offset to do not count manually
 // todo: splines for camera animation
 // todo: better highlighting for code
+// todo: do not add a newline if already exists
 // todo: code page positioning on the screen
 // todo: better on-page scrolling: center on function (stop - start)/2
-// todo: highlight sections of code
+// todo: highlight sections of code (same step, but multiple orders)
 // todo: multipage/multiclass projects
+// todo: more light in the scene
 // todo: off-screen MSAA for code
 // todo: repository, assets, projects
 // todo: new thumbnail, new backgrounds
 // todo: switching to fullscreen
+// todo: scene arrangement: me completely in the frame
+// todo: link to the code in video description
 
 private val window = GlWindow()
 private val capturer = Capturer(window)
