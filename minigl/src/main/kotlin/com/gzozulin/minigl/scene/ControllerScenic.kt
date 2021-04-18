@@ -2,65 +2,71 @@ package com.gzozulin.minigl.scene
 
 import com.gzozulin.minigl.api.*
 import org.joml.Vector3f
+import kotlin.math.abs
 
-// todo: spline for positions
-// todo: points of interest: lookat
+private const val EPSILON = 1f
+private const val SPEED = 0.05f
+private const val INERTIA = 0.02f
 
-private const val TIMEOUT_FLIGHT = 150000L
-private const val TIMEOUT_HOVER = 0L
-private const val TIMEOUT_FRAME = 16L
+private const val DTAU = 0.01f
+private const val TAU_EPSILON = 0.001f
 
-private val upVec = vec3().up()
+class ControllerScenic(private val positions: List<vec3>, private val points: List<vec3>) {
 
-data class PointOfInterest(val position: vec3, val direction: vec3)
+    // ----------------- Position ----------------
 
-class ControllerScenic(private val points: List<PointOfInterest>) {
+    private val position = vec3(positions.random())
+    private val destination = vec3(positions.random())
+    private val velocity = vec3(destination).sub(position).normalize()
+    private val ideal = vec3(destination).sub(position).normalize()
+    private val deltaPosition = vec3()
+    private val deltaInertia = vec3()
 
-    private var isHovering = true
-    private var timeout = TIMEOUT_HOVER
+    // ----------------- Direction ----------------
 
-    private var currPoi: PointOfInterest = points.first()
-    private var nextPoi: PointOfInterest = points.first()
-
-    private val position = vec3(points.first().position)
-    private val direction = vec3(points.first().direction)
-
-    private val rotationFrom = quat().identity()
-    private val rotationTo = quat().identity()
-    private val rotation = quat().identity()
+    private var tau = 0f
+    private val curr = vec3(points.random())
+    private val next = vec3(points.random())
+    private val center = vec3()
+    private val direction = vec3()
 
     fun apply(apply: (position: Vector3f, direction: Vector3f) -> Unit) {
-        if (isHovering) {
-            if (timeout < 0) {
-                selectNext()
-                timeout = TIMEOUT_FLIGHT
-                isHovering = false
-            }
-        } else {
-            interpolate()
-            if (timeout < 0) {
-                timeout = TIMEOUT_HOVER
-                isHovering = true
-            }
-        }
+        updateVelocity()
+        updatePosition()
+        updateDirection()
         apply.invoke(position, direction)
-        timeout -= TIMEOUT_FRAME
     }
 
-    private fun selectNext() {
-        currPoi = nextPoi
-        val noCurrent = points.toMutableList()
-        noCurrent.remove(currPoi)
-        nextPoi = noCurrent.random()
-        rotationFrom.identity().lookAlong(currPoi.direction, upVec)
-        rotationTo.identity().lookAlong(nextPoi.direction, upVec)
+    private fun updateVelocity() {
+        ideal.set(destination).sub(position).normalize()
+        deltaInertia.set(ideal).sub(velocity).mul(INERTIA)
+        velocity.add(deltaInertia).normalize()
     }
 
-    private fun interpolate() {
-        val progress = 1f - (timeout.toFloat() / TIMEOUT_FLIGHT.toFloat())
-        position.set(currPoi.position).lerp(nextPoi.position, progress)
-        rotationFrom.slerp(rotationTo, progress, rotation)
-        direction.set(vec3().back())
-        rotation.transformInverse(direction)
+    private fun updatePosition() {
+        deltaPosition.set(velocity).mul(SPEED)
+        position.add(deltaPosition)
+        checkDestination()
+    }
+
+    private fun checkDestination() {
+        if (position.distance(destination) < EPSILON) {
+            destination.set(positions.random())
+        }
+    }
+
+    private fun updateDirection() {
+        tau += DTAU
+        checkTau()
+        center.set(curr).lerp(next, tau)
+        direction.set(center).sub(position).normalize()
+    }
+
+    private fun checkTau() {
+        if (abs(1f - tau) <= TAU_EPSILON) {
+            tau = 0f
+            curr.set(next)
+            next.set(points.random())
+        }
     }
 }

@@ -37,11 +37,15 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     private val empty = texturesLib.loadTexture("textures/snow.png")
 
     private val camera = Camera()
-    private val controller = ControllerScenic(points = listOf(
-        PointOfInterest(vec3(1.138e2f, 1.388e2f, -5.025e1f), vec3(4.844e-1f, -3.756e-1f, -7.901e-1f)),
-        PointOfInterest(vec3(-8.189e1f, 1.131e2f, -3.284e1f), vec3(-2.556e-1f, -3.802e-1f, -8.889e-1f)),
-        PointOfInterest(vec3(8.531e1f, 1.210e2f, 1.509e2f), vec3(-2.779e-1f, -3.098e-1f, 9.093e-1f)),
-    ))
+    private val controller = ControllerScenic(
+        positions = listOf(
+            vec3(1.138e2f, 1.388e2f, -5.025e1f),
+            vec3(-8.189e1f, 1.131e2f, -3.284e1f),
+            vec3(8.531e1f, 1.210e2f, 1.509e2f)),
+        points = listOf(
+            vec3(1.138e2f, 1.388e2f, -5.025e1f),
+            vec3(-8.189e1f, 1.131e2f, -3.284e1f),
+            vec3(8.531e1f, 1.210e2f, 1.509e2f)))
 
     private val cameraLight = PointLight(bedroom.aabb.center(), vec3(1f), 350f)
     private val lights = listOf(cameraLight,
