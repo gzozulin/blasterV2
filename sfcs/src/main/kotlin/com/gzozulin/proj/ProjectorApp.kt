@@ -4,7 +4,6 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: better highlighting for code: assign color in visitor based on token, expression
 // todo: do not add a newline if already exists
 // todo: better on-page scrolling: center on function (stop - start)/2
 // todo: highlight sections of code (same step, but multiple orders)
@@ -17,6 +16,7 @@ import org.lwjgl.glfw.GLFW
 // todo: switching to fullscreen
 // todo: scene arrangement: me completely in the frame
 // todo: link to the code in video description
+// todo: highlighting for fields and variables
 
 private val window = GlWindow()
 private val capturer = Capturer(window)

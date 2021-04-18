@@ -41,6 +41,7 @@ class ScenarioFile(private val text: String) {
                 else                            -> parseNode(line)
             }
         }
+        return
     }
 
     private fun parseOffset(line: String) {

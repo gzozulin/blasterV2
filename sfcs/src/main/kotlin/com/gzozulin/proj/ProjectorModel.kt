@@ -4,7 +4,6 @@ import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.api.col3
-import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
@@ -46,7 +45,7 @@ data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                       val tokens: CommonTokenStream, val parser: KotlinParser)
 
 data class OrderedToken(val order: Int, val token: Token)
-data class OrderedSpan(val order: Int, override val text: String, override val color: col3,
+data class OrderedSpan(override val text: String, val order: Int, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
 class ProjectorModel {
@@ -119,7 +118,7 @@ class ProjectorModel {
             unclaimed.removeAll(claimedNodes)
             error("Unclaimed nodes left! $unclaimed")
         }
-        return preparePage(orderedTokens)
+        return highlightPage(orderedTokens)
     }
 
     private fun parseKotlinFile(file: File) = kotlinFiles.computeIfAbsent(file) {
@@ -130,17 +129,21 @@ class ProjectorModel {
         return@computeIfAbsent KotlinFile(chars, lexer, tokens, parser)
     }
 
-    private fun preparePage(orderedTokens: List<OrderedToken>): TextPage<OrderedSpan> {
+    private fun highlightPage(orderedTokens: List<OrderedToken>): TextPage<OrderedSpan> {
         val result = mutableListOf<OrderedSpan>()
         val orderMap = mutableMapOf<Token, Int>()
+        val colorMap = mutableMapOf<Token, col3>()
         val tokens = mutableListOf<Token>()
         for (orderedToken in orderedTokens) {
             orderMap[orderedToken.token] = orderedToken.order
             tokens.add(orderedToken.token)
         }
-        val highlightVisitor = HighlightVisitor(tokens, orderMap, result)
+        val highlightVisitor = HighlightVisitor(tokens, colorMap)
         val parser = KotlinParser(CommonTokenStream(ListTokenSource(tokens))).apply { reset() }
         highlightVisitor.visitKotlinFile(parser.kotlinFile())
+        for (token in tokens) {
+            result.add(OrderedSpan(token.text, orderMap[token]!!, colorMap[token]!!, SpanVisibility.GONE))
+        }
         return TextPage(result)
     }
 
@@ -282,18 +285,18 @@ private fun DeclCtx.identifier() = when {
 private fun DeclCtx.predeclare(tokens: CommonTokenStream): List<Token> {
     val start = start.tokenIndex.leftPadding(tokens)
     val classDecl = classDeclaration()!!
-    val stop = classDecl.classBody().start.tokenIndex
+    val stop = classDecl.classBody().start.tokenIndex // FIXME: tokenIndex + 1?
     return tokens.get(start, stop)
 }
 
 private fun DeclCtx.define(tokens: CommonTokenStream): List<Token> {
     val start = start.tokenIndex.leftPadding(tokens)
-    return tokens.get(start, stop.tokenIndex)
+    return tokens.get(start, stop.tokenIndex) // FIXME: tokenIndex + 1?
 }
 
 private fun DeclCtx.postdeclare(tokens: CommonTokenStream): List<Token> {
     val start = stop.tokenIndex.leftPadding(tokens)
-    return tokens.get(start, stop.tokenIndex)
+    return tokens.get(start, stop.tokenIndex) // FIXME: tokenIndex + 1?
 }
 
 private fun Int.leftPadding(tokens: CommonTokenStream): Int {
@@ -319,30 +322,56 @@ private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, claimed: Mu
 
 private fun List<Token>.withOrder(order: Int) = stream().map { OrderedToken(order, it) }.toList()
 
-private fun ParserRuleContext.select(tokens: List<Token>) = tokens.subList(start.tokenIndex, stop.tokenIndex)
+private fun ParserRuleContext.select(tokens: List<Token>) = tokens[start.tokenIndex]
 
-private class HighlightVisitor(val tokens: List<Token>, val orderMap: Map<Token, Int>, val result: MutableList<OrderedSpan>)
+private val kotlin_white    = col3(0.659f, 0.718f, 0.776f)
+private val kotlin_orange   = col3(0.706f, 0.427f, 0.192f)
+private val kotlin_blue     = col3(0.216f, 0.416f, 0.824f)
+private val kotlin_light_blue = col3(0.314f, 0.553f, 0.631f)
+private val kotlin_green    = col3(0.282f, 0.451f, 0.337f)
+private val kotlin_yellow   = col3(0.937f, 0.675f, 0.306f)
+private val kotlin_purple   = col3(0.596f, 0.463f, 0.667f)
+
+private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
     :  KotlinParserBaseVisitor<Unit>() {
 
+    override fun visitFunctionDeclaration(ctx: KotlinParser.FunctionDeclarationContext) {
+        updateColor(ctx.simpleIdentifier().select(tokens), kotlin_yellow)
+        super.visitFunctionDeclaration(ctx)
+    }
+
+    override fun visitPropertyDeclaration(ctx: KotlinParser.PropertyDeclarationContext) { // FIXME
+        val variableDeclaration = ctx.variableDeclaration()
+        if (variableDeclaration != null) {
+            updateColor(variableDeclaration.simpleIdentifier().select(tokens), kotlin_purple)
+        }
+        super.visitPropertyDeclaration(ctx)
+    }
+
+    override fun visitLabel(ctx: KotlinParser.LabelContext) {
+        updateColor(ctx.simpleIdentifier().select(tokens), kotlin_blue)
+        super.visitLabel(ctx)
+    }
+
     override fun visitKotlinFile(ctx: KotlinParser.KotlinFileContext) {
-        val selected = ctx.select(tokens)
-        for (token in selected) {
-            result.add(OrderedSpan(orderMap[token]!!, token.text, token.color(), SpanVisibility.GONE))
+        tokens.forEach { updateColor(it, it.color()) }
+        super.visitKotlinFile(ctx)
+    }
+
+    private fun updateColor(token: Token, color: col3) {
+        val current = colorMap[token]
+        if (current == null || current == kotlin_white) {
+            colorMap[token] = color
         }
     }
 }
-
-private val kotlin_white = vec3(0.659f, 0.718f, 0.776f)
-private val kotlin_orange = vec3(0.922f, 0.537f, 0.239f)
-private val kotlin_blue = vec3(0.314f, 0.553f, 0.631f)
-private val kotlin_green = vec3(0.282f, 0.451f, 0.337f)
 
 fun Token.color(): col3 = when (type) {
     KotlinLexer.CLASS, KotlinLexer.FUN, KotlinLexer.VAL, KotlinLexer.WHEN, KotlinLexer.IF,
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE -> kotlin_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
-    KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_blue
+    KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_light_blue
     KotlinLexer.LineStrText -> kotlin_green
     else -> kotlin_white
 }

@@ -58,7 +58,6 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
     private fun updateDirection() {
         tau += DTAU
         checkTau()
-        println(tau)
         center.set(curr).lerp(next, tau)
         direction.set(center).sub(position).normalize()
     }
