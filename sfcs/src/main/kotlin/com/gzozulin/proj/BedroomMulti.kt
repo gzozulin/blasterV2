@@ -20,10 +20,12 @@ private val controller = ControllerFirstPerson(position = model.aabb.center(), v
 private val wasdInput = WasdInput(controller)
 
 private val cameraLight = PointLight(model.aabb.center(), vec3(1f), 350f)
-private val lights = listOf(cameraLight,
-    PointLight(vec3(178.7f, 91.33f, -107.6f), vec3().yellow(), 500f),
-    PointLight(vec3(-113.8f, 104.5f, -91.5f), vec3().azure(), 1000f),
-    PointLight(vec3(28.2f, 112.2f, 193.7f), vec3().cyan(), 300f),
+private val lights = listOf(
+    cameraLight,
+    PointLight(vec3(2.732e1f, 150.3f, 5.401e1f),    vec3().white(),  800f),
+    PointLight(vec3(178.7f,   91.33f,  -107.6f),    vec3().yellow(), 500f),
+    PointLight(vec3(-113.8f,  104.5f,  -91.5f),     vec3().azure(),  1000f),
+    PointLight(vec3(28.2f,    112.2f,   193.7f),    vec3().cyan(),   300f),
 )
 
 private val modelM = constm4(mat4().identity())

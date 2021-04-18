@@ -39,19 +39,28 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     private val camera = Camera()
     private val controller = ControllerScenic(
         positions = listOf(
-            vec3(1.138e2f, 1.388e2f, -5.025e1f),
-            vec3(-8.189e1f, 1.131e2f, -3.284e1f),
-            vec3(8.531e1f, 1.210e2f, 1.509e2f)),
+            vec3(-8.511e1f, 1.148e2f,  1.536e2f),
+            vec3( 1.735e1f, 1.208e2f,  1.576e2f),
+            vec3( 1.231e2f, 1.141e2f,  1.750e2f),
+            vec3( 1.214e2f, 1.052e2f,  9.576e1f),
+            vec3( 1.236e2f, 1.099e2f, -8.687e1f),
+            vec3( 4.717e1f, 1.052e2f, -9.311e1f),
+            vec3(-9.781e1f, 1.104e2f,  1.249e1f)),
         points = listOf(
-            vec3(1.138e2f, 1.388e2f, -5.025e1f),
-            vec3(-8.189e1f, 1.131e2f, -3.284e1f),
-            vec3(8.531e1f, 1.210e2f, 1.509e2f)))
+            vec3( 1.712e2f, 8.569e1f, -1.056e2f),
+            vec3(-1.051e2f, 1.019e2f, -7.971e1f),
+            vec3( 2.484e1f, 1.106e2f,  1.942e2f),
+            vec3( 8.932e1f, 1.102e2f,  1.880e2f),
+            vec3( 1.621e2f, 1.665e2f,  7.581e1f),
+            vec3( 1.677e2f, 1.040e2f,  5.499e1f)))
 
     private val cameraLight = PointLight(bedroom.aabb.center(), vec3(1f), 350f)
-    private val lights = listOf(cameraLight,
-        PointLight(vec3(178.7f, 91.33f, -107.6f), vec3().yellow(), 500f),
-        PointLight(vec3(-113.8f, 104.5f, -91.5f), vec3().azure(), 1000f),
-        PointLight(vec3(28.2f, 112.2f, 193.7f), vec3().cyan(), 300f),
+    private val lights = listOf(
+        cameraLight,
+        PointLight(vec3(2.732e1f, 150.3f, 5.401e1f),    vec3().white(),  800f),
+        PointLight(vec3(178.7f,   91.33f,  -107.6f),    vec3().yellow(), 500f),
+        PointLight(vec3(-113.8f,  104.5f,  -91.5f),     vec3().azure(),  1000f),
+        PointLight(vec3(28.2f,    112.2f,   193.7f),    vec3().cyan(),   300f),
     )
 
     private val modelM = constm4(mat4().identity())

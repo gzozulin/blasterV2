@@ -8,8 +8,8 @@ private const val EPSILON = 1f
 private const val SPEED = 0.05f
 private const val INERTIA = 0.02f
 
-private const val DTAU = 0.01f
-private const val TAU_EPSILON = 0.001f
+private const val DTAU = 0.0001f
+private const val TAU_EPSILON = 0.01f
 
 class ControllerScenic(private val positions: List<vec3>, private val points: List<vec3>) {
 
@@ -51,13 +51,14 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
 
     private fun checkDestination() {
         if (position.distance(destination) < EPSILON) {
-            destination.set(positions.random())
+            destination.set(positions.filter { it != destination }.random())
         }
     }
 
     private fun updateDirection() {
         tau += DTAU
         checkTau()
+        println(tau)
         center.set(curr).lerp(next, tau)
         direction.set(center).sub(position).normalize()
     }
@@ -66,7 +67,7 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
         if (abs(1f - tau) <= TAU_EPSILON) {
             tau = 0f
             curr.set(next)
-            next.set(points.random())
+            next.set(points.filter { it != curr }.random())
         }
     }
 }
