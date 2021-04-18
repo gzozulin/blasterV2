@@ -22,6 +22,26 @@ const val FRAMES_PER_SPAN = 2
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
+private val exampleScenario = """
+    # Pilot scenario
+
+    alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ScenarioFile.kt
+    alias class=ScenarioFile
+
+    1	file/scenarioExample
+    2	file/ScenarioNode
+    3	file/whitespaceRegex
+    4	file/equalsRegex
+    5	file/slashRegex
+    6	file/class
+    7	file/class/aliases
+    8	file/class/scenario
+    9 	file/class/parseScenario
+    10 	file/class/parseAlias
+    11	file/class/parseNode
+    12	file/main
+""".trimIndent()
+
 data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                       val tokens: CommonTokenStream, val parser: KotlinParser)
 
@@ -30,9 +50,7 @@ data class OrderedSpan(val order: Int, override val text: String, override val c
                        override var visibility: SpanVisibility) : TextSpan
 
 class ProjectorModel {
-    private val projectScenario by lazy {
-        ScenarioFile(File("/home/greg/ep0_scenario/scenario").readText())
-    }
+    private val projectScenario by lazy { ScenarioFile(exampleScenario) }
 
     private val kotlinFiles = mutableMapOf<File, KotlinFile>()
 
@@ -87,7 +105,7 @@ class ProjectorModel {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
         val claimedNodes = mutableListOf<ScenarioNode>()
-        val visitor = Visitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
+        val visitor = DeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
             if (increment.last().token.type != KotlinLexer.NL) {
                 orderedTokens += addTrailingNl(increment)
             } else {
@@ -112,8 +130,19 @@ class ProjectorModel {
         return@computeIfAbsent KotlinFile(chars, lexer, tokens, parser)
     }
 
-    private fun preparePage(orderedTokens: MutableList<OrderedToken>) =
-        TextPage(orderedTokens.stream().map { it.toOrderedSpan() }.toList())
+    private fun preparePage(orderedTokens: List<OrderedToken>): TextPage<OrderedSpan> {
+        val result = mutableListOf<OrderedSpan>()
+        val orderMap = mutableMapOf<Token, Int>()
+        val tokens = mutableListOf<Token>()
+        for (orderedToken in orderedTokens) {
+            orderMap[orderedToken.token] = orderedToken.order
+            tokens.add(orderedToken.token)
+        }
+        val highlightVisitor = HighlightVisitor(tokens, orderMap, result)
+        val parser = KotlinParser(CommonTokenStream(ListTokenSource(tokens))).apply { reset() }
+        highlightVisitor.visitKotlinFile(parser.kotlinFile())
+        return TextPage(result)
+    }
 
     private fun prepareOrder() {
         findCurrentPage()
@@ -194,11 +223,11 @@ class ProjectorModel {
     }
 }
 
-private class Visitor(private val depth: Int,
-                      private val nodes: List<ScenarioNode>,
-                      private val claimed: MutableList<ScenarioNode>,
-                      private val tokens: CommonTokenStream,
-                      private val result: (increment: List<OrderedToken>) -> Unit)
+private class DeclVisitor(private val depth: Int,
+                          private val nodes: List<ScenarioNode>,
+                          private val claimed: MutableList<ScenarioNode>,
+                          private val tokens: CommonTokenStream,
+                          private val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
 
     override fun visitDeclaration(decl: DeclCtx) {
@@ -278,7 +307,7 @@ private fun Int.leftPadding(tokens: CommonTokenStream): Int {
 
 private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, claimed: MutableList<ScenarioNode>,
                               tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
-    val visitor = Visitor(depth, nodes, claimed, tokens, result)
+    val visitor = DeclVisitor(depth, nodes, claimed, tokens, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
         functionDeclaration() != null -> visitor.visitFunctionDeclaration(functionDeclaration())
@@ -290,8 +319,18 @@ private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, claimed: Mu
 
 private fun List<Token>.withOrder(order: Int) = stream().map { OrderedToken(order, it) }.toList()
 
-private fun OrderedToken.toOrderedSpan() =
-    OrderedSpan(order, token.text, token.color(), visibility = SpanVisibility.GONE)
+private fun ParserRuleContext.select(tokens: List<Token>) = tokens.subList(start.tokenIndex, stop.tokenIndex)
+
+private class HighlightVisitor(val tokens: List<Token>, val orderMap: Map<Token, Int>, val result: MutableList<OrderedSpan>)
+    :  KotlinParserBaseVisitor<Unit>() {
+
+    override fun visitKotlinFile(ctx: KotlinParser.KotlinFileContext) {
+        val selected = ctx.select(tokens)
+        for (token in selected) {
+            result.add(OrderedSpan(orderMap[token]!!, token.text, token.color(), SpanVisibility.GONE))
+        }
+    }
+}
 
 private val kotlin_white = vec3(0.659f, 0.718f, 0.776f)
 private val kotlin_orange = vec3(0.922f, 0.537f, 0.239f)
