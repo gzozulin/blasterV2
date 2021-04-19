@@ -66,7 +66,7 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
         if (abs(1f - tau) <= TAU_EPSILON) {
             tau = 0f
             curr.set(next)
-            next.set(points.filter { it != curr }.random())
+            next.set(points.random())
         }
     }
 }

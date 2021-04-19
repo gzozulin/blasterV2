@@ -6,17 +6,18 @@ import org.lwjgl.glfw.GLFW
 
 // todo: do not add a newline if already exists
 // todo: better on-page scrolling: center on function (stop - start)/2
-// todo: highlight sections of code (same step, but multiple orders)
 // todo: off-screen MSAA for code, just antialiasing for text before
 // todo: code page positioning on the screen
-// todo: multipage/multiclass projects
 // todo: repository, assets, projects
 // todo: fix texture for the bedroom scene
 // todo: new thumbnail, new backgrounds
+// todo: highlighting for fields and variables
+// todo: highlight sections of code (same step, but multiple orders)
+// todo: multipage/multiclass projects
 // todo: switching to fullscreen
 // todo: scene arrangement: me completely in the frame
 // todo: link to the code in video description
-// todo: highlighting for fields and variables
+// todo: support for C and GLSL
 
 private val window = GlWindow()
 private val capturer = Capturer(window)
