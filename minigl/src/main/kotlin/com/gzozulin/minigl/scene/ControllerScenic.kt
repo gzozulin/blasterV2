@@ -5,7 +5,7 @@ import org.joml.Vector3f
 import kotlin.math.abs
 
 private const val EPSILON = 1f
-private const val SPEED = 0.05f
+private const val SPEED = 0.03f
 private const val INERTIA = 0.02f
 
 private const val DTAU = 0.0001f

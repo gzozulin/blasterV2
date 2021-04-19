@@ -7,7 +7,6 @@ import org.lwjgl.glfw.GLFW
 // todo: do not add a newline if already exists
 // todo: better on-page scrolling: center on function (stop - start)/2
 // todo: off-screen MSAA for code, just antialiasing for text before
-// todo: code page positioning on the screen
 // todo: repository, assets, projects
 // todo: fix texture for the bedroom scene
 // todo: new thumbnail, new backgrounds

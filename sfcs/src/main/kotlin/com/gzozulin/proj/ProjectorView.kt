@@ -9,7 +9,7 @@ import com.gzozulin.minigl.scene.*
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.4f, fontScaleV = 0.5f,
+    fontScaleU = 0.5f, fontScaleV = 0.5f,
     fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) : GlResource(), GlResizable {
@@ -19,7 +19,7 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     // ----------------- Text ------------------
 
     private val simpleTextTechnique = SimpleTextTechnique(fontDescription, width, height)
-    private val rttTechnique = RttTechnique(1600, 1080)
+    private val rttTechnique = RttTechnique(1080, 1000)
 
     private val backgroundModelM = unifm4()
     private val backgroundViewM = constm4(mat4().identity())
@@ -29,7 +29,7 @@ class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) 
     private val backgroundSampler = unifsampler()
     private val backgroundTech = FlatTechnique(backgroundModelM, backgroundViewM, backgroundProjM, tex(backgroundTexCoords, backgroundSampler))
     private val backgroundColor = vec4(0f, 0f, 0f, 0.8f)
-    private val backgroundMesh = GlMesh.rect(1600f, 1080f)
+    private val backgroundMesh = GlMesh.rect(1080f, 1000f)
 
     // ----------------- Scene ------------------
 
