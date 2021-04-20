@@ -105,11 +105,7 @@ class ProjectorModel {
         val orderedTokens = mutableListOf<OrderedToken>()
         val claimedNodes = mutableListOf<ScenarioNode>()
         val visitor = DeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
-            if (increment.last().token.type != KotlinLexer.NL) {
-                orderedTokens += addTrailingNl(increment)
-            } else {
-                orderedTokens += increment
-            }
+            orderedTokens += increment
         }
         visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
         if (claimedNodes.size != projectScenario.scenario.size) {
@@ -269,9 +265,6 @@ private class DeclVisitor(private val depth: Int,
     }
 }
 
-private fun addTrailingNl(increment: List<OrderedToken>) =
-    listOf(*increment.toTypedArray(), OrderedToken(increment.first().order, CommonToken(KotlinParser.NL, "\n")))
-
 private fun DeclCtx.identifier() = when {
     classDeclaration() != null -> classDeclaration().simpleIdentifier().text
     functionDeclaration() != null -> functionDeclaration().simpleIdentifier().text
@@ -281,29 +274,37 @@ private fun DeclCtx.identifier() = when {
     else -> error("Unknown declaration!")
 }
 
-// FIXME: 2021-02-12 objects and functions, ctors
 private fun DeclCtx.predeclare(tokens: CommonTokenStream): List<Token> {
-    val start = start.tokenIndex.leftPadding(tokens)
-    val classDecl = classDeclaration()!!
-    val stop = classDecl.classBody().start.tokenIndex // FIXME: tokenIndex + 1?
+    val start = start.tokenIndex.withLeftWS(tokens)
+    val classDecl = classDeclaration()!! // TODO: others: objects, etc
+    val stop = classDecl.classBody().start.tokenIndex.withRightNL(tokens)
+    return tokens.get(start, stop)
+}
+
+private fun DeclCtx.postdeclare(tokens: CommonTokenStream): List<Token> {
+    val start = stop.tokenIndex.withLeftWS(tokens)
+    val stop = stop.tokenIndex.withRightNL(tokens)
     return tokens.get(start, stop)
 }
 
 private fun DeclCtx.define(tokens: CommonTokenStream): List<Token> {
-    val start = start.tokenIndex.leftPadding(tokens)
-    return tokens.get(start, stop.tokenIndex) // FIXME: tokenIndex + 1?
+    val start = start.tokenIndex.withLeftWS(tokens)
+    val stop = stop.tokenIndex.withRightNL(tokens)
+    return tokens.get(start, stop)
 }
 
-private fun DeclCtx.postdeclare(tokens: CommonTokenStream): List<Token> {
-    val start = stop.tokenIndex.leftPadding(tokens)
-    return tokens.get(start, stop.tokenIndex) // FIXME: tokenIndex + 1?
+private fun Int.withLeftWS(tokens: CommonTokenStream): Int {
+    var result = this
+    while (result > 0 && tokens.get(result - 1).type == KotlinLexer.WS) {
+        result--
+    }
+    return result
 }
 
-private fun Int.leftPadding(tokens: CommonTokenStream): Int {
-    var result = this - 1
-    // FIXME: 2021-02-12 other WS types
-    while (result >= 0 && tokens.get(result).type == KotlinLexer.WS) {
-        result --
+private fun Int.withRightNL(tokens: CommonTokenStream): Int {
+    var result = this
+    while (result <= tokens.size() && tokens.get(result + 1).type == KotlinLexer.NL) {
+        result++
     }
     return result
 }

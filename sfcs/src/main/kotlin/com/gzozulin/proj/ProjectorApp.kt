@@ -4,7 +4,6 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: do not add a newline if already exists
 // todo: better on-page scrolling: center on function (stop - start)/2
 // todo: off-screen MSAA for code, just antialiasing for text before
 // todo: repository, assets, projects
@@ -17,6 +16,7 @@ import org.lwjgl.glfw.GLFW
 // todo: scene arrangement: me completely in the frame
 // todo: link to the code in video description
 // todo: support for C and GLSL
+// todo: background music
 
 private val window = GlWindow()
 private val capturer = Capturer(window)

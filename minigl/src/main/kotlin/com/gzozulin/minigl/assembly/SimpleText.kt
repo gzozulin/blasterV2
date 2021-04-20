@@ -93,7 +93,7 @@ class SimpleTextTechnique(
     private fun updateCursor(line: Int, letter: Int) {
         cursor.identity().setTranslation(
             letter * fontDescription.letterSizeU * fontDescription.fontStepScaleU - windowWidth/2f,
-            windowHeight/2f - fontDescription.letterSizeV * (line + 1) * fontDescription.fontStepScaleV,
+            windowHeight/2f - fontDescription.letterSizeV * (line + 1.5f) * fontDescription.fontStepScaleV,
             0f)
         modelM.value = cursor
     }
