@@ -19,7 +19,7 @@ import kotlin.streams.toList
 const val LINES_TO_SHOW = 22
 
 const val FRAMES_PER_SPAN = 2
-const val FRAMES_PER_LINE = 3
+const val FRAMES_PER_LINE = 2
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 

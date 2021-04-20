@@ -6,6 +6,30 @@ import java.util.concurrent.atomic.AtomicInteger
 const val VERSION = "#version 460"
 const val PRECISION_HIGH = "precision highp float;"
 
+private const val EXPR_X = """
+    float expr_x(vec4 v) {
+        return v.x;
+    }
+"""
+
+private const val EXPR_Y = """
+    float expr_y(vec4 v) {
+        return v.y;
+    }
+"""
+
+private const val EXPR_Z = """
+    float expr_z(vec4 v) {
+        return v.z;
+    }
+"""
+
+private const val EXPR_W = """
+    float expr_w(vec4 v) {
+        return v.w;
+    }
+"""
+
 private const val EXPR_TILE =
     "vec2 expr_tile(vec2 texCoord, ivec2 uv, ivec2 cnt) {\n" +
         "    vec2 result;\n" +
@@ -27,7 +51,7 @@ private const val EXPR_DISCARD =
 
 private const val EXPR_NEAR =
     "bool expr_near(float left, float right) {\n" +
-            "    return abs(left - right) < 0.001;\n" +
+            "    return abs(left - right) < 0.00001;\n" +
             "}\n"
 
 private const val EXPR_NEAR_V4 =
@@ -112,9 +136,11 @@ private const val EXPR_SPECULAR_CONTRIB = """
     }
 """
 
-const val DECLARATIONS_VERT = EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
+const val DECLARATIONS_VERT = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+        EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
 
-const val DECLARATIONS_FRAG = EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
+const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+        EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
         EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
         EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
         EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
@@ -401,4 +427,47 @@ fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
 
 // ------------------------- Accessors -------------------------
 
-// x, y, z, w, u, v, swizzles
+fun getx(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun decl() = expr.decl()
+    override fun vrbl() = expr.vrbl()
+    override fun expr() = "expr_x(${expr.expr()})"
+
+    override fun submit(program: GlProgram) {
+        expr.submit(program)
+    }
+}
+
+fun gety(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun decl() = expr.decl()
+    override fun vrbl() = expr.vrbl()
+    override fun expr() = "expr_y(${expr.expr()})"
+
+    override fun submit(program: GlProgram) {
+        expr.submit(program)
+    }
+}
+
+fun getz(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun decl() = expr.decl()
+    override fun vrbl() = expr.vrbl()
+    override fun expr() = "expr_z(${expr.expr()})"
+
+    override fun submit(program: GlProgram) {
+        expr.submit(program)
+    }
+}
+
+fun getw(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun decl() = expr.decl()
+    override fun vrbl() = expr.vrbl()
+    override fun expr() = "expr_w(${expr.expr()})"
+
+    override fun submit(program: GlProgram) {
+        expr.submit(program)
+    }
+}
+
+fun getr(expr: Expression<vec4>) = getx(expr)
+fun getg(expr: Expression<vec4>) = gety(expr)
+fun getb(expr: Expression<vec4>) = getz(expr)
+fun geta(expr: Expression<vec4>) = getw(expr)

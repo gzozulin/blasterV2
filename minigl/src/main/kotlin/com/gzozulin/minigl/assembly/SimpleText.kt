@@ -54,33 +54,28 @@ class SimpleTextTechnique(
 
     private val rect = GlMesh.rect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
     private val font = texturesLib.loadTexture(fontDescription.textureFilename)
-        .copy(minFilter = backend.GL_NEAREST, magFilter = backend.GL_NEAREST)
-
-    private val texCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
+        .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
 
     private val cursor = mat4().identity()
+    private val tileUV = vec2i(0)
 
+    private val texCoord = varying<vec2>(SimpleVarrying.vTexCoord.name)
     private val modelM = unifm4(cursor)
-
     private val unifProj = unifm4(mat4().identity())
     private val unifCenter = unifm4(mat4().identity())
 
-    init {
-        resize(windowWidth, windowHeight)
-    }
-
-    private val tileUV = vec2i(0)
     private val unifTileUV = unifv2i(tileUV)
     private val texCoordTiled = tile(texCoord, unifTileUV, constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
 
     private val uniformColor = unifv4()
-    private val fontCheck = near(tex(texCoordTiled, unifsampler(font)), constv4(vec4(1f)))
+    private val fontCheck = eq(geta(tex(texCoordTiled, unifsampler(font))), constf(1f))
     private val result = ifexp(fontCheck, uniformColor, discard())
 
     private val simpleTechnique = FlatTechnique(modelM, unifCenter, unifProj, result)
 
     init {
         addChildren(simpleTechnique, rect, font)
+        resize(windowWidth, windowHeight)
     }
 
     override fun resize(width: Int, height: Int) {
@@ -201,7 +196,7 @@ private val examplePage = TextPage(listOf(
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.296875f, fontScaleV = 0.40625f,
+    fontScaleU = 0.5f, fontScaleV = 0.5f,
     fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)
