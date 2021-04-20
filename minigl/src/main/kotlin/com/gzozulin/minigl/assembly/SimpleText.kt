@@ -65,11 +65,14 @@ class SimpleTextTechnique(
     private val unifCenter = unifm4(mat4().identity())
 
     private val unifTileUV = unifv2i(tileUV)
-    private val texCoordTiled = tile(texCoord, unifTileUV, constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
+    private val texCoordTiled = tile(texCoord, unifTileUV,
+        constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
 
     private val uniformColor = unifv4()
-    private val fontCheck = eq(geta(tex(texCoordTiled, unifsampler(font))), constf(1f))
-    private val result = ifexp(fontCheck, uniformColor, discard())
+    private val fontColor = cachev4(tex(texCoordTiled, unifsampler(font)))
+    private val fontCheck = eq(geta(fontColor), constf(1f))
+    private val resultColor = seta(uniformColor, getr(fontColor))
+    private val result = resultColor//ifexp(fontCheck, resultColor, discard()) // TODO
 
     private val simpleTechnique = FlatTechnique(modelM, unifCenter, unifProj, result)
 
@@ -117,30 +120,32 @@ class SimpleTextTechnique(
         check(fromLine in 0 until toLine) { "wtf?!" }
         var currentLetter = 0
         var currentLine = 0
-        simpleTechnique.draw {
-            for (span in page.spans) {
-                if (span.visibility == SpanVisibility.GONE) {
-                    continue
-                }
-                updateSpan(span)
-                for (character in span.text) {
-                    if (character == '\n') {
-                        currentLetter = 0
-                        currentLine++
+        glBlend {
+            simpleTechnique.draw {
+                for (span in page.spans) {
+                    if (span.visibility == SpanVisibility.GONE) {
                         continue
                     }
-                    if (currentLine < fromLine) {
-                        continue
+                    updateSpan(span)
+                    for (character in span.text) {
+                        if (character == '\n') {
+                            currentLetter = 0
+                            currentLine++
+                            continue
+                        }
+                        if (currentLine < fromLine) {
+                            continue
+                        }
+                        if (currentLine >= toLine) {
+                            return@draw
+                        }
+                        if (span.visibility == SpanVisibility.VISIBLE) {
+                            updateCursor(currentLine - fromLine, currentLetter)
+                            updateGlyph(character)
+                            simpleTechnique.instance(rect, font)
+                        }
+                        currentLetter ++
                     }
-                    if (currentLine >= toLine) {
-                        return@draw
-                    }
-                    if (span.visibility == SpanVisibility.VISIBLE) {
-                        updateCursor(currentLine - fromLine, currentLetter)
-                        updateGlyph(character)
-                        simpleTechnique.instance(rect, font)
-                    }
-                    currentLetter ++
                 }
             }
         }

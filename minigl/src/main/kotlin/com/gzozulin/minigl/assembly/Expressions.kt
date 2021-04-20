@@ -30,6 +30,30 @@ private const val EXPR_W = """
     }
 """
 
+private const val EXPR_SET_X = """
+    vec4 expr_set_x(vec4 vec, float x) {
+        return vec4(x, vec.y, vec.z, vec.w);
+    }
+"""
+
+private const val EXPR_SET_Y = """
+    vec4 expr_set_y(vec4 vec, float y) {
+        return vec4(vec.x, y, vec.z, vec.w);
+    }
+"""
+
+private const val EXPR_SET_Z = """
+    vec4 expr_set_z(vec4 vec, float z) {
+        return vec4(vec.x, vec.y, z, vec.w);
+    }
+"""
+
+private const val EXPR_SET_W = """
+    vec4 expr_set_w(vec4 vec, float w) {
+        return vec4(vec.x, vec.y, vec.z, w);
+    }
+"""
+
 private const val EXPR_TILE =
     "vec2 expr_tile(vec2 texCoord, ivec2 uv, ivec2 cnt) {\n" +
         "    vec2 result;\n" +
@@ -137,9 +161,11 @@ private const val EXPR_SPECULAR_CONTRIB = """
 """
 
 const val DECLARATIONS_VERT = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+        EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
         EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
 
 const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+        EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
         EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
         EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
         EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
@@ -471,3 +497,52 @@ fun getr(expr: Expression<vec4>) = getx(expr)
 fun getg(expr: Expression<vec4>) = gety(expr)
 fun getb(expr: Expression<vec4>) = getz(expr)
 fun geta(expr: Expression<vec4>) = getw(expr)
+
+fun setx(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun decl() = vec.decl() + w.decl()
+    override fun vrbl() = vec.vrbl() + w.vrbl()
+    override fun expr() = "expr_set_x(${vec.expr()}, ${w.expr()})"
+
+    override fun submit(program: GlProgram) {
+        vec.submit(program)
+        w.submit(program)
+    }
+}
+
+fun sety(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun decl() = vec.decl() + w.decl()
+    override fun vrbl() = vec.vrbl() + w.vrbl()
+    override fun expr() = "expr_set_y(${vec.expr()}, ${w.expr()})"
+
+    override fun submit(program: GlProgram) {
+        vec.submit(program)
+        w.submit(program)
+    }
+}
+
+fun setz(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun decl() = vec.decl() + w.decl()
+    override fun vrbl() = vec.vrbl() + w.vrbl()
+    override fun expr() = "expr_set_z(${vec.expr()}, ${w.expr()})"
+
+    override fun submit(program: GlProgram) {
+        vec.submit(program)
+        w.submit(program)
+    }
+}
+
+fun setw(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun decl() = vec.decl() + w.decl()
+    override fun vrbl() = vec.vrbl() + w.vrbl()
+    override fun expr() = "expr_set_w(${vec.expr()}, ${w.expr()})"
+
+    override fun submit(program: GlProgram) {
+        vec.submit(program)
+        w.submit(program)
+    }
+}
+
+fun setr(vec: Expression<vec4>, r: Expression<Float>) = setx(vec, r)
+fun setg(vec: Expression<vec4>, g: Expression<Float>) = sety(vec, g)
+fun setb(vec: Expression<vec4>, b: Expression<Float>) = setz(vec, b)
+fun seta(vec: Expression<vec4>, a: Expression<Float>) = setw(vec, a)

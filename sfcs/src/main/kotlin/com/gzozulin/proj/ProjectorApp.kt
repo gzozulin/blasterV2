@@ -4,7 +4,8 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: off-screen MSAA for code, just antialiasing for text before
+// todo: fix what is left for SimpleTextTechnique
+// todo: off-screen MSAA for Deferred technique
 // todo: repository, assets, projects
 // todo: fix texture for the bedroom scene
 // todo: new thumbnail, new backgrounds
