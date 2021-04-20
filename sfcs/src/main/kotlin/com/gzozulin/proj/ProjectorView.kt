@@ -10,7 +10,7 @@ private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
     fontScaleU = 0.5f, fontScaleV = 0.5f,
-    fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
+    fontStepScaleU = 0.5f, fontStepScaleV = 0.8f)
 
 class ProjectorView(private val model: ProjectorModel, width: Int, height: Int) : GlResource(), GlResizable {
 

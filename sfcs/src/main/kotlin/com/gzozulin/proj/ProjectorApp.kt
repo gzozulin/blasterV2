@@ -4,21 +4,6 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: fix what is left for SimpleTextTechnique
-// todo: off-screen MSAA for Deferred technique
-// todo: repository, assets, projects
-// todo: fix texture for the bedroom scene
-// todo: new thumbnail, new backgrounds
-// todo: highlighting for fields and variables
-// todo: highlight sections of code (same step, but multiple orders)
-// todo: multipage/multiclass projects
-// todo: switching to fullscreen
-// todo: scene arrangement: me completely in the frame
-// todo: link to the code in video description
-// todo: support for C and GLSL
-// todo: background music
-// todo: crash main thread if parsing issue
-
 private val window = GlWindow()
 private val capturer = Capturer(window)
 

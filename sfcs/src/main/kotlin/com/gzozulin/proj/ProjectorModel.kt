@@ -16,7 +16,7 @@ import java.io.File
 import kotlin.math.abs
 import kotlin.streams.toList
 
-const val LINES_TO_SHOW = 22
+const val LINES_TO_SHOW = 20
 
 const val FRAMES_PER_SPAN = 2
 const val FRAMES_PER_LINE = 2
