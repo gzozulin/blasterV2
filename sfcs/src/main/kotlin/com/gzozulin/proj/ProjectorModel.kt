@@ -17,36 +17,42 @@ import kotlin.math.abs
 import kotlin.streams.toList
 
 const val LINES_TO_SHOW = 22
+
 const val FRAMES_PER_SPAN = 2
+const val FRAMES_PER_LINE = 3
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 private val exampleScenario = """
     # Pilot scenario
 
-    alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ScenarioFile.kt
-    alias class=ScenarioFile
+    alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
+    alias class=ProjectorModel
 
-    1	file/scenarioExample
-    2	file/ScenarioNode
-    3	file/whitespaceRegex
-    4	file/equalsRegex
-    5	file/slashRegex
-    6	file/class
-    7	file/class/aliases
-    8	file/class/scenario
-    9 	file/class/parseScenario
-    10 	file/class/parseAlias
-    11	file/class/parseNode
-    12	file/main
+    0   file/class
+    1   file/class/renderScenario
+    2   file/class/advanceSpans
+    3   file/class/advanceScenario
+    4   file/class/splitPerFile
+    5   file/class/renderConcurrently
+    6   file/class/renderFile
+    7   file/class/parseKotlinFile
+    8   file/KotlinFile
+    9   file/class/highlightPage
+    10  file/LINES_TO_SHOW
+    11  file/class/prepareOrder
+    12  file/DeclCtx
+    13  file/exampleScenario
 """.trimIndent()
 
-data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
+private data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                       val tokens: CommonTokenStream, val parser: KotlinParser)
 
 data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(override val text: String, val order: Int, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
+
+private enum class AnimationState { WAITING_KEY_FRAME, SCROLLING, ADVANCING_SPANS }
 
 class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(exampleScenario) }
@@ -56,9 +62,11 @@ class ProjectorModel {
     private val renderedPages = mutableListOf<TextPage<OrderedSpan>>()
 
     lateinit var currentPage: TextPage<OrderedSpan>
-    var currentPageCenter = 0
 
-    private var isWaitingKeyFrame = true
+    var currentPageCenter = 0
+    private var expectedPageCenter = 0
+
+    private var animationState = AnimationState.WAITING_KEY_FRAME
 
     private var currentFrame = 0
     private var currentOrder = 0
@@ -72,10 +80,10 @@ class ProjectorModel {
 
     fun advanceScenario() {
         currentFrame++
-        if (isWaitingKeyFrame) {
-            waitForKeyFrame()
-        } else {
-            advanceSpans()
+        when (animationState) {
+            AnimationState.WAITING_KEY_FRAME -> waitForKeyFrame()
+            AnimationState.SCROLLING -> scrollToPageCenter()
+            AnimationState.ADVANCING_SPANS -> advanceSpans()
         }
     }
 
@@ -181,8 +189,7 @@ class ProjectorModel {
         if (currentFrame % FRAMES_PER_SPAN == 0) {
             val found = findNextInvisibleSpan()
             if (found != null) {
-                found.visibility = SpanVisibility.VISIBLE
-                updatePageCenter(found)
+                showNextInvisibleSpan(found)
             } else {
                 val haveNext = nextOrder()
                 if (haveNext) {
@@ -190,7 +197,7 @@ class ProjectorModel {
                 } else {
                     nextKeyFrame = Int.MAX_VALUE
                 }
-                isWaitingKeyFrame = true
+                animationState = AnimationState.WAITING_KEY_FRAME
             }
         }
     }
@@ -202,17 +209,32 @@ class ProjectorModel {
                     it.text.isNotBlank()
         }
 
-    private fun updatePageCenter(span: OrderedSpan) {
+    private fun showNextInvisibleSpan(span: OrderedSpan) {
         val newCenter = currentPage.findLineNo(span)
         val delta = newCenter - currentPageCenter
         if (abs(delta) >= LINES_TO_SHOW) {
-            currentPageCenter += delta - (LINES_TO_SHOW - 1)
+            expectedPageCenter += delta - (LINES_TO_SHOW - 1)
+            if (currentPageCenter != expectedPageCenter) {
+                animationState = AnimationState.SCROLLING
+                return // need to scroll first
+            }
+        }
+        span.visibility = SpanVisibility.VISIBLE
+    }
+
+    private fun scrollToPageCenter() {
+        if (currentFrame % FRAMES_PER_LINE == 0) {
+            when {
+                expectedPageCenter > currentPageCenter -> currentPageCenter++
+                expectedPageCenter < currentPageCenter -> currentPageCenter--
+                else -> animationState = AnimationState.ADVANCING_SPANS
+            }
         }
     }
 
     private fun waitForKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
-            isWaitingKeyFrame = false
+            animationState = AnimationState.ADVANCING_SPANS
         }
     }
 
@@ -257,7 +279,7 @@ private class DeclVisitor(private val depth: Int,
                 node.path.size >  nextDepth -> children.add(node)
             }
         }
-        check(parents.size == 1) { "Only one parent declaration allowed!" }
+        check(parents.size == 1) { "Only one parent declaration allowed, but single is required!" }
         result.invoke(decl.predeclare(tokens).withOrder(parents.first().order))
         decl.visitNext(depth + 1, children, claimed, tokens, result)
         result.invoke(decl.postdeclare(tokens).withOrder(parents.first().order))

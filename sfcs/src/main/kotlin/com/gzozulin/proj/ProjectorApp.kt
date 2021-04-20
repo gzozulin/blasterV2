@@ -4,7 +4,6 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.api.glUse
 import org.lwjgl.glfw.GLFW
 
-// todo: better on-page scrolling: center on function (stop - start)/2
 // todo: off-screen MSAA for code, just antialiasing for text before
 // todo: repository, assets, projects
 // todo: fix texture for the bedroom scene
@@ -17,6 +16,7 @@ import org.lwjgl.glfw.GLFW
 // todo: link to the code in video description
 // todo: support for C and GLSL
 // todo: background music
+// todo: crash main thread if parsing issue
 
 private val window = GlWindow()
 private val capturer = Capturer(window)
