@@ -428,6 +428,17 @@ fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Bool
     }
 }
 
+fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun decl() = left.decl() + right.decl()
+    override fun vrbl() = left.vrbl() + right.vrbl()
+    override fun expr() = "(${left.expr()} > ${right.expr()})"
+
+    override fun submit(program: GlProgram) {
+        left.submit(program)
+        right.submit(program)
+    }
+}
+
 fun <R> near(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
     override fun decl() = left.decl() + right.decl()
     override fun vrbl() = left.vrbl() + right.vrbl()

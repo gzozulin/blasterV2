@@ -70,9 +70,9 @@ class SimpleTextTechnique(
 
     private val uniformColor = unifv4()
     private val fontColor = cachev4(tex(texCoordTiled, unifsampler(font)))
-    private val fontCheck = eq(geta(fontColor), constf(1f))
+    private val fontCheck = more(geta(fontColor), constf(0f))
     private val resultColor = seta(uniformColor, getr(fontColor))
-    private val result = resultColor//ifexp(fontCheck, resultColor, discard()) // TODO
+    private val result = ifexp(fontCheck, resultColor, discard())
 
     private val simpleTechnique = FlatTechnique(modelM, unifCenter, unifProj, result)
 

@@ -15,8 +15,8 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
 
     // ----------------- Position ----------------
 
-    private val position = vec3(positions.random())
-    private val destination = vec3(positions.random())
+    private val position = vec3(positions[0])
+    private val destination = vec3(positions[1])
     private val velocity = vec3(destination).sub(position).normalize()
     private val ideal = vec3(destination).sub(position).normalize()
     private val deltaPosition = vec3()
