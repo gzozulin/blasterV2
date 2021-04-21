@@ -15,14 +15,20 @@
       <w>highlevel</w>
       <w>highp</w>
       <w>identificatior</w>
+      <w>mmodel</w>
+      <w>mproj</w>
       <w>multipage</w>
+      <w>mview</w>
       <w>phong</w>
       <w>postdeclare</w>
       <w>predeclare</w>
       <w>resizables</w>
       <w>sfcs</w>
       <w>templ</w>
+      <w>tmodel</w>
+      <w>tproj</w>
       <w>transp</w>
+      <w>tview</w>
       <w>unif</w>
       <w>vrbl</w>
     </words>

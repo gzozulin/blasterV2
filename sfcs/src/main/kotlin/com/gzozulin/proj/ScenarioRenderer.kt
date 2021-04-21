@@ -39,31 +39,32 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
         return result
     }
 
-    private fun renderConcurrently(nodesToFiles: Map<File, List<ScenarioNode>>) {
-        runBlocking {
-            val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
-            for (pairs in nodesToFiles) {
-                deferred.add(async { renderFile(pairs.key, pairs.value) })
-            }
-            pages.addAll(deferred.awaitAll())
-        }
+    private fun renderConcurrently(nodesToFiles: Map<File, List<ScenarioNode>>) = runBlocking {
+        val claimedNodes = mutableListOf<ScenarioNode>()
+        val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
+        nodesToFiles.forEach { deferred.add(async { renderFile(it.key, it.value, claimedNodes)}) }
+        pages.addAll(deferred.awaitAll())
+        enforceAllNodesClaimed(claimedNodes)
     }
 
-    private fun renderFile(file: File, nodes: List<ScenarioNode>): TextPage<OrderedSpan> {
+    private fun renderFile(file: File, nodes: List<ScenarioNode>,
+                           claimedNodes: MutableList<ScenarioNode>): TextPage<OrderedSpan> {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
-        val claimedNodes = mutableListOf<ScenarioNode>()
         val visitor = DeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
             orderedTokens += increment
         }
         visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
+        return highlightPage(orderedTokens)
+    }
+
+    private fun enforceAllNodesClaimed(claimedNodes: List<ScenarioNode>) {
         if (claimedNodes.size != scenarioFile.scenario.size) {
             val unclaimed = mutableListOf<ScenarioNode>()
             unclaimed.addAll(scenarioFile.scenario)
             unclaimed.removeAll(claimedNodes)
             error("Unclaimed nodes left! $unclaimed")
         }
-        return highlightPage(orderedTokens)
     }
 
     private fun parseKotlinFile(file: File) = kotlinFiles.computeIfAbsent(file) {
@@ -256,7 +257,7 @@ fun Token.color(): col3 = when (type) {
     KotlinLexer.CLASS, KotlinLexer.FUN, KotlinLexer.VAL, KotlinLexer.WHEN, KotlinLexer.IF,
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE, KotlinLexer.CONST, KotlinLexer.DATA,
-    KotlinLexer.TYPE_ALIAS, KotlinLexer.AS -> kotlin_orange
+    KotlinLexer.TYPE_ALIAS, KotlinLexer.AS, KotlinLexer.BY -> kotlin_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
     KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_light_blue
     KotlinLexer.LineStrText -> kotlin_green

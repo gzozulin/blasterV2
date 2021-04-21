@@ -18,23 +18,22 @@ typealias DeclCtx = KotlinParser.DeclarationContext
 private val exampleScenario = """
     # Pilot scenario
 
-    alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
-    alias class=ProjectorModel
+    alias file1=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
+    alias file2=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ScenarioRenderer.kt
+    alias class1=ProjectorModel
+    alias class2=ScenarioRenderer
 
-    0   file/class
-    1   file/class/projectScenario
-    2   file/class/scenarioRenderer
-    3   file/class/renderScenario
-    4   file/class/advanceSpans
-    5   file/class/advanceScenario
-    6   file/class/findCurrentPage
-    7   file/class/makeOrderInvisible
-    8   file/class/findOrderFrame
-    9   file/class/showNextInvisibleSpan
-    10  file/LINES_TO_SHOW
-    11  file/class/prepareOrder
-    12  file/DeclCtx
-    13  file/exampleScenario
+    0   file1/class1
+    1   file1/class1/projectScenario
+    2   file1/class1/scenarioRenderer
+    3   file1/class1/renderScenario
+    4   file1/class1/advanceSpans
+    
+    5   file2/class2
+    6   file2/class2/renderScenario
+    7   file2/class2/splitPerFile
+    8   file2/class2/renderConcurrently
+    9   file2/KotlinFile
 """.trimIndent()
 
 data class OrderedToken(val order: Int, val token: Token)
