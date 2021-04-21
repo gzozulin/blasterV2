@@ -7,6 +7,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 private var scenarioLoaded = false
+private val exceptionHandler = Thread.currentThread().uncaughtExceptionHandler
 
 open class State(
     protected val parent: ProjectorController,
@@ -27,7 +28,11 @@ class StateCozyRoomIntro(
     override fun onEnter() {
         super.onEnter()
         GlobalScope.launch {
-            model.renderScenario()
+            try {
+                model.renderScenario()
+            } catch (th: Throwable) {
+                exceptionHandler.uncaughtException(Thread.currentThread(), th)
+            }
             scenarioLoaded = true
         }
         view.fadeIn()
