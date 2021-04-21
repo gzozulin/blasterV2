@@ -203,6 +203,7 @@ private val kotlin_light_blue = col3(0.314f, 0.553f, 0.631f)
 private val kotlin_green    = col3(0.282f, 0.451f, 0.337f)
 private val kotlin_yellow   = col3(0.937f, 0.675f, 0.306f)
 private val kotlin_purple   = col3(0.596f, 0.463f, 0.667f)
+private val kotlin_red      = col3(0.780f, 0.329f, 0.314f)
 
 private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
     :  KotlinParserBaseVisitor<Unit>() {
@@ -212,7 +213,7 @@ private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap
         super.visitFunctionDeclaration(ctx)
     }
 
-    override fun visitPropertyDeclaration(ctx: KotlinParser.PropertyDeclarationContext) { // FIXME
+    override fun visitPropertyDeclaration(ctx: KotlinParser.PropertyDeclarationContext) {
         val variableDeclaration = ctx.variableDeclaration()
         if (variableDeclaration != null) {
             updateColor(variableDeclaration.simpleIdentifier().select(tokens), kotlin_purple)
@@ -220,9 +221,22 @@ private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap
         super.visitPropertyDeclaration(ctx)
     }
 
+    override fun visitDirectlyAssignableExpression(ctx: KotlinParser.DirectlyAssignableExpressionContext) {
+        if (ctx.simpleIdentifier() != null) {
+            updateColor(ctx.simpleIdentifier().select(tokens), kotlin_purple)
+        }
+        super.visitDirectlyAssignableExpression(ctx)
+    }
+
     override fun visitLabel(ctx: KotlinParser.LabelContext) {
         updateColor(ctx.simpleIdentifier().select(tokens), kotlin_blue)
         super.visitLabel(ctx)
+    }
+
+    override fun visitStringLiteral(ctx: KotlinParser.StringLiteralContext) {
+        val update = tokens.subList(ctx.start.tokenIndex, ctx.stop.tokenIndex + 1)
+        update.forEach { updateColor(it, kotlin_green) }
+        super.visitStringLiteral(ctx)
     }
 
     override fun visitKotlinFile(ctx: KotlinParser.KotlinFileContext) {
@@ -242,9 +256,9 @@ fun Token.color(): col3 = when (type) {
     KotlinLexer.CLASS, KotlinLexer.FUN, KotlinLexer.VAL, KotlinLexer.WHEN, KotlinLexer.IF,
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE, KotlinLexer.CONST, KotlinLexer.DATA,
-    KotlinLexer.TYPE_ALIAS -> kotlin_orange
+    KotlinLexer.TYPE_ALIAS, KotlinLexer.AS -> kotlin_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
     KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_light_blue
     KotlinLexer.LineStrText -> kotlin_green
-    else -> kotlin_white
+    else -> if (text != "error") kotlin_white else kotlin_red
 }
