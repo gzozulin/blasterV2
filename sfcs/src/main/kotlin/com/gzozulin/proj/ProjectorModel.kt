@@ -22,12 +22,14 @@ private val exampleScenario = """
     alias class=ProjectorModel
 
     0   file/class
-    1   file/class/renderScenario
-    2   file/class/advanceSpans
-    3   file/class/advanceScenario
-    4   file/class/findCurrentPage
-    5   file/class/makeOrderInvisible
-    6   file/class/findOrderFrame
+    1   file/class/projectScenario
+    2   file/class/scenarioRenderer
+    3   file/class/renderScenario
+    4   file/class/advanceSpans
+    5   file/class/advanceScenario
+    6   file/class/findCurrentPage
+    7   file/class/makeOrderInvisible
+    8   file/class/findOrderFrame
     9   file/class/showNextInvisibleSpan
     10  file/LINES_TO_SHOW
     11  file/class/prepareOrder
@@ -42,8 +44,8 @@ data class OrderedSpan(override val text: String, val order: Int, override val c
 private enum class AnimationState { WAITING_KEY_FRAME, SCROLLING, ADVANCING_SPANS }
 
 class ProjectorModel {
-    private val projectScenario by lazy { ScenarioFile(exampleScenario) }
-    private val scenarioRenderer by lazy { ScenarioRenderer(projectScenario) }
+    private val projectScenario by lazy { ScenarioFile(text = exampleScenario) }
+    private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
     private lateinit var pages: List<TextPage<OrderedSpan>>
     lateinit var currentPage: TextPage<OrderedSpan>

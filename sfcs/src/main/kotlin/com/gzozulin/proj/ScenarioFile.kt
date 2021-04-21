@@ -38,7 +38,7 @@ class ScenarioFile(private val text: String) {
             when {
                 line.startsWith("offset") -> parseOffset(line)
                 line.startsWith("alias")  -> parseAlias(line)
-                else                            -> parseNode(line)
+                else                      -> parseNode(line)
             }
         }
         return

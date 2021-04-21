@@ -12,7 +12,9 @@ private val projectorView = ProjectorView(projectorModel, window.width, window.h
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {
-    window.create(resizables = listOf(projectorView), isFullscreen = true, isHoldingCursor = false) {
+    window.create(
+        resizables = listOf(projectorView),
+        isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.keyCallback = { key, pressed ->
             if (key == GLFW.GLFW_KEY_R && pressed) {
                 capturer.isCapturing = !capturer.isCapturing
