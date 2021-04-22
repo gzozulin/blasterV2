@@ -20,12 +20,17 @@ private val codeModelM = mat4().identity()
 
 private const val MINIMAP_PANEL_WIDTH = 300
 private const val MINIMAP_PANEL_HEIGHT = 1000
-private const val MINIMAP_PANEL_POS_X = SCREEN_WIDTH / 2f + 550
+private const val MINIMAP_CURSOR_HEIGHT = 300
+private const val MINIMAP_PANEL_POS_X = SCREEN_WIDTH / 2f + 490
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
 private val minimapModelM = mat4().identity()
     .translate(MINIMAP_PANEL_POS_X, MINIMAP_PANEL_POS_Y, 0f)
     .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_PANEL_HEIGHT.toFloat(), 1f)
+
+private val minimapCursorModelM = mat4().identity()
+    .translate(MINIMAP_PANEL_POS_X, MINIMAP_PANEL_POS_Y, 0f)
+    .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
 
 private val codeFontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
@@ -48,6 +53,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
 
     private val minimapTextTechnique = SimpleTextTechnique(minimapFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
     private val minimapRttTechnique = RttTechnique(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
+    private val minimapCursorTechnique = RttTechnique(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
+    private val minimapCursorColor = vec4(0.25f)
 
     private val panelModelM = unifm4()
     private val panelViewM = constm4(mat4().identity())
@@ -104,8 +111,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     init {
-        addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, crossFadeTechnique,
-            panelTechnique, panelMesh, deferredTechnique, bedroomModel, noiseTexture)
+        addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, minimapCursorTechnique,
+            crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel, noiseTexture)
     }
 
     // 1080p only
@@ -158,14 +165,21 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
                 glClear(panelColor)
                 minimapTextTechnique.page(model.currentPage)
             }
+            minimapCursorTechnique.render {
+                glClear(minimapCursorColor)
+            }
             glBlend {
                 panelTechnique.draw {
-                    glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0) {
+                    glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0,
+                        minimapCursorTechnique.colorAttachment0) {
                         panelSampler.value = codeRttTechnique.colorAttachment0
                         panelModelM.value = codeModelM
                         panelTechnique.instance(panelMesh)
                         panelSampler.value = minimapRttTechnique.colorAttachment0
                         panelModelM.value = minimapModelM
+                        panelTechnique.instance(panelMesh)
+                        panelSampler.value = minimapCursorTechnique.colorAttachment0
+                        panelModelM.value = minimapCursorModelM
                         panelTechnique.instance(panelMesh)
                     }
                 }
