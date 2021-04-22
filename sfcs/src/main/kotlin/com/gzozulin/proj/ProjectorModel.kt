@@ -28,12 +28,16 @@ private val exampleScenario = """
     2   file1/class1/scenarioRenderer
     3   file1/class1/renderScenario
     4   file1/class1/advanceSpans
+    5   file1/class1/advanceScenario
+    6   file1/class1/findCurrentPage
+    7   file1/class1/makeOrderInvisible
+    8   file1/class1/findOrderFrame
+    9   file1/class1/showNextInvisibleSpan
+    10  file1/LINES_TO_SHOW
+    11  file1/class1/prepareOrder
+    12  file1/DeclCtx
+    13  file1/exampleScenario
     
-    5   file2/class2
-    6   file2/class2/renderScenario
-    7   file2/class2/splitPerFile
-    8   file2/class2/renderConcurrently
-    9   file2/KotlinFile
 """.trimIndent()
 
 data class OrderedToken(val order: Int, val token: Token)

@@ -8,7 +8,7 @@ private val window = GlWindow()
 private val capturer = Capturer(window)
 
 private val projectorModel = ProjectorModel()
-private val projectorView = ProjectorView(projectorModel, window.width, window.height)
+private val projectorView = ProjectorView(projectorModel)
 private val projectorController = ProjectorController(projectorModel, projectorView)
 
 fun main() {

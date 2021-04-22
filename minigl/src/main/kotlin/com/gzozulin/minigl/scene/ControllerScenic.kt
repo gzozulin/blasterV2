@@ -15,8 +15,9 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
 
     // ----------------- Position ----------------
 
-    private val position = vec3(positions[0])
-    private val destination = vec3(positions[1])
+    private var iterator = positions.iterator()
+    private val position = vec3(iterator.next())
+    private val destination = vec3(iterator.next())
     private val velocity = vec3(destination).sub(position).normalize()
     private val ideal = vec3(destination).sub(position).normalize()
     private val deltaPosition = vec3()
@@ -51,7 +52,10 @@ class ControllerScenic(private val positions: List<vec3>, private val points: Li
 
     private fun checkDestination() {
         if (position.distance(destination) < EPSILON) {
-            destination.set(positions.filter { it != destination }.random())
+            if (!iterator.hasNext()) {
+                iterator = positions.iterator()
+            }
+            destination.set(iterator.next())
         }
     }
 

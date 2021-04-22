@@ -56,7 +56,6 @@ class StateCozyRoomTyping(
         super.onFrame()
         model.advanceScenario()
         view.tickCamera()
-        view.prepareCode()
         view.renderScene()
         view.renderCode()
     }
