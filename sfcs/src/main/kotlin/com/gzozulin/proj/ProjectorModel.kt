@@ -49,7 +49,7 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(override val text: String, val order: Int, override val color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-private enum class AnimationState { WAITING_KEY_FRAME, SCROLLING, ADVANCING_SPANS }
+private enum class AnimationState { KEY_FRAME, SCROLLING, ADVANCING }
 
 class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(text = exampleScenario) }
@@ -60,7 +60,7 @@ class ProjectorModel {
     var currentPageCenter = 0
     private var expectedPageCenter = 0
 
-    private var animationState = AnimationState.WAITING_KEY_FRAME
+    private var animationState = AnimationState.KEY_FRAME
 
     private var currentFrame = 0
     private var currentOrder = 0
@@ -74,9 +74,9 @@ class ProjectorModel {
     fun advanceScenario() {
         currentFrame++
         when (animationState) {
-            AnimationState.WAITING_KEY_FRAME -> waitForKeyFrame()
+            AnimationState.KEY_FRAME -> waitForKeyFrame()
             AnimationState.SCROLLING -> scrollToPageCenter()
-            AnimationState.ADVANCING_SPANS -> advanceSpans()
+            AnimationState.ADVANCING -> advanceSpans()
         }
     }
 
@@ -126,7 +126,7 @@ class ProjectorModel {
                 } else {
                     nextKeyFrame = Int.MAX_VALUE
                 }
-                animationState = AnimationState.WAITING_KEY_FRAME
+                animationState = AnimationState.KEY_FRAME
             }
         }
     }
@@ -156,14 +156,14 @@ class ProjectorModel {
             when {
                 expectedPageCenter > currentPageCenter -> currentPageCenter++
                 expectedPageCenter < currentPageCenter -> currentPageCenter--
-                else -> animationState = AnimationState.ADVANCING_SPANS
+                else -> animationState = AnimationState.ADVANCING
             }
         }
     }
 
     private fun waitForKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.ADVANCING_SPANS
+            animationState = AnimationState.ADVANCING
         }
     }
 

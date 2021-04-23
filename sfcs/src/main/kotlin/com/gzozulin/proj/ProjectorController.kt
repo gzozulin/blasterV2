@@ -57,7 +57,7 @@ class StateCozyRoomTyping(
         model.advanceScenario()
         view.tickCamera()
         view.renderScene()
-        view.renderCode()
+        view.renderOverlays()
     }
 }
 

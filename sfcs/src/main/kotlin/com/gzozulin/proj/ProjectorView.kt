@@ -13,27 +13,26 @@ private const val SCREEN_HEIGHT = 1080
 
 private const val CODE_PANEL_WIDTH = 1080
 private const val CODE_PANEL_HEIGHT = 1000
-private const val CODE_PANEL_POS_X = SCREEN_WIDTH / 2f - 200
+private const val CODE_PANEL_POS_X = 700
 private const val CODE_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
-private val codeModelM = mat4().identity()
-    .translate(CODE_PANEL_POS_X, CODE_PANEL_POS_Y, 0f)
-    .scale(CODE_PANEL_WIDTH.toFloat(), CODE_PANEL_HEIGHT.toFloat(), 1f)
-
-private const val MINIMAP_PANEL_WIDTH = 300
+private const val MINIMAP_MAX_LINES = 140
+private const val MINIMAP_PANEL_WIDTH = 400
 private const val MINIMAP_PANEL_HEIGHT = 1000
 private const val MINIMAP_CURSOR_HEIGHT = 300
-private const val MINIMAP_PANEL_POS_X = SCREEN_WIDTH / 2f + 490
+private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
-private const val MAX_MINIMAP_LINES = 140
+private val codeModelM = mat4().identity()
+    .translate(CODE_PANEL_POS_X.toFloat(), CODE_PANEL_POS_Y, 0f)
+    .scale(CODE_PANEL_WIDTH.toFloat(), CODE_PANEL_HEIGHT.toFloat(), 1f)
 
 private val minimapModelM = mat4().identity()
-    .translate(MINIMAP_PANEL_POS_X, MINIMAP_PANEL_POS_Y, 0f)
+    .translate(MINIMAP_PANEL_POS_X.toFloat(), MINIMAP_PANEL_POS_Y, 0f)
     .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_PANEL_HEIGHT.toFloat(), 1f)
 
 private val minimapCursorModelM = mat4().identity()
-    .translate(MINIMAP_PANEL_POS_X, MINIMAP_PANEL_POS_Y, 0f)
+    .translate(MINIMAP_PANEL_POS_X.toFloat(), MINIMAP_PANEL_POS_Y, 0f)
     .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
 
 private val codeFontDescription = FontDescription(
@@ -66,7 +65,7 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
 
     private val panelTexCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
     private val panelSampler = unifsampler()
-    private val panelColor = vec4(0f, 0f, 0f, 0.8f)
+    private val panelColor = vec4(0f, 0f, 0f, 0.7f)
     private val panelMesh = GlMesh.rect(1f, 1f)
     private val panelTechnique = FlatTechnique(panelModelM, panelViewM, panelProjM, tex(panelTexCoords, panelSampler))
 
@@ -115,8 +114,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     init {
-        addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, minimapCursorTechnique,
-            crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel, noiseTexture)
+        addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, noiseTexture,
+            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel)
     }
 
     // 1080p only
@@ -159,48 +158,60 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         }
     }
 
-    fun renderCode() {
+    fun renderOverlays() {
         glMultiSample {
-            codeRttTechnique.render {
-                glClear(panelColor)
-                codeTextTechnique.pageCentered(model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
-            }
-            minimapRttTechnique.render {
-                glClear(panelColor)
-                minimapTextTechnique.page(model.currentPage)
-            }
-            minimapCursorTechnique.render {
-                glClear(minimapCursorColor)
-            }
-            glBlend {
-                panelTechnique.draw {
-                    glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0,
-                        minimapCursorTechnique.colorAttachment0) {
-                        panelSampler.value = codeRttTechnique.colorAttachment0
-                        panelModelM.value = codeModelM
-                        panelTechnique.instance(panelMesh)
-                        panelSampler.value = minimapRttTechnique.colorAttachment0
-                        panelModelM.value = minimapModelM
-                        panelTechnique.instance(panelMesh)
-                        panelSampler.value = minimapCursorTechnique.colorAttachment0
-                        updateMinimapCursor()
-                        panelModelM.value = minimapCursorModelM
-                        panelTechnique.instance(panelMesh)
-                    }
-                }
-            }
+            prepareCode()
+            prepareMinimap()
+            renderPanels()
+        }
+    }
+
+    private fun prepareCode() {
+        codeRttTechnique.render {
+            glClear(panelColor)
+            codeTextTechnique.pageCentered(model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
+        }
+    }
+
+    private fun prepareMinimap() {
+        minimapRttTechnique.render {
+            glClear(panelColor)
+            minimapTextTechnique.page(model.currentPage)
+        }
+        minimapCursorTechnique.render {
+            glClear(minimapCursorColor)
         }
     }
 
     private fun updateMinimapCursor() {
-        val progress = 1f - model.currentPageCenter.toFloat() / MAX_MINIMAP_LINES.toFloat()
+        val progress = 1f - model.currentPageCenter.toFloat() / MINIMAP_MAX_LINES.toFloat()
         val minimapStart = MINIMAP_PANEL_POS_Y - MINIMAP_PANEL_HEIGHT/2
         val minimapEnd = MINIMAP_PANEL_POS_Y + MINIMAP_PANEL_HEIGHT/2
         val minimapSpan = minimapEnd - minimapStart
         val position = minimapStart + progress * minimapSpan
         val bounded = min(max(position, minimapStart + MINIMAP_CURSOR_HEIGHT/2f), minimapEnd - MINIMAP_CURSOR_HEIGHT/2f)
         minimapCursorModelM.identity()
-            .translate(MINIMAP_PANEL_POS_X, bounded, 0f)
+            .translate(MINIMAP_PANEL_POS_X.toFloat(), bounded, 0f)
             .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
+    }
+
+    private fun renderPanels() {
+        glBlend {
+            panelTechnique.draw {
+                glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0,
+                    minimapCursorTechnique.colorAttachment0) {
+                    panelSampler.value = codeRttTechnique.colorAttachment0
+                    panelModelM.value = codeModelM
+                    panelTechnique.instance(panelMesh)
+                    panelSampler.value = minimapRttTechnique.colorAttachment0
+                    panelModelM.value = minimapModelM
+                    panelTechnique.instance(panelMesh)
+                    panelSampler.value = minimapCursorTechnique.colorAttachment0
+                    updateMinimapCursor()
+                    panelModelM.value = minimapCursorModelM
+                    panelTechnique.instance(panelMesh)
+                }
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@
 2021-04-23 Highlight sections of code +projector @code @complex
 2021-04-23 Highlighting for method calls in function body +projector @simple @code
 2021-04-23 Link to code in video description +projector @simple @video
-2021-04-23 Minimap cursor window +projector @simple @code
+x 2021-04-23 2021-04-23 Minimap cursor window +projector @simple @code
 2021-04-23 Move the minimap to accomodate any amounts of code +projector @code @complex
 2021-04-23 New thumbnail, new backgrounds +projector @simple @video
 2021-04-23 Off-screen MSAA for Deferred Technique +projector @code @complex
