@@ -5,6 +5,8 @@ import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.scene.*
+import java.lang.Float.max
+import java.lang.Float.min
 
 private const val SCREEN_WIDTH = 1920 // 1080p
 private const val SCREEN_HEIGHT = 1080
@@ -23,6 +25,8 @@ private const val MINIMAP_PANEL_HEIGHT = 1000
 private const val MINIMAP_CURSOR_HEIGHT = 300
 private const val MINIMAP_PANEL_POS_X = SCREEN_WIDTH / 2f + 490
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
+
+private const val MAX_MINIMAP_LINES = 140
 
 private val minimapModelM = mat4().identity()
     .translate(MINIMAP_PANEL_POS_X, MINIMAP_PANEL_POS_Y, 0f)
@@ -179,11 +183,24 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
                         panelModelM.value = minimapModelM
                         panelTechnique.instance(panelMesh)
                         panelSampler.value = minimapCursorTechnique.colorAttachment0
+                        updateMinimapCursor()
                         panelModelM.value = minimapCursorModelM
                         panelTechnique.instance(panelMesh)
                     }
                 }
             }
         }
+    }
+
+    private fun updateMinimapCursor() {
+        val progress = 1f - model.currentPageCenter.toFloat() / MAX_MINIMAP_LINES.toFloat()
+        val minimapStart = MINIMAP_PANEL_POS_Y - MINIMAP_PANEL_HEIGHT/2
+        val minimapEnd = MINIMAP_PANEL_POS_Y + MINIMAP_PANEL_HEIGHT/2
+        val minimapSpan = minimapEnd - minimapStart
+        val position = minimapStart + progress * minimapSpan
+        val bounded = min(max(position, minimapStart + MINIMAP_CURSOR_HEIGHT/2f), minimapEnd - MINIMAP_CURSOR_HEIGHT/2f)
+        minimapCursorModelM.identity()
+            .translate(MINIMAP_PANEL_POS_X, bounded, 0f)
+            .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
     }
 }

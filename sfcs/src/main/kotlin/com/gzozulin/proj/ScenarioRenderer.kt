@@ -129,6 +129,7 @@ private class DeclVisitor(private val depth: Int,
                 node.path.size >  nextDepth -> children.add(node)
             }
         }
+        // 1. Only one parent 2. Parent is required 3. Multiple declarations
         check(parents.size == 1) { "Only one parent declaration allowed, but single is required! $matching" }
         result.invoke(decl.predeclare(tokens).withOrder(parents.first().order))
         decl.visitNext(depth + 1, children, claimed, tokens, result)

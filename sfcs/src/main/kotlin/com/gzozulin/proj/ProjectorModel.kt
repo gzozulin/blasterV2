@@ -26,17 +26,22 @@ private val exampleScenario = """
     0   file1/class1
     1   file1/class1/projectScenario
     2   file1/class1/scenarioRenderer
-    3   file1/class1/renderScenario
-    4   file1/class1/advanceSpans
-    5   file1/class1/advanceScenario
-    6   file1/class1/findCurrentPage
-    7   file1/class1/makeOrderInvisible
-    8   file1/class1/findOrderFrame
-    9   file1/class1/showNextInvisibleSpan
-    10  file1/LINES_TO_SHOW
-    11  file1/class1/prepareOrder
-    12  file1/DeclCtx
-    13  file1/exampleScenario
+    3   file1/class1/pages
+    4   file1/class1/currentPage
+    5   file1/class1/renderScenario
+    6   file1/class1/advanceScenario
+    8   file1/class1/advanceSpans
+    9   file1/class1/findCurrentPage
+    10  file1/class1/makeOrderInvisible
+    11  file1/class1/findOrderFrame
+    12  file1/class1/showNextInvisibleSpan
+    13  file1/class1/scrollToPageCenter
+    14  file1/class1/waitForKeyFrame
+    15  file1/class1/nextOrder
+    16  file1/LINES_TO_SHOW
+    17  file1/class1/prepareOrder
+    18  file1/DeclCtx
+    19  file1/exampleScenario
     
 """.trimIndent()
 
