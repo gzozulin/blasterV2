@@ -25,12 +25,12 @@ private const val MINIMAP_CURSOR_HEIGHT = 300
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
-private const val FILE_POP_UP_WIDTH = 1000
+private const val FILE_POP_UP_WIDTH = 700
 private const val FILE_POP_UP_HEIGHT = 100
-private const val FILE_POP_UP_POS_X = 1300
+private const val FILE_POP_UP_POS_X = 1600
 private const val FILE_POP_UP_POS_Y = 200
 
-private const val FILE_POP_UP_FRAMES_SHOW = 60
+private const val FILE_POP_UP_FRAMES_SHOW = 120
 
 private val codeModelM = mat4().identity()
     .translate(CODE_PANEL_POS_X.toFloat(), CODE_PANEL_POS_Y, 0f)
@@ -59,7 +59,7 @@ private val minimapFontDescription = codeFontDescription.copy(
 )
 
 private val filePopUpFontDescription = codeFontDescription.copy(
-    fontScaleU = 2.5f, fontScaleV = 10f, fontStepScaleU = 0.45f
+    fontScaleU = 1.5f, fontScaleV = 10f, fontStepScaleU = 0.45f
 )
 
 enum class FilePopUp { GONE, FADE_IN, SHOWN, FADE_OUT }

@@ -1,21 +1,21 @@
 2021-04-23 Add the ability to show existing code without animation +projector @code @complex
-2021-04-23 Ambient music/theme/sounds in video +projector @complex @video
-2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +projector @simple @video
-2021-04-23 Fix texture for the bedroom scene +projector @assets @simple
-2021-04-23 Fix texture Z-fighting or remove the globe +projector @simple @assets
+(A) 2021-04-23 Ambient music/theme/sounds in video +projector @complex @video
+(A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +projector @simple @video
+(A) 2021-04-23 Fix texture for the bedroom scene +projector @assets @simple
+(A) 2021-04-23 Fix texture Z-fighting or remove the globe +projector @simple @assets
 2021-04-23 Highlighting enums +projector @simple @code
 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +projector @simple @code
 2021-04-23 Highlight sections of code +projector @code @complex
 2021-04-23 Highlighting for method calls in function body +projector @simple @code
-2021-04-23 Link to code in video description +projector @simple @video
+(A) 2021-04-23 Link to code in video description +projector @simple @video
 x 2021-04-23 2021-04-23 Minimap cursor window +projector @simple @code
 2021-04-23 Move the minimap to accomodate any amounts of code +projector @code @complex
-2021-04-23 New thumbnail, new backgrounds +projector @simple @video
+(A) 2021-04-23 New thumbnail, new backgrounds +projector @simple @video
 2021-04-23 Off-screen MSAA for Deferred Technique +projector @code @complex
-2021-04-23 Repository, assets, projects +projector @assets @complex
+(A) 2021-04-23 Repository, assets, projects +projector @assets @complex
 x 2021-04-23 2021-04-23 Show packages in left panel +projector @code @complex
 2021-04-23 Support for C and GLSL +projector @code @complex
 2021-04-23 Switching to fullscreen +projector @code @complex
-2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
+(A) 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
 x 2021-04-23 2021-04-23 Current file pop-up +projector @code @complex
-2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
+(A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
