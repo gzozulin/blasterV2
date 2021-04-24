@@ -4,7 +4,9 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.modelLib
 import com.gzozulin.minigl.assets.texturesLib
-import com.gzozulin.minigl.scene.*
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.scene.ControllerScenic
+import com.gzozulin.minigl.scene.PointLight
 import java.lang.Float.max
 import java.lang.Float.min
 
@@ -23,6 +25,13 @@ private const val MINIMAP_CURSOR_HEIGHT = 300
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
+private const val FILE_POP_UP_WIDTH = 1000
+private const val FILE_POP_UP_HEIGHT = 100
+private const val FILE_POP_UP_POS_X = 1300
+private const val FILE_POP_UP_POS_Y = 200
+
+private const val FILE_POP_UP_FRAMES_SHOW = 60
+
 private val codeModelM = mat4().identity()
     .translate(CODE_PANEL_POS_X.toFloat(), CODE_PANEL_POS_Y, 0f)
     .scale(CODE_PANEL_WIDTH.toFloat(), CODE_PANEL_HEIGHT.toFloat(), 1f)
@@ -35,6 +44,10 @@ private val minimapCursorModelM = mat4().identity()
     .translate(MINIMAP_PANEL_POS_X.toFloat(), MINIMAP_PANEL_POS_Y, 0f)
     .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
 
+private val filePopUpM = mat4().identity()
+    .translate(FILE_POP_UP_POS_X.toFloat(), FILE_POP_UP_POS_Y.toFloat(), 0f)
+    .scale(FILE_POP_UP_WIDTH.toFloat(), FILE_POP_UP_HEIGHT.toFloat(), 1f)
+
 private val codeFontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
@@ -44,6 +57,12 @@ private val codeFontDescription = FontDescription(
 private val minimapFontDescription = codeFontDescription.copy(
     fontScaleU = 0.6f, fontScaleV = 0.15f
 )
+
+private val filePopUpFontDescription = codeFontDescription.copy(
+    fontScaleU = 2.5f, fontScaleV = 10f, fontStepScaleU = 0.45f
+)
+
+enum class FilePopUp { GONE, FADE_IN, SHOWN, FADE_OUT }
 
 class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizable {
 
@@ -68,6 +87,17 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
     private val panelColor = vec4(0f, 0f, 0f, 0.7f)
     private val panelMesh = GlMesh.rect(1f, 1f)
     private val panelTechnique = FlatTechnique(panelModelM, panelViewM, panelProjM, tex(panelTexCoords, panelSampler))
+
+    // ----------------- File pop-up ------------------
+
+    private val filePopUpTextTechnique = SimpleTextTechnique(filePopUpFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
+    private val filePopUpRttTechnique = RttTechnique(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT)
+
+    private var lastShownPage: ProjectorTextPage<OrderedSpan>? = null
+    private var filePopUp = TextPage(listOf(SimpleSpan("ProjectorView.kt", col3().white())))
+    private var filePopUpState = FilePopUp.GONE
+    private val filePopUpBackground = vec4(0f, 0f, 0f, 0f)
+    private var filePopUpTimeout = 0
 
     // ----------------- Scene ------------------
 
@@ -115,7 +145,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
 
     init {
         addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, noiseTexture,
-            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel)
+            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel,
+            filePopUpTextTechnique, filePopUpRttTechnique)
     }
 
     // 1080p only
@@ -160,6 +191,7 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
 
     fun renderOverlays() {
         glMultiSample {
+            prepareFilePopUp()
             prepareCode()
             prepareMinimap()
             renderPanels()
@@ -195,20 +227,47 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
             .scale(MINIMAP_PANEL_WIDTH.toFloat(), MINIMAP_CURSOR_HEIGHT.toFloat(), 1f)
     }
 
+    private fun prepareFilePopUp() {
+        filePopUpTimeout++
+        if (model.isPageReady() && model.currentPage !== lastShownPage) {
+            filePopUpTimeout = 0
+            lastShownPage = model.currentPage
+            filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().white())))
+            filePopUpState = FilePopUp.SHOWN
+        }
+        filePopUpRttTechnique.render {
+            glClear(filePopUpBackground)
+            when (filePopUpState) {
+                FilePopUp.GONE -> {} // nothing
+                FilePopUp.FADE_IN -> TODO()
+                FilePopUp.SHOWN -> {
+                    filePopUpTextTechnique.page(filePopUp)
+                    if (filePopUpTimeout >= FILE_POP_UP_FRAMES_SHOW) {
+                        filePopUpState = FilePopUp.GONE
+                    }
+                }
+                FilePopUp.FADE_OUT -> TODO()
+            }
+        }
+    }
+
     private fun renderPanels() {
         glBlend {
             panelTechnique.draw {
                 glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0,
-                    minimapCursorTechnique.colorAttachment0) {
+                    minimapCursorTechnique.colorAttachment0, filePopUpRttTechnique.colorAttachment0) {
                     panelSampler.value = codeRttTechnique.colorAttachment0
                     panelModelM.value = codeModelM
                     panelTechnique.instance(panelMesh)
                     panelSampler.value = minimapRttTechnique.colorAttachment0
                     panelModelM.value = minimapModelM
                     panelTechnique.instance(panelMesh)
-                    panelSampler.value = minimapCursorTechnique.colorAttachment0
                     updateMinimapCursor()
+                    panelSampler.value = minimapCursorTechnique.colorAttachment0
                     panelModelM.value = minimapCursorModelM
+                    panelTechnique.instance(panelMesh)
+                    panelSampler.value = filePopUpRttTechnique.colorAttachment0
+                    panelModelM.value = filePopUpM
                     panelTechnique.instance(panelMesh)
                 }
             }

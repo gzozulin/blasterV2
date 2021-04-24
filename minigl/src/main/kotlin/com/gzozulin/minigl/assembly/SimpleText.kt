@@ -28,7 +28,7 @@ data class SimpleSpan(
     override val color: col3,
     override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
 
-data class TextPage<T : TextSpan>(val spans: List<T>) {
+open class TextPage<T : TextSpan>(val spans: List<T>) {
     fun findLineNo(lookup: T) = run {
         var currentLine = 0
         for (span in spans) {

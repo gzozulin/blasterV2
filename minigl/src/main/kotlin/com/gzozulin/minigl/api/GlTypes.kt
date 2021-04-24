@@ -12,6 +12,7 @@ typealias vec4 = Vector4f
 typealias vec4i = Vector4i
 typealias euler3 = Vector3f
 typealias col3 = Vector3f
+typealias col4 = Vector4f
 typealias vec2 = Vector2f
 typealias vec2i = Vector2i
 typealias mat3 = Matrix3f

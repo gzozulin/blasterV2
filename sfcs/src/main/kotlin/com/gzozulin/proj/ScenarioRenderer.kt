@@ -6,6 +6,7 @@ import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.assembly.SpanVisibility
 import com.gzozulin.minigl.assembly.TextPage
+import com.gzozulin.minigl.assembly.TextSpan
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -14,14 +15,16 @@ import org.antlr.v4.runtime.*
 import java.io.File
 import kotlin.streams.toList
 
+class ProjectorTextPage<T : TextSpan>(val file: File, spans: List<T>) : TextPage<T>(spans)
+
 private data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                               val tokens: CommonTokenStream, val parser: KotlinParser)
 
 class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
     private val kotlinFiles = mutableMapOf<File, KotlinFile>()
-    private lateinit var pages: MutableList<TextPage<OrderedSpan>>
+    private lateinit var pages: MutableList<ProjectorTextPage<OrderedSpan>>
 
-    fun renderScenario(): List<TextPage<OrderedSpan>> {
+    fun renderScenario(): List<ProjectorTextPage<OrderedSpan>> {
         pages = mutableListOf()
         val nodesToFiles = splitPerFile()
         renderConcurrently(nodesToFiles)
@@ -41,21 +44,21 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
 
     private fun renderConcurrently(nodesToFiles: Map<File, List<ScenarioNode>>) = runBlocking {
         val claimedNodes = mutableListOf<ScenarioNode>()
-        val deferred = mutableListOf<Deferred<TextPage<OrderedSpan>>>()
+        val deferred = mutableListOf<Deferred<ProjectorTextPage<OrderedSpan>>>()
         nodesToFiles.forEach { deferred.add(async { renderFile(it.key, it.value, claimedNodes)}) }
         pages.addAll(deferred.awaitAll())
         enforceAllNodesClaimed(claimedNodes)
     }
 
     private fun renderFile(file: File, nodes: List<ScenarioNode>,
-                           claimedNodes: MutableList<ScenarioNode>): TextPage<OrderedSpan> {
+                           claimedNodes: MutableList<ScenarioNode>): ProjectorTextPage<OrderedSpan> {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
         val visitor = DeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
             orderedTokens += increment
         }
         visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
-        return highlightPage(orderedTokens)
+        return highlightPage(file, orderedTokens)
     }
 
     private fun enforceAllNodesClaimed(claimedNodes: List<ScenarioNode>) {
@@ -75,7 +78,7 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
         return@computeIfAbsent KotlinFile(chars, lexer, tokens, parser)
     }
 
-    private fun highlightPage(orderedTokens: List<OrderedToken>): TextPage<OrderedSpan> {
+    private fun highlightPage(file: File, orderedTokens: List<OrderedToken>): ProjectorTextPage<OrderedSpan> {
         val result = mutableListOf<OrderedSpan>()
         val orderMap = mutableMapOf<Token, Int>()
         val colorMap = mutableMapOf<Token, col3>()
@@ -90,7 +93,7 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
         for (token in tokens) {
             result.add(OrderedSpan(token.text, orderMap[token]!!, colorMap[token]!!, SpanVisibility.GONE))
         }
-        return TextPage(result)
+        return ProjectorTextPage(file, result)
     }
 }
 

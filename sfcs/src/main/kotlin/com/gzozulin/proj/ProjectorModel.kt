@@ -3,9 +3,8 @@ package com.gzozulin.proj
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.assembly.SpanVisibility
-import com.gzozulin.minigl.assembly.TextPage
 import com.gzozulin.minigl.assembly.TextSpan
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.Token
 import kotlin.math.abs
 
 const val LINES_TO_SHOW = 20
@@ -17,7 +16,6 @@ typealias DeclCtx = KotlinParser.DeclarationContext
 
 private val exampleScenario = """
     # Pilot scenario
-
     alias file1=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
     alias file2=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ScenarioRenderer.kt
     alias class1=ProjectorModel
@@ -27,22 +25,28 @@ private val exampleScenario = """
     1   file1/class1/projectScenario
     2   file1/class1/scenarioRenderer
     3   file1/class1/pages
-    4   file1/class1/currentPage
-    5   file1/class1/renderScenario
-    6   file1/class1/advanceScenario
-    8   file1/class1/advanceSpans
-    9   file1/class1/findCurrentPage
-    10  file1/class1/makeOrderInvisible
-    11  file1/class1/findOrderFrame
-    12  file1/class1/showNextInvisibleSpan
-    13  file1/class1/scrollToPageCenter
-    14  file1/class1/waitForKeyFrame
-    15  file1/class1/nextOrder
-    16  file1/LINES_TO_SHOW
-    17  file1/class1/prepareOrder
-    18  file1/DeclCtx
-    19  file1/exampleScenario
     
+    4   file2/class2
+    5   file2/class2/splitPerFile
+    6   file2/class2/renderConcurrently
+    7   file2/class2/renderFile
+    8   file2/class2/enforceAllNodesClaimed
+    
+    9   file1/class1/currentPage
+    10  file1/class1/renderScenario
+    11  file1/class1/advanceScenario
+    12  file1/class1/advanceSpans
+    13  file1/class1/findCurrentPage
+    14  file1/class1/makeOrderInvisible
+    15  file1/class1/findOrderFrame
+    16  file1/class1/showNextInvisibleSpan
+    17  file1/class1/scrollToPageCenter
+    18  file1/class1/waitForKeyFrame
+    19  file1/class1/nextOrder
+    20  file1/LINES_TO_SHOW
+    21  file1/class1/prepareOrder
+    22  file1/DeclCtx
+    23  file1/exampleScenario
 """.trimIndent()
 
 data class OrderedToken(val order: Int, val token: Token)
@@ -55,8 +59,9 @@ class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(text = exampleScenario) }
     private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
-    private lateinit var pages: List<TextPage<OrderedSpan>>
-    lateinit var currentPage: TextPage<OrderedSpan>
+    private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
+    lateinit var currentPage: ProjectorTextPage<OrderedSpan>
+
     var currentPageCenter = 0
     private var expectedPageCenter = 0
 
@@ -70,6 +75,8 @@ class ProjectorModel {
         pages = scenarioRenderer.renderScenario()
         prepareOrder()
     }
+
+    fun isPageReady() = ::currentPage.isInitialized
 
     fun advanceScenario() {
         currentFrame++

@@ -13,7 +13,8 @@ x 2021-04-23 2021-04-23 Minimap cursor window +projector @simple @code
 2021-04-23 New thumbnail, new backgrounds +projector @simple @video
 2021-04-23 Off-screen MSAA for Deferred Technique +projector @code @complex
 2021-04-23 Repository, assets, projects +projector @assets @complex
-2021-04-23 Show packages in left panel +projector @code @complex
+x 2021-04-23 2021-04-23 Show packages in left panel +projector @code @complex
 2021-04-23 Support for C and GLSL +projector @code @complex
 2021-04-23 Switching to fullscreen +projector @code @complex
 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
+2021-04-23 Current file pop-up +projector @code @complex
