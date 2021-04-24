@@ -50,7 +50,7 @@ private val exampleScenario = """
 """.trimIndent()
 
 data class OrderedToken(val order: Int, val token: Token)
-data class OrderedSpan(override val text: String, val order: Int, override val color: col3,
+data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
 private enum class AnimationState { KEY_FRAME, SCROLLING, ADVANCING }

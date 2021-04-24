@@ -18,4 +18,5 @@ x 2021-04-23 2021-04-23 Show packages in left panel +projector @code @complex
 2021-04-23 Switching to fullscreen +projector @code @complex
 (A) 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
 x 2021-04-23 2021-04-23 Current file pop-up +projector @code @complex
-(A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
+x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
+2021-04-23 File pop-up shadow +projector @code @simple @idea

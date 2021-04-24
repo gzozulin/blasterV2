@@ -25,12 +25,14 @@ private const val MINIMAP_CURSOR_HEIGHT = 300
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
-private const val FILE_POP_UP_WIDTH = 700
-private const val FILE_POP_UP_HEIGHT = 100
-private const val FILE_POP_UP_POS_X = 1600
+private const val FILE_POP_UP_WIDTH = 500
+private const val FILE_POP_UP_HEIGHT = 150
+private const val FILE_POP_UP_POS_X = 1300
 private const val FILE_POP_UP_POS_Y = 200
+private const val FILE_POP_UP_POS_X_DELTA = 700
 
-private const val FILE_POP_UP_FRAMES_SHOW = 120
+private const val FILE_POP_UP_FRAMES_MOVE = 5
+private const val FILE_POP_UP_FRAMES_SHOW = 300
 
 private val codeModelM = mat4().identity()
     .translate(CODE_PANEL_POS_X.toFloat(), CODE_PANEL_POS_Y, 0f)
@@ -59,10 +61,10 @@ private val minimapFontDescription = codeFontDescription.copy(
 )
 
 private val filePopUpFontDescription = codeFontDescription.copy(
-    fontScaleU = 1.5f, fontScaleV = 10f, fontStepScaleU = 0.45f
+    fontScaleU = 3f, fontScaleV = 10f, fontStepScaleU = 0.45f
 )
 
-enum class FilePopUp { GONE, FADE_IN, SHOWN, FADE_OUT }
+enum class FilePopUp { MOVE_IN, SHOWN, GONE }
 
 class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizable {
 
@@ -232,21 +234,32 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         if (model.isPageReady() && model.currentPage !== lastShownPage) {
             filePopUpTimeout = 0
             lastShownPage = model.currentPage
-            filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().white())))
-            filePopUpState = FilePopUp.SHOWN
+            filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().cyan())))
+            filePopUpState = FilePopUp.MOVE_IN
         }
         filePopUpRttTechnique.render {
             glClear(filePopUpBackground)
             when (filePopUpState) {
-                FilePopUp.GONE -> {} // nothing
-                FilePopUp.FADE_IN -> TODO()
+                FilePopUp.MOVE_IN -> {
+                    val elapsed = 1f - filePopUpTimeout.toFloat() / FILE_POP_UP_FRAMES_MOVE.toFloat()
+                    filePopUpM.identity()
+                        .translate(FILE_POP_UP_POS_X.toFloat() + elapsed * FILE_POP_UP_POS_X_DELTA, FILE_POP_UP_POS_Y.toFloat(), 0f)
+                        .scale(FILE_POP_UP_WIDTH.toFloat(), FILE_POP_UP_HEIGHT.toFloat(), 1f)
+                    filePopUpTextTechnique.page(filePopUp)
+                    if (elapsed <= 0.01f) {
+                        filePopUpState = FilePopUp.SHOWN
+                        filePopUpTimeout = 0
+                    }
+                }
                 FilePopUp.SHOWN -> {
                     filePopUpTextTechnique.page(filePopUp)
                     if (filePopUpTimeout >= FILE_POP_UP_FRAMES_SHOW) {
                         filePopUpState = FilePopUp.GONE
                     }
                 }
-                FilePopUp.FADE_OUT -> TODO()
+                FilePopUp.GONE -> {
+                    // nothing
+                }
             }
         }
     }

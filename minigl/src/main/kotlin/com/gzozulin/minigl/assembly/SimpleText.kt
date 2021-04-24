@@ -18,14 +18,14 @@ data class FontDescription(
 enum class SpanVisibility { VISIBLE, INVISIBLE, GONE }
 
 interface TextSpan {
-    val text: String
-    val color: col3
+    var text: String
+    var color: col3
     var visibility: SpanVisibility
 }
 
 data class SimpleSpan(
-    override val text: String,
-    override val color: col3,
+    override var text: String,
+    override var color: col3,
     override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
 
 open class TextPage<T : TextSpan>(val spans: List<T>) {
