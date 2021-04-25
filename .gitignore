@@ -1,5 +1,7 @@
 *.iml
 .gradle
+/assets/models
+/assets/textures
 /local.properties
 /.idea/caches
 /.idea/libraries
