@@ -16,8 +16,8 @@ typealias DeclCtx = KotlinParser.DeclarationContext
 
 private val exampleScenario = """
     # Pilot scenario
-    alias file1=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
-    alias file2=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ScenarioRenderer.kt
+    alias file1=/home/greg/blaster/projector/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
+    alias file2=/home/greg/blaster/projector/src/main/kotlin/com/gzozulin/proj/ScenarioRenderer.kt
     alias class1=ProjectorModel
     alias class2=ScenarioRenderer
 

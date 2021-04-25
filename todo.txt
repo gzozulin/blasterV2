@@ -21,4 +21,5 @@ x 2021-04-23 2021-04-23 Current file pop-up +projector @code @complex
 x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
 2021-04-23 File pop-up shadow +projector @code @simple @idea
 2021-04-24 Intro scene for Projector +projecto @complex @code
-(A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
+x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
+2021-04-25 Fix texture UV missing on doors +projector @assets @complex
