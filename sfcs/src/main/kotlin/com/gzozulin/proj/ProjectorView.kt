@@ -21,7 +21,7 @@ private const val CODE_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 private const val MINIMAP_MAX_LINES = 140
 private const val MINIMAP_PANEL_WIDTH = 400
 private const val MINIMAP_PANEL_HEIGHT = 1000
-private const val MINIMAP_CURSOR_HEIGHT = 300
+private const val MINIMAP_CURSOR_HEIGHT = 290
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
