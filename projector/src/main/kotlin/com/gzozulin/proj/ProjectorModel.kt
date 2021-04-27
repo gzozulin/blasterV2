@@ -53,7 +53,7 @@ data class OrderedToken(val order: Int, val token: Token)
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-private enum class AnimationState { KEY_FRAME, SCROLLING, ADVANCING }
+private enum class AnimationState { ADVANCING, KEY_FRAME, SCROLLING }
 
 class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(text = exampleScenario) }
@@ -62,28 +62,85 @@ class ProjectorModel {
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
     lateinit var currentPage: ProjectorTextPage<OrderedSpan>
 
-    var currentPageCenter = 0
-    private var expectedPageCenter = 0
-
     private var animationState = AnimationState.KEY_FRAME
 
     private var currentFrame = 0
     private var currentOrder = 0
     private var nextKeyFrame = 0
 
+    var currentPageCenter = 0
+    private var nextPageCenter = 0
+
+    fun isPageReady() = ::currentPage.isInitialized
+
     fun renderScenario() {
         pages = scenarioRenderer.renderScenario()
         prepareOrder()
     }
 
-    fun isPageReady() = ::currentPage.isInitialized
-
     fun advanceScenario() {
         currentFrame++
         when (animationState) {
+            AnimationState.ADVANCING -> advanceSpans()
             AnimationState.KEY_FRAME -> waitForKeyFrame()
             AnimationState.SCROLLING -> scrollToPageCenter()
-            AnimationState.ADVANCING -> advanceSpans()
+        }
+    }
+
+    private fun advanceSpans() {
+        if (currentFrame % FRAMES_PER_SPAN == 0) {
+            val found = findNextInvisibleSpan()
+            if (found != null) {
+                showNextInvisibleSpan(found)
+            } else {
+                nextOrder()
+            }
+        }
+    }
+
+    private fun findNextInvisibleSpan() =
+        currentPage.spans.firstOrNull {
+            it.order == currentOrder &&
+                    it.visibility == SpanVisibility.INVISIBLE &&
+                    it.text.isNotBlank()
+        }
+
+    private fun showNextInvisibleSpan(span: OrderedSpan) {
+        val newCenter = currentPage.findLineNo(span)
+        val delta = newCenter - currentPageCenter
+        if (abs(delta) >= LINES_TO_SHOW) {
+            nextPageCenter += delta - (LINES_TO_SHOW - 1)
+            if (currentPageCenter != nextPageCenter) {
+                animationState = AnimationState.SCROLLING
+                return // need to scroll first
+            }
+        }
+        span.visibility = SpanVisibility.VISIBLE
+    }
+
+    private fun scrollToPageCenter() {
+        if (currentFrame % FRAMES_PER_LINE == 0) {
+            when {
+                nextPageCenter > currentPageCenter -> currentPageCenter++
+                nextPageCenter < currentPageCenter -> currentPageCenter--
+                else -> animationState = AnimationState.ADVANCING
+            }
+        }
+    }
+
+    private fun waitForKeyFrame() {
+        if (currentFrame >= nextKeyFrame) {
+            animationState = AnimationState.ADVANCING
+        }
+    }
+
+    private fun nextOrder() {
+        currentOrder++
+        animationState = AnimationState.KEY_FRAME
+        if (currentOrder != projectScenario.scenario.size) {
+            prepareOrder()
+        } else {
+            nextKeyFrame = Int.MAX_VALUE
         }
     }
 
@@ -119,63 +176,5 @@ class ProjectorModel {
             }
         }
         error("Key frame not found!")
-    }
-
-    private fun advanceSpans() {
-        if (currentFrame % FRAMES_PER_SPAN == 0) {
-            val found = findNextInvisibleSpan()
-            if (found != null) {
-                showNextInvisibleSpan(found)
-            } else {
-                val haveNext = nextOrder()
-                if (haveNext) {
-                    prepareOrder()
-                } else {
-                    nextKeyFrame = Int.MAX_VALUE
-                }
-                animationState = AnimationState.KEY_FRAME
-            }
-        }
-    }
-
-    private fun findNextInvisibleSpan() =
-        currentPage.spans.firstOrNull {
-            it.order == currentOrder &&
-                    it.visibility == SpanVisibility.INVISIBLE &&
-                    it.text.isNotBlank()
-        }
-
-    private fun showNextInvisibleSpan(span: OrderedSpan) {
-        val newCenter = currentPage.findLineNo(span)
-        val delta = newCenter - currentPageCenter
-        if (abs(delta) >= LINES_TO_SHOW) {
-            expectedPageCenter += delta - (LINES_TO_SHOW - 1)
-            if (currentPageCenter != expectedPageCenter) {
-                animationState = AnimationState.SCROLLING
-                return // need to scroll first
-            }
-        }
-        span.visibility = SpanVisibility.VISIBLE
-    }
-
-    private fun scrollToPageCenter() {
-        if (currentFrame % FRAMES_PER_LINE == 0) {
-            when {
-                expectedPageCenter > currentPageCenter -> currentPageCenter++
-                expectedPageCenter < currentPageCenter -> currentPageCenter--
-                else -> animationState = AnimationState.ADVANCING
-            }
-        }
-    }
-
-    private fun waitForKeyFrame() {
-        if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.ADVANCING
-        }
-    }
-
-    private fun nextOrder(): Boolean {
-        currentOrder++
-        return currentOrder != projectScenario.scenario.size
     }
 }
