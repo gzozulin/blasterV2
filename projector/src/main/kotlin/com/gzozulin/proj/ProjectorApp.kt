@@ -22,13 +22,13 @@ fun main() {
             projectorController.keyPressed(key, pressed)
         }
         glUse(projectorView) {
-            //capturer.capture {
+            capturer.capture {
                 window.show {
                     projectorController.onFrame()
-                    //window.copyWindowBuffer()
-                    //capturer.frame()
+                    window.copyWindowBuffer()
+                    capturer.frame()
                 }
-            //}
+            }
         }
     }
 }

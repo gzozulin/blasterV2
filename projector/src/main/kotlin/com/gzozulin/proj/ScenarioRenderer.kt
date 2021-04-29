@@ -15,10 +15,11 @@ import org.antlr.v4.runtime.*
 import java.io.File
 import kotlin.streams.toList
 
-class ProjectorTextPage<T : TextSpan>(val file: File, spans: List<T>) : TextPage<T>(spans)
-
 private data class KotlinFile(val charStream: CharStream, val lexer: KotlinLexer,
                               val tokens: CommonTokenStream, val parser: KotlinParser)
+
+private data class OrderedToken(val order: Int, val token: Token)
+class ProjectorTextPage<T : TextSpan>(val file: File, spans: List<T>) : TextPage<T>(spans)
 
 class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
     private val kotlinFiles = mutableMapOf<File, KotlinFile>()
@@ -261,7 +262,8 @@ fun Token.color(): col3 = when (type) {
     KotlinLexer.CLASS, KotlinLexer.FUN, KotlinLexer.VAL, KotlinLexer.WHEN, KotlinLexer.IF,
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE, KotlinLexer.CONST, KotlinLexer.DATA,
-    KotlinLexer.TYPE_ALIAS, KotlinLexer.AS, KotlinLexer.BY -> kotlin_orange
+    KotlinLexer.TYPE_ALIAS, KotlinLexer.AS, KotlinLexer.BY, KotlinLexer.VAR, KotlinLexer.OVERRIDE,
+    KotlinLexer.LATEINIT, KotlinLexer.ENUM -> kotlin_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
     KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_light_blue
     KotlinLexer.LineStrText -> kotlin_green

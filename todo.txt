@@ -7,7 +7,7 @@ x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe +projecto
 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +projector @simple @code
 2021-04-23 Highlight sections of code +projector @code @complex
 2021-04-23 Highlighting for method calls in function body +projector @simple @code
-(A) 2021-04-23 Create automatic video description, include link to source code +projector @simple @code
+2021-04-23 Create automatic video description, include link to source code +projector @simple @code
 x 2021-04-23 2021-04-23 Minimap cursor window +projector @simple @code
 2021-04-23 Move the minimap to accomodate any amounts of code +projector @code @complex
 (A) 2021-04-23 New thumbnail, new backgrounds +projector @simple @video
@@ -23,3 +23,5 @@ x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector 
 2021-04-24 Intro scene for Projector +projecto @complex @code
 x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
 2021-04-25 Fix texture UV missing on doors +projector @assets @complex
+2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +projector @video @code @complex
+2021-04-28 Logo scene +projector @code @complex @assets
