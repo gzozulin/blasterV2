@@ -31,4 +31,6 @@ x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @co
 2021-04-29 Better teleprompter app +projector @video @simple
 2021-04-29 Screen capture for any scene +projector @simple @code
 2021-04-29 Learn about H264 codec +projector @code @video @complex
-2021-04-29 Find a way to import HuffYUV to Blender +projector @code @video @complex
+x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +projector @code @video @complex
+2021-04-29 Find a way to directly incode H264 lossless in code +projector @code @complex
+2021-04-29 True Type fonts +projector @code @complex
