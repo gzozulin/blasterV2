@@ -1,9 +1,7 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.GlWindow
-import org.bytedeco.ffmpeg.avcodec.AVCodecContext.FF_PROFILE_H264_CONSTRAINED_BASELINE
-import org.bytedeco.ffmpeg.avcodec.AVCodecContext.FF_PROFILE_H264_HIGH_444
-import org.bytedeco.ffmpeg.global.avcodec.*
+import org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_RAWVIDEO
 import org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_RGBA
 import org.bytedeco.javacpp.BytePointer
 import org.bytedeco.javacv.FFmpegFrameRecorder
@@ -12,21 +10,18 @@ import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.opencv_core.Mat
 import org.opencv.core.CvType
 
+// code > raw, avi > ffmpeg > h264, mp4, lossless
+
 private val converter = OpenCVFrameConverter.ToMat()
 
 class Capturer(window: GlWindow) : AutoCloseable {
     var isCapturing = true
 
     private val recorder by lazy {
-        FFmpegFrameRecorder("output.mp4", window.width, window.height, 0)
+        FFmpegFrameRecorder("output.avi", window.width, window.height, 0)
             .apply {
-                videoCodec = AV_CODEC_ID_H264
+                videoCodec = AV_CODEC_ID_RAWVIDEO
                 frameRate = 60.0
-                videoBitrate = 288000000
-                setVideoOption("crf", "0")
-                setVideoOption("profile", "high")
-                setVideoOption("level", "4.0")
-                setVideoOption("preset", "slow")
             }
     }
 
