@@ -1,5 +1,5 @@
 2021-04-23 Add the ability to show existing code without animation +projector @code @complex
-(A) 2021-04-23 Ambient music/theme/sounds in video +projector @complex @video
+2021-04-23 Ambient music/theme/sounds in video +projector @complex @video
 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +projector @simple @video
 x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +projector @assets @simple
 x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe +projector @simple @assets
@@ -16,12 +16,19 @@ x 2021-04-25 (A) 2021-04-23 Remove assets from project +projector @assets @compl
 x 2021-04-23 2021-04-23 Show packages in left panel +projector @code @complex
 2021-04-23 Support for C and GLSL +projector @code @complex
 2021-04-23 Switching to fullscreen +projector @code @complex
-(A) 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
+x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
 x 2021-04-23 2021-04-23 Current file pop-up +projector @code @complex
 x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
 2021-04-23 File pop-up shadow +projector @code @simple @idea
-2021-04-24 Intro scene for Projector +projecto @complex @code
+2021-04-24 Intro scene for Projector +projector @complex @code
 x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
 2021-04-25 Fix texture UV missing on doors +projector @assets @complex
 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +projector @video @code @complex
 2021-04-28 Logo scene +projector @code @complex @assets
+2021-04-29 Better tripod +projector @video @simple
+2021-04-29 Better lighting +projector @video @complex
+2021-04-29 Better camera +projector @video @complex
+2021-04-29 Better teleprompter app +projector @video @simple
+2021-04-29 Screen capture for any scene +projector @simple @code
+2021-04-29 Learn about H264 codec +projector @code @video @complex
+2021-04-29 Find a way to import HuffYUV to Blender +projector @code @video @complex
