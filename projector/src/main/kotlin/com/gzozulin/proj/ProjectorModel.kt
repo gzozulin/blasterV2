@@ -83,22 +83,6 @@ class ProjectorModel {
         span.visibility = SpanVisibility.VISIBLE
     }
 
-    private fun scrollToPageCenter() {
-        if (currentFrame % FRAMES_PER_LINE == 0) {
-            when {
-                nextPageCenter > currentPageCenter -> currentPageCenter++
-                nextPageCenter < currentPageCenter -> currentPageCenter--
-                else -> animationState = AnimationState.ADVANCING
-            }
-        }
-    }
-
-    private fun waitForKeyFrame() {
-        if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.ADVANCING
-        }
-    }
-
     private fun nextOrder() {
         currentOrder++
         animationState = AnimationState.KEY_FRAME
@@ -141,6 +125,22 @@ class ProjectorModel {
         currentPage.spans
             .filter { it.order == currentOrder }
             .forEach { it.visibility = SpanVisibility.INVISIBLE }
+    }
+
+    private fun waitForKeyFrame() {
+        if (currentFrame >= nextKeyFrame) {
+            animationState = AnimationState.ADVANCING
+        }
+    }
+
+    private fun scrollToPageCenter() {
+        if (currentFrame % FRAMES_PER_LINE == 0) {
+            when {
+                nextPageCenter > currentPageCenter -> currentPageCenter++
+                nextPageCenter < currentPageCenter -> currentPageCenter--
+                else -> animationState = AnimationState.ADVANCING
+            }
+        }
     }
 }
 
