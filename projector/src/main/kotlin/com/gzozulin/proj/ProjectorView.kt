@@ -164,13 +164,6 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         crossFadeTechnique.draw()
     }
 
-    fun tickCamera() {
-        controller.apply { position, direction ->
-            camera.setPosition(position)
-            camera.lookAlong(direction)
-        }
-    }
-
     fun renderScene() {
         controller.apply { position, direction ->
             camera.setPosition(position)

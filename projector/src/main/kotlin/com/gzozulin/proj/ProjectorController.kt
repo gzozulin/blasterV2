@@ -22,45 +22,6 @@ open class State(
     open fun onKey(key: Int, pressed: Boolean) {}
 }
 
-class StateCozyRoomIntro(
-    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
-
-    override fun onEnter() {
-        super.onEnter()
-        GlobalScope.launch {
-            try {
-                model.renderScenario()
-            } catch (th: Throwable) {
-                exceptionHandler.uncaughtException(Thread.currentThread(), th)
-            }
-            scenarioLoaded = true
-        }
-        view.fadeIn()
-    }
-
-    override fun onFrame() {
-        glClear(col3().black())
-        view.tickCamera()
-        view.renderScene()
-        view.renderCrossFade()
-        if (scenarioLoaded) {
-            parent.switch(StateCozyRoomTyping(parent, model, view))
-        }
-    }
-}
-
-class StateCozyRoomTyping(
-    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
-
-    override fun onFrame() {
-        super.onFrame()
-        model.advanceScenario()
-        view.tickCamera()
-        view.renderScene()
-        view.renderOverlays()
-    }
-}
-
 class ProjectorController(model: ProjectorModel, view: ProjectorView) {
 
     private lateinit var current: State
@@ -88,5 +49,42 @@ class ProjectorController(model: ProjectorModel, view: ProjectorView) {
 
     fun switch(next: State) {
         this.next = next
+    }
+}
+
+class StateCozyRoomIntro(
+    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
+
+    override fun onEnter() {
+        super.onEnter()
+        GlobalScope.launch {
+            try {
+                model.renderScenario()
+            } catch (th: Throwable) {
+                exceptionHandler.uncaughtException(Thread.currentThread(), th)
+            }
+            scenarioLoaded = true
+        }
+        view.fadeIn()
+    }
+
+    override fun onFrame() {
+        glClear(col3().black())
+        view.renderScene()
+        view.renderCrossFade()
+        if (scenarioLoaded) {
+            parent.switch(StateCozyRoomTyping(parent, model, view))
+        }
+    }
+}
+
+class StateCozyRoomTyping(
+    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
+
+    override fun onFrame() {
+        super.onFrame()
+        model.advanceScenario()
+        view.renderScene()
+        view.renderOverlays()
     }
 }
