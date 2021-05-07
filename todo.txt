@@ -24,7 +24,7 @@ x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector 
 x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
 2021-04-25 Fix texture UV missing on doors +projector @assets @complex
 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +projector @video @code @complex
-x 2021-05-04 (A) 2021-04-28 Logo scene +projector @code @complex @assets
+x 2021-05-04 2021-04-28 Logo scene +projector @code @complex @assets
 (A) 2021-04-29 Better tripod +projector @video @simple
 2021-04-29 Better lighting +projector @video @complex
 2021-04-29 Better camera +projector @video @complex
@@ -44,3 +44,4 @@ x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +projector @video @simp
 (A) 2021-05-03 Create a header strip for the channel page +projector @video @simple
 2021-05-03 Forum on gzozulin.com +projector @complex @web
 (A) 2021-05-04 Blender file template +projector @video @simple
+x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +projector @code @complex
