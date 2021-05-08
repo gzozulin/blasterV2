@@ -43,14 +43,14 @@ private val matSpecular = unifv3()
 private val matShine = uniff()
 private val matTransparency = uniff()
 
-private val deferredTextureTechnique = DeferredTechnique(
+private val forwardTechnique = ForwardTechnique(
     modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
 private var mouseLook = false
 
 fun main() {
-    window.create(resizables = listOf(camera, deferredTextureTechnique),
-        isFullscreen = false, isHoldingCursor = false, isMultisampling = false) {
+    window.create(resizables = listOf(camera),
+        isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
@@ -67,7 +67,7 @@ fun main() {
                 println("Pos: ${controller.position} dir: ${controller.direction}")
             }
         }
-        glUse(deferredTextureTechnique, model, empty) {
+        glUse(forwardTechnique, model, empty) {
             window.show {
                 glClear()
                 controller.apply { position, direction ->
@@ -77,7 +77,7 @@ fun main() {
                 cameraLight.position.set(camera.position)
                 glDepthTest {
                     glBind(empty) {
-                        deferredTextureTechnique.draw(lights) {
+                        forwardTechnique.draw(lights) {
                             model.objects.forEach { obj ->
                                 val material = obj.phong()
                                 sampler.value = material.mapDiffuse ?: empty
@@ -86,7 +86,7 @@ fun main() {
                                 matSpecular.value = material.specular
                                 matShine.value = 1f
                                 matTransparency.value = material.transparency
-                                deferredTextureTechnique.instance(obj)
+                                forwardTechnique.instance(obj)
                             }
                         }
                     }

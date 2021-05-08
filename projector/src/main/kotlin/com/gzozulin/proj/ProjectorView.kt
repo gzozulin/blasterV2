@@ -66,7 +66,7 @@ private val filePopUpFontDescription = codeFontDescription.copy(
 
 enum class FilePopUp { MOVE_IN, SHOWN, GONE }
 
-class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizable {
+class ProjectorView(private val model: ProjectorModel) : GlResource() {
 
     private val crossFadeTechnique = CrossFadeTechnique(timeout = 2000)
 
@@ -142,18 +142,14 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
     private val matShine = constf(1f)
     private val matTransparency = constf(1f)
 
-    private val deferredTechnique = DeferredTechnique(
+    private val forwardTechnique = ForwardTechnique(
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     init {
         addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, noiseTexture,
-            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh, deferredTechnique, bedroomModel,
+            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh,
+            forwardTechnique, bedroomModel,
             filePopUpTextTechnique, filePopUpRttTechnique)
-    }
-
-    // 1080p only
-    override fun resize(width: Int, height: Int) {
-        deferredTechnique.resize(SCREEN_WIDTH, SCREEN_HEIGHT)
     }
 
     fun fadeIn() {
@@ -165,6 +161,7 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
     }
 
     fun renderScene() {
+        glClear()
         controller.apply { position, direction ->
             camera.setPosition(position)
             camera.lookAlong(direction)
@@ -172,12 +169,12 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
         cameraLight.position.set(camera.position)
         glDepthTest {
             glBind(noiseTexture) {
-                deferredTechnique.draw(lights) {
+                forwardTechnique.draw(lights) {
                     bedroomModel.objects.forEach { obj ->
                         val material = obj.phong()
                         sampler.value = material.mapDiffuse ?: noiseTexture
                         matDiffuse.value = material.diffuse
-                        deferredTechnique.instance(obj)
+                        forwardTechnique.instance(obj)
                     }
                 }
             }
@@ -185,12 +182,10 @@ class ProjectorView(private val model: ProjectorModel) : GlResource(), GlResizab
     }
 
     fun renderOverlays() {
-        glMultiSample {
-            prepareFilePopUp()
-            prepareCode()
-            prepareMinimap()
-            renderPanels()
-        }
+        prepareFilePopUp()
+        prepareCode()
+        prepareMinimap()
+        renderPanels()
     }
 
     private fun prepareCode() {

@@ -20,6 +20,7 @@ private const val forwardVert = """
     layout (location = 1) in vec2 aTexCoord;
     layout (location = 2) in vec3 aNormal;
     
+    out vec4 vPosition;
     out vec2 vTexCoord;
     out vec3 vNormal;
     
@@ -29,6 +30,8 @@ private const val forwardVert = """
     {
         %VRBL%
         vec4 worldPos = %MODEL% * vec4(aPosition, 1.0);
+        vPosition = worldPos;
+        vTexCoord = aTexCoord;
         mat3 normalM = transpose(inverse(mat3(%MODEL%)));
         vNormal = normalM * aNormal;
         gl_Position = %PROJ% * %VIEW% * worldPos;
@@ -44,6 +47,7 @@ private const val forwardFrag = """
     uniform int uLightsDirCnt;
     uniform Light uLights[$MAX_LIGHTS];
 
+    in vec4 vPosition;
     in vec2 vTexCoord;
     in vec3 vNormal;
     
@@ -55,31 +59,14 @@ private const val forwardFrag = """
     {
         %VRBL%
         
-        
-        oPosition = vPosition;
-        oNormal = normalize(vNormal);
-        oDiffuse = %DIFFUSE%;
-        oMatAmbient = %MAT_AMBIENT%;
-        oMatDiffuse = %MAT_DIFFUSE%;
-        oMatSpecular = %MAT_SPECULAR%;
-        oMatShineTransp = vec3(%MAT_SHINE%, %MAT_TRANSPARENCY%, 1.0);
-        
-        
-        
-        vec4 positionLookup = texture(uTexPosition, vTexCoord);
-        if (positionLookup.a != 1.0) {
-            discard;
-        }
-
-        vec3 fragPosition = positionLookup.rgb;
-        vec3 fragNormal = texture(uTexNormal, vTexCoord).rgb;
-        vec3 fragDiffuse = texture(uTexDiffuse, vTexCoord).rgb;
-        vec3 matAmbient = texture(uTexMatAmbient, vTexCoord).rgb;
-        vec3 matDiffuse = texture(uTexMatDiffuse, vTexCoord).rgb;
-        vec3 matSpecular = texture(uTexMatSpecular, vTexCoord).rgb;
-        vec3 matShineTransp = texture(uTexMatShineTransp, vTexCoord).rgb;
-        float shine = matShineTransp[0];
-        float transparency = matShineTransp[1];
+        vec3 fragPosition = vPosition.xyz;
+        vec3 fragNormal = normalize(vNormal);
+        vec3 fragDiffuse = %DIFFUSE%.rgb;
+        vec3 matAmbient = %MAT_AMBIENT%;
+        vec3 matDiffuse = %MAT_DIFFUSE%;
+        vec3 matSpecular = %MAT_SPECULAR%;
+        float shine = %MAT_SHINE%;
+        float transparency = %MAT_TRANSPARENCY%;
         
         PhongMaterial material = { matAmbient, matDiffuse, matSpecular, shine, transparency };
 
@@ -143,6 +130,8 @@ class ForwardTechnique(
     fun draw(lights: List<Light>, instances: () -> Unit) {
         checkReady()
         glBind(forwardProgram) {
+            viewM.submit(forwardProgram)
+            projM.submit(forwardProgram)
             eye.submit(forwardProgram)
             submitLights(lights)
             instances.invoke()
@@ -237,7 +226,7 @@ private var lightsDown = false
 
 fun main() {
     val window = GlWindow()
-    window.create(resizables = listOf(camera), isFullscreen = true, isHoldingCursor = false) {
+    window.create(resizables = listOf(camera), isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
             if (pressed) {
@@ -264,7 +253,7 @@ fun main() {
         }
         glUse(forwardTechnique, obj) {
             window.show {
-                glClear(vec3().black())
+                glClear(vec3().white())
                 if (lightsUp) {
                     light.range += 10f
                     println(light.range)

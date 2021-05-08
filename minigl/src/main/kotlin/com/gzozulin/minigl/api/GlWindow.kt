@@ -109,6 +109,11 @@ class GlWindow {
 
     fun show(onFrame: () -> Unit) {
         check(handle != null) { "Window is not yet created!" }
+        if (isMultisampling) {
+            backend.glEnable(backend.GL_MULTISAMPLE)
+        } else {
+            backend.glDisable(backend.GL_MULTISAMPLE)
+        }
         while (!glfwWindowShouldClose(handle!!)) {
             updateCursor(handle!!)
             onFrame.invoke()

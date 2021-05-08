@@ -13,7 +13,6 @@ private val projectorController = ProjectorController(projectorModel, projectorV
 
 fun main() {
     window.create(
-        resizables = listOf(projectorView),
         isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.keyCallback = { key, pressed ->
             if (key == GLFW.GLFW_KEY_R && pressed) {
