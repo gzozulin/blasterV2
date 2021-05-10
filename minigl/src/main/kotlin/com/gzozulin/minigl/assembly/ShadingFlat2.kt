@@ -55,13 +55,13 @@ data class FlatTechnique2(
     internal val program = GlProgram(vertShader, fragShader)
 }
 
-fun glUseFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
+fun glFlatTechniqueUse(flatTechnique: FlatTechnique2, callback: Callback) =
     glUseProgram(flatTechnique.program, callback)
 
-fun glBindFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
+fun glFlatTechniqueBind(flatTechnique: FlatTechnique2, callback: Callback) =
     glBindProgram(flatTechnique.program, callback)
 
-fun glDrawFlatTechnique(flatTechnique: FlatTechnique2, mesh: GlMesh) {
+fun glFlatTechniqueDraw(flatTechnique: FlatTechnique2, mesh: GlMesh) {
     flatTechnique.matrix.submit(flatTechnique.program)
     flatTechnique.color.submit(flatTechnique.program)
     glMeshBind(mesh) {
@@ -82,15 +82,31 @@ private val texture = glTextureCreate2D(2, 2, listOf(
 ))
 private val window = GlWindow()
 
+private fun use(callback: Callback) {
+    glFlatTechniqueUse(flatTechnique) {
+        glMeshUse(rect) {
+            glTextureUse(texture) {
+                callback.invoke()
+            }
+        }
+    }
+}
+
+private fun draw() {
+    glFlatTechniqueBind(flatTechnique) {
+        glMeshBind(rect) {
+            glTextureBind(texture) {
+                glFlatTechniqueDraw(flatTechnique, rect)
+            }
+        }
+    }
+}
+
 fun main() {
     window.create {
-        glUseFlatTechnique(flatTechnique) {
-            glMeshUse(rect) {
-                window.show {
-                    glBindFlatTechnique(flatTechnique) {
-                        glDrawFlatTechnique(flatTechnique, rect)
-                    }
-                }
+        use {
+            window.show {
+                draw()
             }
         }
     }

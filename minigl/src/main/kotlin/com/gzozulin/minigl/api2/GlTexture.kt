@@ -11,8 +11,8 @@ private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableLis
 data class GlTexture(val target: Int = backend.GL_TEXTURE_2D, val images: List<GlTextureImage> = emptyList(),
                      internal var handle: Int? = null, internal var unit: Int? = null)
 
-data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer,
-                          val internalFormat: Int = backend.GL_RGBA, val pixelFormat: Int = backend.GL_RGBA, val pixelType: Int = backend.GL_RGBA,
+data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer, val pixelType: Int = backend.GL_UNSIGNED_BYTE,
+                          val internalFormat: Int = backend.GL_RGBA, val pixelFormat: Int = backend.GL_RGBA,
                           val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR, val magFilter: Int = backend.GL_LINEAR,
                           val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT)
 
