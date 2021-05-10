@@ -47,7 +47,7 @@ internal fun glCheckProgramBound() {
 
 internal fun glDrawTriangles(mesh: GlMesh) {
     glCheckProgramBound()
-    glCheckMeshBound()
+    glMeshCheck()
     backend.glDrawElements(backend.GL_TRIANGLES, mesh.indicesCnt, backend.GL_UNSIGNED_INT, 0)
 }
 

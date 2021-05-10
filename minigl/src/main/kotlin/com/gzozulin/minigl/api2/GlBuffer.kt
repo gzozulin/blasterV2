@@ -4,13 +4,14 @@ import com.gzozulin.minigl.api.backend
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-data class GlBuffer(internal val data: ByteBuffer, internal var handle: Int? = null)
+data class GlBuffer(val target: Int = backend.GL_ARRAY_BUFFER, val usage: Int = backend.GL_STATIC_DRAW,
+                    internal val data: ByteBuffer, internal var handle: Int? = null)
 
-internal fun glUseBuffer(buffer: GlBuffer, target: Int, usage: Int, callback: Callback) {
+internal fun glBufferUse(buffer: GlBuffer, callback: Callback) {
     check(buffer.handle == null) { "GlBuffer already in use!" }
     buffer.handle = backend.glGenBuffers()
-    glBindBuffer(buffer, target) {
-        backend.glBufferData(target, buffer.data, usage)
+    glBufferBind(buffer) {
+        backend.glBufferData(buffer.target, buffer.data, buffer.usage)
         callback.invoke()
     }
     backend.glDeleteBuffers(buffer.handle!!)
@@ -18,24 +19,24 @@ internal fun glUseBuffer(buffer: GlBuffer, target: Int, usage: Int, callback: Ca
 }
 
 private val currBinding = mutableMapOf<Int, Int?>()
-internal fun glBindBuffer(buffer: GlBuffer, target: Int, callback: Callback) {
+internal fun glBufferBind(buffer: GlBuffer, callback: Callback) {
     check(buffer.handle != null) { "GlBuffer is not used!" }
-    val prev = currBinding[target]
-    backend.glBindBuffer(target, buffer.handle!!)
-    currBinding[target] = buffer.handle!!
+    val prev = currBinding[buffer.target]
+    backend.glBindBuffer(buffer.target, buffer.handle!!)
+    currBinding[buffer.target] = buffer.handle!!
     callback.invoke()
-    backend.glBindBuffer(target, prev ?: 0)
-    currBinding[target] = prev
+    backend.glBindBuffer(buffer.target, prev ?: 0)
+    currBinding[buffer.target] = prev
 }
 
-fun glCreateBuffer(floats: FloatArray): GlBuffer {
+fun glBufferCreate(target: Int, usage: Int, floats: FloatArray): GlBuffer {
     val data = ByteBuffer.allocateDirect(floats.size * 4).order(ByteOrder.nativeOrder())
     data.asFloatBuffer().put(floats).position(0)
-    return GlBuffer(data)
+    return GlBuffer(target, usage, data)
 }
 
-fun glCreateBuffer(ints: IntArray): GlBuffer {
+fun glBufferCreate(target: Int, usage: Int, ints: IntArray): GlBuffer {
     val data = ByteBuffer.allocateDirect(ints.size * 4).order(ByteOrder.nativeOrder())
     data.asIntBuffer().put(ints).position(0)
-    return GlBuffer(data)
+    return GlBuffer(target, usage, data)
 }

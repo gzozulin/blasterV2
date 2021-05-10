@@ -64,7 +64,7 @@ fun glBindFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
 fun glDrawFlatTechnique(flatTechnique: FlatTechnique2, mesh: GlMesh) {
     flatTechnique.matrix.submit(flatTechnique.program)
     flatTechnique.color.submit(flatTechnique.program)
-    glBindMesh(mesh) {
+    glMeshBind(mesh) {
         glDrawTriangles(mesh)
     }
 }
@@ -73,13 +73,19 @@ private val constMatrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
 private val constColor = constv4(col4(col3().rose(), 1f))
 
 private val flatTechnique = FlatTechnique2(constMatrix, constColor)
-private val rect = glCreateRect()
+private val rect = glMeshCreateRect()
+private val texture = glTextureCreate2D(2, 2, listOf(
+    col4(col3().rose(), 1f),
+    col4(col3().azure(), 1f),
+    col4(col3().aquamarine(), 1f),
+    col4(col3().chartreuse(), 1f)
+))
 private val window = GlWindow()
 
 fun main() {
     window.create {
         glUseFlatTechnique(flatTechnique) {
-            glUseMesh(rect) {
+            glMeshUse(rect) {
                 window.show {
                     glBindFlatTechnique(flatTechnique) {
                         glDrawFlatTechnique(flatTechnique, rect)
