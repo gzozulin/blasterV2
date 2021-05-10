@@ -2,6 +2,10 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api2.DECLARATIONS_FRAG
+import com.gzozulin.minigl.api2.DECLARATIONS_VERT
+import com.gzozulin.minigl.api2.PRECISION_HIGH
+import com.gzozulin.minigl.api2.VERSION
 import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson

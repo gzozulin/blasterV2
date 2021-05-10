@@ -92,7 +92,7 @@ class GlWindow {
     }
 
     fun create(resizables: List<GlResizable> = listOf(),
-               isHoldingCursor: Boolean = true, isFullscreen: Boolean = false,
+               isHoldingCursor: Boolean = false, isFullscreen: Boolean = false,
                isMultisampling: Boolean = false, onCreated: () -> Unit) {
         this.resizables.clear()
         this.resizables.addAll(resizables)

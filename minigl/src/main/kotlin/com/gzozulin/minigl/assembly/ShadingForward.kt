@@ -7,6 +7,11 @@ import com.gzozulin.minigl.scene.*
 import org.lwjgl.glfw.GLFW
 import java.lang.Float.max
 
+import com.gzozulin.minigl.api2.DECLARATIONS_FRAG
+import com.gzozulin.minigl.api2.DECLARATIONS_VERT
+import com.gzozulin.minigl.api2.PRECISION_HIGH
+import com.gzozulin.minigl.api2.VERSION
+
 // todo: create/release is probably working improperly
 
 private const val MAX_LIGHTS = 128

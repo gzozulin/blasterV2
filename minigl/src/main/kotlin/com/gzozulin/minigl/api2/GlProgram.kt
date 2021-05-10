@@ -41,6 +41,18 @@ internal fun glBindProgram(program: GlProgram, callback: Callback) {
     prevBinding = prev
 }
 
+internal fun glSendUniform() {
+    // check everything is bound
+}
+
+internal fun glSendTexture() {
+    // check everything is bound
+}
+
+internal fun glDrawMesh() {
+    // check everything is bound
+}
+
 internal fun testGlProgram() {
     //glUseProgram(GlProgram(GlShader()))
 }
