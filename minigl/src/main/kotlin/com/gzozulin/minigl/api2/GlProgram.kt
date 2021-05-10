@@ -10,7 +10,7 @@ private fun glCreateProgram(program: GlProgram) {
     check(program.vertexShader.type == backend.GL_VERTEX_SHADER)
     check(program.fragmentShader.type == backend.GL_FRAGMENT_SHADER)
     backend.glAttachShader(program.handle!!, program.vertexShader.handle!!)
-    backend.glAttachShader(program.handle!!, program.vertexShader.handle!!)
+    backend.glAttachShader(program.handle!!, program.fragmentShader.handle!!)
     backend.glLinkProgram(program.handle!!)
     val isLinked = backend.glGetProgrami(program.handle!!, backend.GL_LINK_STATUS)
     if (isLinked == backend.GL_FALSE) {

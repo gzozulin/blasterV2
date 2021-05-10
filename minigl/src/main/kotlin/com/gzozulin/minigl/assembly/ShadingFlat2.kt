@@ -3,6 +3,7 @@ package com.gzozulin.minigl.assembly
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.Expression
+import com.gzozulin.minigl.api2.GlMesh
 import com.gzozulin.minigl.api2.GlProgram
 import com.gzozulin.minigl.api2.GlShader
 import com.gzozulin.minigl.api2.constv4
@@ -60,18 +61,29 @@ fun glUseFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
 fun glBindFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
     glBindProgram(flatTechnique.program, callback)
 
-private val constMatrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
+fun glDrawFlatTechnique(flatTechnique: FlatTechnique2, mesh: GlMesh) {
+    flatTechnique.matrix.submit(flatTechnique.program)
+    flatTechnique.color.submit(flatTechnique.program)
+    glBindMesh(mesh) {
+        glDrawTriangles(mesh)
+    }
+}
 
-private val flatTechnique = FlatTechnique2(constMatrix)
+private val constMatrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
+private val constColor = constv4(col4(col3().rose(), 1f))
+
+private val flatTechnique = FlatTechnique2(constMatrix, constColor)
 private val rect = glCreateRect()
 private val window = GlWindow()
 
 fun main() {
     window.create {
         glUseFlatTechnique(flatTechnique) {
-            window.show {
-                glBindFlatTechnique(flatTechnique) {
-                    glDrawTriangles(rect)
+            glUseMesh(rect) {
+                window.show {
+                    glBindFlatTechnique(flatTechnique) {
+                        glDrawFlatTechnique(flatTechnique, rect)
+                    }
                 }
             }
         }
