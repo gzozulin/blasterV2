@@ -6,6 +6,7 @@ import com.gzozulin.minigl.api2.Expression
 import com.gzozulin.minigl.api2.GlProgram
 import com.gzozulin.minigl.api2.GlShader
 import com.gzozulin.minigl.api2.constv4
+import com.gzozulin.minigl.api2.constm4
 
 private val vertexSrc = """
     $VERSION
@@ -59,12 +60,20 @@ fun glUseFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
 fun glBindFlatTechnique(flatTechnique: FlatTechnique2, callback: Callback) =
     glBindProgram(flatTechnique.program, callback)
 
+private val constMatrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
+
+private val flatTechnique = FlatTechnique2(constMatrix)
+private val rect = glCreateRect()
 private val window = GlWindow()
 
 fun main() {
     window.create {
-        window.show {
-
+        glUseFlatTechnique(flatTechnique) {
+            window.show {
+                glBindFlatTechnique(flatTechnique) {
+                    glDrawTriangles(rect)
+                }
+            }
         }
     }
 }

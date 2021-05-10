@@ -30,15 +30,25 @@ internal fun glUseProgram(program: GlProgram, callback: Callback) {
     }
 }
 
-private var prevBinding: Int? = null
+private var currBinding: Int? = null
 internal fun glBindProgram(program: GlProgram, callback: Callback) {
     check(program.handle != null) { "GlProgram is not used!" }
-    val prev = prevBinding
+    val prev = currBinding
     backend.glUseProgram(program.handle!!)
-    prevBinding = program.handle
+    currBinding = program.handle
     callback.invoke()
     backend.glUseProgram(prev ?: 0)
-    prevBinding = prev
+    currBinding = prev
+}
+
+internal fun glCheckProgramBound() {
+    check(currBinding != null) { "No GlProgram is bound!" }
+}
+
+internal fun glDrawTriangles(mesh: GlMesh) {
+    glCheckProgramBound()
+    glCheckMeshBound()
+    backend.glDrawElements(backend.GL_TRIANGLES, mesh.indicesCnt, backend.GL_UNSIGNED_INT, 0)
 }
 
 internal fun glSendUniform() {
@@ -46,10 +56,6 @@ internal fun glSendUniform() {
 }
 
 internal fun glSendTexture() {
-    // check everything is bound
-}
-
-internal fun glDrawMesh() {
     // check everything is bound
 }
 

@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.api2
 
+import com.gzozulin.minigl.api.mat4
 import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.api.vec4
 import java.util.concurrent.atomic.AtomicInteger
@@ -176,6 +177,8 @@ const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
 
+// ----------------------------- Expressions -----------------------------
+
 abstract class Expression<T> {
     open val name: String = nextName()
     abstract fun expr(): String
@@ -201,6 +204,8 @@ abstract class Constant<T>(internal val value: T, override val name: String = ne
 
 fun <T> named(name: String) = Named<T>(name)
 
+// ----------------------------- Uniforms -----------------------------
+
 fun uniff(name: String) = object : Uniform<Float>(name) {
     override fun declare() = "uniform float $name;"
 
@@ -208,6 +213,8 @@ fun uniff(name: String) = object : Uniform<Float>(name) {
         TODO("Not yet implemented")
     }
 }
+
+// ----------------------------- Constants -----------------------------
 
 fun constf(value: Float) = object : Constant<Float>(value) {
     override fun declare() = "const float $name = $value;"
@@ -220,6 +227,16 @@ fun constv3(value: vec3) = object : Constant<vec3>(value) {
 fun constv4(value: vec4) = object : Constant<vec4>(value) {
     override fun declare() = "const vec4 $name = vec4(${value.x}, ${value.y}, ${value.z}, ${value.w});"
 }
+
+fun constm4(value: mat4) = object : Constant<mat4>(value) {
+    override fun declare() = "const mat4 $name = mat4(" +
+            "${value.get(0, 0)}, ${value.get(0, 1)}, ${value.get(0, 2)}, ${value.get(0, 3)}, " +
+            "${value.get(1, 0)}, ${value.get(1, 1)}, ${value.get(1, 2)}, ${value.get(1, 3)}, " +
+            "${value.get(2, 0)}, ${value.get(2, 1)}, ${value.get(2, 2)}, ${value.get(2, 3)}, " +
+            "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
+}
+
+// ----------------------------- Arithmetics -----------------------------
 
 fun <T> add(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
     override fun expr() = "(${right.expr()} - ${left.expr()})"
@@ -245,19 +262,17 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
     var uniforms = ""
     var constants = ""
     fun search(expression: Expression<*>) {
-        expression.roots().forEach { root ->
-            when (root) {
-                is Constant -> constants += "${root.declare()}\n"
-                is Uniform  -> uniforms += "${root.declare()}\n"
-                else        -> search(root)
-            }
+        when (expression) {
+            is Constant -> constants += "${expression.declare()}\n"
+            is Uniform  -> uniforms += "${expression.declare()}\n"
+            else        -> expression.roots().forEach { search(it) }
         }
     }
-    source.replace("%UNIF%", uniforms)
-    source.replace("%CONST%", constants)
     expressions.forEach { (name, expr) ->
         search(expr)
         result = result.replace("%$name%", expr.expr())
     }
+    result = result.replace("%UNIF%", uniforms)
+    result = result.replace("%CONST%", constants)
     return result
 }
