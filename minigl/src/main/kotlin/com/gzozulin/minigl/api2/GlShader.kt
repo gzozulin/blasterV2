@@ -6,7 +6,7 @@ typealias Callback = () -> Unit
 
 data class GlShader(internal val type: Int, internal var source: String, internal var handle: Int? = null)
 
-private fun glCreateShader(shader: GlShader) {
+private fun glShaderCreate(shader: GlShader) {
     shader.handle = backend.glCreateShader(shader.type)
     backend.glShaderSource(shader.handle!!, shader.source)
     backend.glCompileShader(shader.handle!!)
@@ -21,9 +21,9 @@ private fun glCreateShader(shader: GlShader) {
     }
 }
 
-internal fun glUseShader(shader: GlShader, callback: Callback) {
+internal fun glShaderUse(shader: GlShader, callback: Callback) {
     check(shader.handle == null) { "Shader is already in use!" }
-    glCreateShader(shader)
+    glShaderCreate(shader)
     callback.invoke()
     backend.glDeleteShader(shader.handle!!)
     shader.handle = null
@@ -43,7 +43,7 @@ private val testShader = GlShader(1, """
 """.trimIndent())
 
 internal fun testGlShader() {
-    glUseShader(testShader) {
+    glShaderUse(testShader) {
         println("testsing")
     }
 }

@@ -1,11 +1,33 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.backend
+import com.gzozulin.minigl.api.*
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+private val bufferVec2i = ByteBuffer.allocateDirect(2 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asIntBuffer()
+
+private val bufferVec2 = ByteBuffer.allocateDirect(2 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
+
+private val bufferVec3 = ByteBuffer.allocateDirect(3 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
+
+private val bufferVec4 = ByteBuffer.allocateDirect(4 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
+
+private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()
 
 data class GlProgram(internal val vertexShader: GlShader, internal val fragmentShader: GlShader,
                      internal var handle: Int? = null)
 
-private fun glCreateProgram(program: GlProgram) {
+private fun glProgramCreate(program: GlProgram) {
     program.handle = backend.glCreateProgram()
     check(program.vertexShader.type == backend.GL_VERTEX_SHADER)
     check(program.fragmentShader.type == backend.GL_FRAGMENT_SHADER)
@@ -18,11 +40,11 @@ private fun glCreateProgram(program: GlProgram) {
     }
 }
 
-internal fun glUseProgram(program: GlProgram, callback: Callback) {
+internal fun glProgramUse(program: GlProgram, callback: Callback) {
     check(program.handle == null) { "GlProgram is already in use!" }
-    glUseShader(program.vertexShader) {
-        glUseShader(program.fragmentShader) {
-            glCreateProgram(program)
+    glShaderUse(program.vertexShader) {
+        glShaderUse(program.fragmentShader) {
+            glProgramCreate(program)
             callback.invoke()
             backend.glDeleteProgram(program.handle!!)
             program.handle = null
@@ -31,7 +53,7 @@ internal fun glUseProgram(program: GlProgram, callback: Callback) {
 }
 
 private var currBinding: Int? = null
-internal fun glBindProgram(program: GlProgram, callback: Callback) {
+internal fun glProgramBind(program: GlProgram, callback: Callback) {
     check(program.handle != null) { "GlProgram is not used!" }
     val prev = currBinding
     backend.glUseProgram(program.handle!!)
@@ -41,26 +63,55 @@ internal fun glBindProgram(program: GlProgram, callback: Callback) {
     currBinding = prev
 }
 
-internal fun glCheckProgramBound() {
+internal fun glProgramCheckBound() {
     check(currBinding != null) { "No GlProgram is bound!" }
 }
 
+private fun glProgramUniformLocation(program: GlProgram, name: String): Int {
+    check(program.handle != null) { "GlProgram is not used!" }
+    return backend.glGetUniformLocation(program.handle!!, name)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: Float) {
+    backend.glUniform1f(glProgramUniformLocation(program, name), value)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: Int) {
+    backend.glUniform1i(glProgramUniformLocation(program, name), value)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: vec2i) {
+    value.get(bufferVec2i)
+    backend.glUniform2iv(glProgramUniformLocation(program, name), bufferVec2i)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: vec2) {
+    value.get(bufferVec2)
+    backend.glUniform2fv(glProgramUniformLocation(program, name), bufferVec2)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: vec3) {
+    value.get(bufferVec3)
+    backend.glUniform3fv(glProgramUniformLocation(program, name), bufferVec3)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: vec4) {
+    value.get(bufferVec4)
+    backend.glUniform4fv(glProgramUniformLocation(program, name), bufferVec4)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, value: mat4) {
+    value.get(bufferMat4)
+    backend.glUniformMatrix4fv(glProgramUniformLocation(program, name), false, bufferMat4)
+}
+
+internal fun glProgramUniform(program: GlProgram, name: String, texture: GlTexture) {
+    check(texture.handle != null) { "GlTexture is not used!" }
+    backend.glUniform1i(glProgramUniformLocation(program, name), texture.unit!!)
+}
+
 internal fun glDrawTriangles(mesh: GlMesh) {
-    glCheckProgramBound()
-    glMeshCheck()
+    glProgramCheckBound()
+    glMeshCheckBound()
     backend.glDrawElements(backend.GL_TRIANGLES, mesh.indicesCnt, backend.GL_UNSIGNED_INT, 0)
 }
-
-internal fun glSendUniform() {
-    // check everything is bound
-}
-
-internal fun glSendTexture() {
-    // check everything is bound
-}
-
-internal fun testGlProgram() {
-    //glUseProgram(GlProgram(GlShader()))
-}
-
-//root (varrrying, uniform, constant) > expressions

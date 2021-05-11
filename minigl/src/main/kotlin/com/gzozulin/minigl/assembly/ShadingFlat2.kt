@@ -56,10 +56,10 @@ data class FlatTechnique2(
 }
 
 fun glFlatTechniqueUse(flatTechnique: FlatTechnique2, callback: Callback) =
-    glUseProgram(flatTechnique.program, callback)
+    glProgramUse(flatTechnique.program, callback)
 
 fun glFlatTechniqueBind(flatTechnique: FlatTechnique2, callback: Callback) =
-    glBindProgram(flatTechnique.program, callback)
+    glProgramBind(flatTechnique.program, callback)
 
 fun glFlatTechniqueDraw(flatTechnique: FlatTechnique2, mesh: GlMesh) {
     flatTechnique.matrix.submit(flatTechnique.program)
@@ -69,10 +69,6 @@ fun glFlatTechniqueDraw(flatTechnique: FlatTechnique2, mesh: GlMesh) {
     }
 }
 
-private val constMatrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
-private val constColor = constv4(col4(col3().rose(), 1f))
-
-private val flatTechnique = FlatTechnique2(constMatrix, constColor)
 private val rect = glMeshCreateRect()
 private val texture = glTextureCreate2D(2, 2, listOf(
     col4(col3().rose(), 1f),
@@ -80,6 +76,15 @@ private val texture = glTextureCreate2D(2, 2, listOf(
     col4(col3().aquamarine(), 1f),
     col4(col3().chartreuse(), 1f)
 ))
+
+private val uniformSampler = unift(texture)
+private val namedTexCoords = namedv2("vTexCoord")
+
+private val matrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
+private val color = tex(namedTexCoords, uniformSampler)
+
+private val flatTechnique = FlatTechnique2(matrix, color)
+
 private val window = GlWindow()
 
 private fun use(callback: Callback) {

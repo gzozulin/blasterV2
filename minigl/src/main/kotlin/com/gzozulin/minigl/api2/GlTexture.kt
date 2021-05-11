@@ -80,10 +80,10 @@ internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteArray): GlTe
 internal fun glTextureCreate2D(width: Int, height: Int, pixels: List<col4>): GlTexture {
     val data = ByteBuffer.allocateDirect(width * height * 4)
     pixels.forEach {
-        data.put((it.x * 255).toInt().toByte())
-        data.put((it.y * 255).toInt().toByte())
-        data.put((it.z * 255).toInt().toByte())
-        data.put((it.w * 255).toInt().toByte())
+        data.put((it.x * 255f).toInt().toByte())
+        data.put((it.y * 255f).toInt().toByte())
+        data.put((it.z * 255f).toInt().toByte())
+        data.put((it.w * 255f).toInt().toByte())
     }
     return glTextureCreate2D(width, height, data)
 }

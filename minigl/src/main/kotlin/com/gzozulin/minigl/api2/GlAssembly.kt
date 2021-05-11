@@ -1,6 +1,7 @@
 package com.gzozulin.minigl.api2
 
 import com.gzozulin.minigl.api.mat4
+import com.gzozulin.minigl.api.vec2
 import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.api.vec4
 import java.util.concurrent.atomic.AtomicInteger
@@ -188,30 +189,45 @@ abstract class Expression<T> {
     }
 }
 
-data class Named<T>(override val name: String) : Expression<T>() {
-    override fun expr() = name
+data class Named<T>(val given: String) : Expression<T>() {
+    override fun expr() = given
 }
 
-abstract class Uniform<T>(override val name: String) : Expression<T>() {
+abstract class Uniform<T>(private val p: (() -> T)?, private var v: T?) : Expression<T>() {
+
+    override fun expr() = name
+    abstract fun declare(): String
+
+    var value: T
+        get() = if (p != null) { p.invoke() } else { v!! }
+        set(new) {
+            check(p == null) { "This uniform already has a provider!" }
+            v = new
+        }
+}
+
+abstract class Constant<T>(internal val value: T) : Expression<T>() {
     override fun expr() = name
     abstract fun declare(): String
 }
 
-abstract class Constant<T>(internal val value: T, override val name: String = nextName()) : Expression<T>() {
-    override fun expr() = name
-    abstract fun declare(): String
-}
-
-fun <T> named(name: String) = Named<T>(name)
+fun namedv2(name: String) = Named<vec2>(name)
 
 // ----------------------------- Uniforms -----------------------------
 
-fun uniff(name: String) = object : Uniform<Float>(name) {
+fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
     override fun declare() = "uniform float $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
 
-    override fun submit(program: GlProgram) {
-        TODO("Not yet implemented")
-    }
+fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
+    override fun declare() = "uniform vec3 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unift(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+    override fun declare() = "uniform sampler2D $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
 // ----------------------------- Constants -----------------------------
@@ -236,6 +252,11 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
             "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
 }
 
+// cannot const texture as int
+/*fun consts(value: GlTexture) = object : Constant<GlTexture>(value) {
+    override fun declare() = "const int $name = ${value.unit};"
+}*/
+
 // ----------------------------- Arithmetics -----------------------------
 
 fun <T> add(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
@@ -256,6 +277,15 @@ fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>(
     override fun expr() = "(${right.expr()} / ${left.expr()})"
     override fun roots() = listOf(left, right)
 }
+
+// ----------------------------- Substitution -----------------------------
+
+fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
+    override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
+    override fun roots() = listOf(texCoord, sampler)
+}
+
+// ----------------------------- Substitution -----------------------------
 
 fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): String {
     var result = source

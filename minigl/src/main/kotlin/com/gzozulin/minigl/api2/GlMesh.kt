@@ -40,7 +40,7 @@ internal fun glMeshBind(mesh: GlMesh, callback: Callback) {
     currBinding = prev
 }
 
-internal fun glMeshCheck() {
+internal fun glMeshCheckBound() {
     check(currBinding != null) { "No GlMesh is bound!" }
 }
 
