@@ -3,18 +3,20 @@ package com.gzozulin.minigl.api2
 import com.gzozulin.minigl.api.backend
 import com.gzozulin.minigl.api.col4
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 // At least 80, see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glActiveTexture.xhtml
 private const val MAX_ACTIVE_TEXTURES = 80
 private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
 
 data class GlTexture(val target: Int = backend.GL_TEXTURE_2D, val images: List<GlTextureImage> = emptyList(),
+                     val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR, val magFilter: Int = backend.GL_LINEAR,
+                     val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT,
                      internal var handle: Int? = null, internal var unit: Int? = null)
 
-data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer, val pixelType: Int = backend.GL_UNSIGNED_BYTE,
+data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer,
                           val internalFormat: Int = backend.GL_RGBA, val pixelFormat: Int = backend.GL_RGBA,
-                          val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR, val magFilter: Int = backend.GL_LINEAR,
-                          val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT)
+                          val pixelType: Int = backend.GL_UNSIGNED_BYTE)
 
 private fun glTextureUnitHold(): Int {
     synchronized(availableActiveTextures) {
@@ -29,26 +31,23 @@ private fun glTextureUnitRelease(unit: Int) {
     }
 }
 
-private fun glTextureImage(image: GlTextureImage) {
-    backend.glTexImage2D(image.target, 0, image.internalFormat,
-        image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
-    backend.glTexParameteri(image.target, backend.GL_TEXTURE_MIN_FILTER, image.minFilter)
-    backend.glTexParameteri(image.target, backend.GL_TEXTURE_MAG_FILTER, image.magFilter)
-    backend.glTexParameteri(image.target, backend.GL_TEXTURE_WRAP_S, image.wrapS)
-    backend.glTexParameteri(image.target, backend.GL_TEXTURE_WRAP_T, image.wrapT)
-    backend.glTexParameteri(image.target, backend.GL_TEXTURE_WRAP_R, image.wrapR)
-    backend.glGenerateMipmap(image.target)
-}
-
 internal fun glTextureUse(texture: GlTexture, callback: Callback) {
     check(texture.handle == null) { "GlTexture is already in use" }
     texture.handle = backend.glGenTextures()
     texture.unit = glTextureUnitHold()
     glTextureBind(texture) {
-        texture.images.forEach { glTextureImage(it) }
+        texture.images.forEach { image ->
+            backend.glTexImage2D(image.target, 0, image.internalFormat,
+                image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
+        }
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
+        backend.glGenerateMipmap(texture.target)
         callback.invoke()
     }
-    callback.invoke()
     backend.glDeleteTextures(texture.handle!!)
     glTextureUnitRelease(texture.unit!!)
     texture.handle = null
@@ -78,12 +77,13 @@ internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteArray): GlTe
 }
 
 internal fun glTextureCreate2D(width: Int, height: Int, pixels: List<col4>): GlTexture {
-    val data = ByteBuffer.allocateDirect(width * height * 4)
+    val data = ByteBuffer.allocateDirect(width * height * 4).order(ByteOrder.nativeOrder())
     pixels.forEach {
         data.put((it.x * 255f).toInt().toByte())
         data.put((it.y * 255f).toInt().toByte())
         data.put((it.z * 255f).toInt().toByte())
         data.put((it.w * 255f).toInt().toByte())
     }
+    data.position(0)
     return glTextureCreate2D(width, height, data)
 }

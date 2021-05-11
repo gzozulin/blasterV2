@@ -7,7 +7,11 @@ import com.gzozulin.minigl.api2.GlMesh
 import com.gzozulin.minigl.api2.GlProgram
 import com.gzozulin.minigl.api2.GlShader
 import com.gzozulin.minigl.api2.constv4
-import com.gzozulin.minigl.api2.constm4
+import com.gzozulin.minigl.api2.unifm4
+import com.gzozulin.minigl.assets2.libWavefrontCreate
+import com.gzozulin.minigl.scene.Camera
+import com.gzozulin.minigl.scene.ControllerFirstPerson
+import com.gzozulin.minigl.scene.WasdInput
 
 private val vertexSrc = """
     $VERSION
@@ -69,39 +73,39 @@ fun glFlatTechniqueDraw(flatTechnique: FlatTechnique2, mesh: GlMesh) {
     }
 }
 
-private val rect = glMeshCreateRect()
-private val texture = glTextureCreate2D(2, 2, listOf(
-    col4(col3().rose(), 1f),
-    col4(col3().azure(), 1f),
-    col4(col3().aquamarine(), 1f),
-    col4(col3().chartreuse(), 1f)
-))
+private var mouseLook = false
+private val camera = Camera()
+private val controller = ControllerFirstPerson(position = vec3().front())
+private val wasdInput = WasdInput(controller)
 
-private val uniformSampler = unift(texture)
+private val group = libWavefrontCreate("models/pcjr/pcjr")
+private val obj = group.objects.first()
+
+private val uniformSampler = unift(obj.material.mapDiffuse!!)
 private val namedTexCoords = namedv2("vTexCoord")
-
-private val matrix = constm4(mat4().ortho(-5f, 5f, -5f, 5f, 1f, -1f))
+private val matrix = unifm4 { camera.calculateFullM() }
 private val color = tex(namedTexCoords, uniformSampler)
-
 private val flatTechnique = FlatTechnique2(matrix, color)
 
 private val window = GlWindow()
 
-private fun use(callback: Callback) {
+private fun useScene(callback: Callback) {
     glFlatTechniqueUse(flatTechnique) {
-        glMeshUse(rect) {
-            glTextureUse(texture) {
+        glMeshUse(obj.mesh) {
+            glTextureUse(obj.material.mapDiffuse!!) {
                 callback.invoke()
             }
         }
     }
 }
 
-private fun draw() {
-    glFlatTechniqueBind(flatTechnique) {
-        glMeshBind(rect) {
-            glTextureBind(texture) {
-                glFlatTechniqueDraw(flatTechnique, rect)
+private fun drawScene() {
+    glDepthTest {
+        glFlatTechniqueBind(flatTechnique) {
+            glMeshBind(obj.mesh) {
+                glTextureBind(obj.material.mapDiffuse!!) {
+                    glFlatTechniqueDraw(flatTechnique, obj.mesh)
+                }
             }
         }
     }
@@ -109,9 +113,27 @@ private fun draw() {
 
 fun main() {
     window.create {
-        use {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
+                mouseLook = pressed
+            }
+        }
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }
+        window.keyCallback = { key, pressed ->
+            wasdInput.onKeyPressed(key, pressed)
+        }
+        useScene {
             window.show {
-                draw()
+                glClear()
+                controller.apply { position, direction ->
+                    camera.setPosition(position)
+                    camera.lookAlong(direction)
+                }
+                drawScene()
             }
         }
     }

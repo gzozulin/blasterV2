@@ -10,8 +10,9 @@ data class Camera(
     val rotation: quat = quat()
 ) : GlResizable {
     private val viewVersion: Version = Version()
-    private val viewM: mat4 = mat4()
+    private val viewM: mat4 = mat4().identity()
     private val negatedBuf: vec3 = vec3()
+    private val fullM: mat4 = mat4().identity()
 
     init {
         setPerspective(4f/3f)
@@ -28,6 +29,8 @@ data class Camera(
         }
         return viewM
     }
+
+    fun calculateFullM() = fullM.set(projectionM).mul(calculateViewM())
 
     fun setPerspective(aspectRatio: Float): Camera {
         projectionM.identity().perspective(Math.toRadians(90.0).toFloat(), aspectRatio, 0.1f, 500f)

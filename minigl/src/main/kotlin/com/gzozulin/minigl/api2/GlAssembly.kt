@@ -225,6 +225,16 @@ fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun unifm4(v: mat4? = null) = object : Uniform<mat4>(null, v) {
+    override fun declare() = "uniform mat4 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
+    override fun declare() = "uniform mat4 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unift(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform sampler2D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
