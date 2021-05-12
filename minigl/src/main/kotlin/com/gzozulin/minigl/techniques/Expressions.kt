@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.assembly
+package com.gzozulin.minigl.techniques
 
 import com.gzozulin.minigl.api.*
 import java.util.concurrent.atomic.AtomicInteger

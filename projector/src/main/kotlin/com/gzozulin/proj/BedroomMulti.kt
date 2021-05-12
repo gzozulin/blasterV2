@@ -8,6 +8,7 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
+import com.gzozulin.minigl.techniques.*
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()

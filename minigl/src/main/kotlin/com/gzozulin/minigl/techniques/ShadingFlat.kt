@@ -10,7 +10,7 @@ import com.gzozulin.minigl.assets.Object
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
-import com.gzozulin.minigl.techniques.StaticSkyboxTechnique
+import com.gzozulin.minigl.techniques.*
 
 private const val TEMPL_SIMPLE_VERT = """
 $VERSION
@@ -73,7 +73,8 @@ fun String.substituteDeclVrbl(vararg expression: Expression<*>): String {
 class FlatTechnique(private val modelM: Expression<mat4>,
                     private val viewM: Expression<mat4>,
                     private val projM: Expression<mat4>,
-                    private val color: Expression<vec4> = constv4(vec4(1f))) : GlResource() {
+                    private val color: Expression<vec4> = constv4(vec4(1f))
+) : GlResource() {
 
     private val program: GlProgram
 

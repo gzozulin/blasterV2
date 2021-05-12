@@ -2,6 +2,7 @@ package com.gzozulin.minigl.assembly
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.techniques.*
 import java.lang.Integer.max
 
 data class FontDescription(
@@ -66,7 +67,8 @@ class SimpleTextTechnique(
 
     private val unifTileUV = unifv2i(tileUV)
     private val texCoordTiled = tile(texCoord, unifTileUV,
-        constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV)))
+        constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV))
+    )
 
     private val uniformColor = unifv4()
     private val fontColor = cachev4(tex(texCoordTiled, unifsampler(font)))

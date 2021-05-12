@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.assembly
+package com.gzozulin.minigl.techniques
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.Object
@@ -11,6 +11,9 @@ import com.gzozulin.minigl.api2.DECLARATIONS_FRAG
 import com.gzozulin.minigl.api2.DECLARATIONS_VERT
 import com.gzozulin.minigl.api2.PRECISION_HIGH
 import com.gzozulin.minigl.api2.VERSION
+import com.gzozulin.minigl.assembly.FlatTechnique
+import com.gzozulin.minigl.assembly.SimpleVarrying
+import com.gzozulin.minigl.assembly.substituteDeclVrbl
 
 // todo: create/release is probably working improperly
 

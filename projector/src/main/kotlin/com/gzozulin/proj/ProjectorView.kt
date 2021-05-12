@@ -7,6 +7,7 @@ import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerScenic
 import com.gzozulin.minigl.scene.PointLight
+import com.gzozulin.minigl.techniques.*
 import java.lang.Float.max
 import java.lang.Float.min
 

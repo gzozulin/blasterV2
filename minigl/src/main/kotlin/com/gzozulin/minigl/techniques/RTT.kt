@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.assembly
+package com.gzozulin.minigl.techniques
 
 import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets.modelLib
