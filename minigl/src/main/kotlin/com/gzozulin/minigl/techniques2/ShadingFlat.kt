@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.assembly
+package com.gzozulin.minigl.techniques2
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
@@ -47,7 +47,7 @@ private val fragmentSrs = """
     }
 """.trimIndent()
 
-data class FlatTechnique2(
+data class ShadingFlat(
     val matrix: Expression<mat4>, val color: Expression<col4> = constv4(vec4(1f))) {
 
     private val vertShader = GlShader(backend.GL_VERTEX_SHADER,
@@ -59,15 +59,15 @@ data class FlatTechnique2(
     internal val program = GlProgram(vertShader, fragShader)
 }
 
-fun glFlatTechniqueUse(flatTechnique: FlatTechnique2, callback: Callback) =
-    glProgramUse(flatTechnique.program, callback)
+fun glFlatTechniqueUse(shadingFlat: ShadingFlat, callback: Callback) =
+    glProgramUse(shadingFlat.program, callback)
 
-fun glFlatTechniqueBind(flatTechnique: FlatTechnique2, callback: Callback) =
-    glProgramBind(flatTechnique.program, callback)
+fun glFlatTechniqueBind(shadingFlat: ShadingFlat, callback: Callback) =
+    glProgramBind(shadingFlat.program, callback)
 
-fun glFlatTechniqueDraw(flatTechnique: FlatTechnique2, mesh: GlMesh) {
-    flatTechnique.matrix.submit(flatTechnique.program)
-    flatTechnique.color.submit(flatTechnique.program)
+fun glFlatTechniqueDraw(shadingFlat: ShadingFlat, mesh: GlMesh) {
+    shadingFlat.matrix.submit(shadingFlat.program)
+    shadingFlat.color.submit(shadingFlat.program)
     glMeshBind(mesh) {
         glDrawTriangles(mesh)
     }
@@ -85,7 +85,7 @@ private val uniformSampler = unift(obj.material.mapDiffuse!!)
 private val namedTexCoords = namedv2("vTexCoord")
 private val matrix = unifm4 { camera.calculateFullM() }
 private val color = tex(namedTexCoords, uniformSampler)
-private val flatTechnique = FlatTechnique2(matrix, color)
+private val flatTechnique = ShadingFlat(matrix, color)
 
 private val window = GlWindow()
 
