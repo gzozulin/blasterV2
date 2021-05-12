@@ -175,6 +175,9 @@ const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
         EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
 
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_VERT\n$CONST_UNIF"
+const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_FRAG\n$CONST_UNIF"
+
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
 
@@ -221,6 +224,11 @@ fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
 }
 
 fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
+    override fun declare() = "uniform vec3 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifv3(p: () -> vec3) = object : Uniform<vec3>(p, null) {
     override fun declare() = "uniform vec3 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }

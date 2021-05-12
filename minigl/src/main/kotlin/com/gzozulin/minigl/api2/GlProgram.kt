@@ -69,7 +69,9 @@ internal fun glProgramCheckBound() {
 
 private fun glProgramUniformLocation(program: GlProgram, name: String): Int {
     check(program.handle != null) { "GlProgram is not used!" }
-    return backend.glGetUniformLocation(program.handle!!, name)
+    val location = backend.glGetUniformLocation(program.handle!!, name)
+    check(location >= 0) { "Location $name is not found in GlProgram" }
+    return location
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: Float) {
@@ -108,6 +110,22 @@ internal fun glProgramUniform(program: GlProgram, name: String, value: mat4) {
 internal fun glProgramUniform(program: GlProgram, name: String, texture: GlTexture) {
     check(texture.handle != null) { "GlTexture is not used!" }
     backend.glUniform1i(glProgramUniformLocation(program, name), texture.unit!!)
+}
+
+internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: Int) {
+    val location = glProgramUniformLocation(program, name.format(index))
+    backend.glUniform1i(location, value)
+}
+
+internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: Float) {
+    val location = glProgramUniformLocation(program, name.format(index))
+    backend.glUniform1f(location, value)
+}
+
+internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: vec3) {
+    val location = glProgramUniformLocation(program, name.format(index))
+    value.get(bufferVec3)
+    backend.glUniform3fv(location, bufferVec3)
 }
 
 internal fun glDrawTriangles(mesh: GlMesh) {

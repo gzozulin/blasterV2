@@ -14,10 +14,7 @@ import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
 
 private val vertexSrc = """
-    $VERSION
-    $PRECISION_HIGH
-    $DECLARATIONS_VERT
-    $CONST_UNIF
+    $VERT_SHADER_HEADER
     
     layout (location = 0) in vec3 aPosition;
     layout (location = 1) in vec2 aTexCoord;
@@ -33,10 +30,7 @@ private val vertexSrc = """
 """.trimIndent()
 
 private val fragmentSrs = """
-    $VERSION
-    $PRECISION_HIGH
-    $DECLARATIONS_FRAG
-    $CONST_UNIF
+    $FRAG_SHADER_HEADER
     
     in vec2 vTexCoord;
 
@@ -59,13 +53,16 @@ data class ShadingFlat(
     internal val program = GlProgram(vertShader, fragShader)
 }
 
-fun glFlatTechniqueUse(shadingFlat: ShadingFlat, callback: Callback) =
+fun glShadingFlatUse(shadingFlat: ShadingFlat, callback: Callback) =
     glProgramUse(shadingFlat.program, callback)
 
-fun glFlatTechniqueBind(shadingFlat: ShadingFlat, callback: Callback) =
-    glProgramBind(shadingFlat.program, callback)
+fun glShadingFlatDraw(shadingFlat: ShadingFlat, callback: Callback) {
+    glProgramBind(shadingFlat.program) {
+        callback.invoke()
+    }
+}
 
-fun glFlatTechniqueDraw(shadingFlat: ShadingFlat, mesh: GlMesh) {
+fun glShadingFlatInstance(shadingFlat: ShadingFlat, mesh: GlMesh) {
     shadingFlat.matrix.submit(shadingFlat.program)
     shadingFlat.color.submit(shadingFlat.program)
     glMeshBind(mesh) {
@@ -85,12 +82,12 @@ private val uniformSampler = unift(obj.material.mapDiffuse!!)
 private val namedTexCoords = namedv2("vTexCoord")
 private val matrix = unifm4 { camera.calculateFullM() }
 private val color = tex(namedTexCoords, uniformSampler)
-private val flatTechnique = ShadingFlat(matrix, color)
+private val shadingFlat = ShadingFlat(matrix, color)
 
 private val window = GlWindow()
 
 private fun useScene(callback: Callback) {
-    glFlatTechniqueUse(flatTechnique) {
+    glShadingFlatUse(shadingFlat) {
         glMeshUse(obj.mesh) {
             glTextureUse(obj.material.mapDiffuse!!) {
                 callback.invoke()
@@ -101,11 +98,9 @@ private fun useScene(callback: Callback) {
 
 private fun drawScene() {
     glDepthTest {
-        glFlatTechniqueBind(flatTechnique) {
-            glMeshBind(obj.mesh) {
-                glTextureBind(obj.material.mapDiffuse!!) {
-                    glFlatTechniqueDraw(flatTechnique, obj.mesh)
-                }
+        glTextureBind(obj.material.mapDiffuse!!) {
+            glShadingFlatDraw(shadingFlat) {
+                glShadingFlatInstance(shadingFlat, obj.mesh)
             }
         }
     }
