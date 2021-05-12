@@ -68,8 +68,6 @@ enum class FilePopUp { MOVE_IN, SHOWN, GONE }
 
 class ProjectorView(private val model: ProjectorModel) : GlResource() {
 
-    private val crossFadeTechnique = CrossFadeTechnique(timeout = 2000)
-
     // ----------------- Text ------------------
 
     private val codeTextTechnique = SimpleTextTechnique(codeFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -147,17 +145,9 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
 
     init {
         addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, noiseTexture,
-            minimapCursorTechnique, crossFadeTechnique, panelTechnique, panelMesh,
+            minimapCursorTechnique, panelTechnique, panelMesh,
             forwardTechnique, bedroomModel,
             filePopUpTextTechnique, filePopUpRttTechnique)
-    }
-
-    fun fadeIn() {
-        crossFadeTechnique.fadeIn()
-    }
-
-    fun renderCrossFade() {
-        crossFadeTechnique.draw()
     }
 
     fun renderScene() {

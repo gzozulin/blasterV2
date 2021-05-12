@@ -7,6 +7,8 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.*
 import org.joml.Matrix4f
 
+private const val MAX_LIGHTS = 128
+
 @Deprecated("Use assembly instead!")
 class StaticPbrTechnique: GlResource() {
     private val program = shadersLib.loadProgram("shaders/pbr/pbr.vert", "shaders/pbr/pbr.frag")

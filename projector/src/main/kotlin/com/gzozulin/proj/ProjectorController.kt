@@ -65,13 +65,11 @@ class StateCozyRoomIntro(
             }
             scenarioLoaded = true
         }
-        view.fadeIn()
     }
 
     override fun onFrame() {
         glClear(col3().black())
         view.renderScene()
-        view.renderCrossFade()
         if (scenarioLoaded) {
             parent.switch(StateCozyRoomTyping(parent, model, view))
         }
