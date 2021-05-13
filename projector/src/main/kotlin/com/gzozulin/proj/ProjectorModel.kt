@@ -2,9 +2,9 @@ package com.gzozulin.proj
 
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.assembly.SpanVisibility
-import com.gzozulin.minigl.assembly.TextPage
-import com.gzozulin.minigl.assembly.TextSpan
+import com.gzozulin.minigl.techniques.SpanVisibility
+import com.gzozulin.minigl.techniques.TextPage
+import com.gzozulin.minigl.techniques.TextSpan
 import java.io.File
 import kotlin.math.abs
 
@@ -16,7 +16,8 @@ const val FRAMES_PER_LINE = 2
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
-                       override var visibility: SpanVisibility) : TextSpan
+                       override var visibility: SpanVisibility
+) : TextSpan
 
 private enum class AnimationState { ADVANCING, KEY_FRAME, SCROLLING }
 

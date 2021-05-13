@@ -1,7 +1,9 @@
-package com.gzozulin.minigl.assembly
+package com.gzozulin.minigl.techniques
 
 import com.gzozulin.minigl.assets.texturesLib
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.assembly.FlatTechnique
+import com.gzozulin.minigl.assembly.SimpleVarrying
 import com.gzozulin.minigl.techniques.*
 import java.lang.Integer.max
 
@@ -27,7 +29,8 @@ interface TextSpan {
 data class SimpleSpan(
     override var text: String,
     override var color: col3,
-    override var visibility: SpanVisibility = SpanVisibility.VISIBLE) : TextSpan
+    override var visibility: SpanVisibility = SpanVisibility.VISIBLE
+) : TextSpan
 
 open class TextPage<T : TextSpan>(val spans: List<T>) {
     fun findLineNo(lookup: T) = run {
@@ -203,7 +206,7 @@ private val examplePage = TextPage(listOf(
 private val fontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.3f, fontScaleV = 0.3f,
+    fontScaleU = 0.3f, fontScaleV = 0.4f,
     fontStepScaleU = 0.45f, fontStepScaleV = 0.75f)
 
 private val simpleTextTechnique = SimpleTextTechnique(fontDescription, window.width, window.height)

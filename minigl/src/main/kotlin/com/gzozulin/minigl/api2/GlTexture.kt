@@ -5,6 +5,8 @@ import com.gzozulin.minigl.api.col4
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+// todo: find a way to check if the texture is bound
+
 // At least 80, see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glActiveTexture.xhtml
 private const val MAX_ACTIVE_TEXTURES = 80
 private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
