@@ -1,9 +1,6 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.mat4
-import com.gzozulin.minigl.api.vec2
-import com.gzozulin.minigl.api.vec3
-import com.gzozulin.minigl.api.vec4
+import com.gzozulin.minigl.api.*
 import java.util.concurrent.atomic.AtomicInteger
 
 const val VERSION = "#version 460\n"
@@ -183,6 +180,31 @@ const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_FRAG\n$
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
 
+// ----------------------------- Substitution -----------------------------
+
+fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): String {
+    var result = source
+    var uniforms = ""
+    var constants = ""
+    var cache = ""
+    fun search(expression: Expression<*>) {
+        when (expression) {
+            is Constant -> constants    += "${expression.declare()}\n"
+            is Uniform  -> uniforms     += "${expression.declare()}\n"
+            is Cache    -> cache        += "${expression.declare()}\n"
+            else        -> expression.roots().forEach { search(it) }
+        }
+    }
+    expressions.forEach { (name, expr) ->
+        search(expr)
+        result = result.replace("%$name%", expr.expr())
+    }
+    result = result.replace("%UNIF%", uniforms)
+    result = result.replace("%CONST%", constants)
+    result = result.replace("main() {", "main() {\n$cache\n")
+    return result
+}
+
 // ----------------------------- Expressions -----------------------------
 
 abstract class Expression<T> {
@@ -197,6 +219,9 @@ abstract class Expression<T> {
 data class Named<T>(val given: String) : Expression<T>() {
     override fun expr() = given
 }
+
+fun namedv2(name: String) = Named<vec2>(name)
+fun namedTexCoords() = Named<vec2>(V_TEX_COORD)
 
 abstract class Uniform<T>(private val p: (() -> T)?, private var v: T?) : Expression<T>() {
 
@@ -216,13 +241,20 @@ abstract class Constant<T>(internal val value: T) : Expression<T>() {
     abstract fun declare(): String
 }
 
-fun namedv2(name: String) = Named<vec2>(name)
-fun namedTexCoords() = Named<vec2>(V_TEX_COORD)
+abstract class Cache<T>() : Expression<T>() {
+    override fun expr() = name
+    abstract fun declare(): String
+}
 
 // ----------------------------- Uniforms -----------------------------
 
 fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
     override fun declare() = "uniform float $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
+    override fun declare() = "uniform vec2i $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
@@ -233,6 +265,11 @@ fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
 
 fun unifv3(p: () -> vec3) = object : Uniform<vec3>(p, null) {
     override fun declare() = "uniform vec3 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifv4(v: vec4? = null) = object : Uniform<vec4>(null, v) {
+    override fun declare() = "uniform vec4 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
@@ -257,6 +294,10 @@ fun constf(value: Float) = object : Constant<Float>(value) {
     override fun declare() = "const float $name = $value;"
 }
 
+fun constv2i(value: vec2i) = object : Constant<vec2i>(value) {
+    override fun declare() = "const vec2i $name = vec2i(${value.x}, ${value.y});"
+}
+
 fun constv3(value: vec3) = object : Constant<vec3>(value) {
     override fun declare() = "const vec3 $name = vec3(${value.x}, ${value.y}, ${value.z});"
 }
@@ -273,10 +314,12 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
             "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
 }
 
-// cannot const texture as int
-/*fun consts(value: GlTexture) = object : Constant<GlTexture>(value) {
-    override fun declare() = "const int $name = ${value.unit};"
-}*/
+// ----------------------------- Cache -----------------------------
+
+fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
+    override fun declare() = "vec4 $name = ${value.expr()}"
+    override fun roots() = listOf(value)
+}
 
 // ----------------------------- Arithmetics -----------------------------
 
@@ -299,31 +342,101 @@ fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>(
     override fun roots() = listOf(left, right)
 }
 
-// ----------------------------- Substitution -----------------------------
+// ----------------------------- Texture -----------------------------
 
 fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(texCoord, sampler)
 }
 
-// ----------------------------- Substitution -----------------------------
+// ----------------------------- Tile -----------------------------
 
-fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): String {
-    var result = source
-    var uniforms = ""
-    var constants = ""
-    fun search(expression: Expression<*>) {
-        when (expression) {
-            is Constant -> constants += "${expression.declare()}\n"
-            is Uniform  -> uniforms += "${expression.declare()}\n"
-            else        -> expression.roots().forEach { search(it) }
-        }
-    }
-    expressions.forEach { (name, expr) ->
-        search(expr)
-        result = result.replace("%$name%", expr.expr())
-    }
-    result = result.replace("%UNIF%", uniforms)
-    result = result.replace("%CONST%", constants)
-    return result
+fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
+    override fun expr() = "expr_tile(${texCoord.expr()}, ${uv.expr()}, ${cnt.expr()})"
+    override fun roots() = listOf(texCoord, uv, cnt)
 }
+
+// ------------------------- Discard -------------------------
+
+fun <R> discard() = object : Expression<R>() {
+    override fun expr() = "expr_discard()"
+}
+
+// ------------------------- Boolean -------------------------
+
+fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
+    override fun expr() = "((${check.expr()}) ? ${left.expr()} : ${right.expr()})"
+    override fun roots() = listOf(check, left, right)
+}
+
+fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun expr() = "(${left.expr()} == ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun expr() = "(${left.expr()} > ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun <R> near(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun expr() = "expr_near(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
+    override fun expr() = expr.expr() + listOf("(!${expr.expr()})")
+    override fun roots() = listOf(expr)
+}
+
+// ------------------------- Accessors -------------------------
+
+fun getx(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun expr() = "expr_x(${expr.expr()})"
+    override fun roots() = listOf(expr)
+}
+
+fun gety(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun expr() = "expr_y(${expr.expr()})"
+    override fun roots() = listOf(expr)
+}
+
+fun getz(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun expr() = "expr_z(${expr.expr()})"
+    override fun roots() = listOf(expr)
+}
+
+fun getw(expr: Expression<vec4>) = object : Expression<Float>() {
+    override fun expr() = "expr_w(${expr.expr()})"
+    override fun roots() = listOf(expr)
+}
+
+fun getr(expr: Expression<vec4>) = getx(expr)
+fun getg(expr: Expression<vec4>) = gety(expr)
+fun getb(expr: Expression<vec4>) = getz(expr)
+fun geta(expr: Expression<vec4>) = getw(expr)
+
+fun setx(vec: Expression<vec4>, x: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "expr_set_x(${vec.expr()}, ${x.expr()})"
+    override fun roots() = listOf(vec, x)
+}
+
+fun sety(vec: Expression<vec4>, y: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "expr_set_y(${vec.expr()}, ${y.expr()})"
+    override fun roots() = listOf(vec, y)
+}
+
+fun setz(vec: Expression<vec4>, z: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "expr_set_z(${vec.expr()}, ${z.expr()})"
+    override fun roots() = listOf(vec, z)
+}
+
+fun setw(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "expr_set_w(${vec.expr()}, ${w.expr()})"
+    override fun roots() = listOf(vec, w)
+}
+
+fun setr(vec: Expression<vec4>, r: Expression<Float>) = setx(vec, r)
+fun setg(vec: Expression<vec4>, g: Expression<Float>) = sety(vec, g)
+fun setb(vec: Expression<vec4>, b: Expression<Float>) = setz(vec, b)
+fun seta(vec: Expression<vec4>, a: Expression<Float>) = setw(vec, a)
