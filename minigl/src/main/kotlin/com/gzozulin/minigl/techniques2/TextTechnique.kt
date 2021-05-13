@@ -74,7 +74,7 @@ class TechniqueText(
     private val texCoord = namedTexCoords()
     private val uniformMatrix = unifm4 { fullM.set(projM).mul(viewM).mul(cursor) }
 
-    internal val unifTileUV = unifv2i { tileUV }
+    private val unifTileUV = unifv2i { tileUV }
     private val texCoordTiled = tile(texCoord, unifTileUV,
         constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV))
     )
