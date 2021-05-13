@@ -14,7 +14,7 @@ data class GlTexture(val target: Int = backend.GL_TEXTURE_2D, val images: List<G
                      val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT,
                      internal var handle: Int? = null, internal var unit: Int? = null)
 
-data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer,
+data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer? = null,
                           val internalFormat: Int = backend.GL_RGBA, val pixelFormat: Int = backend.GL_RGBA,
                           val pixelType: Int = backend.GL_UNSIGNED_BYTE)
 

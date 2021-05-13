@@ -107,3 +107,5 @@ fun aabb.scaleTo(to: Float): Float {
     }
     return to / maxSide
 }
+
+fun mat4.orthoBox(side: Float) = identity().ortho(-side, side, -side, side, side, -side)

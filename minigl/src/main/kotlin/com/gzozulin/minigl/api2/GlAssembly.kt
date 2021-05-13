@@ -10,6 +10,8 @@ const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
 const val CONST_UNIF = "%CONST%\n%UNIF%\n"
 
+const val V_TEX_COORD = "vTexCoord"
+
 private const val EXPR_X = """
     float expr_x(vec4 v) {
         return v.x;
@@ -215,6 +217,7 @@ abstract class Constant<T>(internal val value: T) : Expression<T>() {
 }
 
 fun namedv2(name: String) = Named<vec2>(name)
+fun namedTexCoords() = Named<vec2>(V_TEX_COORD)
 
 // ----------------------------- Uniforms -----------------------------
 
