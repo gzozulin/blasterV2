@@ -91,8 +91,7 @@ private const val deferredLightVert = """
 
     out vec2 vTexCoord;
 
-    void main()
-    {
+    void main() {
         vTexCoord = aTexCoord;
         gl_Position = vec4(aPosition, 1.0);
     }
@@ -121,8 +120,7 @@ private const val deferredLightFrag = """
 
     out vec4 oFragColor;
 
-    void main()
-    {
+    void main() {
         %VRBL%
         
         vec4 positionLookup = texture(uTexPosition, vTexCoord);

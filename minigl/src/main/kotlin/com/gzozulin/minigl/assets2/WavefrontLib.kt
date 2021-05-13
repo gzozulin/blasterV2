@@ -19,7 +19,7 @@ private val slashRegex = "/".toRegex()
 data class WavefrontObj(val mesh: GlMesh, val material: PhongMaterial, val aabb: aabb)
 data class WavefrontObjGroup(val objects: List<WavefrontObj>, val aabb: aabb)
 
-fun libWavefrontCreate(filename: String, join: Boolean = true, progress: (Float) -> Unit = { println(it.toString()) }) =
+fun libWavefrontCreate(filename: String, join: Boolean = false, progress: (Float) -> Unit = { println(it.toString()) }) =
     libWavefrontCreate("$filename.obj", "$filename.mtl", join, progress)
 
 fun libWavefrontCreate(objFilename: String, mtlFilename: String, join: Boolean = true,

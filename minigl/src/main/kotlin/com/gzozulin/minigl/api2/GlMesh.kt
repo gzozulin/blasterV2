@@ -44,7 +44,7 @@ internal fun glMeshCheckBound() {
     check(currBinding != null) { "No GlMesh is bound!" }
 }
 
-internal fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f): GlMesh {
+fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f): GlMesh {
     val vertices = floatArrayOf(
         left,  top,     0f,
         left,  bottom,  0f,
@@ -66,4 +66,10 @@ internal fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Floa
         glBufferCreate(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, texCoords),
         glBufferCreate(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, normals),
         glBufferCreate(backend.GL_ELEMENT_ARRAY_BUFFER, backend.GL_STATIC_DRAW, indices), 6)
+}
+
+fun glMeshCreateRect(width: Float, height: Float): GlMesh {
+    val hw = width/2f
+    val hh = height/2f
+    return glMeshCreateRect(-hw, hw, -hh, hh)
 }

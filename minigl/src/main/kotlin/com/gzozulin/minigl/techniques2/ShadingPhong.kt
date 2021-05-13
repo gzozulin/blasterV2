@@ -25,8 +25,7 @@ private const val vertSrc = """
     out vec2 vTexCoord;
     out vec3 vNormal;
 
-    void main()
-    {
+    void main() {
         vec4 worldPos = %MODEL% * vec4(aPosition, 1.0);
         vPosition = worldPos;
         vTexCoord = aTexCoord;
@@ -49,8 +48,7 @@ private const val fragSrc = """
     
     layout (location = 0) out vec4 oFragColor;
 
-    void main()
-    {
+    void main() {
         vec3 fragPosition = vPosition.xyz;
         vec3 fragNormal = normalize(vNormal);
         vec3 fragDiffuse = %DIFFUSE%.rgb;

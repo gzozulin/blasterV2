@@ -20,7 +20,7 @@ fun main() {
             }
             projectorController.keyPressed(key, pressed)
         }
-        glUse(projectorView) {
+        projectorView.use {
             justFrame()
         }
     }

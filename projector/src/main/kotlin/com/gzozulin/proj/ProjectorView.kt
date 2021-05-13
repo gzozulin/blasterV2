@@ -1,13 +1,25 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.GlMesh
+import com.gzozulin.minigl.api2.*
+import com.gzozulin.minigl.api2.constf
+import com.gzozulin.minigl.api2.constv3
+import com.gzozulin.minigl.api2.constm4
+import com.gzozulin.minigl.api2.tex
+import com.gzozulin.minigl.api2.unifm4
+import com.gzozulin.minigl.api2.unifv3
 import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.modelLib
-import com.gzozulin.minigl.assets.texturesLib
+import com.gzozulin.minigl.assets2.libTextureCreate
+import com.gzozulin.minigl.assets2.libWavefrontCreate
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerScenic
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.techniques.*
+import com.gzozulin.minigl.techniques2.SimpleSpan
+import com.gzozulin.minigl.techniques2.TextPage
+import com.gzozulin.minigl.techniques2.*
+import com.gzozulin.minigl.techniques2.FontDescription
 import java.lang.Float.max
 import java.lang.Float.min
 
@@ -67,32 +79,33 @@ private val filePopUpFontDescription = codeFontDescription.copy(
 
 enum class FilePopUp { MOVE_IN, SHOWN, GONE }
 
-class ProjectorView(private val model: ProjectorModel) : GlResource() {
+class ProjectorView(private val model: ProjectorModel) {
 
     // ----------------- Text ------------------
 
-    private val codeTextTechnique = SimpleTextTechnique(codeFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
-    private val codeRttTechnique = RttTechnique(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT)
+    private val codeTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, codeFontDescription)
+    private val codeRttTechnique = TechniqueRtt(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT)
 
-    private val minimapTextTechnique = SimpleTextTechnique(minimapFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
-    private val minimapRttTechnique = RttTechnique(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
-    private val minimapCursorTechnique = RttTechnique(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
+    private val minimapTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, minimapFontDescription)
+    private val minimapRttTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
+    private val minimapCursorTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
     private val minimapCursorColor = vec4(0.25f)
 
-    private val panelModelM = unifm4()
-    private val panelViewM = constm4(mat4().identity())
-    private val panelProjM = constm4(mat4().ortho(0f, SCREEN_WIDTH.toFloat(), 0f, SCREEN_HEIGHT.toFloat(), -1f, 1f))
+    private val panelModelM = mat4().identity()
+    private val panelProjM = mat4().ortho(0f, SCREEN_WIDTH.toFloat(), 0f, SCREEN_HEIGHT.toFloat(), -1f, 1f)
+    private val panelFullM = mat4().identity()
+    private val uniformPanelM = unifm4 { panelFullM.set(panelProjM).mul(panelModelM) }
 
-    private val panelTexCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
-    private val panelSampler = unifsampler()
+    private val panelTexCoords = namedTexCoords()
+    private val panelSampler = unift()
     private val panelColor = vec4(0f, 0f, 0f, 0.7f)
-    private val panelMesh = GlMesh.rect(1f, 1f)
-    private val panelTechnique = FlatTechnique(panelModelM, panelViewM, panelProjM, tex(panelTexCoords, panelSampler))
+    private val panelMesh = glMeshCreateRect(1f, 1f)
+    private val shadingFlat = ShadingFlat(uniformPanelM, tex(panelTexCoords, panelSampler))
 
     // ----------------- File pop-up ------------------
 
-    private val filePopUpTextTechnique = SimpleTextTechnique(filePopUpFontDescription, SCREEN_WIDTH, SCREEN_HEIGHT)
-    private val filePopUpRttTechnique = RttTechnique(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT)
+    private val filePopUpTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, filePopUpFontDescription)
+    private val filePopUpRttTechnique = TechniqueRtt(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT)
 
     private var lastShownPage: ProjectorTextPage<OrderedSpan>? = null
     private var filePopUp = TextPage(listOf(SimpleSpan("ProjectorView.kt", col3().white())))
@@ -102,8 +115,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
 
     // ----------------- Scene ------------------
 
-    private val bedroomModel = modelLib.load("models/bedroom/bedroom", join = false)
-    private val noiseTexture = texturesLib.loadTexture("textures/snow.png")
+    private val bedroomModel = libWavefrontCreate("models/bedroom/bedroom")
+    private val noiseTexture = libTextureCreate("textures/snow.png")
 
     private val camera = Camera()
     private val controller = ControllerScenic(
@@ -131,8 +144,8 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
     private val eye = unifv3 { camera.position }
     private val projM = unifm4 { camera.projectionM }
 
-    private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
-    private val sampler = unifsampler()
+    private val texCoords = namedTexCoords()
+    private val sampler = unift()
     private val diffuseMap = tex(texCoords, sampler)
 
     private val matAmbient = constv3(vec3(0.05f))
@@ -141,14 +154,30 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
     private val matShine = constf(1f)
     private val matTransparency = constf(1f)
 
-    private val forwardTechnique = ForwardTechnique(
+    private val shadingPhong = ShadingPhong(
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
-    init {
-        addChildren(codeTextTechnique, codeRttTechnique, minimapTextTechnique, minimapRttTechnique, noiseTexture,
-            minimapCursorTechnique, panelTechnique, panelMesh,
-            forwardTechnique, bedroomModel,
-            filePopUpTextTechnique, filePopUpRttTechnique)
+    fun use(callback: Callback) {
+        glTechTextUse(codeTextTechnique) {
+            glTechRttUse(codeRttTechnique) {
+                glTechTextUse(minimapTextTechnique) {
+                    glTechRttUse(minimapRttTechnique) {
+                        glTechRttUse(minimapCursorTechnique) {
+                            glShadingFlatUse(shadingFlat) {
+                                glTechTextUse(filePopUpTextTechnique) {
+                                    glTechRttUse(filePopUpRttTechnique) {
+
+                                        // todo: meshes, textures, multitech
+
+                                        callback.invoke()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun renderScene() {
@@ -159,13 +188,12 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
         }
         cameraLight.position.set(camera.position)
         glDepthTest {
-            glBind(noiseTexture) {
-                forwardTechnique.draw(lights) {
+            glTextureBind(noiseTexture) {
+                glShadingPhongDraw(shadingPhong, lights) {
                     bedroomModel.objects.forEach { obj ->
-                        val material = obj.phong()
-                        sampler.value = material.mapDiffuse ?: noiseTexture
-                        matDiffuse.value = material.diffuse
-                        forwardTechnique.instance(obj)
+                        sampler.value = obj.material.mapDiffuse ?: noiseTexture
+                        matDiffuse.value = obj.material.diffuse
+                        glShadingPhongInstance(shadingPhong, obj.mesh)
                     }
                 }
             }
@@ -180,18 +208,18 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
     }
 
     private fun prepareCode() {
-        codeRttTechnique.render {
+        glTechRttDraw(codeRttTechnique) {
             glClear(panelColor)
-            codeTextTechnique.pageCentered(model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
+            glTechTextPageCentered(codeTextTechnique, model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
         }
     }
 
     private fun prepareMinimap() {
-        minimapRttTechnique.render {
+        glTechRttDraw(minimapRttTechnique) {
             glClear(panelColor)
-            minimapTextTechnique.page(model.currentPage)
+            glTechTextPage(minimapTextTechnique, model.currentPage)
         }
-        minimapCursorTechnique.render {
+        glTechRttDraw(minimapCursorTechnique) {
             glClear(minimapCursorColor)
         }
     }
@@ -216,7 +244,7 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
             filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().cyan())))
             filePopUpState = FilePopUp.MOVE_IN
         }
-        filePopUpRttTechnique.render {
+        glTechRttDraw(filePopUpRttTechnique) {
             glClear(filePopUpBackground)
             when (filePopUpState) {
                 FilePopUp.MOVE_IN -> {
@@ -224,14 +252,14 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
                     filePopUpM.identity()
                         .translate(FILE_POP_UP_POS_X.toFloat() + elapsed * FILE_POP_UP_POS_X_DELTA, FILE_POP_UP_POS_Y.toFloat(), 0f)
                         .scale(FILE_POP_UP_WIDTH.toFloat(), FILE_POP_UP_HEIGHT.toFloat(), 1f)
-                    filePopUpTextTechnique.page(filePopUp)
+                    glTechTextPage(filePopUpTextTechnique, filePopUp)
                     if (elapsed <= 0.01f) {
                         filePopUpState = FilePopUp.SHOWN
                         filePopUpTimeout = 0
                     }
                 }
                 FilePopUp.SHOWN -> {
-                    filePopUpTextTechnique.page(filePopUp)
+                    glTechTextPage(filePopUpTextTechnique, filePopUp)
                     if (filePopUpTimeout >= FILE_POP_UP_FRAMES_SHOW) {
                         filePopUpState = FilePopUp.GONE
                     }
@@ -245,22 +273,27 @@ class ProjectorView(private val model: ProjectorModel) : GlResource() {
 
     private fun renderPanels() {
         glBlend {
-            panelTechnique.draw {
-                glBind(codeRttTechnique.colorAttachment0, minimapRttTechnique.colorAttachment0,
-                    minimapCursorTechnique.colorAttachment0, filePopUpRttTechnique.colorAttachment0) {
-                    panelSampler.value = codeRttTechnique.colorAttachment0
-                    panelModelM.value = codeModelM
-                    panelTechnique.instance(panelMesh)
-                    panelSampler.value = minimapRttTechnique.colorAttachment0
-                    panelModelM.value = minimapModelM
-                    panelTechnique.instance(panelMesh)
-                    updateMinimapCursor()
-                    panelSampler.value = minimapCursorTechnique.colorAttachment0
-                    panelModelM.value = minimapCursorModelM
-                    panelTechnique.instance(panelMesh)
-                    panelSampler.value = filePopUpRttTechnique.colorAttachment0
-                    panelModelM.value = filePopUpM
-                    panelTechnique.instance(panelMesh)
+            glShadingFlatDraw(shadingFlat) {
+                updateMinimapCursor()
+                glTextureBind(codeRttTechnique.output) {
+                    panelSampler.value = codeRttTechnique.output
+                    panelModelM.set(codeModelM)
+                    glShadingFlatInstance(shadingFlat, panelMesh)
+                }
+                glTextureBind(minimapRttTechnique.output) {
+                    panelSampler.value = minimapRttTechnique.output
+                    panelModelM.set(minimapModelM)
+                    glShadingFlatInstance(shadingFlat, panelMesh)
+                }
+                glTextureBind(minimapCursorTechnique.output) {
+                    panelSampler.value = minimapCursorTechnique.output
+                    panelModelM.set(minimapCursorModelM)
+                    glShadingFlatInstance(shadingFlat, panelMesh)
+                }
+                glTextureBind(filePopUpRttTechnique.output) {
+                    panelSampler.value = filePopUpRttTechnique.output
+                    panelModelM.set(filePopUpM)
+                    glShadingFlatInstance(shadingFlat, panelMesh)
                 }
             }
         }

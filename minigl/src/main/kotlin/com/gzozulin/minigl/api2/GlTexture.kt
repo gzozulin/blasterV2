@@ -57,7 +57,7 @@ internal fun glTextureUse(texture: GlTexture, callback: Callback) {
 }
 
 private val currBinding = HashSet<Int>()
-internal fun glTextureBind(texture: GlTexture, callback: Callback) {
+fun glTextureBind(texture: GlTexture, callback: Callback) {
     check(texture.handle != null) { "GlTexture is not used!" }
     backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
     backend.glBindTexture(texture.target, texture.handle!!)

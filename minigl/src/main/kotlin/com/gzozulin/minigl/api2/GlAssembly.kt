@@ -205,7 +205,7 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
     uniforms = uniforms.lines().distinct().joinToString("\n")
     constants = constants.lines().distinct().joinToString("\n")
     cache = cache.lines().distinct().joinToString("\n")
-    check(result.contains(MAIN_DECL)) { "Main is not declared properly ($MAIN_DECL)!\n$source" }
+    check(result.contains(MAIN_DECL)) { "Main is not declared properly: $MAIN_DECL\n$source" }
     result = result.replace(MAIN_DECL, "$uniforms\n$MAIN_DECL")
     result = result.replace(MAIN_DECL, "$constants\n$MAIN_DECL")
     result = result.replace(MAIN_DECL, "$MAIN_DECL\n$cache\n")

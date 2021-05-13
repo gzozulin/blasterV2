@@ -11,10 +11,10 @@ private val outputs = listOf(backend.GL_COLOR_ATTACHMENT0)
 
 data class TechniqueRtt(val width: Int, val height: Int) {
     internal val frameBuffer = GlFrameBuffer()
-    internal val output = GlTexture(images = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height)))
+    val output = GlTexture(images = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height)))
 }
 
-internal fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
+fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
     glFrameBufferUse(techniqueRtt.frameBuffer) {
         glTextureUse(techniqueRtt.output) {
             callback.invoke()
@@ -22,7 +22,7 @@ internal fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
     }
 }
 
-internal fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
+fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
     backend.glGetIntegerv(backend.GL_VIEWPORT, prevViewport)
     glFrameBufferBind(techniqueRtt.frameBuffer) {
         glTextureBind(techniqueRtt.output) {

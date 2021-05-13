@@ -34,11 +34,11 @@ private fun ByteBuffer.addColor(color: Color) {
     put(color.alpha.toByte())
 }
 
-internal fun libTextureCreate(file: File, mirrorX: Boolean = false, mirrorY: Boolean = false): GlTexture {
+fun libTextureCreate(file: File, mirrorX: Boolean = false, mirrorY: Boolean = false): GlTexture {
     val inputStream = file.inputStream()
     val decoded = libTextureDecodePixels(inputStream, mirrorX, mirrorY)
     return glTextureCreate2D(decoded.width, decoded.height, decoded.pixels)
 }
 
-internal fun libTextureCreate(asset: String, mirrorX: Boolean = false, mirrorY: Boolean = false) =
+fun libTextureCreate(asset: String, mirrorX: Boolean = false, mirrorY: Boolean = false) =
     libTextureCreate(libAssetCreate(asset), mirrorX, mirrorY)
