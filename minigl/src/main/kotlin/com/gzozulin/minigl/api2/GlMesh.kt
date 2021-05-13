@@ -5,7 +5,7 @@ import com.gzozulin.minigl.api.backend
 data class GlMesh(internal val vertices: GlBuffer, internal val texCoords: GlBuffer, internal val normals: GlBuffer,
                   internal val indices: GlBuffer, internal val indicesCnt: Int, internal var handle: Int? = null)
 
-internal fun glMeshUse(mesh: GlMesh, callback: Callback) {
+fun glMeshUse(mesh: GlMesh, callback: Callback) {
     check(mesh.handle == null) { "GlMesh is already in use!" }
     mesh.handle = backend.glGenVertexArrays()
     glMeshBind(mesh) {
@@ -27,6 +27,16 @@ internal fun glMeshUse(mesh: GlMesh, callback: Callback) {
     }
     backend.glDeleteVertexArrays(mesh.handle!!)
     mesh.handle = null
+}
+
+internal fun glMeshUse(meshes: Iterator<GlMesh>, callback: Callback) {
+    if (meshes.hasNext()) {
+        glMeshUse(meshes.next()) {
+            glMeshUse(meshes, callback)
+        }
+    } else {
+        callback.invoke()
+    }
 }
 
 private var currBinding: Int? = null

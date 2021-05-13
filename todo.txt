@@ -48,3 +48,4 @@ x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +projector
 (B) 2021-05-08 MSAA for RttTechnique (code rendering) +projector @code @complex
 x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +projector @code @simple
 2021-05-12 Inject substitutions before and after main() for shaders +projector @code @complex
+2021-05-13 Learn about licenses for creative use +projector @video @complex

@@ -1,7 +1,6 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.api.GlMesh
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.constf
 import com.gzozulin.minigl.api2.constv3
@@ -9,13 +8,12 @@ import com.gzozulin.minigl.api2.constm4
 import com.gzozulin.minigl.api2.tex
 import com.gzozulin.minigl.api2.unifm4
 import com.gzozulin.minigl.api2.unifv3
-import com.gzozulin.minigl.assembly.*
 import com.gzozulin.minigl.assets2.libTextureCreate
 import com.gzozulin.minigl.assets2.libWavefrontCreate
+import com.gzozulin.minigl.assets2.libWavefrontGroupUse
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerScenic
 import com.gzozulin.minigl.scene.PointLight
-import com.gzozulin.minigl.techniques.*
 import com.gzozulin.minigl.techniques2.SimpleSpan
 import com.gzozulin.minigl.techniques2.TextPage
 import com.gzozulin.minigl.techniques2.*
@@ -115,7 +113,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     // ----------------- Scene ------------------
 
-    private val bedroomModel = libWavefrontCreate("models/bedroom/bedroom")
+    private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
     private val noiseTexture = libTextureCreate("textures/snow.png")
 
     private val camera = Camera()
@@ -130,7 +128,7 @@ class ProjectorView(private val model: ProjectorModel) {
             vec3(-9.781e1f, 1.104e2f,  1.249e1f)).reversed(), // CW
         points = listOf(vec3(2.732e1f, 100f, 5.401e1f)))
 
-    private val cameraLight = PointLight(bedroomModel.aabb.center(), vec3(1f), 350f)
+    private val cameraLight = PointLight(bedroomGroup.aabb.center(), vec3(1f), 350f)
     private val lights = listOf(
         cameraLight,
         PointLight(vec3(2.732e1f, 150.3f, 5.401e1f),    vec3().white(),  800f),
@@ -158,18 +156,23 @@ class ProjectorView(private val model: ProjectorModel) {
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     fun use(callback: Callback) {
-        glTechTextUse(codeTextTechnique) {
-            glTechRttUse(codeRttTechnique) {
-                glTechTextUse(minimapTextTechnique) {
-                    glTechRttUse(minimapRttTechnique) {
-                        glTechRttUse(minimapCursorTechnique) {
-                            glShadingFlatUse(shadingFlat) {
-                                glTechTextUse(filePopUpTextTechnique) {
-                                    glTechRttUse(filePopUpRttTechnique) {
-
-                                        // todo: meshes, textures, multitech
-
-                                        callback.invoke()
+        glShadingPhongUse(shadingPhong) {
+            glTechTextUse(codeTextTechnique) {
+                glTechRttUse(codeRttTechnique) {
+                    glTechTextUse(minimapTextTechnique) {
+                        glTechRttUse(minimapRttTechnique) {
+                            glTechRttUse(minimapCursorTechnique) {
+                                glShadingFlatUse(shadingFlat) {
+                                    glTechTextUse(filePopUpTextTechnique) {
+                                        glTechRttUse(filePopUpRttTechnique) {
+                                            libWavefrontGroupUse(bedroomGroup) {
+                                                glTextureUse(noiseTexture) {
+                                                    glMeshUse(panelMesh) {
+                                                        callback.invoke()
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -190,10 +193,18 @@ class ProjectorView(private val model: ProjectorModel) {
         glDepthTest {
             glTextureBind(noiseTexture) {
                 glShadingPhongDraw(shadingPhong, lights) {
-                    bedroomModel.objects.forEach { obj ->
-                        sampler.value = obj.material.mapDiffuse ?: noiseTexture
-                        matDiffuse.value = obj.material.diffuse
-                        glShadingPhongInstance(shadingPhong, obj.mesh)
+                    bedroomGroup.objects.forEach { obj ->
+                        if (obj.material.mapDiffuse != null) {
+                            glTextureBind(obj.material.mapDiffuse!!) {
+                                sampler.value = obj.material.mapDiffuse!!
+                                matDiffuse.value = obj.material.diffuse
+                                glShadingPhongInstance(shadingPhong, obj.mesh)
+                            }
+                        } else {
+                            sampler.value = noiseTexture
+                            matDiffuse.value = obj.material.diffuse
+                            glShadingPhongInstance(shadingPhong, obj.mesh)
+                        }
                     }
                 }
             }

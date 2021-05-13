@@ -3,8 +3,9 @@ package com.gzozulin.minigl.assets2
 import com.gzozulin.minigl.api.aabb
 import com.gzozulin.minigl.api.backend
 import com.gzozulin.minigl.api.vec3
-import com.gzozulin.minigl.api2.GlBuffer
-import com.gzozulin.minigl.api2.GlMesh
+import com.gzozulin.minigl.api2.*
+import com.gzozulin.minigl.api2.glMeshUse
+import com.gzozulin.minigl.api2.glTextureUse
 import com.gzozulin.minigl.assets.*
 import java.io.BufferedReader
 import java.io.File
@@ -29,6 +30,36 @@ fun libWavefrontCreate(objFilename: String, mtlFilename: String, join: Boolean =
     val allAabb = aabb()
     objects.forEach { allAabb.union(it.aabb) }
     return WavefrontObjGroup(objects, allAabb)
+}
+
+fun libWavefrontObjectUse(obj: WavefrontObj, callback: Callback) {
+    glMeshUse(obj.mesh) {
+        glTextureUse(listOfNotNull(
+            obj.material.mapAmbient,
+            obj.material.mapDiffuse,
+            obj.material.mapSpecular,
+            obj.material.mapShine,
+            obj.material.mapTransparency).iterator()) {
+            callback.invoke()
+        }
+    }
+}
+
+fun libWavefrontGroupUse(group: WavefrontObjGroup, callback: Callback) {
+    val meshes = HashSet<GlMesh>()
+    val textures = HashSet<GlTexture>()
+    group.objects.forEach {
+        meshes.add(it.mesh)
+        textures.addAll(listOfNotNull(
+            it.material.mapAmbient, it.material.mapDiffuse, it.material.mapSpecular,
+            it.material.mapShine, it.material.mapTransparency
+        ))
+    }
+    glMeshUse(meshes.iterator()) {
+        glTextureUse(textures.iterator()) {
+            callback.invoke()
+        }
+    }
 }
 
 private fun libWavefrontParseAsset(filename: String) =

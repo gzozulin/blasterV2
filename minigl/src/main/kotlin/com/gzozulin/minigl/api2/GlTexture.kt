@@ -33,7 +33,7 @@ private fun glTextureUnitRelease(unit: Int) {
     }
 }
 
-internal fun glTextureUse(texture: GlTexture, callback: Callback) {
+private fun glTextureUpload(texture: GlTexture) {
     check(texture.handle == null) { "GlTexture is already in use" }
     texture.handle = backend.glGenTextures()
     texture.unit = glTextureUnitHold()
@@ -48,12 +48,30 @@ internal fun glTextureUse(texture: GlTexture, callback: Callback) {
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
         backend.glGenerateMipmap(texture.target)
-        callback.invoke()
     }
+}
+
+private fun glTextureDelete(texture: GlTexture) {
     backend.glDeleteTextures(texture.handle!!)
     glTextureUnitRelease(texture.unit!!)
     texture.handle = null
     texture.unit = null
+}
+
+fun glTextureUse(texture: GlTexture, callback: Callback) {
+    glTextureUpload(texture)
+    callback.invoke()
+    glTextureDelete(texture)
+}
+
+fun glTextureUse(texture: Iterator<GlTexture>, callback: Callback) {
+    if (texture.hasNext()) {
+        glTextureUse(texture.next()) {
+            glTextureUse(texture, callback)
+        }
+    } else {
+        callback.invoke()
+    }
 }
 
 private val currBinding = HashSet<Int>()
