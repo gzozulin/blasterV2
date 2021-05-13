@@ -2,19 +2,14 @@ package com.gzozulin.minigl.techniques2
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
+import com.gzozulin.minigl.api2.constf
 import com.gzozulin.minigl.api2.constv2i
-import com.gzozulin.minigl.api2.glMeshCreateRect
+import com.gzozulin.minigl.api2.discard
 import com.gzozulin.minigl.api2.unifm4
 import com.gzozulin.minigl.api2.unifv2i
 import com.gzozulin.minigl.api2.unifv4
 import com.gzozulin.minigl.assets2.libTextureCreate
 import com.gzozulin.minigl.techniques.*
-import com.gzozulin.minigl.api2.constf
-import com.gzozulin.minigl.api2.discard
-import com.gzozulin.minigl.api2.ifexp
-import com.gzozulin.minigl.api2.more
-import com.gzozulin.minigl.api2.seta
-import com.gzozulin.minigl.api2.getr
 import java.lang.Integer.max
 
 data class FontDescription(
@@ -63,91 +58,105 @@ open class TextPage<T : TextSpan>(val spans: List<T>) {
 }
 
 class TechniqueText(
-    private val width: Int, private val height: Int,
-    private val fontDescription: FontDescription = FontDescription()) {
+    internal val width: Int, internal val height: Int, fontDescription: FontDescription = FontDescription()) {
 
-    private val rect = glMeshCreateRect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
-    private val font = libTextureCreate(fontDescription.textureFilename)
+    internal val rect = glMeshCreateRect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
+    internal val font = libTextureCreate(fontDescription.textureFilename)
         .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
 
-    private val cursor = mat4().identity()
-    private val tileUV = vec2i(0)
+    internal val cursor = mat4().identity()
+    private val viewM = mat4().identity().translate(vec3(width / 2f, height / 2f, 0f))
+    private val projM = mat4().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f)
+    private val fullM = mat4().identity()
+
+    internal val tileUV = vec2i(0)
 
     private val texCoord = namedTexCoords()
-    private val modelM = unifm4(cursor)
-    private val unifProj = unifm4(mat4().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f))
-    private val unifCenter = unifm4(mat4().identity().translate(vec3(width / 2f, height / 2f, 0f)))
+    private val uniformMatrix = unifm4 { fullM.set(projM).mul(viewM).mul(cursor) }
 
-    private val unifTileUV = unifv2i(tileUV)
+    internal val unifTileUV = unifv2i { tileUV }
     private val texCoordTiled = tile(texCoord, unifTileUV,
         constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV))
     )
 
-    private val uniformColor = unifv4()
+    internal val uniformColor = unifv4()
     private val fontColor = cachev4(tex(texCoordTiled, unift(font)))
     private val fontCheck = more(geta(fontColor), constf(0f))
     private val resultColor = seta(uniformColor, getr(fontColor))
     private val result = ifexp(fontCheck, resultColor, discard())
 
-    private val shadingFlat = ShadingFlat(modelM, unifCenter, unifProj, result)
+    internal val shadingFlat = ShadingFlat(uniformMatrix, result)
+}
 
-    private fun updateCursor(line: Int, letter: Int) {
-        cursor.identity().setTranslation(
-            letter * fontDescription.letterSizeU * fontDescription.fontStepScaleU - width/2f,
-            height/2f - fontDescription.letterSizeV * (line + 1.5f) * fontDescription.fontStepScaleV,
-            0f)
-        modelM.value = cursor
+fun glTechTextUse(techniqueText: TechniqueText, callback: Callback) {
+    glShadingFlatUse(techniqueText.shadingFlat) {
+        glMeshUse(techniqueText.rect) {
+            glTextureUse(techniqueText.font) {
+                callback.invoke()
+            }
+        }
     }
+}
 
-    private fun updateGlyph(character: Char) {
-        tileUV.x = character.toInt() % fontDescription.fontCntU
-        tileUV.y = fontDescription.fontCntV - character.toInt() / fontDescription.fontCntV - 1
-        unifTileUV.value = tileUV
-    }
+private fun glTechTextUpdateCursor(techniqueText: TechniqueText, line: Int, letter: Int) {
+    techniqueText.cursor.identity().setTranslation(
+        letter * fontDescription.letterSizeU * fontDescription.fontStepScaleU - techniqueText.width/2f,
+        techniqueText.height/2f - fontDescription.letterSizeV * (line + 1.5f) * fontDescription.fontStepScaleV,
+        0f)
+}
 
-    private fun updateSpan(span: TextSpan) {
-        uniformColor.value = vec4(span.color, 1f)
-    }
+private fun glTechTextUpdateGlyph(techniqueText: TechniqueText, character: Char) {
+    techniqueText.tileUV.x = character.toInt() % fontDescription.fontCntU
+    techniqueText.tileUV.y = fontDescription.fontCntV - character.toInt() / fontDescription.fontCntV - 1
+}
 
-    fun <T : TextSpan> page(page: TextPage<T>) {
-        pageRange(page, 0, Int.MAX_VALUE)
-    }
+private fun glTechTextUpdateSpan(techniqueText: TechniqueText, span: TextSpan) {
+    techniqueText.uniformColor.value = vec4(span.color, 1f)
+}
 
-    fun <T : TextSpan> pageCentered(page: TextPage<T>, centerLine: Int, linesCnt: Int) {
-        val fromLine = max(centerLine - linesCnt, 0)
-        val toLine = fromLine + linesCnt * 2
-        pageRange(page, fromLine, toLine)
-    }
+fun <T : TextSpan> glTechTextPage(techniqueText: TechniqueText, page: TextPage<T>) {
+    glTechTextPageRange(techniqueText, page, 0, Int.MAX_VALUE)
+}
 
-    private fun <T : TextSpan> pageRange(page: TextPage<T>, fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
-        check(fromLine in 0 until toLine) { "wtf?!" }
-        var currentLetter = 0
-        var currentLine = 0
-        glBlend {
-            shadingFlat.draw {
-                for (span in page.spans) {
-                    if (span.visibility == SpanVisibility.GONE) {
-                        continue
-                    }
-                    updateSpan(span)
-                    for (character in span.text) {
-                        if (character == '\n') {
-                            currentLetter = 0
-                            currentLine++
+fun <T : TextSpan> glTechTextPageCentered(techniqueText: TechniqueText, page: TextPage<T>, centerLine: Int, linesCnt: Int) {
+    val fromLine = max(centerLine - linesCnt, 0)
+    val toLine = fromLine + linesCnt * 2
+    glTechTextPageRange(techniqueText, page, fromLine, toLine)
+}
+
+private fun <T : TextSpan> glTechTextPageRange(techniqueText: TechniqueText, page: TextPage<T>,
+                                               fromLine: Int = 0, toLine: Int = Int.MAX_VALUE) {
+    check(fromLine in 0 until toLine) { "wtf?!" }
+    var currentLetter = 0
+    var currentLine = 0
+    glBlend {
+        glMeshBind(techniqueText.rect) {
+            glTextureBind(techniqueText.font) {
+                glShadingFlatDraw(techniqueText.shadingFlat) {
+                    for (span in page.spans) {
+                        if (span.visibility == SpanVisibility.GONE) {
                             continue
                         }
-                        if (currentLine < fromLine) {
-                            continue
+                        glTechTextUpdateSpan(techniqueText, span)
+                        for (character in span.text) {
+                            if (character == '\n') {
+                                currentLetter = 0
+                                currentLine++
+                                continue
+                            }
+                            if (currentLine < fromLine) {
+                                continue
+                            }
+                            if (currentLine >= toLine) {
+                                return@glShadingFlatDraw
+                            }
+                            if (span.visibility == SpanVisibility.VISIBLE) {
+                                glTechTextUpdateCursor(techniqueText, currentLine - fromLine, currentLetter)
+                                glTechTextUpdateGlyph(techniqueText, character)
+                                glShadingFlatInstance(techniqueText.shadingFlat, techniqueText.rect)
+                            }
+                            currentLetter ++
                         }
-                        if (currentLine >= toLine) {
-                            return@draw
-                        }
-                        if (span.visibility == SpanVisibility.VISIBLE) {
-                            updateCursor(currentLine - fromLine, currentLetter)
-                            updateGlyph(character)
-                            shadingFlat.instance(rect, font)
-                        }
-                        currentLetter ++
                     }
                 }
             }
@@ -211,11 +220,11 @@ private val techniqueText = TechniqueText(window.width, window.height, fontDescr
 
 fun main() {
     window.create {
-        glUse(techniqueText) {
+        glTechTextUse(techniqueText) {
             window.show {
                 glClear(col3().ltGrey())
                 val centerLine = examplePage.findLineNo(occasionSpan)
-                techniqueText.pageCentered(examplePage, centerLine, 1000)
+                glTechTextPageCentered(techniqueText, examplePage, centerLine, 1000)
             }
         }
     }

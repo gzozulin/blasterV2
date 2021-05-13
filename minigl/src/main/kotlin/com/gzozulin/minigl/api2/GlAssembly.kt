@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger
 
 const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
-const val CONST_UNIF = "%CONST%\n%UNIF%\n"
 
 const val V_TEX_COORD = "vTexCoord"
 
@@ -174,8 +173,10 @@ const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
         EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
 
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_VERT\n$CONST_UNIF"
-const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_FRAG\n$CONST_UNIF"
+private const val MAIN_DECL = "void main() {"
+
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_VERT\n"
+const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_FRAG\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
@@ -188,10 +189,12 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
     var constants = ""
     var cache = ""
     fun search(expression: Expression<*>) {
+        if (expression is Cache) {
+            cache += "${expression.declare()}\n"
+        }
         when (expression) {
             is Constant -> constants    += "${expression.declare()}\n"
             is Uniform  -> uniforms     += "${expression.declare()}\n"
-            is Cache    -> cache        += "${expression.declare()}\n"
             else        -> expression.roots().forEach { search(it) }
         }
     }
@@ -199,9 +202,13 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
         search(expr)
         result = result.replace("%$name%", expr.expr())
     }
-    result = result.replace("%UNIF%", uniforms)
-    result = result.replace("%CONST%", constants)
-    result = result.replace("main() {", "main() {\n$cache\n")
+    uniforms = uniforms.lines().distinct().joinToString("\n")
+    constants = constants.lines().distinct().joinToString("\n")
+    cache = cache.lines().distinct().joinToString("\n")
+    check(result.contains(MAIN_DECL)) { "Main is not declared properly ($MAIN_DECL)!\n$source" }
+    result = result.replace(MAIN_DECL, "$uniforms\n$MAIN_DECL")
+    result = result.replace(MAIN_DECL, "$constants\n$MAIN_DECL")
+    result = result.replace(MAIN_DECL, "$MAIN_DECL\n$cache\n")
     return result
 }
 
@@ -254,7 +261,12 @@ fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
 }
 
 fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
-    override fun declare() = "uniform vec2i $name;"
+    override fun declare() = "uniform ivec2 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifv2i(p: () -> vec2i) = object : Uniform<vec2i>(p, null) {
+    override fun declare() = "uniform ivec2 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
@@ -295,7 +307,7 @@ fun constf(value: Float) = object : Constant<Float>(value) {
 }
 
 fun constv2i(value: vec2i) = object : Constant<vec2i>(value) {
-    override fun declare() = "const vec2i $name = vec2i(${value.x}, ${value.y});"
+    override fun declare() = "const ivec2 $name = ivec2(${value.x}, ${value.y});"
 }
 
 fun constv3(value: vec3) = object : Constant<vec3>(value) {
@@ -317,7 +329,7 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
 // ----------------------------- Cache -----------------------------
 
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
-    override fun declare() = "vec4 $name = ${value.expr()}"
+    override fun declare() = "vec4 $name = ${value.expr()};"
     override fun roots() = listOf(value)
 }
 
