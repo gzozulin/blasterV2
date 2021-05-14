@@ -7,26 +7,17 @@ import java.nio.ByteOrder
 data class GlBuffer(val target: Int = backend.GL_ARRAY_BUFFER, val usage: Int = backend.GL_STATIC_DRAW,
                     internal val data: ByteBuffer, internal var handle: Int? = null)
 
-internal fun glBufferUse(buffer: GlBuffer, callback: Callback) {
+internal fun glBufferUpload(buffer: GlBuffer) {
     check(buffer.handle == null) { "GlBuffer already in use!" }
     buffer.handle = backend.glGenBuffers()
-    glBufferBind(buffer) {
-        backend.glBufferData(buffer.target, buffer.data, buffer.usage)
-        callback.invoke()
-    }
-    backend.glDeleteBuffers(buffer.handle!!)
-    buffer.handle = null
+    backend.glBindBuffer(buffer.target, buffer.handle!!)
+    backend.glBufferData(buffer.target, buffer.data, buffer.usage)
 }
 
-private val currBinding = mutableMapOf<Int, Int?>()
-internal fun glBufferBind(buffer: GlBuffer, callback: Callback) {
-    check(buffer.handle != null) { "GlBuffer is not used!" }
-    val prev = currBinding[buffer.target]
-    backend.glBindBuffer(buffer.target, buffer.handle!!)
-    currBinding[buffer.target] = buffer.handle!!
-    callback.invoke()
-    backend.glBindBuffer(buffer.target, prev ?: 0)
-    currBinding[buffer.target] = prev
+internal fun glBufferDelete(buffer: GlBuffer) {
+    check(buffer.handle != null) { "GlBuffer is not in use!" }
+    backend.glDeleteBuffers(buffer.handle!!)
+    buffer.handle = null
 }
 
 fun glBufferCreate(target: Int, usage: Int, floats: FloatArray): GlBuffer {

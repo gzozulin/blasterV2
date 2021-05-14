@@ -32,19 +32,6 @@ fun libWavefrontCreate(objFilename: String, mtlFilename: String, join: Boolean =
     return WavefrontObjGroup(objects, allAabb)
 }
 
-fun libWavefrontObjectUse(obj: WavefrontObj, callback: Callback) {
-    glMeshUse(obj.mesh) {
-        glTextureUse(listOfNotNull(
-            obj.material.mapAmbient,
-            obj.material.mapDiffuse,
-            obj.material.mapSpecular,
-            obj.material.mapShine,
-            obj.material.mapTransparency).iterator()) {
-            callback.invoke()
-        }
-    }
-}
-
 fun libWavefrontGroupUse(group: WavefrontObjGroup, callback: Callback) {
     val meshes = HashSet<GlMesh>()
     val textures = HashSet<GlTexture>()
@@ -55,8 +42,8 @@ fun libWavefrontGroupUse(group: WavefrontObjGroup, callback: Callback) {
             it.material.mapShine, it.material.mapTransparency
         ))
     }
-    glMeshUse(meshes.iterator()) {
-        glTextureUse(textures.iterator()) {
+    glMeshUse(meshes) {
+        glTextureUse(textures) {
             callback.invoke()
         }
     }

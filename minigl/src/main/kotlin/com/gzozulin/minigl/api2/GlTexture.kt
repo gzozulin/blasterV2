@@ -37,18 +37,20 @@ private fun glTextureUpload(texture: GlTexture) {
     check(texture.handle == null) { "GlTexture is already in use" }
     texture.handle = backend.glGenTextures()
     texture.unit = glTextureUnitHold()
-    glTextureBind(texture) {
-        texture.images.forEach { image ->
-            backend.glTexImage2D(image.target, 0, image.internalFormat,
-                image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
-        }
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
-        backend.glGenerateMipmap(texture.target)
+    backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
+    backend.glBindTexture(texture.target, texture.handle!!)
+    texture.images.forEach { image ->
+        backend.glTexImage2D(image.target, 0, image.internalFormat,
+            image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
     }
+    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
+    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
+    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
+    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
+    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
+    backend.glGenerateMipmap(texture.target)
+    backend.glBindTexture(texture.target, 0)
+    backend.glActiveTexture(backend.GL_TEXTURE0)
 }
 
 private fun glTextureDelete(texture: GlTexture) {
@@ -64,14 +66,10 @@ fun glTextureUse(texture: GlTexture, callback: Callback) {
     glTextureDelete(texture)
 }
 
-fun glTextureUse(texture: Iterator<GlTexture>, callback: Callback) {
-    if (texture.hasNext()) {
-        glTextureUse(texture.next()) {
-            glTextureUse(texture, callback)
-        }
-    } else {
-        callback.invoke()
-    }
+fun glTextureUse(texture: Collection<GlTexture>, callback: Callback) {
+    texture.forEach { glTextureUpload(it) }
+    callback.invoke()
+    texture.forEach { glTextureDelete(it) }
 }
 
 private val currBinding = HashSet<Int>()

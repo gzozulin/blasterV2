@@ -5,38 +5,46 @@ import com.gzozulin.minigl.api.backend
 data class GlMesh(internal val vertices: GlBuffer, internal val texCoords: GlBuffer, internal val normals: GlBuffer,
                   internal val indices: GlBuffer, internal val indicesCnt: Int, internal var handle: Int? = null)
 
-fun glMeshUse(mesh: GlMesh, callback: Callback) {
+private fun glMeshUpload(mesh: GlMesh) {
     check(mesh.handle == null) { "GlMesh is already in use!" }
     mesh.handle = backend.glGenVertexArrays()
-    glMeshBind(mesh) {
-        glBufferUse(mesh.vertices) {
-            backend.glEnableVertexAttribArray(0)
-            backend.glVertexAttribPointer(0, 3, backend.GL_FLOAT, false, 0, 0)
-            glBufferUse(mesh.texCoords) {
-                backend.glEnableVertexAttribArray(1)
-                backend.glVertexAttribPointer(1, 2, backend.GL_FLOAT, false, 0, 0)
-                glBufferUse(mesh.normals) {
-                    backend.glEnableVertexAttribArray(2)
-                    backend.glVertexAttribPointer(2, 3, backend.GL_FLOAT, false, 0, 0)
-                    glBufferUse(mesh.indices) {
-                        callback.invoke()
-                    }
-                }
-            }
-        }
-    }
+    glBufferUpload(mesh.vertices)
+    glBufferUpload(mesh.texCoords)
+    glBufferUpload(mesh.normals)
+    glBufferUpload(mesh.indices)
+    backend.glBindVertexArray(mesh.handle!!)
+    backend.glBindBuffer(mesh.vertices.target, mesh.vertices.handle!!)
+    backend.glEnableVertexAttribArray(0)
+    backend.glVertexAttribPointer(0, 3, backend.GL_FLOAT, false, 0, 0)
+    backend.glBindBuffer(mesh.texCoords.target, mesh.texCoords.handle!!)
+    backend.glEnableVertexAttribArray(1)
+    backend.glVertexAttribPointer(1, 2, backend.GL_FLOAT, false, 0, 0)
+    backend.glBindBuffer(mesh.normals.target, mesh.normals.handle!!)
+    backend.glEnableVertexAttribArray(2)
+    backend.glVertexAttribPointer(2, 3, backend.GL_FLOAT, false, 0, 0)
+    backend.glBindBuffer(mesh.indices.target, mesh.indices.handle!!)
+    backend.glBindVertexArray(0)
+}
+
+private fun glMeshDelete(mesh: GlMesh) {
     backend.glDeleteVertexArrays(mesh.handle!!)
+    glBufferDelete(mesh.vertices)
+    glBufferDelete(mesh.texCoords)
+    glBufferDelete(mesh.normals)
+    glBufferDelete(mesh.indices)
     mesh.handle = null
 }
 
-internal fun glMeshUse(meshes: Iterator<GlMesh>, callback: Callback) {
-    if (meshes.hasNext()) {
-        glMeshUse(meshes.next()) {
-            glMeshUse(meshes, callback)
-        }
-    } else {
-        callback.invoke()
-    }
+fun glMeshUse(mesh: GlMesh, callback: Callback) {
+    glMeshUpload(mesh)
+    callback.invoke()
+    glMeshDelete(mesh)
+}
+
+internal fun glMeshUse(meshes: Collection<GlMesh>, callback: Callback) {
+    meshes.forEach { glMeshUpload(it) }
+    callback.invoke()
+    meshes.forEach { glMeshDelete(it) }
 }
 
 private var currBinding: Int? = null

@@ -42,14 +42,14 @@ private fun glProgramCreate(program: GlProgram) {
 
 internal fun glProgramUse(program: GlProgram, callback: Callback) {
     check(program.handle == null) { "GlProgram is already in use!" }
-    glShaderUse(program.vertexShader) {
-        glShaderUse(program.fragmentShader) {
-            glProgramCreate(program)
-            callback.invoke()
-            backend.glDeleteProgram(program.handle!!)
-            program.handle = null
-        }
-    }
+    glShaderUpload(program.vertexShader)
+    glShaderUpload(program.fragmentShader)
+    glProgramCreate(program)
+    callback.invoke()
+    backend.glDeleteProgram(program.handle!!)
+    program.handle = null
+    glShaderDelete(program.vertexShader)
+    glShaderDelete(program.fragmentShader)
 }
 
 private var currBinding: Int? = null
