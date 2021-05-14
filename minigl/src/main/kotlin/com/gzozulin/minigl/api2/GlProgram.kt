@@ -130,6 +130,6 @@ internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int,
 
 internal fun glDrawTriangles(mesh: GlMesh) {
     glProgramCheckBound()
-    glMeshCheckBound()
+    glMeshCheckBound(mesh)
     backend.glDrawElements(backend.GL_TRIANGLES, mesh.indicesCnt, backend.GL_UNSIGNED_INT, 0)
 }

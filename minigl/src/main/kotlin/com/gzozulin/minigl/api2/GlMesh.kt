@@ -1,9 +1,18 @@
 package com.gzozulin.minigl.api2
 
 import com.gzozulin.minigl.api.backend
+import org.lwjgl.opengl.GL30.GL_VERTEX_ARRAY_BINDING
+
+private val binding = IntArray(1)
 
 data class GlMesh(internal val vertices: GlBuffer, internal val texCoords: GlBuffer, internal val normals: GlBuffer,
                   internal val indices: GlBuffer, internal val indicesCnt: Int, internal var handle: Int? = null)
+
+private fun glMeshBindPrev(callback: Callback) {
+    backend.glGetIntegerv(GL_VERTEX_ARRAY_BINDING, binding)
+    callback.invoke()
+    backend.glBindVertexArray(binding[0])
+}
 
 private fun glMeshUpload(mesh: GlMesh) {
     check(mesh.handle == null) { "GlMesh is already in use!" }
@@ -12,18 +21,19 @@ private fun glMeshUpload(mesh: GlMesh) {
     glBufferUpload(mesh.texCoords)
     glBufferUpload(mesh.normals)
     glBufferUpload(mesh.indices)
-    backend.glBindVertexArray(mesh.handle!!)
-    backend.glBindBuffer(mesh.vertices.target, mesh.vertices.handle!!)
-    backend.glEnableVertexAttribArray(0)
-    backend.glVertexAttribPointer(0, 3, backend.GL_FLOAT, false, 0, 0)
-    backend.glBindBuffer(mesh.texCoords.target, mesh.texCoords.handle!!)
-    backend.glEnableVertexAttribArray(1)
-    backend.glVertexAttribPointer(1, 2, backend.GL_FLOAT, false, 0, 0)
-    backend.glBindBuffer(mesh.normals.target, mesh.normals.handle!!)
-    backend.glEnableVertexAttribArray(2)
-    backend.glVertexAttribPointer(2, 3, backend.GL_FLOAT, false, 0, 0)
-    backend.glBindBuffer(mesh.indices.target, mesh.indices.handle!!)
-    backend.glBindVertexArray(0)
+    glMeshBindPrev {
+        backend.glBindVertexArray(mesh.handle!!)
+        backend.glBindBuffer(mesh.vertices.target, mesh.vertices.handle!!)
+        backend.glEnableVertexAttribArray(0)
+        backend.glVertexAttribPointer(0, 3, backend.GL_FLOAT, false, 0, 0)
+        backend.glBindBuffer(mesh.texCoords.target, mesh.texCoords.handle!!)
+        backend.glEnableVertexAttribArray(1)
+        backend.glVertexAttribPointer(1, 2, backend.GL_FLOAT, false, 0, 0)
+        backend.glBindBuffer(mesh.normals.target, mesh.normals.handle!!)
+        backend.glEnableVertexAttribArray(2)
+        backend.glVertexAttribPointer(2, 3, backend.GL_FLOAT, false, 0, 0)
+        backend.glBindBuffer(mesh.indices.target, mesh.indices.handle!!)
+    }
 }
 
 private fun glMeshDelete(mesh: GlMesh) {
@@ -47,19 +57,17 @@ internal fun glMeshUse(meshes: Collection<GlMesh>, callback: Callback) {
     meshes.forEach { glMeshDelete(it) }
 }
 
-private var currBinding: Int? = null
 internal fun glMeshBind(mesh: GlMesh, callback: Callback) {
     check(mesh.handle != null) { "GlMesh is not used!" }
-    val prev = currBinding
-    backend.glBindVertexArray(mesh.handle!!)
-    currBinding = mesh.handle
-    callback.invoke()
-    backend.glBindVertexArray(prev ?: 0)
-    currBinding = prev
+    glMeshBindPrev {
+        backend.glBindVertexArray(mesh.handle!!)
+        callback.invoke()
+    }
 }
 
-internal fun glMeshCheckBound() {
-    check(currBinding != null) { "No GlMesh is bound!" }
+internal fun glMeshCheckBound(mesh: GlMesh) {
+    backend.glGetIntegerv(GL_VERTEX_ARRAY_BINDING, binding)
+    check(binding[0] == mesh.handle) { "GlMesh is not bound!" }
 }
 
 fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f): GlMesh {
