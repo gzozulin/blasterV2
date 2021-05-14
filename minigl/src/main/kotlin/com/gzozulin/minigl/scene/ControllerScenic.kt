@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api2.*
 import org.joml.Vector3f
 import kotlin.math.abs
 

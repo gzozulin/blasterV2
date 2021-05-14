@@ -1,8 +1,5 @@
 package com.gzozulin.minigl.assets2
 
-import com.gzozulin.minigl.api.aabb
-import com.gzozulin.minigl.api.backend
-import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.glMeshUse
 import com.gzozulin.minigl.api2.glTextureUse

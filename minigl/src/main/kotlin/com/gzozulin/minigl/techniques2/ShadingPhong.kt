@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.techniques2
 
-import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.GlMesh
 import com.gzozulin.minigl.api2.GlProgram
@@ -200,7 +199,7 @@ private var lightsDown = false
 
 fun main() {
     val window = GlWindow()
-    window.create(resizables = listOf(camera), isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
+    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
             if (pressed) {

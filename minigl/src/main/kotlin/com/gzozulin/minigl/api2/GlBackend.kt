@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api
+package com.gzozulin.minigl.api2
 
 import org.lwjgl.opengl.*
 import java.nio.ByteBuffer

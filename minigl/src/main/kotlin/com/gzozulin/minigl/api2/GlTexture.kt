@@ -1,7 +1,5 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.backend
-import com.gzozulin.minigl.api.col4
 import org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D
 import org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE
 import org.lwjgl.opengl.GL13.GL_TEXTURE_BINDING_CUBE_MAP

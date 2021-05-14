@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api
+package com.gzozulin.minigl.api2
 
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWKeyCallback
@@ -32,8 +32,6 @@ typealias DeltaCallback = (delta: vec2) -> Unit
 class GlWindow {
     var handle: Long? = null
 
-    private val resizables = mutableListOf<GlResizable>()
-
     private var isHoldingCursor: Boolean = false
     private var isFullscreen: Boolean = false
     private var isMultisampling: Boolean = false
@@ -58,22 +56,11 @@ class GlWindow {
     private var fps = 0
     private var last = System.currentTimeMillis()
 
-    private val resizeCallbackInternal = object : GLFWWindowSizeCallback() {
-        override fun invoke(window: Long, width: Int, height: Int) {
-            onResize(width, height)
-        }
-    }
-
     private val keyCallbackInternal = object : GLFWKeyCallback() {
         override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
             if (action == GLFW_PRESS) {
                 when (key) {
                     GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(window, true)
-                    GLFW_KEY_ENTER  -> {
-                        isFullscreen = !isFullscreen
-                        recreateWindow()
-                        onResize(width, height)
-                    }
                 }
             }
             keyCallback?.invoke(key, action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -91,18 +78,15 @@ class GlWindow {
         }
     }
 
-    fun create(resizables: List<GlResizable> = listOf(),
-               isHoldingCursor: Boolean = false, isFullscreen: Boolean = false,
+    fun create(isHoldingCursor: Boolean = false, isFullscreen: Boolean = false,
                isMultisampling: Boolean = false, onCreated: () -> Unit) {
-        this.resizables.clear()
-        this.resizables.addAll(resizables)
         this.isHoldingCursor = isHoldingCursor
         this.isFullscreen = isFullscreen
         this.isMultisampling = isMultisampling
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         recreateWindow()
-        onResize(width, height)
+        glCheck { backend.glViewport(0, 0, width, height) }
         onCreated.invoke()
         glfwDestroyWindow(handle!!)
     }
@@ -120,7 +104,6 @@ class GlWindow {
             glfwSwapBuffers(handle!!)
             glfwPollEvents()
             updateFps()
-            GlProgram.stopComplaining()
         }
     }
 
@@ -136,18 +119,12 @@ class GlWindow {
         if (isHoldingCursor) {
             glfwSetInputMode(handle!!, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
         }
-        glfwSetWindowSizeCallback(handle!!, resizeCallbackInternal)
         glfwSetMouseButtonCallback(handle!!, buttonCallbackInternal)
         glfwSetKeyCallback(handle!!, keyCallbackInternal)
         glfwMakeContextCurrent(handle!!)
         GL.createCapabilities();
         glfwSwapInterval(1)
         glfwShowWindow(handle!!)
-    }
-
-    private fun onResize(width: Int, height: Int) {
-        glCheck { backend.glViewport(0, 0, width, height) }
-        resizables.forEach { it.resize(width, height) }
     }
 
     private fun updateCursor(window: Long) {

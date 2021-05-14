@@ -1,7 +1,7 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.api.mat4
-import com.gzozulin.minigl.api.vec4
+import com.gzozulin.minigl.api2.mat4
+import com.gzozulin.minigl.api2.vec4
 
 // Mproj * Mview * Mmodel * vert = Tproj(Tview(Tmodel(vert)))
 

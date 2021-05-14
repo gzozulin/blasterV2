@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.techniques2
 
-import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.constf
 import com.gzozulin.minigl.api2.constv2i

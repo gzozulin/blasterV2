@@ -47,5 +47,6 @@ x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +projector @video @simp
 x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +projector @code @complex
 (B) 2021-05-08 MSAA for RttTechnique (code rendering) +projector @code @complex
 x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +projector @code @simple
-2021-05-12 Inject substitutions before and after main() for shaders +projector @code @complex
+x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +projector @code @complex
 2021-05-13 Learn about licenses for creative use +projector @video @complex
+2021-05-14 Remove GlBackend +projector @code @complex

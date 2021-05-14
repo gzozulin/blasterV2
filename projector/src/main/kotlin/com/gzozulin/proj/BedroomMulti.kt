@@ -1,6 +1,5 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.assets2.libTextureCreate
 import com.gzozulin.minigl.assets2.libWavefrontCreate
@@ -54,8 +53,7 @@ private val shadingPhong = ShadingPhong(
 private var mouseLook = false
 
 fun main() {
-    window.create(resizables = listOf(camera),
-        isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
+    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed

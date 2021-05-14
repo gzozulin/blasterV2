@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 

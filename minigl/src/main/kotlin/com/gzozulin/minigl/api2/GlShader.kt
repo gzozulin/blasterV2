@@ -1,7 +1,5 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.backend
-
 typealias Callback = () -> Unit
 
 data class GlShader(internal val type: Int, internal var source: String, internal var handle: Int? = null)

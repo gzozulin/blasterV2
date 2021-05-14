@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.backend
 import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_BINDING
 
 private val binding = IntArray(1)

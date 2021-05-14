@@ -1,7 +1,7 @@
 package com.gzozulin.proj
 
 import com.gzozulin.kotlin.KotlinParser
-import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.techniques2.SpanVisibility
 import com.gzozulin.minigl.techniques2.TextPage
 import com.gzozulin.minigl.techniques2.TextSpan

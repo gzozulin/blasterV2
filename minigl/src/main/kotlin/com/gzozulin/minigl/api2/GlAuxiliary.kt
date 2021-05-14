@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api
+package com.gzozulin.minigl.api2
 
 import org.lwjgl.opengl.GL11
 
@@ -13,24 +13,6 @@ fun <T> glCheck(action: () -> T): T {
         }
     }
     return result
-}
-
-fun glBind(vararg bindables: GlBindable, action: () -> Unit) {
-    bindables.forEach { it.bind() }
-    action.invoke()
-    bindables.reversed().forEach { it.unbind() }
-}
-
-fun glBind(bindables: Collection<GlBindable>, action: () -> Unit) {
-    bindables.forEach { it.bind() }
-    action.invoke()
-    bindables.reversed().forEach { it.unbind() }
-}
-
-fun glUse(vararg usables: GlResource, action: () -> Unit) {
-    usables.forEach { it.use() }
-    action.invoke()
-    usables.forEach { it.release() }
 }
 
 fun glClear(color: col3 = col3().cyan()) {
@@ -63,10 +45,3 @@ fun glBlend(sfactor: Int = backend.GL_SRC_ALPHA, dfactor: Int = backend.GL_ONE_M
     action.invoke()
     backend.glDisable(backend.GL_BLEND)
 }
-
-/*
-private fun glMultiSample(action: () -> Unit) {
-    backend.glEnable(backend.GL_MULTISAMPLE)
-    action.invoke()
-    backend.glDisable(backend.GL_MULTISAMPLE)
-}*/

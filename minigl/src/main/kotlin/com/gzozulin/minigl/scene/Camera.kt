@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api2.*
 
 private val vecUp = vec3().up()
 
@@ -8,7 +8,7 @@ data class Camera(
     val projectionM: mat4 = mat4(),
     val position: vec3 = vec3(),
     val rotation: quat = quat()
-) : GlResizable {
+) {
     private val viewVersion: Version = Version()
     private val viewM: mat4 = mat4().identity()
     private val negatedBuf: vec3 = vec3()
@@ -16,10 +16,6 @@ data class Camera(
 
     init {
         setPerspective(4f/3f)
-    }
-
-    override fun resize(width: Int, height: Int) {
-        setPerspective(width, height)
     }
 
     fun calculateViewM(): mat4 {

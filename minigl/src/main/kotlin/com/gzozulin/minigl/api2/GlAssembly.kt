@@ -1,6 +1,5 @@
 package com.gzozulin.minigl.api2
 
-import com.gzozulin.minigl.api.*
 import java.util.concurrent.atomic.AtomicInteger
 
 const val VERSION = "#version 460\n"

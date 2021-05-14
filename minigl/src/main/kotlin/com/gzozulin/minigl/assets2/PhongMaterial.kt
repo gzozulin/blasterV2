@@ -1,7 +1,7 @@
 package com.gzozulin.minigl.assets2
 
 import com.gzozulin.minigl.api2.GlTexture
-import com.gzozulin.minigl.api.vec3
+import com.gzozulin.minigl.api2.vec3
 
 data class PhongMaterial(
     val ambient: vec3,

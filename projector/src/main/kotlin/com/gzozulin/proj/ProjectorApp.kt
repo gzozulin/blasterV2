@@ -1,7 +1,6 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api.GlWindow
-import com.gzozulin.minigl.api.glUse
+import com.gzozulin.minigl.api2.GlWindow
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()
