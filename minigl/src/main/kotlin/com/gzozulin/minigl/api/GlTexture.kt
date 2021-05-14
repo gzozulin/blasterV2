@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api2
+package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D
 import org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE

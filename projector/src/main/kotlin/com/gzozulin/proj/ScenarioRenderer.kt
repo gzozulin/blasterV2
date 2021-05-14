@@ -3,10 +3,10 @@ package com.gzozulin.proj
 import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
-import com.gzozulin.minigl.api2.col3
-import com.gzozulin.minigl.techniques2.SpanVisibility
-import com.gzozulin.minigl.techniques2.TextPage
-import com.gzozulin.minigl.techniques2.TextSpan
+import com.gzozulin.minigl.api.col3
+import com.gzozulin.minigl.techniques.SpanVisibility
+import com.gzozulin.minigl.techniques.TextPage
+import com.gzozulin.minigl.techniques.TextSpan
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

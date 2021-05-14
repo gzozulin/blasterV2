@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.assets2
+package com.gzozulin.minigl.assets
 
 import java.io.File
 

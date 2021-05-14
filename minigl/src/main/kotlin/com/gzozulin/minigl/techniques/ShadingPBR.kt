@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.techniques2
+package com.gzozulin.minigl.techniques
 
 /*package com.gzozulin.minigl.techniques
 

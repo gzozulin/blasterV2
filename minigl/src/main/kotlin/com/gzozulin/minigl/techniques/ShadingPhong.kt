@@ -1,12 +1,12 @@
-package com.gzozulin.minigl.techniques2
+package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.GlMesh
-import com.gzozulin.minigl.api2.GlProgram
-import com.gzozulin.minigl.api2.GlShader
-import com.gzozulin.minigl.assets2.libWavefrontCreate
-import com.gzozulin.minigl.assets2.PhongMaterial
-import com.gzozulin.minigl.assets2.PHONG_MATERIALS
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.GlMesh
+import com.gzozulin.minigl.api.GlProgram
+import com.gzozulin.minigl.api.GlShader
+import com.gzozulin.minigl.assets.libWavefrontCreate
+import com.gzozulin.minigl.assets.PhongMaterial
+import com.gzozulin.minigl.assets.PHONG_MATERIALS
 import com.gzozulin.minigl.scene.*
 import org.lwjgl.glfw.GLFW
 import java.lang.Float.max

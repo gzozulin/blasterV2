@@ -1,8 +1,8 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api2.black
-import com.gzozulin.minigl.api2.col3
-import com.gzozulin.minigl.api2.glClear
+import com.gzozulin.minigl.api.black
+import com.gzozulin.minigl.api.col3
+import com.gzozulin.minigl.api.glClear
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

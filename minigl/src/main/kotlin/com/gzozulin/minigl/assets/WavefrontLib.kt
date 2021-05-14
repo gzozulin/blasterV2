@@ -1,8 +1,8 @@
-package com.gzozulin.minigl.assets2
+package com.gzozulin.minigl.assets
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.glMeshUse
-import com.gzozulin.minigl.api2.glTextureUse
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.glMeshUse
+import com.gzozulin.minigl.api.glTextureUse
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader

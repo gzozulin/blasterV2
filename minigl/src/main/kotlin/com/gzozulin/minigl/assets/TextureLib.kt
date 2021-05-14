@@ -1,7 +1,7 @@
-package com.gzozulin.minigl.assets2
+package com.gzozulin.minigl.assets
 
-import com.gzozulin.minigl.api2.GlTexture
-import com.gzozulin.minigl.api2.glTextureCreate2D
+import com.gzozulin.minigl.api.GlTexture
+import com.gzozulin.minigl.api.glTextureCreate2D
 import java.awt.Color
 import java.io.File
 import java.io.InputStream

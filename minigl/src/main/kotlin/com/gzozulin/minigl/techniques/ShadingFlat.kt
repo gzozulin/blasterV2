@@ -1,13 +1,13 @@
-package com.gzozulin.minigl.techniques2
+package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.Expression
-import com.gzozulin.minigl.api2.GlMesh
-import com.gzozulin.minigl.api2.GlProgram
-import com.gzozulin.minigl.api2.GlShader
-import com.gzozulin.minigl.api2.constv4
-import com.gzozulin.minigl.api2.unifm4
-import com.gzozulin.minigl.assets2.libWavefrontCreate
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.Expression
+import com.gzozulin.minigl.api.GlMesh
+import com.gzozulin.minigl.api.GlProgram
+import com.gzozulin.minigl.api.GlShader
+import com.gzozulin.minigl.api.constv4
+import com.gzozulin.minigl.api.unifm4
+import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput

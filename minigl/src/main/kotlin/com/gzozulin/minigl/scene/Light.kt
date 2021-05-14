@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.api2.vec3
+import com.gzozulin.minigl.api.vec3
 
 interface Light {
     val vector: vec3

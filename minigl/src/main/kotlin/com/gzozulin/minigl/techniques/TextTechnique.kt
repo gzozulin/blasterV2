@@ -1,13 +1,13 @@
-package com.gzozulin.minigl.techniques2
+package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.constf
-import com.gzozulin.minigl.api2.constv2i
-import com.gzozulin.minigl.api2.discard
-import com.gzozulin.minigl.api2.unifm4
-import com.gzozulin.minigl.api2.unifv2i
-import com.gzozulin.minigl.api2.unifv4
-import com.gzozulin.minigl.assets2.libTextureCreate
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.constf
+import com.gzozulin.minigl.api.constv2i
+import com.gzozulin.minigl.api.discard
+import com.gzozulin.minigl.api.unifm4
+import com.gzozulin.minigl.api.unifv2i
+import com.gzozulin.minigl.api.unifv4
+import com.gzozulin.minigl.assets.libTextureCreate
 import java.lang.Integer.max
 
 data class FontDescription(

@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api2
+package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_BINDING
 

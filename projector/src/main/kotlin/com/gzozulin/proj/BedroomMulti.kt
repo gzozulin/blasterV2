@@ -1,17 +1,17 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.assets2.libTextureCreate
-import com.gzozulin.minigl.assets2.libWavefrontCreate
-import com.gzozulin.minigl.assets2.libWavefrontGroupUse
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.assets.libTextureCreate
+import com.gzozulin.minigl.assets.libWavefrontCreate
+import com.gzozulin.minigl.assets.libWavefrontGroupUse
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
-import com.gzozulin.minigl.techniques2.ShadingPhong
-import com.gzozulin.minigl.techniques2.glShadingPhongDraw
-import com.gzozulin.minigl.techniques2.glShadingPhongInstance
-import com.gzozulin.minigl.techniques2.glShadingPhongUse
+import com.gzozulin.minigl.techniques.ShadingPhong
+import com.gzozulin.minigl.techniques.glShadingPhongDraw
+import com.gzozulin.minigl.techniques.glShadingPhongInstance
+import com.gzozulin.minigl.techniques.glShadingPhongUse
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()

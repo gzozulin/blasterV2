@@ -1,6 +1,6 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api2.GlWindow
+import com.gzozulin.minigl.api.GlWindow
 import org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_RAWVIDEO
 import org.bytedeco.ffmpeg.global.avutil.AV_PIX_FMT_RGBA
 import org.bytedeco.javacpp.BytePointer

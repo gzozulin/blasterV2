@@ -1,6 +1,6 @@
 package com.gzozulin.minigl.scene
 
-import com.gzozulin.minigl.api2.*
+import com.gzozulin.minigl.api.*
 
 private val vecUp = vec3().up()
 

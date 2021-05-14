@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api2
+package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER_BINDING
 import org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER_BINDING

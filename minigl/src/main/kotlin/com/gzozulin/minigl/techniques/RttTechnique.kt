@@ -1,9 +1,9 @@
-package com.gzozulin.minigl.techniques2
+package com.gzozulin.minigl.techniques
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.GlFrameBuffer
-import com.gzozulin.minigl.api2.GlTexture
-import com.gzozulin.minigl.api2.glFrameBufferUse
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.GlFrameBuffer
+import com.gzozulin.minigl.api.GlTexture
+import com.gzozulin.minigl.api.glFrameBufferUse
 
 private val prevViewport = IntArray(4)
 private val outputs = listOf(backend.GL_COLOR_ATTACHMENT0)

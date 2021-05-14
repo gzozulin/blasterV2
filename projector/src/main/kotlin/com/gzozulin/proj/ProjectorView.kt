@@ -1,22 +1,22 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api2.*
-import com.gzozulin.minigl.api2.constf
-import com.gzozulin.minigl.api2.constv3
-import com.gzozulin.minigl.api2.constm4
-import com.gzozulin.minigl.api2.tex
-import com.gzozulin.minigl.api2.unifm4
-import com.gzozulin.minigl.api2.unifv3
-import com.gzozulin.minigl.assets2.libTextureCreate
-import com.gzozulin.minigl.assets2.libWavefrontCreate
-import com.gzozulin.minigl.assets2.libWavefrontGroupUse
+import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.constf
+import com.gzozulin.minigl.api.constv3
+import com.gzozulin.minigl.api.constm4
+import com.gzozulin.minigl.api.tex
+import com.gzozulin.minigl.api.unifm4
+import com.gzozulin.minigl.api.unifv3
+import com.gzozulin.minigl.assets.libTextureCreate
+import com.gzozulin.minigl.assets.libWavefrontCreate
+import com.gzozulin.minigl.assets.libWavefrontGroupUse
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerScenic
 import com.gzozulin.minigl.scene.PointLight
-import com.gzozulin.minigl.techniques2.SimpleSpan
-import com.gzozulin.minigl.techniques2.TextPage
-import com.gzozulin.minigl.techniques2.*
-import com.gzozulin.minigl.techniques2.FontDescription
+import com.gzozulin.minigl.techniques.SimpleSpan
+import com.gzozulin.minigl.techniques.TextPage
+import com.gzozulin.minigl.techniques.*
+import com.gzozulin.minigl.techniques.FontDescription
 import java.lang.Float.max
 import java.lang.Float.min
 

@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.api2
+package com.gzozulin.minigl.api
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -1,16 +1,12 @@
-package com.gzozulin.minigl.api2
+package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL11
 
-const val STRICT_MODE = true
-
 fun <T> glCheck(action: () -> T): T {
     val result = action.invoke()
-    if (STRICT_MODE) {
-        val errorCode = GL11.glGetError()
-        if (errorCode != GL11.GL_NO_ERROR) {
-            throw GlError(errorCode)
-        }
+    val errorCode = GL11.glGetError()
+    if (errorCode != GL11.GL_NO_ERROR) {
+        throw GlError(errorCode)
     }
     return result
 }
