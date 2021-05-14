@@ -15,6 +15,7 @@ private fun glBufferBindPrev(buffer: GlBuffer, callback: Callback) {
     when (buffer.target) {
         backend.GL_ARRAY_BUFFER -> backend.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, binding)
         backend.GL_ELEMENT_ARRAY_BUFFER -> backend.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, binding)
+        else -> error("Unknown GlBuffer type!")
     }
     callback.invoke()
     backend.glBindBuffer(buffer.target, binding[0])

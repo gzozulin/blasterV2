@@ -2,10 +2,14 @@ package com.gzozulin.minigl.api2
 
 import com.gzozulin.minigl.api.backend
 import com.gzozulin.minigl.api.col4
+import org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D
+import org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE
+import org.lwjgl.opengl.GL13.GL_TEXTURE_BINDING_CUBE_MAP
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-// todo: find a way to check if the texture is bound
+private val active = IntArray(1)
+private val binding = IntArray(1)
 
 // At least 80, see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glActiveTexture.xhtml
 private const val MAX_ACTIVE_TEXTURES = 80
@@ -33,24 +37,37 @@ private fun glTextureUnitRelease(unit: Int) {
     }
 }
 
+private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
+    backend.glGetIntegerv(GL_ACTIVE_TEXTURE, active)
+    backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
+    when (texture.target) {
+        backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
+        backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
+        else -> error("Unknown GlTexture type!")
+    }
+    callback.invoke()
+    backend.glBindTexture(texture.target, binding[0])
+    backend.glActiveTexture(active[0])
+}
+
 private fun glTextureUpload(texture: GlTexture) {
     check(texture.handle == null) { "GlTexture is already in use" }
     texture.handle = backend.glGenTextures()
     texture.unit = glTextureUnitHold()
-    backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
-    backend.glBindTexture(texture.target, texture.handle!!)
-    texture.images.forEach { image ->
-        backend.glTexImage2D(image.target, 0, image.internalFormat,
-            image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
+    glTextureBindPrev(texture) {
+        backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
+        backend.glBindTexture(texture.target, texture.handle!!)
+        texture.images.forEach { image ->
+            backend.glTexImage2D(image.target, 0, image.internalFormat,
+                image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
+        }
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
+        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
+        backend.glGenerateMipmap(texture.target)
     }
-    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
-    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
-    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
-    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
-    backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
-    backend.glGenerateMipmap(texture.target)
-    backend.glBindTexture(texture.target, 0)
-    backend.glActiveTexture(backend.GL_TEXTURE0)
 }
 
 private fun glTextureDelete(texture: GlTexture) {
@@ -72,16 +89,24 @@ fun glTextureUse(texture: Collection<GlTexture>, callback: Callback) {
     texture.forEach { glTextureDelete(it) }
 }
 
-private val currBinding = HashSet<Int>()
 fun glTextureBind(texture: GlTexture, callback: Callback) {
     check(texture.handle != null) { "GlTexture is not used!" }
+    glTextureBindPrev(texture) {
+        backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
+        backend.glBindTexture(texture.target, texture.handle!!)
+        callback.invoke()
+    }
+}
+
+fun glTextureCheckBound(texture: GlTexture) {
+    check(texture.handle != null) { "GlTexture is not used!" }
     backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
-    backend.glBindTexture(texture.target, texture.handle!!)
-    currBinding.add(texture.unit!!)
-    callback.invoke()
-    backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
-    backend.glBindTexture(texture.target, 0) // Each texture has a unique unit
-    currBinding.remove(texture.unit)
+    when (texture.target) {
+        backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
+        backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
+        else -> error("Unknown GlTexture type!")
+    }
+    check(texture.handle == binding[0]) { "GlTexture is not bound!" }
 }
 
 internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteBuffer): GlTexture {

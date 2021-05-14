@@ -1,8 +1,20 @@
 package com.gzozulin.minigl.api2
 
 import com.gzozulin.minigl.api.backend
+import org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_BINDING
+
+private val binding = IntArray(1)
 
 data class GlFrameBuffer(internal val target: Int = backend.GL_FRAMEBUFFER, internal var handle: Int? = null)
+
+private fun glFrameBufferBindPrev(frameBuffer: GlFrameBuffer, callback: Callback) {
+    when (frameBuffer.target) {
+        backend.GL_FRAMEBUFFER -> backend.glGetIntegerv(GL_FRAMEBUFFER_BINDING, binding)
+        else -> error("Unknown GlFrameBuffer type!")
+    }
+    callback.invoke()
+    backend.glBindFramebuffer(frameBuffer.target, binding[0])
+}
 
 internal fun glFrameBufferUse(frameBuffer: GlFrameBuffer, callback: Callback) {
     check(frameBuffer.handle == null) { "GlFrameBuffer is already in use!" }
@@ -12,20 +24,21 @@ internal fun glFrameBufferUse(frameBuffer: GlFrameBuffer, callback: Callback) {
     frameBuffer.handle = null
 }
 
-private val currBinding = mutableMapOf<Int, Int?>()
 internal fun glFrameBufferBind(frameBuffer: GlFrameBuffer, callback: Callback) {
     check(frameBuffer.handle != null) { "FrameBuffer is not used!" }
-    val prev = currBinding[frameBuffer.target]
-    backend.glBindFramebuffer(frameBuffer.target, frameBuffer.handle!!)
-    currBinding[frameBuffer.target] = frameBuffer.handle!!
-    callback.invoke()
-    backend.glBindFramebuffer(frameBuffer.target, prev ?: 0)
-    currBinding[frameBuffer.target] = prev
+    glFrameBufferBindPrev(frameBuffer) {
+        backend.glBindFramebuffer(frameBuffer.target, frameBuffer.handle!!)
+        callback.invoke()
+    }
 }
 
 internal fun glFrameBufferCheck(frameBuffer: GlFrameBuffer) {
     check(frameBuffer.handle != null) { "FrameBuffer is not used!" }
-    check(currBinding[frameBuffer.target] != null) { "No GlFrameBuffer is bound!" }
+    when (frameBuffer.target) {
+        backend.GL_FRAMEBUFFER -> backend.glGetIntegerv(GL_FRAMEBUFFER_BINDING, binding)
+        else -> error("Unknown GlFrameBuffer type!")
+    }
+    check(binding[0] == frameBuffer.handle) { "GlFrameBuffer is not bound!" }
 }
 
 internal fun glFrameBufferTexture(frameBuffer: GlFrameBuffer, attachment: Int, texture: GlTexture) {

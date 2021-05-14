@@ -66,6 +66,7 @@ internal fun glMeshBind(mesh: GlMesh, callback: Callback) {
 }
 
 internal fun glMeshCheckBound(mesh: GlMesh) {
+    check(mesh.handle != null) { "GlMesh is not used!" }
     backend.glGetIntegerv(GL_VERTEX_ARRAY_BINDING, binding)
     check(binding[0] == mesh.handle) { "GlMesh is not bound!" }
 }

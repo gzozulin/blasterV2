@@ -108,7 +108,7 @@ internal fun glProgramUniform(program: GlProgram, name: String, value: mat4) {
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, texture: GlTexture) {
-    check(texture.handle != null) { "GlTexture is not used!" }
+    glTextureCheckBound(texture)
     backend.glUniform1i(glProgramUniformLocation(program, name), texture.unit!!)
 }
 
