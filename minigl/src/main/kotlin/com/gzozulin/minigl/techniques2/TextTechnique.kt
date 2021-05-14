@@ -9,7 +9,6 @@ import com.gzozulin.minigl.api2.unifm4
 import com.gzozulin.minigl.api2.unifv2i
 import com.gzozulin.minigl.api2.unifv4
 import com.gzozulin.minigl.assets2.libTextureCreate
-import com.gzozulin.minigl.techniques.*
 import java.lang.Integer.max
 
 data class FontDescription(

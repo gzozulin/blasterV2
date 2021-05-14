@@ -1,26 +1,30 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.assembly.*
-import com.gzozulin.minigl.assets.modelLib
-import com.gzozulin.minigl.assets.texturesLib
+import com.gzozulin.minigl.api2.*
+import com.gzozulin.minigl.assets2.libTextureCreate
+import com.gzozulin.minigl.assets2.libWavefrontCreate
+import com.gzozulin.minigl.assets2.libWavefrontGroupUse
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
-import com.gzozulin.minigl.techniques.*
+import com.gzozulin.minigl.techniques2.ShadingPhong
+import com.gzozulin.minigl.techniques2.glShadingPhongDraw
+import com.gzozulin.minigl.techniques2.glShadingPhongInstance
+import com.gzozulin.minigl.techniques2.glShadingPhongUse
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()
 
-private val model = modelLib.load("models/bedroom/bedroom", join = false)
-private val empty = texturesLib.loadTexture("textures/snow.png")
+private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
+private val empty = libTextureCreate("textures/snow.png")
 
 private val camera = Camera()
-private val controller = ControllerFirstPerson(position = model.aabb.center(), velocity = 1f)
+private val controller = ControllerFirstPerson(position = bedroomGroup.aabb.center(), velocity = 1f)
 private val wasdInput = WasdInput(controller)
 
-private val cameraLight = PointLight(model.aabb.center(), vec3(1f), 350f)
+private val cameraLight = PointLight(bedroomGroup.aabb.center(), vec3(1f), 350f)
 private val lights = listOf(
     cameraLight,
     PointLight(vec3(2.732e1f, 150.3f, 5.401e1f),    vec3().white(),  800f),
@@ -34,17 +38,17 @@ private val viewM = unifm4 { camera.calculateViewM() }
 private val eye = unifv3 { camera.position }
 private val projM = unifm4 { camera.projectionM }
 
-private val texCoords = varying<vec2>(SimpleVarrying.vTexCoord.name)
-private val sampler = unifsampler()
+private val texCoords = namedTexCoords()
+private val sampler = unift()
 private val diffuseMap = tex(texCoords, sampler)
 
-private val matAmbient = unifv3()
+private val matAmbient = constv3(vec3(0.05f))
 private val matDiffuse = unifv3()
-private val matSpecular = unifv3()
-private val matShine = uniff()
-private val matTransparency = uniff()
+private val matSpecular = constv3(vec3(0.33f))
+private val matShine = constf(1f)
+private val matTransparency = constf(1f)
 
-private val forwardTechnique = ForwardTechnique(
+private val shadingPhong = ShadingPhong(
     modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
 private var mouseLook = false
@@ -68,26 +72,33 @@ fun main() {
                 println("Pos: ${controller.position} dir: ${controller.direction}")
             }
         }
-        glUse(forwardTechnique, model, empty) {
-            window.show {
-                glClear()
-                controller.apply { position, direction ->
-                    camera.setPosition(position)
-                    camera.lookAlong(direction)
-                }
-                cameraLight.position.set(camera.position)
-                glDepthTest {
-                    glBind(empty) {
-                        forwardTechnique.draw(lights) {
-                            model.objects.forEach { obj ->
-                                val material = obj.phong()
-                                sampler.value = material.mapDiffuse ?: empty
-                                matAmbient.value = vec3(0f)
-                                matDiffuse.value = material.diffuse
-                                matSpecular.value = material.specular
-                                matShine.value = 1f
-                                matTransparency.value = material.transparency
-                                forwardTechnique.instance(obj)
+        glShadingPhongUse(shadingPhong) {
+            libWavefrontGroupUse(bedroomGroup) {
+                glTextureUse(empty) {
+                    window.show {
+                        glClear()
+                        controller.apply { position, direction ->
+                            camera.setPosition(position)
+                            camera.lookAlong(direction)
+                        }
+                        cameraLight.position.set(camera.position)
+                        glDepthTest {
+                            glTextureBind(empty) {
+                                glShadingPhongDraw(shadingPhong, lights) {
+                                    bedroomGroup.objects.forEach { obj ->
+                                        if (obj.material.mapDiffuse != null) {
+                                            glTextureBind(obj.material.mapDiffuse!!) {
+                                                sampler.value = obj.material.mapDiffuse!!
+                                                matDiffuse.value = obj.material.diffuse
+                                                glShadingPhongInstance(shadingPhong, obj.mesh)
+                                            }
+                                        } else {
+                                            sampler.value = empty
+                                            matDiffuse.value = obj.material.diffuse
+                                            glShadingPhongInstance(shadingPhong, obj.mesh)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

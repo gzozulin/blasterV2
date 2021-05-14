@@ -6,7 +6,6 @@ import com.gzozulin.minigl.api.vec3
 import com.gzozulin.minigl.api2.*
 import com.gzozulin.minigl.api2.glMeshUse
 import com.gzozulin.minigl.api2.glTextureUse
-import com.gzozulin.minigl.assets.*
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -50,7 +49,7 @@ fun libWavefrontGroupUse(group: WavefrontObjGroup, callback: Callback) {
 }
 
 private fun libWavefrontParseAsset(filename: String) =
-    BufferedReader(InputStreamReader(assetStream.openAsset(filename), Charset.defaultCharset()))
+    BufferedReader(InputStreamReader(libAssetCreate(filename).inputStream(), Charset.defaultCharset()))
 
 private fun libWavefrontParseObject(objFilename: String, materials: Map<String, PhongMaterial>, join: Boolean,
                                     progress: (Float) -> Unit): List<WavefrontObj> {
