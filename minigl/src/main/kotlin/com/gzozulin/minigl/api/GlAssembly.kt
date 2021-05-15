@@ -269,6 +269,11 @@ fun unifv2i(p: () -> vec2i) = object : Uniform<vec2i>(p, null) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun unifv2(v: vec2? = null) = object : Uniform<vec2>(null, v) {
+    override fun declare() = "uniform vec2 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unifv3(v: vec3? = null) = object : Uniform<vec3>(null, v) {
     override fun declare() = "uniform vec3 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)

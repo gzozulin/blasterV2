@@ -50,3 +50,4 @@ x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +projector @cod
 x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +projector @code @complex
 2021-05-13 Learn about licenses for creative use +projector @video @complex
 2021-05-14 Remove GlBackend +projector @code @complex
+(A) 2021-05-14 Fix fonts for ProjectorView +projector @code @simple

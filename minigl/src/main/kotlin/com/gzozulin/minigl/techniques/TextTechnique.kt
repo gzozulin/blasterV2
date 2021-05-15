@@ -64,14 +64,13 @@ class TechniqueText(
 
     internal val cursor = mat4().identity()
     private val viewM = mat4().identity().translate(vec3(width / 2f, height / 2f, 0f))
-    private val projM = mat4().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f)
+    private val projM = mat4().identity().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f)
     private val fullM = mat4().identity()
-
-    internal val tileUV = vec2i(0)
 
     private val texCoord = namedTexCoords()
     private val uniformMatrix = unifm4 { fullM.set(projM).mul(viewM).mul(cursor) }
 
+    internal val tileUV = vec2i(0)
     private val unifTileUV = unifv2i { tileUV }
     private val texCoordTiled = tile(texCoord, unifTileUV,
         constv2i(vec2i(fontDescription.fontCntU, fontDescription.fontCntV))

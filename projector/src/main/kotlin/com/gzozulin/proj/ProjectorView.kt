@@ -63,15 +63,16 @@ private val filePopUpM = mat4().identity()
 private val codeFontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
-    fontScaleU = 0.5f, fontScaleV = 0.5f,
+    fontScaleU = 0.3f, fontScaleV = 0.4f,
     fontStepScaleU = 0.5f, fontStepScaleV = 0.8f)
 
 private val minimapFontDescription = codeFontDescription.copy(
-    fontScaleU = 0.6f, fontScaleV = 0.15f
+    fontScaleU = 0.03f, fontScaleV = 0.04f,
+    fontStepScaleU = 0.005f, fontStepScaleV = 0.008f
 )
 
 private val filePopUpFontDescription = codeFontDescription.copy(
-    fontScaleU = 3f, fontScaleV = 10f, fontStepScaleU = 0.45f
+    fontScaleU = 0.3f, fontScaleV = 0.4f, fontStepScaleU = 0.45f
 )
 
 enum class FilePopUp { MOVE_IN, SHOWN, GONE }
@@ -80,10 +81,10 @@ class ProjectorView(private val model: ProjectorModel) {
 
     // ----------------- Text ------------------
 
-    private val codeTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, codeFontDescription)
+    private val codeTextTechnique = TechniqueText(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT, codeFontDescription)
     private val codeRttTechnique = TechniqueRtt(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT)
 
-    private val minimapTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, minimapFontDescription)
+    private val minimapTextTechnique = TechniqueText(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT, minimapFontDescription)
     private val minimapRttTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
     private val minimapRttCursorTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
     private val minimapCursorColor = vec4(0.25f)
@@ -101,7 +102,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     // ----------------- File pop-up ------------------
 
-    private val filePopUpTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, filePopUpFontDescription)
+    private val filePopUpTextTechnique = TechniqueText(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT, filePopUpFontDescription)
     private val filePopUpRttTechnique = TechniqueRtt(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT)
 
     private var lastShownPage: ProjectorTextPage<OrderedSpan>? = null

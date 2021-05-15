@@ -16,8 +16,7 @@ const val FRAMES_PER_LINE = 2
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
-                       override var visibility: SpanVisibility
-) : TextSpan
+                       override var visibility: SpanVisibility) : TextSpan
 
 private enum class AnimationState { ADVANCING, KEY_FRAME, SCROLLING }
 
