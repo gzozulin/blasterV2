@@ -1,53 +1,54 @@
-(B) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +projector @code @simple
-x 2021-05-02 (A) 2021-04-23 Ambient jazzy music in video from youtube +projector @complex @video
-x 2021-05-02 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +projector @simple @video
-x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +projector @assets @simple
-x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe +projector @simple @assets
-(A) 2021-04-23 Highlighting enums +projector @simple @code
-(A) 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +projector @simple @code
-2021-04-23 Highlight sections of code +projector @code @complex
-(A) 2021-04-23 Highlighting for method calls in function body +projector @simple @code
-2021-04-23 Create automatic video description, include link to source code +projector @simple @code
-x 2021-04-23 2021-04-23 Minimap cursor window +projector @simple @code
-(B) 2021-04-23 Move the minimap to accomodate any amounts of code +projector @code @complex
-x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds +projector @simple @video
-x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +projector @code @complex
-x 2021-04-25 (A) 2021-04-23 Remove assets from project +projector @assets @complex
-x 2021-04-23 2021-04-23 Show packages in left panel +projector @code @complex
-2021-04-23 Support for C and GLSL +projector @code @complex
-2021-04-23 Switching to fullscreen +projector @code @complex
-x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame +projector @simple @video
-x 2021-04-23 2021-04-23 Current file pop-up +projector @code @complex
-x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +projector @code @simple
-2021-04-23 File pop-up shadow +projector @code @simple @idea
-(B) 2021-04-24 Intro scene for Projector +projector @complex @code
-x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +projector @code @simple
-2021-04-25 Fix texture UV missing on doors +projector @assets @complex
-x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +projector @video @code @complex
-x 2021-05-04 2021-04-28 Logo scene +projector @code @complex @assets
-(B) 2021-04-29 Better tripod +projector @video @simple
-2021-04-29 Better lighting +projector @video @complex
-2021-04-29 Better camera +projector @video @complex
-(A) 2021-04-29 Better teleprompter app +projector @video @simple
-2021-04-29 Screen capture for any scene +projector @simple @code
-2021-04-29 Learn about H264 codec +projector @code @video @complex
-x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +projector @code @video @complex
-x 2021-05-03 2021-04-29 Find a way to directly incode H264 lossless in code +projector @code @complex
-(B) 2021-04-29 True Type fonts +projector @code @complex
-x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +projector @video @simple
-(A) 2021-04-30 Show whitespace only before typing, not before scrolling +projector @code @simple
-(A) 2021-04-30 Stop capturing after N seconds +projector @code @simple
-2021-04-30 Typing sounds for KB from NoCopyrightSounds +projector @simple @video
-(B) 2021-04-30 Generate typing sounds with video +projector @code @complex
-(A) 2021-05-02 Ask questions from audience +projector @video @simple
-(B) 2021-05-02 Create avatar for a channel +projector @video @complex
-(A) 2021-05-03 Create a header strip for the channel page +projector @video @simple
-2021-05-03 Forum on gzozulin.com +projector @complex @web
-(A) 2021-05-04 Blender file template +projector @video @simple
-x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +projector @code @complex
-(B) 2021-05-08 MSAA for RttTechnique (code rendering) +projector @code @complex
-x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +projector @code @simple
-x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +projector @code @complex
-2021-05-13 Learn about licenses for creative use +projector @video @complex
-2021-05-14 Remove GlBackend +projector @code @complex
-(A) 2021-05-14 Fix fonts for ProjectorView +projector @code @simple
+(B) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
+x 2021-05-02 (A) 2021-04-23 Ambient jazzy music in video from youtube @complex +video
+x 2021-05-02 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal @simple +video
+x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +assets @simple
+x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe @simple +assets
+(A) 2021-04-23 Highlighting enums +code @simple
+(A) 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +code @simple
+2021-04-23 Highlight sections of code +code @complex
+(A) 2021-04-23 Highlighting for method calls in function body @simple +code
+2021-04-23 Create automatic video description, include link to source code @simple +code
+x 2021-04-23 2021-04-23 Minimap cursor window @simple +code
+(B) 2021-04-23 Move the minimap to accomodate any amounts of code +code @complex
+x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds @simple +video
+x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
+x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
+x 2021-04-23 2021-04-23 Show packages in left panel +code @complex
+2021-04-23 Support for C and GLSL +code @complex
+2021-04-23 Switching to fullscreen +code @complex
+x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame @simple +video
+x 2021-04-23 2021-04-23 Current file pop-up +code @complex
+x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +code @simple
+2021-04-23 File pop-up shadow +code @simple +idea
+(B) 2021-04-24 Intro scene for Projector @complex +code
+x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +code @simple
+2021-04-25 Fix texture UV missing on doors +assets @complex
+x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +video +code @complex
+x 2021-05-04 2021-04-28 Logo scene +code @complex +assets
+(B) 2021-04-29 Better tripod +video @simple
+2021-04-29 Better lighting +video @complex
+2021-04-29 Better camera +video @complex
+(A) 2021-04-29 Better teleprompter app +video @simple
+2021-04-29 Screen capture for any scene @simple +code
+2021-04-29 Learn about H264 codec +code +video @complex
+x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +code +video @complex
+x 2021-05-03 2021-04-29 Find a way to directly incode H264 lossless in code +code @complex
+(B) 2021-04-29 True Type fonts +code @complex
+x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +video @simple
+(A) 2021-04-30 Show whitespace only before typing, not before scrolling +code @simple
+(A) 2021-04-30 Stop capturing after N seconds +code @simple
+2021-04-30 Typing sounds for KB from NoCopyrightSounds @simple +video
+(B) 2021-04-30 Generate typing sounds with video +code @complex
+(A) 2021-05-02 Ask questions from audience +video @simple
+(B) 2021-05-02 Create avatar for a channel +video @complex
+(A) 2021-05-03 Create a header strip for the channel page +video @simple
+2021-05-03 Forum on gzozulin.com @complex +web
+(A) 2021-05-04 Blender file template +video @simple
+x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +code @complex
+(B) 2021-05-08 MSAA for RttTechnique (code rendering) +code @complex
+x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +code @simple
+x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +code @complex
+2021-05-13 Learn about licenses for creative use +video @complex
+2021-05-14 Remove GlBackend +code @complex
+(A) 2021-05-14 Fix fonts for ProjectorView +code @simple
+2021-05-14 Light shines even from the opposite side of the surface +code @complex

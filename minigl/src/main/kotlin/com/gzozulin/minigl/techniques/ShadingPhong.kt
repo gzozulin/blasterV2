@@ -143,6 +143,7 @@ fun glShadingPhongDraw(shadingPhong: ShadingPhong, lights: List<Light>, callback
 }
 
 fun glShadingPhongInstance(shadingPhong: ShadingPhong, mesh: GlMesh) {
+    glProgramCheckBound(shadingPhong.program)
     shadingPhong.modelM.submit(shadingPhong.program)
     shadingPhong.diffuse.submit(shadingPhong.program)
     shadingPhong.matAmbient.submit(shadingPhong.program)

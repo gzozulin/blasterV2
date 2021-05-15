@@ -62,6 +62,7 @@ fun glShadingFlatDraw(shadingFlat: ShadingFlat, callback: Callback) {
 }
 
 fun glShadingFlatInstance(shadingFlat: ShadingFlat, mesh: GlMesh) {
+    glProgramCheckBound(shadingFlat.program)
     shadingFlat.matrix.submit(shadingFlat.program)
     shadingFlat.color.submit(shadingFlat.program)
     glMeshBind(mesh) {

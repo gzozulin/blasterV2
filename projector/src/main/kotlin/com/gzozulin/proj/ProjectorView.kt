@@ -190,20 +190,22 @@ class ProjectorView(private val model: ProjectorModel) {
             camera.lookAlong(direction)
         }
         cameraLight.position.set(camera.position)
-        glDepthTest {
-            glTextureBind(noiseTexture) {
-                glShadingPhongDraw(shadingPhong, lights) {
-                    bedroomGroup.objects.forEach { obj ->
-                        if (obj.material.mapDiffuse != null) {
-                            glTextureBind(obj.material.mapDiffuse!!) {
-                                sampler.value = obj.material.mapDiffuse!!
+        glCulling {
+            glDepthTest {
+                glTextureBind(noiseTexture) {
+                    glShadingPhongDraw(shadingPhong, lights) {
+                        bedroomGroup.objects.forEach { obj ->
+                            if (obj.material.mapDiffuse != null) {
+                                glTextureBind(obj.material.mapDiffuse!!) {
+                                    sampler.value = obj.material.mapDiffuse!!
+                                    matDiffuse.value = obj.material.diffuse
+                                    glShadingPhongInstance(shadingPhong, obj.mesh)
+                                }
+                            } else {
+                                sampler.value = noiseTexture
                                 matDiffuse.value = obj.material.diffuse
                                 glShadingPhongInstance(shadingPhong, obj.mesh)
                             }
-                        } else {
-                            sampler.value = noiseTexture
-                            matDiffuse.value = obj.material.diffuse
-                            glShadingPhongInstance(shadingPhong, obj.mesh)
                         }
                     }
                 }
