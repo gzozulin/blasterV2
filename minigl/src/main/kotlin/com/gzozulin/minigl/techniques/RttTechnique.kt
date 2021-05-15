@@ -49,7 +49,7 @@ fun main() {
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
                     window.show {
-                        glClear()
+                        glClear(vec3().rose())
                         glTechRttDraw(techniqueRtt) {
                             glClear(vec3().chartreuse())
                         }

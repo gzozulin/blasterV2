@@ -6,9 +6,6 @@ import org.lwjgl.opengl.GL13.GL_TEXTURE_BINDING_CUBE_MAP
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private val active = IntArray(1)
-private val binding = IntArray(1)
-
 // At least 80, see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glActiveTexture.xhtml
 private const val MAX_ACTIVE_TEXTURES = 80
 private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
@@ -35,21 +32,26 @@ private fun glTextureUnitRelease(unit: Int) {
     }
 }
 
-private fun glTextureStorePrev(texture: GlTexture) {
-    backend.glGetIntegerv(GL_ACTIVE_TEXTURE, active)
+private fun glTextureSwitchToUnit(texture: GlTexture) {
     backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
+}
+
+private val binding = IntArray(1)
+private fun glTextureGetBound(texture: GlTexture): Int {
+    glTextureSwitchToUnit(texture)
     when (texture.target) {
         backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
         backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
         else -> error("Unknown GlTexture type!")
     }
+    return binding[0]
 }
 
 private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
-    glTextureStorePrev(texture)
+    val prev = glTextureGetBound(texture)
     callback.invoke()
-    backend.glBindTexture(texture.target, binding[0])
-    backend.glActiveTexture(active[0])
+    glTextureSwitchToUnit(texture)
+    backend.glBindTexture(texture.target, prev)
 }
 
 private fun glTextureUpload(texture: GlTexture) {
@@ -102,8 +104,7 @@ fun glTextureBind(texture: GlTexture, callback: Callback) {
 
 fun glTextureCheckBound(texture: GlTexture) {
     check(texture.handle != null) { "GlTexture is not used!" }
-    glTextureStorePrev(texture)
-    check(texture.handle == binding[0]) { "GlTexture is not bound!" }
+    check(glTextureGetBound(texture) == texture.handle) { "GlTexture is not bound!" }
 }
 
 internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteBuffer): GlTexture {

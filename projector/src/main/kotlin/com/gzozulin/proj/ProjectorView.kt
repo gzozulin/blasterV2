@@ -211,9 +211,9 @@ class ProjectorView(private val model: ProjectorModel) {
     }
 
     fun renderOverlays() {
-        //prepareFilePopUp()
+        prepareFilePopUp()
         prepareCode()
-        //prepareMinimap()
+        prepareMinimap()
         renderPanels()
     }
 
