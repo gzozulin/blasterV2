@@ -64,11 +64,11 @@ private val codeFontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
     fontScaleU = 0.3f, fontScaleV = 0.4f,
-    fontStepScaleU = 0.5f, fontStepScaleV = 0.8f)
+    fontStepScaleU = 0.3f, fontStepScaleV = 0.5f)
 
 private val minimapFontDescription = codeFontDescription.copy(
-    fontScaleU = 0.03f, fontScaleV = 0.04f,
-    fontStepScaleU = 0.005f, fontStepScaleV = 0.008f
+    fontScaleU = 0.15f, fontScaleV = 0.2f,
+    fontStepScaleU = 0.15f, fontStepScaleV = 0.25f
 )
 
 private val filePopUpFontDescription = codeFontDescription.copy(

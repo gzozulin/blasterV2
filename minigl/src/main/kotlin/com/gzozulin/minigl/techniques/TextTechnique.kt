@@ -56,14 +56,14 @@ open class TextPage<T : TextSpan>(val spans: List<T>) {
 }
 
 class TechniqueText(
-    internal val width: Int, internal val height: Int, fontDescription: FontDescription = FontDescription()) {
+    internal val width: Int, internal val height: Int, val fontDescription: FontDescription = FontDescription()) {
 
     internal val rect = glMeshCreateRect(0f, fontDescription.letterSizeU, 0f, fontDescription.letterSizeV)
     internal val font = libTextureCreate(fontDescription.textureFilename)
         .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
 
     internal val cursor = mat4().identity()
-    private val viewM = mat4().identity().translate(vec3(width / 2f, height / 2f, 0f))
+    private val viewM = mat4().identity().translate(width / 2f, height / 2f, 0f)
     private val projM = mat4().identity().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f)
     private val fullM = mat4().identity()
 
@@ -97,14 +97,14 @@ fun glTechTextUse(techniqueText: TechniqueText, callback: Callback) {
 
 private fun glTechTextUpdateCursor(techniqueText: TechniqueText, line: Int, letter: Int) {
     techniqueText.cursor.identity().setTranslation(
-        letter * fontDescription.letterSizeU * fontDescription.fontStepScaleU - techniqueText.width/2f,
-        techniqueText.height/2f - fontDescription.letterSizeV * (line + 1.5f) * fontDescription.fontStepScaleV,
+        letter * techniqueText.fontDescription.letterSizeU * techniqueText.fontDescription.fontStepScaleU - techniqueText.width/2f,
+        techniqueText.height/2f - techniqueText.fontDescription.letterSizeV * (line + 1.5f) * techniqueText.fontDescription.fontStepScaleV,
         0f)
 }
 
 private fun glTechTextUpdateGlyph(techniqueText: TechniqueText, character: Char) {
-    techniqueText.tileUV.x = character.toInt() % fontDescription.fontCntU
-    techniqueText.tileUV.y = fontDescription.fontCntV - character.toInt() / fontDescription.fontCntV - 1
+    techniqueText.tileUV.x = character.toInt() % techniqueText.fontDescription.fontCntU
+    techniqueText.tileUV.y = techniqueText.fontDescription.fontCntV - character.toInt() / techniqueText.fontDescription.fontCntV - 1
 }
 
 private fun glTechTextUpdateSpan(techniqueText: TechniqueText, span: TextSpan) {

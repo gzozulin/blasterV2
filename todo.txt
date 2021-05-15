@@ -13,7 +13,7 @@ x 2021-04-23 2021-04-23 Minimap cursor window @simple +code
 x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds @simple +video
 x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
-x 2021-04-23 2021-04-23 Show packages in left panel +code @complex
+x 2021-04-23 2021-04-23 Show packages in left panel +code @complex`
 2021-04-23 Support for C and GLSL +code @complex
 2021-04-23 Switching to fullscreen +code @complex
 x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame @simple +video

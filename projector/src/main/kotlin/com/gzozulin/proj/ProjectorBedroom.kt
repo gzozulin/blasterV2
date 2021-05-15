@@ -14,7 +14,7 @@ import com.gzozulin.minigl.techniques.glShadingPhongInstance
 import com.gzozulin.minigl.techniques.glShadingPhongUse
 import org.lwjgl.glfw.GLFW
 
-private val window = GlWindow(1200, 900)
+private val window = GlWindow(1500, 900)
 
 private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
 private val empty = libTextureCreate("textures/snow.png")
