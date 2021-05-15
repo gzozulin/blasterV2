@@ -31,7 +31,7 @@ private const val CODE_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 private const val MINIMAP_MAX_LINES = 140
 private const val MINIMAP_PANEL_WIDTH = 400
 private const val MINIMAP_PANEL_HEIGHT = 1000
-private const val MINIMAP_CURSOR_HEIGHT = 290
+private const val MINIMAP_CURSOR_HEIGHT = 320
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
@@ -64,16 +64,13 @@ private val codeFontDescription = FontDescription(
     textureFilename = "textures/font_hires.png",
     glyphSidePxU = 64, glyphSidePxV = 64,
     fontScaleU = 0.3f, fontScaleV = 0.4f,
-    fontStepScaleU = 0.3f, fontStepScaleV = 0.5f)
+    fontStepScaleU = 0.45f, fontStepScaleV = 0.9f)
 
 private val minimapFontDescription = codeFontDescription.copy(
-    fontScaleU = 0.15f, fontScaleV = 0.2f,
-    fontStepScaleU = 0.15f, fontStepScaleV = 0.25f
-)
+    fontScaleU = 0.12f, fontScaleV = 0.15f)
 
 private val filePopUpFontDescription = codeFontDescription.copy(
-    fontScaleU = 0.3f, fontScaleV = 0.4f, fontStepScaleU = 0.45f
-)
+    fontScaleU = 0.7f, fontScaleV = 1f)
 
 enum class FilePopUp { MOVE_IN, SHOWN, GONE }
 
