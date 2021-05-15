@@ -9,12 +9,8 @@ import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private const val WIN_WIDTH: Int = 1024
-private const val WIN_HEIGHT: Int = 768
 private const val FULL_WIDTH: Int = 1920
 private const val FULL_HEIGHT: Int = 1080
-private const val WIN_X: Int = 448
-private const val WIN_Y: Int = 156
 
 private const val MULTISAMPLING_HINT = 4
 
@@ -28,7 +24,7 @@ typealias ButtonCallback = (button: MouseButton, pressed: Boolean) -> Unit
 typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
-class GlWindow {
+class GlWindow(private val winWidth: Int = 1024, private val winHeight: Int = 768) {
     var handle: Long? = null
 
     private var isHoldingCursor: Boolean = false
@@ -41,9 +37,9 @@ class GlWindow {
     var deltaCallback: DeltaCallback? = null
 
     val width: Int
-        get() = if (isFullscreen) FULL_WIDTH else WIN_WIDTH
+        get() = if (isFullscreen) FULL_WIDTH else winWidth
     val height: Int
-        get() = if (isFullscreen) FULL_HEIGHT else WIN_HEIGHT
+        get() = if (isFullscreen) FULL_HEIGHT else winHeight
 
     val frameBuffer: ByteBuffer by lazy {
         ByteBuffer.allocateDirect(FULL_WIDTH * FULL_HEIGHT * 4) // RGBA, 1 byte, fullscreen
@@ -113,7 +109,7 @@ class GlWindow {
         handle = glfwCreateWindow(width, height, "Blaster!",
             if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)
         if (!isFullscreen) {
-            glfwSetWindowPos(handle!!, WIN_X, WIN_Y)
+            glfwSetWindowPos(handle!!, (FULL_WIDTH - width)/2, (FULL_HEIGHT - height)/2)
         }
         if (isHoldingCursor) {
             glfwSetInputMode(handle!!, GLFW_CURSOR, GLFW_CURSOR_DISABLED)

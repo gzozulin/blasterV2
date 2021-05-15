@@ -14,7 +14,7 @@ import com.gzozulin.minigl.techniques.glShadingPhongInstance
 import com.gzozulin.minigl.techniques.glShadingPhongUse
 import org.lwjgl.glfw.GLFW
 
-private val window = GlWindow()
+private val window = GlWindow(1200, 900)
 
 private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
 private val empty = libTextureCreate("textures/snow.png")
@@ -53,7 +53,7 @@ private val shadingPhong = ShadingPhong(
 private var mouseLook = false
 
 fun main() {
-    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
+    window.create(isFullscreen = false, isHoldingCursor = false, isMultisampling = true) {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed
