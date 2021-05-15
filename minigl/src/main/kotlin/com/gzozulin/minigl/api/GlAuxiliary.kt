@@ -41,3 +41,10 @@ fun glBlend(sfactor: Int = backend.GL_SRC_ALPHA, dfactor: Int = backend.GL_ONE_M
     action.invoke()
     backend.glDisable(backend.GL_BLEND)
 }
+
+private val prevViewport = IntArray(4)
+fun glViewportBindPrev(callback: Callback) {
+    backend.glGetIntegerv(backend.GL_VIEWPORT, prevViewport)
+    callback.invoke()
+    backend.glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3])
+}

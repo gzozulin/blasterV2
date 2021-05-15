@@ -35,7 +35,7 @@ private fun glTextureUnitRelease(unit: Int) {
     }
 }
 
-private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
+private fun glTextureStorePrev(texture: GlTexture) {
     backend.glGetIntegerv(GL_ACTIVE_TEXTURE, active)
     backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
     when (texture.target) {
@@ -43,6 +43,10 @@ private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
         backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
         else -> error("Unknown GlTexture type!")
     }
+}
+
+private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
+    glTextureStorePrev(texture)
     callback.invoke()
     backend.glBindTexture(texture.target, binding[0])
     backend.glActiveTexture(active[0])
@@ -98,12 +102,7 @@ fun glTextureBind(texture: GlTexture, callback: Callback) {
 
 fun glTextureCheckBound(texture: GlTexture) {
     check(texture.handle != null) { "GlTexture is not used!" }
-    backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
-    when (texture.target) {
-        backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
-        backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
-        else -> error("Unknown GlTexture type!")
-    }
+    glTextureStorePrev(texture)
     check(texture.handle == binding[0]) { "GlTexture is not bound!" }
 }
 

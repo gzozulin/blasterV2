@@ -1,5 +1,6 @@
 package com.gzozulin.minigl.api
 
+import org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -26,6 +27,18 @@ private val bufferMat4 = ByteBuffer.allocateDirect(16 * 4)
 data class GlProgram(internal val vertexShader: GlShader, internal val fragmentShader: GlShader,
                      internal var handle: Int? = null)
 
+private val binding = IntArray(1)
+private fun glProgramGetBound(): Int {
+    backend.glGetIntegerv(GL_CURRENT_PROGRAM, binding)
+    return binding[0]
+}
+
+private fun glProgramBindPrev(callback: Callback) {
+    val prev = glProgramGetBound()
+    callback.invoke()
+    backend.glUseProgram(prev)
+}
+
 private fun glProgramCreate(program: GlProgram) {
     program.handle = backend.glCreateProgram()
     check(program.vertexShader.type == backend.GL_VERTEX_SHADER)
@@ -51,19 +64,16 @@ internal fun glProgramUse(program: GlProgram, callback: Callback) {
     glShaderDelete(program.fragmentShader)
 }
 
-private var currBinding: Int? = null
 internal fun glProgramBind(program: GlProgram, callback: Callback) {
     check(program.handle != null) { "GlProgram is not used!" }
-    val prev = currBinding
-    backend.glUseProgram(program.handle!!)
-    currBinding = program.handle
-    callback.invoke()
-    backend.glUseProgram(prev ?: 0)
-    currBinding = prev
+    glProgramBindPrev {
+        backend.glUseProgram(program.handle!!)
+        callback.invoke()
+    }
 }
 
-internal fun glProgramCheckBound() {
-    check(currBinding != null) { "No GlProgram is bound!" }
+internal fun glProgramCheckBound(program: GlProgram) {
+    check(glProgramGetBound() == program.handle) { "GlProgram is not bound!" }
 }
 
 private fun glProgramUniformLocation(program: GlProgram, name: String): Int {
@@ -127,8 +137,8 @@ internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int,
     backend.glUniform3fv(location, bufferVec3)
 }
 
-internal fun glDrawTriangles(mesh: GlMesh) {
-    glProgramCheckBound()
+internal fun glDrawTriangles(program: GlProgram, mesh: GlMesh) {
+    glProgramCheckBound(program)
     glMeshCheckBound(mesh)
     backend.glDrawElements(backend.GL_TRIANGLES, mesh.indicesCnt, backend.GL_UNSIGNED_INT, 0)
 }

@@ -5,19 +5,23 @@ import org.lwjgl.opengl.GL15.GL_ELEMENT_ARRAY_BUFFER_BINDING
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private val binding = IntArray(1)
-
 data class GlBuffer(val target: Int = backend.GL_ARRAY_BUFFER, val usage: Int = backend.GL_STATIC_DRAW,
                     internal val data: ByteBuffer, internal var handle: Int? = null)
 
-private fun glBufferBindPrev(buffer: GlBuffer, callback: Callback) {
+private val binding = IntArray(1)
+private fun glBufferGetBound(buffer: GlBuffer): Int {
     when (buffer.target) {
         backend.GL_ARRAY_BUFFER -> backend.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, binding)
         backend.GL_ELEMENT_ARRAY_BUFFER -> backend.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, binding)
         else -> error("Unknown GlBuffer type!")
     }
+    return binding[0]
+}
+
+private fun glBufferBindPrev(buffer: GlBuffer, callback: Callback) {
+    val prev = glBufferGetBound(buffer)
     callback.invoke()
-    backend.glBindBuffer(buffer.target, binding[0])
+    backend.glBindBuffer(buffer.target, prev)
 }
 
 internal fun glBufferUpload(buffer: GlBuffer) {

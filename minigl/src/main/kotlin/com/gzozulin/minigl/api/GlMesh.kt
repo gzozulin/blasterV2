@@ -2,15 +2,20 @@ package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL30.GL_VERTEX_ARRAY_BINDING
 
-private val binding = IntArray(1)
-
 data class GlMesh(internal val vertices: GlBuffer, internal val texCoords: GlBuffer, internal val normals: GlBuffer,
                   internal val indices: GlBuffer, internal val indicesCnt: Int, internal var handle: Int? = null)
 
-private fun glMeshBindPrev(callback: Callback) {
+private val binding = IntArray(1)
+private fun glMeshGetBound(): Int {
     backend.glGetIntegerv(GL_VERTEX_ARRAY_BINDING, binding)
+    return binding[0]
+}
+
+
+private fun glMeshBindPrev(callback: Callback) {
+    val prev = glMeshGetBound()
     callback.invoke()
-    backend.glBindVertexArray(binding[0])
+    backend.glBindVertexArray(prev)
 }
 
 private fun glMeshUpload(mesh: GlMesh) {
@@ -66,8 +71,7 @@ internal fun glMeshBind(mesh: GlMesh, callback: Callback) {
 
 internal fun glMeshCheckBound(mesh: GlMesh) {
     check(mesh.handle != null) { "GlMesh is not used!" }
-    backend.glGetIntegerv(GL_VERTEX_ARRAY_BINDING, binding)
-    check(binding[0] == mesh.handle) { "GlMesh is not bound!" }
+    check(glMeshGetBound() == mesh.handle) { "GlMesh is not bound!" }
 }
 
 fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f): GlMesh {

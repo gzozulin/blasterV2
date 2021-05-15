@@ -85,7 +85,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     private val minimapTextTechnique = TechniqueText(SCREEN_WIDTH, SCREEN_HEIGHT, minimapFontDescription)
     private val minimapRttTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
-    private val minimapCursorTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
+    private val minimapRttCursorTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
     private val minimapCursorColor = vec4(0.25f)
 
     private val panelModelM = mat4().identity()
@@ -155,16 +155,16 @@ class ProjectorView(private val model: ProjectorModel) {
         modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     fun use(callback: Callback) {
-        glShadingPhongUse(shadingPhong) {
-            glTechTextUse(codeTextTechnique) {
-                glTechRttUse(codeRttTechnique) {
-                    glTechTextUse(minimapTextTechnique) {
-                        glTechRttUse(minimapRttTechnique) {
-                            glTechRttUse(minimapCursorTechnique) {
-                                glShadingFlatUse(shadingFlat) {
-                                    glTechTextUse(filePopUpTextTechnique) {
-                                        glTechRttUse(filePopUpRttTechnique) {
-                                            libWavefrontGroupUse(bedroomGroup) {
+        libWavefrontGroupUse(bedroomGroup) {
+            glShadingFlatUse(shadingFlat) {
+                glShadingPhongUse(shadingPhong) {
+                    glTechTextUse(codeTextTechnique) {
+                        glTechTextUse(minimapTextTechnique) {
+                            glTechTextUse(filePopUpTextTechnique) {
+                                glTechRttUse(codeRttTechnique) {
+                                    glTechRttUse(minimapRttTechnique) {
+                                        glTechRttUse(minimapRttCursorTechnique) {
+                                            glTechRttUse(filePopUpRttTechnique) {
                                                 glTextureUse(noiseTexture) {
                                                     glMeshUse(panelMesh) {
                                                         callback.invoke()
@@ -211,9 +211,9 @@ class ProjectorView(private val model: ProjectorModel) {
     }
 
     fun renderOverlays() {
-        prepareFilePopUp()
+        //prepareFilePopUp()
         prepareCode()
-        prepareMinimap()
+        //prepareMinimap()
         renderPanels()
     }
 
@@ -229,7 +229,7 @@ class ProjectorView(private val model: ProjectorModel) {
             glClear(panelColor)
             glTechTextPage(minimapTextTechnique, model.currentPage)
         }
-        glTechRttDraw(minimapCursorTechnique) {
+        glTechRttDraw(minimapRttCursorTechnique) {
             glClear(minimapCursorColor)
         }
     }
@@ -295,8 +295,8 @@ class ProjectorView(private val model: ProjectorModel) {
                     panelModelM.set(minimapModelM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }
-                glTextureBind(minimapCursorTechnique.output) {
-                    panelSampler.value = minimapCursorTechnique.output
+                glTextureBind(minimapRttCursorTechnique.output) {
+                    panelSampler.value = minimapRttCursorTechnique.output
                     panelModelM.set(minimapCursorModelM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }

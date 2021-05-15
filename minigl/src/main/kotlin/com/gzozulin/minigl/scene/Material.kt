@@ -1,6 +1,7 @@
-package com.gzozulin.minigl.assets
+package com.gzozulin.minigl.scene
 
 import com.gzozulin.minigl.api.GlTexture
+import com.gzozulin.minigl.api.orange
 import com.gzozulin.minigl.api.vec3
 
 data class PhongMaterial(
@@ -17,7 +18,7 @@ data class PhongMaterial(
     val mapTransparency: GlTexture? = null,
 )
 
-val DEBUG         = PhongMaterial(vec3(1f, 0f, 0f), vec3(0f, 1f, 0f), vec3(0f, 0f, 1f), 10f)
+val DEBUG           = PhongMaterial(vec3().orange(), vec3().orange(), vec3().orange(), 10f)
 val DEFAULT         = PhongMaterial(vec3(0.5f), vec3(0.5f), vec3(0.5f), 10f)
 val CONCRETE        = PhongMaterial(vec3(0.329412f, 0.223529f, 0.027451f), vec3(0.75f, 0.75f, 0.73f), vec3(0.01f, 0.01f, 0.01f), 1f)
 val BRASS           = PhongMaterial(vec3(0.329412f, 0.223529f, 0.027451f), vec3(0.780392f, 0.568627f, 0.113725f), vec3(0.992157f, 0.941176f, 0.807843f), 27.8974f)

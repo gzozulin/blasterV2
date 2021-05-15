@@ -5,7 +5,6 @@ import com.gzozulin.minigl.api.GlFrameBuffer
 import com.gzozulin.minigl.api.GlTexture
 import com.gzozulin.minigl.api.glFrameBufferUse
 
-private val prevViewport = IntArray(4)
 private val outputs = listOf(backend.GL_COLOR_ATTACHMENT0)
 
 data class TechniqueRtt(val width: Int, val height: Int) {
@@ -22,17 +21,17 @@ fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
 }
 
 fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
-    backend.glGetIntegerv(backend.GL_VIEWPORT, prevViewport)
     glFrameBufferBind(techniqueRtt.frameBuffer) {
         glTextureBind(techniqueRtt.output) {
-            backend.glViewport(0, 0, techniqueRtt.width, techniqueRtt.height)
-            glFrameBufferTexture(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.output)
-            glFrameBufferOutputs(techniqueRtt.frameBuffer, outputs)
-            glFrameBufferIsComplete(techniqueRtt.frameBuffer)
-            callback.invoke()
+            glViewportBindPrev {
+                backend.glViewport(0, 0, techniqueRtt.width, techniqueRtt.height)
+                glFrameBufferOutputs(techniqueRtt.frameBuffer, outputs)
+                glFrameBufferTexture(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.output)
+                glFrameBufferIsComplete(techniqueRtt.frameBuffer)
+                callback.invoke()
+            }
         }
     }
-    backend.glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3])
 }
 
 private val techniqueRtt = TechniqueRtt(10, 10)
@@ -50,6 +49,7 @@ fun main() {
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
                     window.show {
+                        glClear()
                         glTechRttDraw(techniqueRtt) {
                             glClear(vec3().chartreuse())
                         }

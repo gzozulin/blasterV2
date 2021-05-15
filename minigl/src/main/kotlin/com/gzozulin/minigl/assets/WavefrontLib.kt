@@ -3,6 +3,8 @@ package com.gzozulin.minigl.assets
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api.glMeshUse
 import com.gzozulin.minigl.api.glTextureUse
+import com.gzozulin.minigl.scene.DEFAULT
+import com.gzozulin.minigl.scene.PhongMaterial
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader

@@ -65,7 +65,7 @@ fun glShadingFlatInstance(shadingFlat: ShadingFlat, mesh: GlMesh) {
     shadingFlat.matrix.submit(shadingFlat.program)
     shadingFlat.color.submit(shadingFlat.program)
     glMeshBind(mesh) {
-        glDrawTriangles(mesh)
+        glDrawTriangles(shadingFlat.program, mesh)
     }
 }
 
