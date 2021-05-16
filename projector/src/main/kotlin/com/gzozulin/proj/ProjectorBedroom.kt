@@ -19,7 +19,7 @@ private val window = GlWindow(1500, 900, isFullscreen = false, isHoldingCursor =
 private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
 private val empty = libTextureCreate("textures/snow.png")
 
-private val camera = Camera()
+private val camera = Camera(window)
 private val controller = ControllerFirstPerson(position = bedroomGroup.aabb.center(), velocity = 1f)
 private val wasdInput = WasdInput(controller)
 

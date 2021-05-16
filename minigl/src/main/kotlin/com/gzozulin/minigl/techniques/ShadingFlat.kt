@@ -70,8 +70,10 @@ fun glShadingFlatInstance(shadingFlat: ShadingFlat, mesh: GlMesh) {
     }
 }
 
+private val window = GlWindow()
+
 private var mouseLook = false
-private val camera = Camera()
+private val camera = Camera(window)
 private val controller = ControllerFirstPerson(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
@@ -82,8 +84,6 @@ private val uniformSampler = unifs(obj.material.mapDiffuse!!)
 private val matrix = unifm4 { camera.calculateFullM() }
 private val color = tex(namedTexCoordsV2(), uniformSampler)
 private val shadingFlat = ShadingFlat(matrix, color)
-
-private val window = GlWindow()
 
 private fun useScene(callback: Callback) {
     glShadingFlatUse(shadingFlat) {

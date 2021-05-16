@@ -113,7 +113,7 @@ class ProjectorView(private val model: ProjectorModel) {
     private val bedroomGroup = libWavefrontCreate("models/bedroom/bedroom")
     private val noiseTexture = libTextureCreate("textures/snow.png")
 
-    private val camera = Camera()
+    private val camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
     private val controller = ControllerScenic(
         positions = listOf(
             vec3(-8.511e1f, 1.148e2f,  1.536e2f),

@@ -98,14 +98,14 @@ fun glTechSkyboxDraw(techniqueSkybox: TechniqueSkybox) {
     }
 }
 
-private val window = GlWindow(isHoldingCursor = false, isFullscreen = true)
+private val window = GlWindow(isHoldingCursor = true, isFullscreen = true)
 
 private var mouseLook = false
-private val camera = Camera()
+private val camera = Camera(window)
 private val controller = ControllerFirstPerson()
 private val wasdInput = WasdInput(controller)
 
-private val cubeMap = libTextureCreateCubeMap("textures/snowy")
+private val cubeMap = libTextureCreateCubeMap("textures/miramar")
 private val texCoords = namedTexCoordsV3()
 private val cubeSampler = unifsq(cubeMap)
 private val color = texq(texCoords, cubeSampler)

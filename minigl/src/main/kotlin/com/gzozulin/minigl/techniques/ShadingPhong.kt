@@ -156,7 +156,9 @@ fun glShadingPhongInstance(shadingPhong: ShadingPhong, mesh: GlMesh) {
     }
 }
 
-private val camera = Camera()
+private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
+
+private val camera = Camera(window)
 private val controller = ControllerFirstPerson(velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
@@ -195,8 +197,6 @@ private val light = PointLight(camera.position, col3().white(), 300f)
 private var mouseLook = false
 private var lightsUp = false
 private var lightsDown = false
-
-private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 
 fun main() {
     window.create {
