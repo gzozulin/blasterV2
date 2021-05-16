@@ -37,10 +37,29 @@ void main() {
 }
 """
 
+/* private val onlyRotationM = mat3()
+    private val noTranslationM = mat4()
+
+    fun skybox(camera: Camera) {
+        checkReady()
+        onlyRotationM.set(camera.calculateViewM())
+        noTranslationM.set(onlyRotationM)
+        glBind(program, cube.mesh, diffuse) {
+            program.setUniform(GlUniform.UNIFORM_PROJ_M.label, camera.projectionM)
+            program.setUniform(GlUniform.UNIFORM_VIEW_M.label, noTranslationM)
+            program.setTexture(GlUniform.UNIFORM_TEXTURE_DIFFUSE.label, diffuse)
+            program.draw(indicesCount = cube.mesh.indicesCount)
+        }
+    }
+}*/
+
 data class TechniqueSkybox(val camera: Camera, val color: Expression<vec4>) {
 
+    private val onlyRotationM = mat3()
+    private val noTranslationM = mat4()
+
     internal val unifProjM = unifm4 { camera.projectionM }
-    internal val unifViewM = unifm4 { camera.calculateViewM() }
+    internal val unifViewM = unifm4 { noTranslationM.set(onlyRotationM.set(camera.calculateViewM())) }
 
     private val vertShader = GlShader(
         backend.GL_VERTEX_SHADER,
