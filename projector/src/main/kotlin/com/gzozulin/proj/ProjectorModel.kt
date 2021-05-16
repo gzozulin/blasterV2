@@ -1,9 +1,8 @@
 package com.gzozulin.proj
 
 import com.gzozulin.kotlin.KotlinParser
-import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.techniques.SpanVisibility
-import com.gzozulin.minigl.techniques.TextPage
 import com.gzozulin.minigl.techniques.TextSpan
 import java.io.File
 import kotlin.math.abs
@@ -12,12 +11,15 @@ const val LINES_TO_SHOW = 20
 
 const val FRAMES_PER_UPDATE = 2
 
+const val FRAMES_TO_FINALIZE = 10000 / 16
+
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-private enum class AnimationState { PREPARE, KEY_FRAME, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINISHED }
+enum class AnimationState {
+    FIND_KEY, WAIT_KEY, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
 class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep1_model/scenario_copy").readText()) }
@@ -26,11 +28,12 @@ class ProjectorModel {
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
     lateinit var currentPage: ProjectorTextPage<OrderedSpan>
 
-    private var animationState = AnimationState.PREPARE
+    var animationState = AnimationState.FIND_KEY
 
     private var currentFrame = 0
     private var currentOrder = 0
     private var nextKeyFrame = 0
+    private var lastFrame    = 0
 
     var currentPageCenter = 0
     private var nextPageCenter = 0
@@ -44,12 +47,13 @@ class ProjectorModel {
     fun advanceScenario() {
         currentFrame++
         when (animationState) {
-            AnimationState.PREPARE    -> findKeyFrame()
-            AnimationState.KEY_FRAME  -> waitForKeyFrame()
+            AnimationState.FIND_KEY   -> findKeyFrame()
+            AnimationState.WAIT_KEY   -> waitForKeyFrame()
             AnimationState.MAKE_SPACE -> makeSpace()
             AnimationState.ADVANCING  -> advanceSpans()
             AnimationState.SCROLLING  -> scrollToPageCenter()
             AnimationState.NEXT_ORDER -> nextOrder()
+            AnimationState.FINALIZING -> finalizingCapture()
             AnimationState.FINISHED   -> {}
         }
     }
@@ -58,7 +62,7 @@ class ProjectorModel {
 
     private fun findKeyFrame() {
         findOrderKeyFrame()
-        animationState = AnimationState.KEY_FRAME
+        animationState = AnimationState.WAIT_KEY
     }
 
     private fun waitForKeyFrame() {
@@ -99,8 +103,17 @@ class ProjectorModel {
     private fun nextOrder() {
         currentOrder++
         if (currentOrder != projectScenario.scenario.size) {
-            animationState = AnimationState.PREPARE
+            animationState = AnimationState.FIND_KEY
         } else {
+            animationState = AnimationState.FINALIZING
+        }
+    }
+
+    private fun finalizingCapture() {
+        if (lastFrame == 0) {
+            lastFrame = currentFrame
+        }
+        if (currentFrame - lastFrame >= FRAMES_TO_FINALIZE) {
             animationState = AnimationState.FINISHED
         }
     }
@@ -147,16 +160,3 @@ class ProjectorModel {
         error("Key frame not found!")
     }
 }
-
-private val exampleSpans = TextPage(listOf(
-    OrderedSpan(text = "What is Lorem Ipsum?",
-        order = 0, color = col3().red(), visibility = SpanVisibility.VISIBLE),
-    OrderedSpan(text = "Lorem Ipsum is",
-        order = 1, color = col3().green(), visibility = SpanVisibility.INVISIBLE),
-    OrderedSpan(text = "simply dummy text",
-        order = 2, color = col3().blue(), visibility = SpanVisibility.GONE),
-    OrderedSpan(text = "of the printing and",
-        order = 3, color = col3().orange(), visibility = SpanVisibility.VISIBLE),
-    OrderedSpan(text = "typesetting industry",
-        order = 4, color = col3().cyan(), visibility = SpanVisibility.INVISIBLE),
-))

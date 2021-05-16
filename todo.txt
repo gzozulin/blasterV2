@@ -35,8 +35,8 @@ x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +code +video @co
 x 2021-05-03 2021-04-29 Find a way to directly incode H264 lossless in code +code @complex
 (B) 2021-04-29 gdx-freetype fonts +code @complex
 x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +video @simple
-(A) 2021-04-30 Show whitespace only before typing, not before scrolling +code @simple
-(A) 2021-04-30 Stop capturing after N seconds +code @simple
+x 2021-05-15 (A) 2021-04-30 Show whitespace only before typing, not before scrolling +code @simple
+x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
 2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
 (B) 2021-04-30 Generate typing sounds with video +code @complex
 (A) 2021-05-02 Ask questions from audience +video @simple
@@ -52,4 +52,4 @@ x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders
 2021-05-14 Remove GlBackend +code @complex
 x 2021-05-15 (A) 2021-05-14 Fix fonts for ProjectorView +code @simple
 2021-05-14 Light shines even from the opposite side of the surface +code @complex
-(A) 2021-05-15 Show filename when start typing +code @complex
+x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex

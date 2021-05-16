@@ -1,8 +1,5 @@
 package com.gzozulin.proj
 
-import com.gzozulin.minigl.api.black
-import com.gzozulin.minigl.api.col3
-import com.gzozulin.minigl.api.glClear
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -12,7 +9,8 @@ private val exceptionHandler = Thread.currentThread().uncaughtExceptionHandler
 open class State(
     protected val parent: ProjectorController,
     protected val model: ProjectorModel,
-    protected val view: ProjectorView) {
+    protected val view: ProjectorView,
+    protected val capturer: Capturer) {
 
     open fun onEnter() {}
     open fun onLeave() {}
@@ -22,13 +20,13 @@ open class State(
     open fun onKey(key: Int, pressed: Boolean) {}
 }
 
-class ProjectorController(model: ProjectorModel, view: ProjectorView) {
+class ProjectorController(model: ProjectorModel, view: ProjectorView, capturer: Capturer) {
 
     private lateinit var current: State
     private var next: State? = null
 
     init {
-        switch(StateCozyRoomIntro(this, model, view))
+        switch(StateCozyRoomIntro(this, model, view, capturer))
     }
 
     fun keyPressed(key: Int, pressed: Boolean) {
@@ -52,8 +50,8 @@ class ProjectorController(model: ProjectorModel, view: ProjectorView) {
     }
 }
 
-class StateCozyRoomIntro(
-    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
+class StateCozyRoomIntro(parent: ProjectorController, model: ProjectorModel, view: ProjectorView,
+                         capturer: Capturer) : State(parent, model, view, capturer) {
 
     override fun onEnter() {
         super.onEnter()
@@ -68,21 +66,35 @@ class StateCozyRoomIntro(
     }
 
     override fun onFrame() {
-        glClear(col3().black())
         view.renderScene()
         if (scenarioLoaded) {
-            parent.switch(StateCozyRoomTyping(parent, model, view))
+            parent.switch(StateCozyRoomTyping(parent, model, view, capturer))
         }
     }
 }
 
-class StateCozyRoomTyping(
-    parent: ProjectorController, model: ProjectorModel, view: ProjectorView) : State(parent, model, view) {
+class StateCozyRoomTyping(parent: ProjectorController, model: ProjectorModel, view: ProjectorView,
+                          capturer: Capturer) : State(parent, model, view, capturer) {
 
     override fun onFrame() {
         super.onFrame()
         model.advanceScenario()
         view.renderScene()
         view.renderOverlays()
+        if (model.animationState == AnimationState.FINISHED) {
+            parent.switch(StateFinished(parent, model, view, capturer))
+        }
+    }
+}
+
+class StateFinished(parent: ProjectorController, model: ProjectorModel, view: ProjectorView,
+                    capturer: Capturer) : State(parent, model, view, capturer) {
+
+    override fun onEnter() {
+        capturer.isCapturing = false
+    }
+
+    override fun onFrame() {
+        view.renderScene()
     }
 }
