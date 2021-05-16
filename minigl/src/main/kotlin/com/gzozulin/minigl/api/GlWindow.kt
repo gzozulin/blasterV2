@@ -24,12 +24,13 @@ typealias ButtonCallback = (button: MouseButton, pressed: Boolean) -> Unit
 typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
-class GlWindow(private val winWidth: Int = 1024, private val winHeight: Int = 768) {
-    var handle: Long? = null
+class GlWindow(
+    private val winWidth: Int = 1024, private val winHeight: Int = 768,
+    private var isHoldingCursor: Boolean = false,
+    private var isFullscreen: Boolean = false,
+    private var isMultisampling: Boolean = false) {
 
-    private var isHoldingCursor: Boolean = false
-    private var isFullscreen: Boolean = false
-    private var isMultisampling: Boolean = false
+    var handle: Long? = null
 
     var keyCallback: KeyCallback? = null
     var buttonCallback: ButtonCallback? = null
@@ -73,11 +74,7 @@ class GlWindow(private val winWidth: Int = 1024, private val winHeight: Int = 76
         }
     }
 
-    fun create(isHoldingCursor: Boolean = false, isFullscreen: Boolean = false,
-               isMultisampling: Boolean = false, onCreated: () -> Unit) {
-        this.isHoldingCursor = isHoldingCursor
-        this.isFullscreen = isFullscreen
-        this.isMultisampling = isMultisampling
+    fun create(onCreated: () -> Unit) {
         glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
         recreateWindow()
@@ -117,7 +114,7 @@ class GlWindow(private val winWidth: Int = 1024, private val winHeight: Int = 76
         glfwSetMouseButtonCallback(handle!!, buttonCallbackInternal)
         glfwSetKeyCallback(handle!!, keyCallbackInternal)
         glfwMakeContextCurrent(handle!!)
-        GL.createCapabilities();
+        GL.createCapabilities()
         glfwSwapInterval(1)
         glfwShowWindow(handle!!)
     }

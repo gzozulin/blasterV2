@@ -45,27 +45,6 @@ fun libTextureCreate(file: File, mirrorX: Boolean = false, mirrorY: Boolean = fa
 fun libTextureCreate(asset: String, mirrorX: Boolean = false, mirrorY: Boolean = false) =
     libTextureCreate(libAssetCreate(asset), mirrorX, mirrorY)
 
-/*fun loadSkybox(filename: String, unit: Int = 0): GlTexture {
-        val file = File(filename)
-        val right   = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_rt.jpg"), mirrorX = true, mirrorY = true)
-        val left    = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_lf.jpg"), mirrorX = true, mirrorY = true)
-        val top     = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_up.jpg"), mirrorX = true, mirrorY = true)
-        val bottom  = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_dn.jpg"), mirrorX = true, mirrorY = true)
-        val front   = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_ft.jpg"), mirrorX = true, mirrorY = true)
-        val back    = pixelDecoder.decodePixels(assetStream.openAsset(filename + "/" + file.name + "_bk.jpg"), mirrorX = true, mirrorY = true)
-        return GlTexture(
-            target = backend.GL_TEXTURE_CUBE_MAP, texData = listOf(
-                GlTexData(width = right.width, height = right.height, pixels = right.pixels),
-                GlTexData(width = left.width, height = left.height, pixels = left.pixels),
-                GlTexData(width = top.width, height = top.height, pixels = top.pixels),
-                GlTexData(width = bottom.width, height = bottom.height, pixels = bottom.pixels),
-                GlTexData(width = front.width, height = front.height, pixels = front.pixels),
-                GlTexData(width = back.width, height = back.height, pixels = back.pixels)
-            )
-        )
-    }
-*/
-
 fun libTextureCreateCubeMap(filename: String): GlTexture {
     val file = File(filename)
     val right   = libTextureDecodePixels(libAssetCreate(filename + "/" + file.name + "_rt.jpg").inputStream(), mirrorX = true, mirrorY = true)
@@ -75,13 +54,15 @@ fun libTextureCreateCubeMap(filename: String): GlTexture {
     val front   = libTextureDecodePixels(libAssetCreate(filename + "/" + file.name + "_ft.jpg").inputStream(), mirrorX = true, mirrorY = true)
     val back    = libTextureDecodePixels(libAssetCreate(filename + "/" + file.name + "_bk.jpg").inputStream(), mirrorX = true, mirrorY = true)
     return GlTexture(
-        target = backend.GL_TEXTURE_CUBE_MAP, images = listOf(
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 0, width = right.width, height = right.height, pixels = right.pixels),
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1, width = left.width, height = left.height, pixels = left.pixels),
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 2, width = top.width, height = top.height, pixels = top.pixels),
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 3, width = bottom.width, height = bottom.height, pixels = bottom.pixels),
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4, width = front.width, height = front.height, pixels = front.pixels),
-            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5, width = back.width, height = back.height, pixels = back.pixels)
+        target = backend.GL_TEXTURE_CUBE_MAP,
+        wrapS = backend.GL_CLAMP_TO_EDGE, wrapT = backend.GL_CLAMP_TO_EDGE, wrapR = backend.GL_CLAMP_TO_EDGE,
+        images = listOf(
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 0, width = right.width,    height = right.height,  pixels = right.pixels),
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1, width = left.width,     height = left.height,   pixels = left.pixels),
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 2, width = top.width,      height = top.height,    pixels = top.pixels),
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 3, width = bottom.width,   height = bottom.height, pixels = bottom.pixels),
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4, width = front.width,    height = front.height,  pixels = front.pixels),
+            GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5, width = back.width,     height = back.height,   pixels = back.pixels)
         )
     )
 }

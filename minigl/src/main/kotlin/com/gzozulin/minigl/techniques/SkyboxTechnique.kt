@@ -89,16 +89,16 @@ fun glTechSkyboxUse(techniqueSkybox: TechniqueSkybox, callback: Callback) {
 
 fun glTechSkyboxDraw(techniqueSkybox: TechniqueSkybox) {
     glProgramBind(techniqueSkybox.program) {
+        techniqueSkybox.color.submit(techniqueSkybox.program)
         techniqueSkybox.unifProjM.submit(techniqueSkybox.program)
         techniqueSkybox.unifViewM.submit(techniqueSkybox.program)
-        techniqueSkybox.color.submit(techniqueSkybox.program)
         glMeshBind(techniqueSkybox.cube) {
             glDrawTriangles(techniqueSkybox.program, techniqueSkybox.cube)
         }
     }
 }
 
-private val window = GlWindow()
+private val window = GlWindow(isHoldingCursor = false, isFullscreen = true)
 
 private var mouseLook = false
 private val camera = Camera()
@@ -113,7 +113,7 @@ private val color = texq(texCoords, cubeSampler)
 private val techniqueSkybox = TechniqueSkybox(camera, color)
 
 fun main() {
-    window.create(isHoldingCursor = false, isFullscreen = true) {
+    window.create {
         window.buttonCallback = { button, pressed ->
             if (button == MouseButton.LEFT) {
                 mouseLook = pressed

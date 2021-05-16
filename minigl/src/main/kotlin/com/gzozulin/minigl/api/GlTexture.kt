@@ -1,7 +1,6 @@
 package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D
-import org.lwjgl.opengl.GL13.GL_ACTIVE_TEXTURE
 import org.lwjgl.opengl.GL13.GL_TEXTURE_BINDING_CUBE_MAP
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

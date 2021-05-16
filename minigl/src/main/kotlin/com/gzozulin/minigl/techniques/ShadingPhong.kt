@@ -196,9 +196,10 @@ private var mouseLook = false
 private var lightsUp = false
 private var lightsDown = false
 
+private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
+
 fun main() {
-    val window = GlWindow()
-    window.create(isFullscreen = true, isHoldingCursor = false, isMultisampling = true) {
+    window.create {
         window.keyCallback = { key, pressed ->
             wasdInput.onKeyPressed(key, pressed)
             if (pressed) {
