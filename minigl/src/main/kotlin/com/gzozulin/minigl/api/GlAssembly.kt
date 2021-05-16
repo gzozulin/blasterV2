@@ -1,9 +1,14 @@
 package com.gzozulin.minigl.api
 
+import com.gzozulin.minigl.scene.Light
+import com.gzozulin.minigl.scene.PointLight
+import com.gzozulin.minigl.techniques.ShadingPhong
 import java.util.concurrent.atomic.AtomicInteger
 
 const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
+
+const val MAX_LIGHTS = 128
 
 const val V_TEX_COORD = "vTexCoord"
 

@@ -1,5 +1,7 @@
 package com.gzozulin.minigl.api
 
+import com.gzozulin.minigl.scene.Light
+import com.gzozulin.minigl.scene.PointLight
 import org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -146,6 +148,28 @@ internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int,
     val location = glProgramUniformLocation(program, name.format(index))
     value.get(bufferVec3)
     backend.glUniform3fv(location, bufferVec3)
+}
+
+internal fun glProgramSubmitLights(program: GlProgram, lights: List<Light>) {
+    check(lights.size <= MAX_LIGHTS) { "More lights than defined in shader!" }
+    glProgramCheckBound(program)
+    val sorted = lights.sortedBy { it is PointLight }
+    var pointLightCnt = 0
+    var dirLightCnt = 0
+    sorted.forEachIndexed { index, light ->
+        glProgramArrayUniform(program, "uLights[%d].vector",          index, light.vector)
+        glProgramArrayUniform(program, "uLights[%d].color",           index, light.color)
+        glProgramArrayUniform(program, "uLights[%d].attenConstant",   index, light.attenConstant)
+        glProgramArrayUniform(program, "uLights[%d].attenLinear",     index, light.attenLinear)
+        glProgramArrayUniform(program, "uLights[%d].attenQuadratic",  index, light.attenQuadratic)
+        if (light is PointLight) {
+            pointLightCnt++
+        } else {
+            dirLightCnt++
+        }
+    }
+    glProgramUniform(program, "uLightsPointCnt", pointLightCnt)
+    glProgramUniform(program, "uLightsDirCnt",   dirLightCnt)
 }
 
 internal fun glDrawTriangles(program: GlProgram, mesh: GlMesh) {

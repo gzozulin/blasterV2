@@ -9,8 +9,6 @@ import com.gzozulin.minigl.scene.*
 import org.lwjgl.glfw.GLFW
 import java.lang.Float.max
 
-private const val MAX_LIGHTS = 128
-
 private const val vertSrc = """
     $VERT_SHADER_HEADER
 
@@ -108,33 +106,12 @@ data class ShadingPhong(val modelM: Expression<mat4>,
     internal val program = GlProgram(vertShader, fragShader)
 }
 
-private fun glShadingPhongSubmitLights(shadingPhong: ShadingPhong, lights: List<Light>) {
-    check(lights.size <= MAX_LIGHTS) { "More lights than defined in shader!" }
-    val sorted = lights.sortedBy { it is PointLight }
-    var pointLightCnt = 0
-    var dirLightCnt = 0
-    sorted.forEachIndexed { index, light ->
-        glProgramArrayUniform(shadingPhong.program, "uLights[%d].vector",          index, light.vector)
-        glProgramArrayUniform(shadingPhong.program, "uLights[%d].color",           index, light.color)
-        glProgramArrayUniform(shadingPhong.program, "uLights[%d].attenConstant",   index, light.attenConstant)
-        glProgramArrayUniform(shadingPhong.program, "uLights[%d].attenLinear",     index, light.attenLinear)
-        glProgramArrayUniform(shadingPhong.program, "uLights[%d].attenQuadratic",  index, light.attenQuadratic)
-        if (light is PointLight) {
-            pointLightCnt++
-        } else {
-            dirLightCnt++
-        }
-    }
-    glProgramUniform(shadingPhong.program, "uLightsPointCnt", pointLightCnt)
-    glProgramUniform(shadingPhong.program, "uLightsDirCnt",   dirLightCnt)
-}
-
 fun glShadingPhongUse(shadingPhong: ShadingPhong, callback: Callback) =
     glProgramUse(shadingPhong.program, callback)
 
 fun glShadingPhongDraw(shadingPhong: ShadingPhong, lights: List<Light>, callback: Callback) {
     glProgramBind(shadingPhong.program) {
-        glShadingPhongSubmitLights(shadingPhong, lights)
+        glProgramSubmitLights(shadingPhong.program, lights)
         shadingPhong.viewM.submit(shadingPhong.program)
         shadingPhong.eye.submit(shadingPhong.program)
         shadingPhong.projM.submit(shadingPhong.program)
@@ -143,7 +120,6 @@ fun glShadingPhongDraw(shadingPhong: ShadingPhong, lights: List<Light>, callback
 }
 
 fun glShadingPhongInstance(shadingPhong: ShadingPhong, mesh: GlMesh) {
-    glProgramCheckBound(shadingPhong.program)
     shadingPhong.modelM.submit(shadingPhong.program)
     shadingPhong.albedo.submit(shadingPhong.program)
     shadingPhong.matAmbient.submit(shadingPhong.program)
