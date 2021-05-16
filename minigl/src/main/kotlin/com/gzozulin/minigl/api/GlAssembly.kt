@@ -259,6 +259,11 @@ fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun uniff(p: () -> Float) = object : Uniform<Float>(p, null) {
+    override fun declare() = "uniform float $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
     override fun declare() = "uniform ivec2 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
@@ -345,7 +350,7 @@ fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
 // ----------------------------- Arithmetics -----------------------------
 
 fun <T> add(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
-    override fun expr() = "(${right.expr()} - ${left.expr()})"
+    override fun expr() = "(${right.expr()} + ${left.expr()})"
     override fun roots() = listOf(left, right)
 }
 
@@ -358,6 +363,7 @@ fun <T> mul(left: Expression<T>, right: Expression<T>) = object : Expression<T>(
     override fun expr() = "(${right.expr()} * ${left.expr()})"
     override fun roots() = listOf(left, right)
 }
+
 fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
     override fun expr() = "(${right.expr()} / ${left.expr()})"
     override fun roots() = listOf(left, right)
@@ -466,3 +472,10 @@ fun setr(vec: Expression<vec4>, r: Expression<Float>) = setx(vec, r)
 fun setg(vec: Expression<vec4>, g: Expression<Float>) = sety(vec, g)
 fun setb(vec: Expression<vec4>, b: Expression<Float>) = setz(vec, b)
 fun seta(vec: Expression<vec4>, a: Expression<Float>) = setw(vec, a)
+
+// ------------------------- Casts -------------------------
+
+fun tov4(value: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "vec4(${value.expr()})"
+    override fun roots() = listOf(value)
+}

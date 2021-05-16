@@ -84,54 +84,65 @@ private fun glProgramUniformLocation(program: GlProgram, name: String): Int {
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: Float) {
+    glProgramCheckBound(program)
     backend.glUniform1f(glProgramUniformLocation(program, name), value)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: Int) {
+    glProgramCheckBound(program)
     backend.glUniform1i(glProgramUniformLocation(program, name), value)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: vec2i) {
+    glProgramCheckBound(program)
     value.get(bufferVec2i)
     backend.glUniform2iv(glProgramUniformLocation(program, name), bufferVec2i)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: vec2) {
+    glProgramCheckBound(program)
     value.get(bufferVec2)
     backend.glUniform2fv(glProgramUniformLocation(program, name), bufferVec2)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: vec3) {
+    glProgramCheckBound(program)
     value.get(bufferVec3)
     backend.glUniform3fv(glProgramUniformLocation(program, name), bufferVec3)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: vec4) {
+    glProgramCheckBound(program)
     value.get(bufferVec4)
     backend.glUniform4fv(glProgramUniformLocation(program, name), bufferVec4)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, value: mat4) {
+    glProgramCheckBound(program)
     value.get(bufferMat4)
     backend.glUniformMatrix4fv(glProgramUniformLocation(program, name), false, bufferMat4)
 }
 
 internal fun glProgramUniform(program: GlProgram, name: String, texture: GlTexture) {
+    glProgramCheckBound(program)
     glTextureCheckBound(texture)
     backend.glUniform1i(glProgramUniformLocation(program, name), texture.unit!!)
 }
 
 internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: Int) {
+    glProgramCheckBound(program)
     val location = glProgramUniformLocation(program, name.format(index))
     backend.glUniform1i(location, value)
 }
 
 internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: Float) {
+    glProgramCheckBound(program)
     val location = glProgramUniformLocation(program, name.format(index))
     backend.glUniform1f(location, value)
 }
 
 internal fun glProgramArrayUniform(program: GlProgram, name: String, index: Int, value: vec3) {
+    glProgramCheckBound(program)
     val location = glProgramUniformLocation(program, name.format(index))
     value.get(bufferVec3)
     backend.glUniform3fv(location, bufferVec3)

@@ -6,6 +6,7 @@ import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
+import org.joml.Math.abs
 
 private const val vertexSrc = """
 $VERT_SHADER_HEADER
@@ -89,26 +90,39 @@ fun glTechSkyboxUse(techniqueSkybox: TechniqueSkybox, callback: Callback) {
 
 fun glTechSkyboxDraw(techniqueSkybox: TechniqueSkybox) {
     glProgramBind(techniqueSkybox.program) {
-        techniqueSkybox.color.submit(techniqueSkybox.program)
         techniqueSkybox.unifProjM.submit(techniqueSkybox.program)
         techniqueSkybox.unifViewM.submit(techniqueSkybox.program)
+        techniqueSkybox.color.submit(techniqueSkybox.program)
         glMeshBind(techniqueSkybox.cube) {
             glDrawTriangles(techniqueSkybox.program, techniqueSkybox.cube)
         }
     }
 }
 
-private val window = GlWindow(isHoldingCursor = true, isFullscreen = true)
+private val window = GlWindow(isHoldingCursor = false, isFullscreen = true)
 
 private var mouseLook = false
 private val camera = Camera(window)
 private val controller = ControllerFirstPerson()
 private val wasdInput = WasdInput(controller)
 
-private val cubeMap = libTextureCreateCubeMap("textures/miramar")
+private val cubeMap1 = libTextureCreateCubeMap("textures/miramar")
+private val cubeSampler1 = unifsq(cubeMap1)
+
+private val cubeMap2 = libTextureCreateCubeMap("textures/snowy")
+private val cubeSampler2 = unifsq(cubeMap2)
+
 private val texCoords = namedTexCoordsV3()
-private val cubeSampler = unifsq(cubeMap)
-private val color = texq(texCoords, cubeSampler)
+
+private val color1 = texq(texCoords, cubeSampler1)
+private val color2 = texq(texCoords, cubeSampler2)
+
+private var direction = true
+private var timer = 0
+private var proportion = 0.5f
+private val unifProportion1 = uniff { proportion }
+private val unifProportion2 = uniff { 1f - proportion }
+private val color = add(mul(color1, tov4(unifProportion1)), mul(color2, tov4(unifProportion2)))
 
 private val techniqueSkybox = TechniqueSkybox(camera, color)
 
@@ -125,15 +139,25 @@ fun main() {
             }
         }
         glTechSkyboxUse(techniqueSkybox) {
-            glTextureUse(cubeMap) {
-                window.show {
-                    glClear()
-                    controller.apply { position, direction ->
-                        camera.setPosition(position)
-                        camera.lookAlong(direction)
-                    }
-                    glTextureBind(cubeMap) {
-                        glTechSkyboxDraw(techniqueSkybox)
+            glTextureUse(cubeMap1) {
+                glTextureUse(cubeMap2) {
+                    window.show {
+                        timer++
+                        proportion += if (direction) 0.01f else -0.01f
+                        if (timer == 100) {
+                            direction = !direction
+                            timer = 0
+                        }
+                        glClear()
+                        controller.apply { position, direction ->
+                            camera.setPosition(position)
+                            camera.lookAlong(direction)
+                        }
+                        glTextureBind(cubeMap1) {
+                            glTextureBind(cubeMap2) {
+                                glTechSkyboxDraw(techniqueSkybox)
+                            }
+                        }
                     }
                 }
             }
