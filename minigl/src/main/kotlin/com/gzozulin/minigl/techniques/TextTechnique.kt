@@ -67,7 +67,7 @@ class TechniqueText(
     private val projM = mat4().identity().ortho(0f, width.toFloat(), 0f, height.toFloat(), -1f, 1f)
     private val fullM = mat4().identity()
 
-    private val texCoord = namedTexCoords()
+    private val texCoord = namedTexCoordsV2()
     private val uniformMatrix = unifm4 { fullM.set(projM).mul(viewM).mul(cursor) }
 
     internal val tileUV = vec2i(0)
@@ -77,7 +77,7 @@ class TechniqueText(
     )
 
     internal val uniformColor = unifv4()
-    private val fontColor = cachev4(tex(texCoordTiled, unift(font)))
+    private val fontColor = cachev4(tex(texCoordTiled, unifs(font)))
     private val fontCheck = more(geta(fontColor), constf(0f))
     private val resultColor = seta(uniformColor, getr(fontColor))
     private val result = ifexp(fontCheck, resultColor, discard())

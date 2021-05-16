@@ -28,10 +28,10 @@ private const val CODE_PANEL_HEIGHT = 1000
 private const val CODE_PANEL_POS_X = 700
 private const val CODE_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
-private const val MINIMAP_MAX_LINES = 140
+private const val MINIMAP_MAX_LINES = 150
 private const val MINIMAP_PANEL_WIDTH = 400
 private const val MINIMAP_PANEL_HEIGHT = 1000
-private const val MINIMAP_CURSOR_HEIGHT = 320
+private const val MINIMAP_CURSOR_HEIGHT = 400
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
@@ -91,8 +91,8 @@ class ProjectorView(private val model: ProjectorModel) {
     private val panelFullM = mat4().identity()
     private val uniformPanelM = unifm4 { panelFullM.set(panelProjM).mul(panelModelM) }
 
-    private val panelTexCoords = namedTexCoords()
-    private val panelSampler = unift()
+    private val panelTexCoords = namedTexCoordsV2()
+    private val panelSampler = unifs()
     private val panelColor = vec4(0f, 0f, 0f, 0.7f)
     private val panelMesh = glMeshCreateRect(1f, 1f)
     private val shadingFlat = ShadingFlat(uniformPanelM, tex(panelTexCoords, panelSampler))
@@ -139,8 +139,8 @@ class ProjectorView(private val model: ProjectorModel) {
     private val eye = unifv3 { camera.position }
     private val projM = unifm4 { camera.projectionM }
 
-    private val texCoords = namedTexCoords()
-    private val sampler = unift()
+    private val texCoords = namedTexCoordsV2()
+    private val sampler = unifs()
     private val albedo = tex(texCoords, sampler)
 
     private val matAmbient = constv3(vec3(0.05f))

@@ -53,3 +53,4 @@ x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders
 x 2021-05-15 (A) 2021-05-14 Fix fonts for ProjectorView +code @simple
 2021-05-14 Light shines even from the opposite side of the surface +code @complex
 x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex
+(A) 2021-05-15 Fix minimap cursor +code @simple

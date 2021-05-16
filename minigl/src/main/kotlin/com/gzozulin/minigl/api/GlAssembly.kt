@@ -226,8 +226,8 @@ data class Named<T>(val given: String) : Expression<T>() {
     override fun expr() = given
 }
 
-fun namedv2(name: String) = Named<vec2>(name)
-fun namedTexCoords() = Named<vec2>(V_TEX_COORD)
+fun namedTexCoordsV2() = Named<vec2>(V_TEX_COORD)
+fun namedTexCoordsV3() = Named<vec3>(V_TEX_COORD)
 
 abstract class Uniform<T>(private val p: (() -> T)?, private var v: T?) : Expression<T>() {
 
@@ -299,8 +299,13 @@ fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unift(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+fun unifs(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform sampler2D $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifsq(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+    override fun declare() = "uniform samplerCube $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
@@ -358,9 +363,14 @@ fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>(
     override fun roots() = listOf(left, right)
 }
 
-// ----------------------------- Texture -----------------------------
+// ----------------------------- Sampler -----------------------------
 
 fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
+    override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
+    override fun roots() = listOf(texCoord, sampler)
+}
+
+fun texq(texCoord: Expression<vec3>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(texCoord, sampler)
 }
