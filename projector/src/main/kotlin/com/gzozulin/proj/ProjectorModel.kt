@@ -10,24 +10,23 @@ import kotlin.math.abs
 
 const val LINES_TO_SHOW = 20
 
-const val FRAMES_PER_SPAN = 2
-const val FRAMES_PER_LINE = 2
+const val FRAMES_PER_UPDATE = 2
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
                        override var visibility: SpanVisibility) : TextSpan
 
-private enum class AnimationState { ADVANCING, KEY_FRAME, SCROLLING }
+private enum class AnimationState { PREPARE, KEY_FRAME, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINISHED }
 
 class ProjectorModel {
-    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep1_model/scenario").readText()) }
+    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep1_model/scenario_copy").readText()) }
     private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
     lateinit var currentPage: ProjectorTextPage<OrderedSpan>
 
-    private var animationState = AnimationState.KEY_FRAME
+    private var animationState = AnimationState.PREPARE
 
     private var currentFrame = 0
     private var currentOrder = 0
@@ -40,26 +39,69 @@ class ProjectorModel {
 
     fun renderScenario() {
         pages = scenarioRenderer.renderScenario()
-        prepareOrder()
     }
 
     fun advanceScenario() {
         currentFrame++
         when (animationState) {
-            AnimationState.ADVANCING -> advanceSpans()
-            AnimationState.KEY_FRAME -> waitForKeyFrame()
-            AnimationState.SCROLLING -> scrollToPageCenter()
+            AnimationState.PREPARE    -> findKeyFrame()
+            AnimationState.KEY_FRAME  -> waitForKeyFrame()
+            AnimationState.MAKE_SPACE -> makeSpace()
+            AnimationState.ADVANCING  -> advanceSpans()
+            AnimationState.SCROLLING  -> scrollToPageCenter()
+            AnimationState.NEXT_ORDER -> nextOrder()
+            AnimationState.FINISHED   -> {}
         }
     }
 
+    private fun isNextTick() = currentFrame % FRAMES_PER_UPDATE == 0
+
+    private fun findKeyFrame() {
+        findOrderKeyFrame()
+        animationState = AnimationState.KEY_FRAME
+    }
+
+    private fun waitForKeyFrame() {
+        if (currentFrame >= nextKeyFrame) {
+            animationState = AnimationState.MAKE_SPACE
+        }
+    }
+
+    private fun makeSpace() {
+        findCurrentPage()
+        currentPage.spans
+            .filter { it.order == currentOrder }
+            .forEach { it.visibility = SpanVisibility.INVISIBLE }
+        animationState = AnimationState.ADVANCING
+    }
+
     private fun advanceSpans() {
-        if (currentFrame % FRAMES_PER_SPAN == 0) {
+        if (isNextTick()) {
             val found = findNextInvisibleSpan()
             if (found != null) {
                 showNextInvisibleSpan(found)
             } else {
-                nextOrder()
+                animationState = AnimationState.NEXT_ORDER
             }
+        }
+    }
+
+    private fun scrollToPageCenter() {
+        if (isNextTick()) {
+            when {
+                nextPageCenter > currentPageCenter -> currentPageCenter++
+                nextPageCenter < currentPageCenter -> currentPageCenter--
+                else -> animationState = AnimationState.ADVANCING
+            }
+        }
+    }
+
+    private fun nextOrder() {
+        currentOrder++
+        if (currentOrder != projectScenario.scenario.size) {
+            animationState = AnimationState.PREPARE
+        } else {
+            animationState = AnimationState.FINISHED
         }
     }
 
@@ -83,22 +125,6 @@ class ProjectorModel {
         span.visibility = SpanVisibility.VISIBLE
     }
 
-    private fun nextOrder() {
-        currentOrder++
-        animationState = AnimationState.KEY_FRAME
-        if (currentOrder != projectScenario.scenario.size) {
-            prepareOrder()
-        } else {
-            nextKeyFrame = Int.MAX_VALUE
-        }
-    }
-
-    private fun prepareOrder() {
-        findCurrentPage()
-        findOrderKeyFrame(projectScenario.scenario)
-        makeOrderInvisible()
-    }
-
     private fun findCurrentPage() {
         for (renderedPage in pages) {
             for (span in renderedPage.spans) {
@@ -111,36 +137,14 @@ class ProjectorModel {
         error("Next page not found!")
     }
 
-    private fun findOrderKeyFrame(scenario: List<ScenarioNode>) {
-        for (scenarioNode in scenario) {
+    private fun findOrderKeyFrame() {
+        for (scenarioNode in projectScenario.scenario) {
             if (scenarioNode.order == currentOrder) {
                 nextKeyFrame = scenarioNode.frame
                 return
             }
         }
         error("Key frame not found!")
-    }
-
-    private fun makeOrderInvisible() {
-        currentPage.spans
-            .filter { it.order == currentOrder }
-            .forEach { it.visibility = SpanVisibility.INVISIBLE }
-    }
-
-    private fun waitForKeyFrame() {
-        if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.ADVANCING
-        }
-    }
-
-    private fun scrollToPageCenter() {
-        if (currentFrame % FRAMES_PER_LINE == 0) {
-            when {
-                nextPageCenter > currentPageCenter -> currentPageCenter++
-                nextPageCenter < currentPageCenter -> currentPageCenter--
-                else -> animationState = AnimationState.ADVANCING
-            }
-        }
     }
 }
 

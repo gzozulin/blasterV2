@@ -141,7 +141,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     private val texCoords = namedTexCoords()
     private val sampler = unift()
-    private val diffuseMap = tex(texCoords, sampler)
+    private val albedo = tex(texCoords, sampler)
 
     private val matAmbient = constv3(vec3(0.05f))
     private val matDiffuse = unifv3()
@@ -149,8 +149,8 @@ class ProjectorView(private val model: ProjectorModel) {
     private val matShine = constf(1f)
     private val matTransparency = constf(1f)
 
-    private val shadingPhong = ShadingPhong(
-        modelM, viewM, projM, eye, diffuseMap, matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
+    private val shadingPhong = ShadingPhong(modelM, viewM, projM, eye, albedo,
+        matAmbient, matDiffuse, matSpecular, matShine, matTransparency)
 
     fun use(callback: Callback) {
         libWavefrontGroupUse(bedroomGroup) {
@@ -211,10 +211,12 @@ class ProjectorView(private val model: ProjectorModel) {
     }
 
     fun renderOverlays() {
-        prepareFilePopUp()
-        prepareCode()
-        prepareMinimap()
-        renderPanels()
+        if (model.isPageReady()) {
+            prepareFilePopUp()
+            prepareCode()
+            prepareMinimap()
+            renderPanels()
+        }
     }
 
     private fun prepareCode() {
@@ -248,7 +250,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     private fun prepareFilePopUp() {
         filePopUpTimeout++
-        if (model.isPageReady() && model.currentPage !== lastShownPage) {
+        if (model.currentPage !== lastShownPage) {
             filePopUpTimeout = 0
             lastShownPage = model.currentPage
             filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().cyan())))

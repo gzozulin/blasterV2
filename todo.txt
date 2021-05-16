@@ -13,7 +13,7 @@ x 2021-04-23 2021-04-23 Minimap cursor window +code @simple
 x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds +video @simple
 x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
-x 2021-04-23 2021-04-23 Show packages in left panel +code @complex`
+x 2021-04-23 2021-04-23 Show packages in left panel +code @complex
 2021-04-23 Support for C and GLSL +code @complex
 2021-04-23 Switching to fullscreen +code @complex
 x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame +video @simple
@@ -52,3 +52,4 @@ x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders
 2021-05-14 Remove GlBackend +code @complex
 x 2021-05-15 (A) 2021-05-14 Fix fonts for ProjectorView +code @simple
 2021-05-14 Light shines even from the opposite side of the surface +code @complex
+(A) 2021-05-15 Show filename when start typing +code @complex

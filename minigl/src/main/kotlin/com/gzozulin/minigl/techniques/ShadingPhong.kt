@@ -48,7 +48,7 @@ private const val fragSrc = """
     void main() {
         vec3 fragPosition = vPosition.xyz;
         vec3 fragNormal = normalize(vNormal);
-        vec3 fragDiffuse = %DIFFUSE%.rgb;
+        vec3 fragDiffuse = %ALBEDO%.rgb;
         vec3 matAmbient = %MAT_AMBIENT%;
         vec3 matDiffuse = %MAT_DIFFUSE%;
         vec3 matSpecular = %MAT_SPECULAR%;
@@ -77,16 +77,16 @@ private const val fragSrc = """
 """
 
 data class ShadingPhong(val modelM: Expression<mat4>,
-                   val viewM: Expression<mat4>,
-                   val projM: Expression<mat4>,
-                   val eye: Expression<vec3>,
-                   val diffuse: Expression<vec4> = constv4(vec4(1f)),
-                   val matAmbient: Expression<vec3> = constv3(vec3(1f)),
-                   val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
-                   val matSpecular: Expression<vec3> = constv3(vec3(1f)),
-                   val matShine: Expression<Float> = constf(10f),
-                   val matTransparency: Expression<Float> = constf(1f)
-) {
+                        val viewM: Expression<mat4>,
+                        val projM: Expression<mat4>,
+                        val eye: Expression<vec3>,
+                        val albedo: Expression<vec4> = constv4(vec4(1f)),
+                        val matAmbient: Expression<vec3> = constv3(vec3(1f)),
+                        val matDiffuse: Expression<vec3> = constv3(vec3(1f)),
+                        val matSpecular: Expression<vec3> = constv3(vec3(1f)),
+                        val matShine: Expression<Float> = constf(10f),
+                        val matTransparency: Expression<Float> = constf(1f)) {
+
     private val vertShader = GlShader(backend.GL_VERTEX_SHADER,
         glExprSubstitute(vertSrc, mapOf(
             "MODEL"     to modelM,
@@ -97,7 +97,7 @@ data class ShadingPhong(val modelM: Expression<mat4>,
     private val fragShader = GlShader(backend.GL_FRAGMENT_SHADER,
         glExprSubstitute(fragSrc, mapOf(
             "EYE"           to eye,
-            "DIFFUSE"       to diffuse,
+            "ALBEDO"        to albedo,
             "MAT_AMBIENT"   to matAmbient,
             "MAT_DIFFUSE"   to matDiffuse,
             "MAT_SPECULAR"  to matSpecular,
@@ -145,7 +145,7 @@ fun glShadingPhongDraw(shadingPhong: ShadingPhong, lights: List<Light>, callback
 fun glShadingPhongInstance(shadingPhong: ShadingPhong, mesh: GlMesh) {
     glProgramCheckBound(shadingPhong.program)
     shadingPhong.modelM.submit(shadingPhong.program)
-    shadingPhong.diffuse.submit(shadingPhong.program)
+    shadingPhong.albedo.submit(shadingPhong.program)
     shadingPhong.matAmbient.submit(shadingPhong.program)
     shadingPhong.matDiffuse.submit(shadingPhong.program)
     shadingPhong.matSpecular.submit(shadingPhong.program)
