@@ -79,7 +79,7 @@ private val wasdInput = WasdInput(controller)
 private val group = libWavefrontCreate("models/pcjr/pcjr")
 private val obj = group.objects.first()
 
-private val uniformSampler = unifs(obj.material.mapDiffuse!!)
+private val uniformSampler = unifs(obj.phong.mapDiffuse!!)
 private val matrix = unifm4 { camera.calculateFullM() }
 private val color = tex(namedTexCoordsV2(), uniformSampler)
 private val shadingFlat = ShadingFlat(matrix, color)
@@ -87,7 +87,7 @@ private val shadingFlat = ShadingFlat(matrix, color)
 private fun useScene(callback: Callback) {
     glShadingFlatUse(shadingFlat) {
         glMeshUse(obj.mesh) {
-            glTextureUse(obj.material.mapDiffuse!!) {
+            glTextureUse(obj.phong.mapDiffuse!!) {
                 callback.invoke()
             }
         }
@@ -96,7 +96,7 @@ private fun useScene(callback: Callback) {
 
 private fun drawScene() {
     glDepthTest {
-        glTextureBind(obj.material.mapDiffuse!!) {
+        glTextureBind(obj.phong.mapDiffuse!!) {
             glShadingFlatDraw(shadingFlat) {
                 glShadingFlatInstance(shadingFlat, obj.mesh)
             }

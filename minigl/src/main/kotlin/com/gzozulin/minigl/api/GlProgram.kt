@@ -169,7 +169,11 @@ internal fun glProgramSubmitLights(program: GlProgram, lights: List<Light>) {
         }
     }
     glProgramUniform(program, "uLightsPointCnt", pointLightCnt)
-    glProgramUniform(program, "uLightsDirCnt",   dirLightCnt)
+    try {
+        glProgramUniform(program, "uLightsDirCnt",   dirLightCnt)
+    } catch (th: Throwable) {
+        // fine, only point lights are implemented
+    }
 }
 
 internal fun glDrawTriangles(program: GlProgram, mesh: GlMesh) {

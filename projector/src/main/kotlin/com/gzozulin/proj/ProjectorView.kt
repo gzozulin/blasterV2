@@ -192,15 +192,15 @@ class ProjectorView(private val model: ProjectorModel) {
                 glTextureBind(noiseTexture) {
                     glShadingPhongDraw(shadingPhong, lights) {
                         bedroomGroup.objects.forEach { obj ->
-                            if (obj.material.mapDiffuse != null) {
-                                glTextureBind(obj.material.mapDiffuse!!) {
-                                    sampler.value = obj.material.mapDiffuse!!
-                                    matDiffuse.value = obj.material.diffuse
+                            if (obj.phong.mapDiffuse != null) {
+                                glTextureBind(obj.phong.mapDiffuse!!) {
+                                    sampler.value = obj.phong.mapDiffuse!!
+                                    matDiffuse.value = obj.phong.diffuse
                                     glShadingPhongInstance(shadingPhong, obj.mesh)
                                 }
                             } else {
                                 sampler.value = noiseTexture
-                                matDiffuse.value = obj.material.diffuse
+                                matDiffuse.value = obj.phong.diffuse
                                 glShadingPhongInstance(shadingPhong, obj.mesh)
                             }
                         }

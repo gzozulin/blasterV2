@@ -1,8 +1,5 @@
 package com.gzozulin.minigl.api
 
-import com.gzozulin.minigl.scene.Light
-import com.gzozulin.minigl.scene.PointLight
-import com.gzozulin.minigl.techniques.ShadingPhong
 import java.util.concurrent.atomic.AtomicInteger
 
 const val VERSION = "#version 460\n"
@@ -11,6 +8,8 @@ const val PRECISION_HIGH = "precision highp float;\n"
 const val MAX_LIGHTS = 128
 
 const val V_TEX_COORD = "vTexCoord"
+
+private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
 private const val EXPR_X = """
     float expr_x(vec4 v) {
@@ -166,11 +165,11 @@ private const val EXPR_SPECULAR_CONTRIB = """
     }
 """
 
-const val DECLARATIONS_VERT = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+const val DECLARATIONS_VERT = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
         EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
 
-const val DECLARATIONS_FRAG = EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+const val DECLARATIONS_FRAG = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
         EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
         EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
@@ -204,6 +203,7 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
     }
     expressions.forEach { (name, expr) ->
         search(expr)
+        check(source.contains("%$name%")) { "Expression $name was not found in source!" }
         result = result.replace("%$name%", expr.expr())
     }
     uniforms = uniforms.lines().distinct().joinToString("\n")
@@ -310,6 +310,11 @@ fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
 }
 
 fun unifs(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+    override fun declare() = "uniform sampler2D $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
     override fun declare() = "uniform sampler2D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }

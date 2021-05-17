@@ -15,7 +15,7 @@ import java.nio.charset.Charset
 private val whitespaceRegex = "\\s+".toRegex()
 private val slashRegex = "/".toRegex()
 
-data class WavefrontObj(val mesh: GlMesh, val material: PhongMaterial, val aabb: aabb)
+data class WavefrontObj(val mesh: GlMesh, val phong: PhongMaterial, val aabb: aabb)
 data class WavefrontObjGroup(val objects: List<WavefrontObj>, val aabb: aabb)
 
 fun libWavefrontCreate(filename: String, join: Boolean = false, progress: (Float) -> Unit = { println(it.toString()) }) =
@@ -36,8 +36,8 @@ fun libWavefrontGroupUse(group: WavefrontObjGroup, callback: Callback) {
     group.objects.forEach {
         meshes.add(it.mesh)
         textures.addAll(listOfNotNull(
-            it.material.mapAmbient, it.material.mapDiffuse, it.material.mapSpecular,
-            it.material.mapShine, it.material.mapTransparency
+            it.phong.mapAmbient, it.phong.mapDiffuse, it.phong.mapSpecular,
+            it.phong.mapShine, it.phong.mapTransparency
         ))
     }
     glMeshUse(meshes) {

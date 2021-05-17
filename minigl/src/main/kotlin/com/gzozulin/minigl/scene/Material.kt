@@ -51,35 +51,15 @@ val RED_RUBBER      = PhongMaterial(vec3(0.05f, 0.0f, 0.0f), vec3(0.5f, 0.4f, 0.
 val WHITE_RUBBER    = PhongMaterial(vec3(0.05f, 0.05f, 0.05f), vec3(0.5f, 0.5f, 0.5f), vec3(0.7f, 0.7f, 0.7f), 10.0f)
 val YELLOW_RUBBER   = PhongMaterial(vec3(0.05f, 0.05f, 0.0f), vec3(0.5f, 0.5f, 0.4f), vec3(0.7f, 0.7f, 0.04f), 10.0f)
 
-val PHONG_MATERIALS = listOf(
-    CONCRETE,
-    BRASS,
-    BRONZE,
-    POLISHED_BRONZE,
-    CHROME,
-    COPPER,
-    POLISHED_COPPER,
-    GOLD,
-    POLISHED_GOLD,
-    TIN,
-    SILVER,
-    POLISHED_SILVER,
-    EMERALD,
-    JADE,
-    OBSIDIAN,
-    PERL,
-    RUBY,
-    TURQUOISE,
-    BLACK_PLASTIC,
-    CIAN_PLASTIC,
-    GREEN_PLASTIC,
-    RED_PLASTIC,
-    WHITE_PLASTIC,
-    YELLOW_PLASTIC,
-    BLACK_RUBBER,
-    CIAN_RUBBER,
-    GREEN_RUBBER,
-    RED_RUBBER,
-    WHITE_RUBBER,
-    YELLOW_RUBBER,
+val PHONG_MATERIALS = listOf(CONCRETE, BRASS, BRONZE, POLISHED_BRONZE, CHROME, COPPER, POLISHED_COPPER, GOLD,
+    POLISHED_GOLD, TIN, SILVER, POLISHED_SILVER, EMERALD, JADE, OBSIDIAN, PERL, RUBY, TURQUOISE, BLACK_PLASTIC,
+    CIAN_PLASTIC, GREEN_PLASTIC, RED_PLASTIC, WHITE_PLASTIC, YELLOW_PLASTIC, BLACK_RUBBER, CIAN_RUBBER, GREEN_RUBBER,
+    RED_RUBBER, WHITE_RUBBER, YELLOW_RUBBER,)
+
+data class PbrMaterial(
+    val albedo: GlTexture,
+    val normal: GlTexture,
+    val metallic: GlTexture,
+    val roughness: GlTexture,
+    val ao: GlTexture,
 )

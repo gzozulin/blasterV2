@@ -4,6 +4,7 @@ import com.gzozulin.minigl.api.GlTexture
 import com.gzozulin.minigl.api.GlTextureImage
 import com.gzozulin.minigl.api.backend
 import com.gzozulin.minigl.api.glTextureCreate2D
+import com.gzozulin.minigl.scene.PbrMaterial
 import java.awt.Color
 import java.io.File
 import java.io.InputStream
@@ -64,5 +65,25 @@ fun libTextureCreateCubeMap(filename: String): GlTexture {
             GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4, width = front.width,    height = front.height,  pixels = front.pixels),
             GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5, width = back.width,     height = back.height,   pixels = back.pixels)
         )
+    )
+}
+
+fun libTextureCreatePbr(directory: String, extension: String = "png",
+                        albedo: String = "$directory/albedo.$extension",
+                        normal: String = "$directory/normal.$extension",
+                        metallic: String = "$directory/metallic.$extension",
+                        roughness: String = "$directory/roughness.$extension",
+                        ao: String = "$directory/ao.$extension"): PbrMaterial {
+    val decodedAlbedo   = libTextureDecodePixels(libAssetCreate(albedo).inputStream())
+    val decodedNormal   = libTextureDecodePixels(libAssetCreate(normal).inputStream())
+    val decodedMetallic = libTextureDecodePixels(libAssetCreate(metallic).inputStream())
+    val decodedRoughness = libTextureDecodePixels(libAssetCreate(roughness).inputStream())
+    val decodedAo       = libTextureDecodePixels(libAssetCreate(ao).inputStream())
+    return PbrMaterial(
+        glTextureCreate2D(decodedAlbedo.width, decodedAlbedo.height, decodedAlbedo.pixels),
+        glTextureCreate2D(decodedNormal.width, decodedNormal.height, decodedNormal.pixels),
+        glTextureCreate2D(decodedMetallic.width, decodedMetallic.height, decodedMetallic.pixels),
+        glTextureCreate2D(decodedRoughness.width, decodedRoughness.height, decodedRoughness.pixels),
+        glTextureCreate2D(decodedAo.width, decodedAo.height, decodedAo.pixels),
     )
 }

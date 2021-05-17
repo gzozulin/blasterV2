@@ -112,8 +112,8 @@ fun glShadingPhongUse(shadingPhong: ShadingPhong, callback: Callback) =
 fun glShadingPhongDraw(shadingPhong: ShadingPhong, lights: List<Light>, callback: Callback) {
     glProgramBind(shadingPhong.program) {
         glProgramSubmitLights(shadingPhong.program, lights)
-        shadingPhong.viewM.submit(shadingPhong.program)
         shadingPhong.eye.submit(shadingPhong.program)
+        shadingPhong.viewM.submit(shadingPhong.program)
         shadingPhong.projM.submit(shadingPhong.program)
         callback.invoke()
     }
