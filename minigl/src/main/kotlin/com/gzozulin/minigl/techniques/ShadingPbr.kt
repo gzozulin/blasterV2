@@ -210,7 +210,7 @@ fun glShadingPbrInstance(shadingPbr: ShadingPbr, mesh: GlMesh) {
     }
 }
 
-private val window = GlWindow(isFullscreen = false, isHoldingCursor = false, isMultisampling = true)
+private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 
 private var mouseLook = false
 private val camera = Camera(window)
@@ -223,6 +223,11 @@ private val material = libTextureCreatePbr("models/mandalorian")
 
 private val light = PointLight(vec3(3f), vec3(25f), 100f)
 
+private var rotation        = 0.0f
+private val unifModel       = unifm4 {
+    rotation += 0.005f
+    mat4().identity().scale(obj.aabb.scaleTo(5f)).rotate(rotation, vec3().up())
+}
 private val unifView        = unifm4 { camera.calculateViewM() }
 private val unifEye         = unifv3 { camera.position }
 
@@ -234,7 +239,7 @@ private val unifRoughness   = tex(texCoords, unifs { material.roughness })
 private val unifAO          = tex(texCoords, unifs { material.ao })
 
 private val shadingPbr = ShadingPbr(
-    constm4(mat4().identity().scale(obj.aabb.scaleTo(5f))), unifView, constm4(camera.projectionM), unifEye,
+    unifModel, unifView, constm4(camera.projectionM), unifEye,
     unifAlbedo, unifNormal, unifMetallic, unifRoughness, unifAO)
 
 fun main() {
@@ -259,7 +264,7 @@ fun main() {
                     glCulling {
                         glDepthTest {
                             window.show {
-                                glClear()
+                                glClear(col3().black())
                                 controller.apply { position, direction ->
                                     camera.setPosition(position)
                                     camera.lookAlong(direction)
