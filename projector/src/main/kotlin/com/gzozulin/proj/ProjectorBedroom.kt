@@ -38,7 +38,7 @@ private val eye = unifv3 { camera.position }
 private val projM = unifm4 { camera.projectionM }
 
 private val texCoords = namedTexCoordsV2()
-private val sampler = unifs()
+private val sampler = unift()
 private val diffuseMap = sampler(texCoords, sampler)
 
 private val matAmbient = constv3(vec3(0.05f))

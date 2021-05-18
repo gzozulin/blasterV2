@@ -231,11 +231,11 @@ private val unifModel       = unifm4 {
 private val unifView        = unifm4 { camera.calculateViewM() }
 private val unifEye         = unifv3 { camera.position }
 
-private val unifAlbedo      = sampler(unifs { material.albedo })
-private val unifNormal      = sampler(unifs { material.normal })
-private val unifMetallic    = sampler(unifs { material.metallic })
-private val unifRoughness   = sampler(unifs { material.roughness })
-private val unifAO          = sampler(unifs { material.ao })
+private val unifAlbedo      = sampler(unift { material.albedo })
+private val unifNormal      = sampler(unift { material.normal })
+private val unifMetallic    = sampler(unift { material.metallic })
+private val unifRoughness   = sampler(unift { material.roughness })
+private val unifAO          = sampler(unift { material.ao })
 
 private val shadingPbr = ShadingPbr(
     unifModel, unifView, constm4(camera.projectionM), unifEye,

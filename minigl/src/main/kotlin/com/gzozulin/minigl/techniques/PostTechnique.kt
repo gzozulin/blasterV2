@@ -9,19 +9,16 @@ import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
 
-typealias Filter = (screen: Expression<GlTexture>) -> Expression<vec4>
+typealias Filter = (screen: GlTexture) -> Expression<vec4>
 
 data class TechniquePostProcessing(val width: Int, val height: Int, val filter: Filter) {
-
     constructor(window: GlWindow, filter: Filter): this(window.width, window.height, filter)
 
     internal val techniqueRtt = TechniqueRtt(width, height)
 
-    private val matrix = constm4(mat4().identity().orthoBox(1f))
-
-    private val input = unifs(techniqueRtt.output)
-    private val output = filter.invoke(input)
-    internal val shadingFlat = ShadingFlat(matrix, output)
+    private val matrix = constm4(mat4().orthoBox(1f))
+    private val color = filter.invoke(techniqueRtt.output)
+    internal val shadingFlat = ShadingFlat(matrix, color)
 
     internal val rect = glMeshCreateRect()
 }
@@ -68,20 +65,20 @@ private val unifModel       = unifm4 {
 private val unifView        = unifm4 { camera.calculateViewM() }
 private val unifEye         = unifv3 { camera.position }
 
-private val unifAlbedo      = sampler(unifs { material.albedo })
-private val unifNormal      = sampler(unifs { material.normal })
-private val unifMetallic    = sampler(unifs { material.metallic })
-private val unifRoughness   = sampler(unifs { material.roughness })
-private val unifAO          = sampler(unifs { material.ao })
+private val unifAlbedo      = sampler(unift { material.albedo })
+private val unifNormal      = sampler(unift { material.normal })
+private val unifMetallic    = sampler(unift { material.metallic })
+private val unifRoughness   = sampler(unift { material.roughness })
+private val unifAO          = sampler(unift { material.ao })
 
 private val shadingPbr = ShadingPbr(
     unifModel, unifView, constm4(camera.projectionM), unifEye,
     unifAlbedo, unifNormal, unifMetallic, unifRoughness, unifAO)
 
 private val foggyTexture = libTextureCreate("textures/foggy.jpg")
-private val foggyUniform = sampler(unifs { foggyTexture })
+private val foggyUniform = sampler(unift { foggyTexture })
 
-private fun filter(screen: Expression<GlTexture>) = sampler(screen)
+private fun filter(screen: GlTexture) = mul(sampler(unift(screen)), foggyUniform)
 
 private val techniquePostProcessing = TechniquePostProcessing(window, ::filter)
 
@@ -99,14 +96,18 @@ private fun useScene(callback: Callback) {
 }
 
 private fun drawScene() {
-    glClear(col3().red())
-    glTextureBind(material.albedo) {
-        glTextureBind(material.normal) {
-            glTextureBind(material.metallic) {
-                glTextureBind(material.roughness) {
-                    glTextureBind(material.ao) {
-                        glShadingPbrDraw(shadingPbr, listOf(light)) {
-                            glShadingPbrInstance(shadingPbr, obj.mesh)
+    glCulling {
+        glDepthTest { // todo: depth buffer for Rtt
+            glClear(col3().red())
+            glTextureBind(material.albedo) {
+                glTextureBind(material.normal) {
+                    glTextureBind(material.metallic) {
+                        glTextureBind(material.roughness) {
+                            glTextureBind(material.ao) {
+                                glShadingPbrDraw(shadingPbr, listOf(light)) {
+                                    glShadingPbrInstance(shadingPbr, obj.mesh)
+                                }
+                            }
                         }
                     }
                 }
@@ -131,18 +132,14 @@ fun main() {
             wasdInput.onKeyPressed(key, pressed)
         }
         useScene {
-            glCulling {
-                glDepthTest {
-                    window.show {
-                        controller.apply { position, direction ->
-                            camera.setPosition(position)
-                            camera.lookAlong(direction)
-                        }
-                        glTextureBind(foggyTexture) {
-                            glTechPostProcessingDraw(techniquePostProcessing) {
-                                drawScene()
-                            }
-                        }
+            window.show {
+                controller.apply { position, direction ->
+                    camera.setPosition(position)
+                    camera.lookAlong(direction)
+                }
+                glTextureBind(foggyTexture) {
+                    glTechPostProcessingDraw(techniquePostProcessing) {
+                        drawScene()
                     }
                 }
             }

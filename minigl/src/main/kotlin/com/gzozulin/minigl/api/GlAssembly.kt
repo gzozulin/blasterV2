@@ -309,17 +309,17 @@ fun unifm4(p: () -> mat4) = object : Uniform<mat4>(p, null) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unifs(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+fun unift(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform sampler2D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
+fun unift(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
     override fun declare() = "uniform sampler2D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unifsq(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+fun uniftq(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform samplerCube $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
