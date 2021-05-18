@@ -231,12 +231,11 @@ private val unifModel       = unifm4 {
 private val unifView        = unifm4 { camera.calculateViewM() }
 private val unifEye         = unifv3 { camera.position }
 
-private val texCoords       = namedTexCoordsV2()
-private val unifAlbedo      = tex(texCoords, unifs { material.albedo })
-private val unifNormal      = tex(texCoords, unifs { material.normal })
-private val unifMetallic    = tex(texCoords, unifs { material.metallic })
-private val unifRoughness   = tex(texCoords, unifs { material.roughness })
-private val unifAO          = tex(texCoords, unifs { material.ao })
+private val unifAlbedo      = sampler(unifs { material.albedo })
+private val unifNormal      = sampler(unifs { material.normal })
+private val unifMetallic    = sampler(unifs { material.metallic })
+private val unifRoughness   = sampler(unifs { material.roughness })
+private val unifAO          = sampler(unifs { material.ao })
 
 private val shadingPbr = ShadingPbr(
     unifModel, unifView, constm4(camera.projectionM), unifEye,

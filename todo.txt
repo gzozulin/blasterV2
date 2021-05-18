@@ -56,3 +56,4 @@ x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex
 (A) 2021-05-15 Fix minimap cursor +code @simple
 (A) 2021-05-17 Use rule of thirds +video @simple
 2021-05-17 Direct lights for PBR +code @complex
+2021-05-17 Environment lighting for PBR +code @complex

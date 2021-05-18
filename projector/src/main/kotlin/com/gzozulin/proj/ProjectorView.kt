@@ -4,7 +4,7 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api.constf
 import com.gzozulin.minigl.api.constv3
 import com.gzozulin.minigl.api.constm4
-import com.gzozulin.minigl.api.tex
+import com.gzozulin.minigl.api.sampler
 import com.gzozulin.minigl.api.unifm4
 import com.gzozulin.minigl.api.unifv3
 import com.gzozulin.minigl.assets.libTextureCreate
@@ -95,7 +95,7 @@ class ProjectorView(private val model: ProjectorModel) {
     private val panelSampler = unifs()
     private val panelColor = vec4(0f, 0f, 0f, 0.7f)
     private val panelMesh = glMeshCreateRect(1f, 1f)
-    private val shadingFlat = ShadingFlat(uniformPanelM, tex(panelTexCoords, panelSampler))
+    private val shadingFlat = ShadingFlat(uniformPanelM, sampler(panelTexCoords, panelSampler))
 
     // ----------------- File pop-up ------------------
 
@@ -141,7 +141,7 @@ class ProjectorView(private val model: ProjectorModel) {
 
     private val texCoords = namedTexCoordsV2()
     private val sampler = unifs()
-    private val albedo = tex(texCoords, sampler)
+    private val albedo = sampler(texCoords, sampler)
 
     private val matAmbient = constv3(vec3(0.05f))
     private val matDiffuse = unifv3()

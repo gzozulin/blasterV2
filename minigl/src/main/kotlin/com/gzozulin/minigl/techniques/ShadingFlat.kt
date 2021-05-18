@@ -81,7 +81,7 @@ private val obj = group.objects.first()
 
 private val uniformSampler = unifs(obj.phong.mapDiffuse!!)
 private val matrix = unifm4 { camera.calculateFullM() }
-private val color = tex(namedTexCoordsV2(), uniformSampler)
+private val color = sampler(uniformSampler)
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private fun useScene(callback: Callback) {

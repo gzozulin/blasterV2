@@ -381,12 +381,12 @@ fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>(
 
 // ----------------------------- Sampler -----------------------------
 
-fun tex(texCoord: Expression<vec2>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
+fun sampler(sampler: Expression<GlTexture>, texCoord: Expression<vec2> = namedTexCoordsV2()) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(texCoord, sampler)
 }
 
-fun texq(texCoord: Expression<vec3>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
+fun samplerq(texCoord: Expression<vec3>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(texCoord, sampler)
 }

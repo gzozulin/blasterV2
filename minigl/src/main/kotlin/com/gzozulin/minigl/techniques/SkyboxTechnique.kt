@@ -6,7 +6,6 @@ import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.WasdInput
-import org.joml.Math.abs
 
 private const val vertexSrc = """
 $VERT_SHADER_HEADER
@@ -98,8 +97,8 @@ private val cubeSampler2 = unifsq(cubeMap2)
 
 private val texCoords = namedTexCoordsV3()
 
-private val color1 = texq(texCoords, cubeSampler1)
-private val color2 = texq(texCoords, cubeSampler2)
+private val color1 = samplerq(texCoords, cubeSampler1)
+private val color2 = samplerq(texCoords, cubeSampler2)
 
 private var direction = true
 private var timer = 0

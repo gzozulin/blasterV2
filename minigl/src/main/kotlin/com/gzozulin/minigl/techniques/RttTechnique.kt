@@ -36,8 +36,8 @@ fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
 
 private val techniqueRtt = TechniqueRtt(10, 10)
 
-private val unifTexture = tex(namedTexCoordsV2(), unifs(techniqueRtt.output))
-private val shadingFlat = ShadingFlat(constm4(mat4().orthoBox(3f)), unifTexture)
+private val unifTexture = sampler(unifs(techniqueRtt.output))
+private val shadingFlat = ShadingFlat(constm4(mat4().orthoBox(1.1f)), unifTexture)
 
 private val rect = glMeshCreateRect()
 
