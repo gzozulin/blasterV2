@@ -11,7 +11,6 @@ private fun glMeshGetBound(): Int {
     return binding[0]
 }
 
-
 private fun glMeshBindPrev(callback: Callback) {
     val prev = glMeshGetBound()
     callback.invoke()

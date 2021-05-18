@@ -43,12 +43,14 @@ internal fun glFrameBufferCheck(frameBuffer: GlFrameBuffer) {
 internal fun glFrameBufferTexture(frameBuffer: GlFrameBuffer, attachment: Int, texture: GlTexture) {
     glFrameBufferCheck(frameBuffer)
     glTextureCheckBound(texture)
-    backend.glFramebufferTexture2D(backend.GL_FRAMEBUFFER, attachment, texture.target, texture.handle!!, 0)
+    backend.glFramebufferTexture2D(frameBuffer.target, attachment, texture.target, texture.handle!!, 0)
 }
 
-/*internal fun glFrameBufferRenderBuffer(frameBuffer: GlFrameBuffer, callback: Callback) {
+internal fun glFrameBufferRenderBuffer(frameBuffer: GlFrameBuffer, attachment: Int, renderBuffer: GlRenderBuffer) {
     glFrameBufferCheck(frameBuffer)
-}*/
+    glRenderBufferCheckBound(renderBuffer)
+    backend.glFramebufferRenderbuffer(frameBuffer.target, attachment, renderBuffer.target, renderBuffer.handle!!)
+}
 
 internal fun glFrameBufferOutputs(frameBuffer: GlFrameBuffer, outputs: List<Int>) {
     glFrameBufferCheck(frameBuffer)

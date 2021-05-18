@@ -287,23 +287,23 @@ class ProjectorView(private val model: ProjectorModel) {
         glBlend {
             glShadingFlatDraw(shadingFlat) {
                 updateMinimapCursor()
-                glTextureBind(codeRttTechnique.output) {
-                    panelSampler.value = codeRttTechnique.output
+                glTextureBind(codeRttTechnique.color) {
+                    panelSampler.value = codeRttTechnique.color
                     panelModelM.set(codeModelM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }
-                glTextureBind(minimapRttTechnique.output) {
-                    panelSampler.value = minimapRttTechnique.output
+                glTextureBind(minimapRttTechnique.color) {
+                    panelSampler.value = minimapRttTechnique.color
                     panelModelM.set(minimapModelM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }
-                glTextureBind(minimapRttCursorTechnique.output) {
-                    panelSampler.value = minimapRttCursorTechnique.output
+                glTextureBind(minimapRttCursorTechnique.color) {
+                    panelSampler.value = minimapRttCursorTechnique.color
                     panelModelM.set(minimapCursorModelM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }
-                glTextureBind(filePopUpRttTechnique.output) {
-                    panelSampler.value = filePopUpRttTechnique.output
+                glTextureBind(filePopUpRttTechnique.color) {
+                    panelSampler.value = filePopUpRttTechnique.color
                     panelModelM.set(filePopUpM)
                     glShadingFlatInstance(shadingFlat, panelMesh)
                 }

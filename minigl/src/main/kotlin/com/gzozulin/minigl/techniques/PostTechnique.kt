@@ -17,7 +17,7 @@ data class TechniquePostProcessing(val width: Int, val height: Int, val filter: 
     internal val techniqueRtt = TechniqueRtt(width, height)
 
     private val matrix = constm4(mat4().orthoBox(1f))
-    private val color = filter.invoke(techniqueRtt.output)
+    private val color = filter.invoke(techniqueRtt.color)
     internal val shadingFlat = ShadingFlat(matrix, color)
 
     internal val rect = glMeshCreateRect()
@@ -38,7 +38,7 @@ fun glTechPostProcessingDraw(techniquePP: TechniquePostProcessing, callback: Cal
         callback.invoke()
     }
     glShadingFlatDraw(techniquePP.shadingFlat) {
-        glTextureBind(techniquePP.techniqueRtt.output) {
+        glTextureBind(techniquePP.techniqueRtt.color) {
             glShadingFlatInstance(techniquePP.shadingFlat, techniquePP.rect)
         }
     }
