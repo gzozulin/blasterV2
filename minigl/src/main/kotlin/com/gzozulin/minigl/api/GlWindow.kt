@@ -12,7 +12,7 @@ import java.nio.ByteOrder
 private const val FULL_WIDTH: Int = 1920
 private const val FULL_HEIGHT: Int = 1080
 
-private const val MULTISAMPLING_HINT = 4
+private const val MULTISAMPLING_HINT = 8
 
 private val xbuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()
 private val ybuf = ByteBuffer.allocateDirect(8).order(ByteOrder.nativeOrder()).asDoubleBuffer()

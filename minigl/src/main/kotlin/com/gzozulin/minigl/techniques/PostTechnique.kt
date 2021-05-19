@@ -97,7 +97,7 @@ private fun useScene(callback: Callback) {
 
 private fun drawScene() {
     glCulling {
-        glDepthTest { // todo: depth buffer for Rtt
+        glDepthTest {
             glClear(col3().red())
             glTextureBind(material.albedo) {
                 glTextureBind(material.normal) {

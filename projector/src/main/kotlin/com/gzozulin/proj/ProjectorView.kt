@@ -91,11 +91,10 @@ class ProjectorView(private val model: ProjectorModel) {
     private val panelFullM = mat4().identity()
     private val uniformPanelM = unifm4 { panelFullM.set(panelProjM).mul(panelModelM) }
 
-    private val panelTexCoords = namedTexCoordsV2()
     private val panelSampler = unift()
     private val panelColor = vec4(0f, 0f, 0f, 0.7f)
     private val panelMesh = glMeshCreateRect(1f, 1f)
-    private val shadingFlat = ShadingFlat(uniformPanelM, sampler(panelTexCoords, panelSampler))
+    private val shadingFlat = ShadingFlat(uniformPanelM, sampler(panelSampler))
 
     // ----------------- File pop-up ------------------
 
@@ -139,9 +138,8 @@ class ProjectorView(private val model: ProjectorModel) {
     private val eye = unifv3 { camera.position }
     private val projM = unifm4 { camera.projectionM }
 
-    private val texCoords = namedTexCoordsV2()
     private val sampler = unift()
-    private val albedo = sampler(texCoords, sampler)
+    private val albedo = sampler(sampler)
 
     private val matAmbient = constv3(vec3(0.05f))
     private val matDiffuse = unifv3()

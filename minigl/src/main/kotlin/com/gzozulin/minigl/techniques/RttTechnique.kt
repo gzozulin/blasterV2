@@ -8,6 +8,8 @@ import com.gzozulin.minigl.api.glFrameBufferUse
 private val outputs = listOf(backend.GL_COLOR_ATTACHMENT0)
 
 data class TechniqueRtt(val width: Int, val height: Int) {
+    constructor(window: GlWindow): this(window.width, window.height)
+
     internal val frameBuffer = GlFrameBuffer()
 
     val color = GlTexture(images = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height)))
