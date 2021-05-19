@@ -10,6 +10,8 @@ import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
 import com.gzozulin.minigl.techniques.*
 
+private const val TEXTURE_SIDE = 4096
+
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 
 private var mouseLook = false
@@ -17,7 +19,7 @@ private val camera = Camera(window)
 private val controller = ControllerFirstPerson(position = vec3().front().mul(10f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
-private val light = PointLight(vec3(3f), vec3(25f), 100f)
+private val cameraLight = PointLight(vec3(), vec3(5f), 100f)
 
 // -------------------------------- TVs --------------------------------
 
@@ -29,43 +31,51 @@ private val unifTvModel       = unifm4()
 private val unifTvView        = unifm4 { camera.calculateViewM() }
 private val unifTvEye         = unifv3 { camera.position }
 
-private val unifTvAlbedo      = sampler(unift { tvMaterial.albedo })
-private val unifTvAlbedoTeapot = sampler(unift { techniqueRtt.color })
-private val unifTvNormal      = sampler(unift { tvMaterial.normal })
-private val unifTvMetallic    = sampler(unift { tvMaterial.metallic })
-private val unifTvRoughness   = sampler(unift { tvMaterial.roughness })
-private val unifTvAO          = sampler(unift { tvMaterial.ao })
+private val unifTvAlbedo      = sampler(unift(tvMaterial.albedo))
+private val unifTvNormal      = sampler(unift(tvMaterial.normal))
+private val unifTvMetallic    = sampler(unift(tvMaterial.metallic))
+private val unifTvRoughness   = sampler(unift(tvMaterial.roughness))
+private val unifTvAO          = sampler(unift(tvMaterial.ao))
 
 // -------------------------------- Teapots --------------------------------
+
+private val teapotLight = PointLight(vec3(3f), vec3(1f), 100f)
 
 private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
 private val teapotObject = teapotGroup.objects.first()
 
-private val unifTeaModel = constm4(mat4().identity()
-    .translate(-10f, 2f, -10f).rotate(radf(-90f), vec3().front()))
+var rotation = 0f
+private val unifTeaModel = unifm4 {
+    rotation += 0.01f
+    mat4().identity()
+        .translate(-10f, 2f, -10f)
+        .rotate(radf(-90f), vec3().front())
+        .rotate(rotation, vec3().up())
+}
 private val unifTeaView = constm4(mat4().identity())
-private val unifTeaProj = unifm4(camera.projectionM)
-private val unifTeaEye = unifv3 { camera.position }
-
-private val shadingPhong = ShadingPhong(unifTeaModel, unifTeaView, unifTeaProj, unifTeaEye)
+private val unifTeaProj = constm4(camera.projectionM)
+private val unifTeaEye = constv3(vec3().zero())
 
 private fun filter(screen: GlTexture): Expression<vec4> {
+    val tvAlbedo = cachev4(unifTvAlbedo)
     val teapotColor = cachev4(sampler(unift { screen }))
-    val mixedTeapot = add(mul(teapotColor, tov4(constf(0.1f))), mul(unifTvAlbedo, tov4(constf(0.9f))))
-    return ifexp(
-        more(geta(teapotColor), constf(0f)),
-        mixedTeapot,
-        unifTvAlbedo
-    )
+    val mixedTeapot = add(mul(teapotColor, tov4(constf(0.5f))), mul(tvAlbedo, tov4(constf(0.5f))))
+    return ifexp(more(geta(teapotColor), constf(0f)), mixedTeapot, tvAlbedo)
 }
 
 // -------------------------------- Techniques --------------------------------
 
-private val postProcessing = TechniquePostProcessing(window, ::filter) // todo: texture size
-private val techniqueRtt = TechniqueRtt(window) // todo: texture size
+private val shadingPhong = ShadingPhong(unifTeaModel, unifTeaView, unifTeaProj, unifTeaEye)
+private val postProcessing = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::filter)
+private val techniqueRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
+
+private val unifTvAlbedoTeapot = sampler(unift(techniqueRtt.color))
+
 private val shadingPbr = ShadingPbr(
     unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
     unifTvAlbedoTeapot, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
+
+// -------------------------------- Business --------------------------------
 
 private fun useTeapots(callback: Callback) {
     glTechRttUse(techniqueRtt) {
@@ -73,19 +83,6 @@ private fun useTeapots(callback: Callback) {
             glShadingPhongUse(shadingPhong) {
                 libWavefrontGroupUse(teapotGroup) {
                     callback.invoke()
-                }
-            }
-        }
-    }
-}
-
-private fun drawTeapots() {
-    glTechRttDraw(techniqueRtt) {
-        glTextureBind(tvMaterial.albedo) {
-            glTechPostProcessingDraw(postProcessing) {
-                glClear()
-                glShadingPhongDraw(shadingPhong, listOf(light)) {
-                    glShadingPhongInstance(shadingPhong, teapotObject.mesh)
                 }
             }
         }
@@ -103,6 +100,19 @@ private fun useTVs(callback: Callback) {
     }
 }
 
+private fun drawTeapots() {
+    glTechRttDraw(techniqueRtt) {
+        glTextureBind(tvMaterial.albedo) {
+            glTechPostProcessingDraw(postProcessing) {
+                glClear()
+                glShadingPhongDraw(shadingPhong, listOf(teapotLight)) {
+                    glShadingPhongInstance(shadingPhong, teapotObject.mesh)
+                }
+            }
+        }
+    }
+}
+
 private fun drawTVs() {
     glCulling {
         glDepthTest {
@@ -111,11 +121,12 @@ private fun drawTVs() {
                     glTextureBind(tvMaterial.metallic) {
                         glTextureBind(tvMaterial.roughness) {
                             glTextureBind(tvMaterial.ao) {
-                                glShadingPbrDraw(shadingPbr, listOf(light)) {
+                                cameraLight.position.set(camera.position).add(0f, 0f, -1f)
+                                glShadingPbrDraw(shadingPbr, listOf(cameraLight)) {
                                     for (i in 0 until 20) {
                                         for (j in 0 until 20) {
                                             unifTvModel.value =
-                                                mat4().identity().translate(i * 5f, j * 5f, 0f).scale(10f)
+                                                mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)
                                             glShadingPbrInstance(shadingPbr, tvObject.mesh)
                                         }
                                     }
@@ -146,7 +157,6 @@ fun main() {
         }
         useTVs {
             useTeapots {
-
                 window.show {
                     glClear(col3().black())
                     controller.apply { position, direction ->

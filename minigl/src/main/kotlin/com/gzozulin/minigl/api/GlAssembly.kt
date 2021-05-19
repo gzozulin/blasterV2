@@ -352,6 +352,7 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
 
 // ----------------------------- Cache -----------------------------
 
+// todo: can be done automatically by reference counting?
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
     override fun declare() = "vec4 $name = ${value.expr()};"
     override fun roots() = listOf(value)

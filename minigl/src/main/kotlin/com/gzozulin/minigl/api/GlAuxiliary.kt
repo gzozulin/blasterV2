@@ -21,6 +21,7 @@ fun glClear(color: vec4) {
     backend.glClear(backend.GL_COLOR_BUFFER_BIT or backend.GL_DEPTH_BUFFER_BIT)
 }
 
+// todo: restore prev state
 fun glDepthTest(depthFunc: Int = backend.GL_LEQUAL, action: () -> Unit) {
     backend.glEnable(backend.GL_DEPTH_TEST)
     backend.glDepthFunc(depthFunc)
@@ -28,6 +29,7 @@ fun glDepthTest(depthFunc: Int = backend.GL_LEQUAL, action: () -> Unit) {
     backend.glDisable(backend.GL_DEPTH_TEST)
 }
 
+// todo: restore prev state
 fun glCulling(frontFace: Int = backend.GL_CCW, action: () -> Unit) {
     backend.glEnable(backend.GL_CULL_FACE)
     backend.glFrontFace(frontFace)
@@ -35,6 +37,7 @@ fun glCulling(frontFace: Int = backend.GL_CCW, action: () -> Unit) {
     backend.glDisable(backend.GL_CULL_FACE)
 }
 
+// todo: restore prev state
 fun glBlend(sfactor: Int = backend.GL_SRC_ALPHA, dfactor: Int = backend.GL_ONE_MINUS_SRC_ALPHA, action: () -> Unit) {
     backend.glBlendFunc(sfactor, dfactor)
     backend.glEnable(backend.GL_BLEND)

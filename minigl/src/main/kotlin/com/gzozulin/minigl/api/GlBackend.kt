@@ -41,6 +41,7 @@ class GlBackend {
     val GL_ACTIVE_UNIFORMS:    Int get() = GL20.GL_ACTIVE_UNIFORMS
     val GL_RENDERBUFFER:       Int get() = GL30.GL_RENDERBUFFER
     val GL_DEPTH_COMPONENT24:  Int get() = GL14.GL_DEPTH_COMPONENT24
+    val GL_DEPTH_COMPONENT32:  Int get() = GL14.GL_DEPTH_COMPONENT32
     val GL_RED:                Int get() = GL11.GL_RED
     val GL_R32UI:              Int get() = ARBTextureRG.GL_R32UI
     val GL_R32I:               Int get() = ARBTextureRG.GL_R32I

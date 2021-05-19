@@ -40,13 +40,13 @@ internal fun glFrameBufferCheck(frameBuffer: GlFrameBuffer) {
     check(glFrameBufferGetBound(frameBuffer) == frameBuffer.handle) { "GlFrameBuffer is not bound!" }
 }
 
-internal fun glFrameBufferTexture(frameBuffer: GlFrameBuffer, attachment: Int, texture: GlTexture) {
+internal fun glFrameBufferAttachment(frameBuffer: GlFrameBuffer, attachment: Int, texture: GlTexture) {
     glFrameBufferCheck(frameBuffer)
     glTextureCheckBound(texture)
     backend.glFramebufferTexture2D(frameBuffer.target, attachment, texture.target, texture.handle!!, 0)
 }
 
-internal fun glFrameBufferRenderBuffer(frameBuffer: GlFrameBuffer, attachment: Int, renderBuffer: GlRenderBuffer) {
+internal fun glFrameBufferAttachment(frameBuffer: GlFrameBuffer, attachment: Int, renderBuffer: GlRenderBuffer) {
     glFrameBufferCheck(frameBuffer)
     glRenderBufferCheckBound(renderBuffer)
     backend.glFramebufferRenderbuffer(frameBuffer.target, attachment, renderBuffer.target, renderBuffer.handle!!)

@@ -3,7 +3,7 @@ package com.gzozulin.minigl.api
 import org.lwjgl.opengl.GL30
 
 data class GlRenderBuffer(val width: Int, val height: Int,
-                          val target: Int = backend.GL_RENDERBUFFER, val component: Int = backend.GL_DEPTH_COMPONENT24,
+                          val target: Int = backend.GL_RENDERBUFFER, val component: Int = backend.GL_DEPTH_COMPONENT32,
                           var handle: Int? = null)
 
 private val binding = IntArray(1)

@@ -32,10 +32,11 @@ fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
             glRenderBufferBind(techniqueRtt.depth) {
                 glViewportBindPrev {
                     backend.glViewport(0, 0, techniqueRtt.width, techniqueRtt.height)
-                    glFrameBufferTexture(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.color)
-                    glFrameBufferRenderBuffer(techniqueRtt.frameBuffer, backend.GL_DEPTH_ATTACHMENT, techniqueRtt.depth)
+                    glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.color)
+                    glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_DEPTH_ATTACHMENT, techniqueRtt.depth)
                     glFrameBufferOutputs(techniqueRtt.frameBuffer, outputs)
                     glFrameBufferIsComplete(techniqueRtt.frameBuffer)
+                    backend.glGenerateMipmap(techniqueRtt.color.target)
                     callback.invoke()
                 }
             }
