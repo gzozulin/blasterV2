@@ -52,20 +52,28 @@ private val unifTeaModel = unifm4 {
         .rotate(radf(-90f), vec3().front())
         .rotate(rotation, vec3().up())
 }
-private val unifTeaView = constm4(mat4().identity())
-private val unifTeaProj = constm4(camera.projectionM)
-private val unifTeaEye = constv3(vec3().zero())
+
+private val constTeaView = constm4(mat4().identity())
+private val constTeaProj = constm4(camera.projectionM)
+private val constTeaEye = constv3(vec3().zero())
+private val constTeaAlbedo = constv4(vec4(vec3().rose(), 1f))
+private val constTeaMatAmbient = constv3(vec3(0.1f))
+private val constTeaMatDiffuse = constv3(vec3(1f))
+private val constTeaMatSpecular = constv3(vec3(0.5f))
+private val constTeaMatShine = constf(100f)
 
 private fun filter(screen: GlTexture): Expression<vec4> {
     val tvAlbedo = cachev4(unifTvAlbedo)
     val teapotColor = cachev4(sampler(unift { screen }))
-    val mixedTeapot = add(mul(teapotColor, tov4(constf(0.5f))), mul(tvAlbedo, tov4(constf(0.5f))))
+    val mixedTeapot = add(mul(teapotColor, tov4(constf(0.8f))), mul(tvAlbedo, tov4(constf(0.2f))))
     return ifexp(more(geta(teapotColor), constf(0f)), mixedTeapot, tvAlbedo)
 }
 
 // -------------------------------- Techniques --------------------------------
 
-private val shadingPhong = ShadingPhong(unifTeaModel, unifTeaView, unifTeaProj, unifTeaEye)
+private val shadingPhong = ShadingPhong(unifTeaModel, constTeaView, constTeaProj, constTeaEye,
+    constTeaAlbedo, constTeaMatAmbient, constTeaMatDiffuse, constTeaMatSpecular, constTeaMatShine)
+
 private val postProcessing = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::filter)
 private val techniqueRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
 
@@ -104,9 +112,13 @@ private fun drawTeapots() {
     glTechRttDraw(techniqueRtt) {
         glTextureBind(tvMaterial.albedo) {
             glTechPostProcessingDraw(postProcessing) {
-                glClear()
-                glShadingPhongDraw(shadingPhong, listOf(teapotLight)) {
-                    glShadingPhongInstance(shadingPhong, teapotObject.mesh)
+                glDepthTest {
+                    glCulling {
+                        glClear()
+                        glShadingPhongDraw(shadingPhong, listOf(teapotLight)) {
+                            glShadingPhongInstance(shadingPhong, teapotObject.mesh)
+                        }
+                    }
                 }
             }
         }
@@ -125,8 +137,7 @@ private fun drawTVs() {
                                 glShadingPbrDraw(shadingPbr, listOf(cameraLight)) {
                                     for (i in 0 until 20) {
                                         for (j in 0 until 20) {
-                                            unifTvModel.value =
-                                                mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)
+                                            unifTvModel.value = mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)
                                             glShadingPbrInstance(shadingPbr, tvObject.mesh)
                                         }
                                     }
