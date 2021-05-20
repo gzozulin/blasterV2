@@ -90,10 +90,10 @@ private val controller = ControllerFirstPerson()
 private val wasdInput = WasdInput(controller)
 
 private val cubeMap1 = libTextureCreateCubeMap("textures/miramar")
-private val cubeSampler1 = uniftq(cubeMap1)
+private val cubeSampler1 = unifsq(cubeMap1)
 
 private val cubeMap2 = libTextureCreateCubeMap("textures/snowy")
-private val cubeSampler2 = uniftq(cubeMap2)
+private val cubeSampler2 = unifsq(cubeMap2)
 
 private val texCoords = namedTexCoordsV3()
 

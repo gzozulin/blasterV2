@@ -37,7 +37,7 @@ private val viewM = unifm4 { camera.calculateViewM() }
 private val eye = unifv3 { camera.position }
 private val projM = unifm4 { camera.projectionM }
 
-private val sampler = unift()
+private val sampler = unifs()
 private val diffuseMap = sampler(sampler)
 
 private val matAmbient = constv3(vec3(0.05f))

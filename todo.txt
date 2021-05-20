@@ -15,14 +15,14 @@ x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @comple
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
 x 2021-04-23 2021-04-23 Show packages in left panel +code @complex
 2021-04-23 Support for C and GLSL +code @complex
-2021-04-23 Switching to fullscreen +code @complex
+x 2021-05-19 2021-04-23 Switching to fullscreen +code @complex
 x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame +video @simple
 x 2021-04-23 2021-04-23 Current file pop-up +code @complex
 x 2021-04-23 (A) 2021-04-23 File pop-up animations: fade-in/fade-out +code @simple
-2021-04-23 File pop-up shadow +code +idea @simple
+x 2021-05-19 2021-04-23 File pop-up shadow +code +idea @simple
 (B) 2021-04-24 Intro scene for Projector +code @complex
 x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +code @simple
-2021-04-25 Fix texture UV missing on doors +assets @complex
+x 2021-05-19 2021-04-25 Fix texture UV missing on doors +assets @complex
 x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +video +code @complex
 x 2021-05-04 2021-04-28 Logo scene +code +assets @complex
 (B) 2021-04-29 Better tripod +video @simple

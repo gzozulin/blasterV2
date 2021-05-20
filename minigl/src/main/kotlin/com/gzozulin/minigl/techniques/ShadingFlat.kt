@@ -79,7 +79,7 @@ private val wasdInput = WasdInput(controller)
 private val group = libWavefrontCreate("models/pcjr/pcjr")
 private val obj = group.objects.first()
 
-private val uniformSampler = unift(obj.phong.mapDiffuse!!)
+private val uniformSampler = unifs(obj.phong.mapDiffuse!!)
 private val matrix = unifm4 { camera.calculateFullM() }
 private val color = sampler(uniformSampler)
 private val shadingFlat = ShadingFlat(matrix, color)
