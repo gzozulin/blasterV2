@@ -80,7 +80,7 @@ private val tvGroup = libWavefrontCreate("models/tv/tv")
 private val tvObject = tvGroup.objects.first()
 private val tvMaterial = libTextureCreatePbr("models/tv")
 
-private val teapotLight = PointLight(vec3(3f), vec3(1f), 100f)
+private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
 
 private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
 private val teapotObject = teapotGroup.objects.first()
@@ -113,7 +113,7 @@ private fun tvsUse(callback: Callback) {
 private fun tvsDraw() {
     glCulling {
         glDepthTest {
-            glTextureBind(techniqueRtt.color) {
+            glTextureBind(rttTeapot.color) {
                 glTextureBind(tvMaterial.normal) {
                     glTextureBind(tvMaterial.metallic) {
                         glTextureBind(tvMaterial.roughness) {
@@ -136,10 +136,10 @@ private fun tvsDraw() {
     }
 }
 
-// -------------------------------- Teapots --------------------------------
+// -------------------------------- Items --------------------------------
 
 var rotation = 0f
-private val unifTeaModel = unifm4 {
+private val unifTeapotModel = unifm4 {
     rotation += 0.01f
     mat4().identity()
         .translate(-10f, 2f, -10f)
@@ -147,18 +147,30 @@ private val unifTeaModel = unifm4 {
         .rotate(rotation, vec3().up())
 }
 
-private val constTeaView = constm4(mat4().identity())
-private val constTeaProj = constm4(camera.projectionM)
-private val constTeaEye = constv3(vec3().zero())
-private val constTeaAlbedo = constv4(vec4(vec3().rose(), 1f))
-private val constTeaMatAmbient = constv3(vec3(0.1f))
-private val constTeaMatDiffuse = constv3(vec3(1f))
-private val constTeaMatSpecular = constv3(vec3(0.5f))
-private val constTeaMatShine = constf(100f)
+private val unifItemAlbedo = unifv4(vec4(vec3().rose(), 1f))
 
-private fun teapotsUse(callback: Callback) {
-    glTechRttUse(techniqueRtt) {
-        glTechPostProcessingUse(postProcessing) {
+private val constItemView = constm4(mat4().identity())
+private val constItemProj = constm4(camera.projectionM)
+private val constIteEye = constv3(vec3().zero())
+private val constItemMatAmbient = constv3(vec3(0.1f))
+private val constItemMatDiffuse = constv3(vec3(1f))
+private val constItemMatSpecular = constv3(vec3(0.5f))
+private val constItemMatShine = constf(100f)
+
+private fun mapItem(screen: GlTexture): Expression<vec4> {
+    val tvAlbedo = cachev4(unifTvAlbedo)
+    val itemColor = cachev4(sampler(unifs { screen }))
+    val itemMerged = add(mul(itemColor, tov4(constf(0.8f))), mul(tvAlbedo, tov4(constf(0.2f))))
+    return ifexp(more(geta(itemColor), constf(0f)), itemMerged, tvAlbedo)
+}
+
+private val mergingItem = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::mapItem)
+
+private val rttTeapot = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
+
+private fun itemUse(callback: Callback) {
+    glTechRttUse(rttTeapot) {
+        glTechPostProcessingUse(mergingItem) {
             glShadingPhongUse(shadingPhong) {
                 libWavefrontGroupUse(teapotGroup) {
                     callback.invoke()
@@ -168,15 +180,15 @@ private fun teapotsUse(callback: Callback) {
     }
 }
 
-private fun teapotsDraw() {
-    glTechRttDraw(techniqueRtt) {
+private fun itemDraw(where: TechniqueRtt, mesh: GlMesh) {
+    glTechRttDraw(where) {
         glTextureBind(tvMaterial.albedo) {
-            glTechPostProcessingDraw(postProcessing) {
+            glTechPostProcessingDraw(mergingItem) {
                 glDepthTest {
                     glCulling {
                         glClear()
-                        glShadingPhongDraw(shadingPhong, listOf(teapotLight)) {
-                            glShadingPhongInstance(shadingPhong, teapotObject.mesh)
+                        glShadingPhongDraw(shadingPhong, listOf(itemLight)) {
+                            glShadingPhongInstance(shadingPhong, mesh)
                         }
                     }
                 }
@@ -187,45 +199,14 @@ private fun teapotsDraw() {
 
 // -------------------------------- Techniques --------------------------------
 
-private val shadingPhong = ShadingPhong(unifTeaModel, constTeaView, constTeaProj, constTeaEye,
-    constTeaAlbedo, constTeaMatAmbient, constTeaMatDiffuse, constTeaMatSpecular, constTeaMatShine)
+private val shadingPhong = ShadingPhong(unifTeapotModel, constItemView, constItemProj, constIteEye,
+    unifItemAlbedo, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
 
-private fun mapTeapot(screen: GlTexture): Expression<vec4> {
-    val tvAlbedo = cachev4(unifTvAlbedo)
-    val teapotColor = cachev4(sampler(unifs { screen }))
-    val mixedTeapot = add(mul(teapotColor, tov4(constf(0.8f))), mul(tvAlbedo, tov4(constf(0.2f))))
-    return ifexp(more(geta(teapotColor), constf(0f)), mixedTeapot, tvAlbedo)
-}
-
-private val postProcessing = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::mapTeapot)
-private val techniqueRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
-
-private val unifTvAlbedoTeapot = sampler(unifs(techniqueRtt.color))
+private val unifTvItemAlbedo = sampler(unifs(rttTeapot.color))
 
 private val shadingPbr = ShadingPbr(
     unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
-    unifTvAlbedoTeapot, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
-
-// -------------------------------- Dithering --------------------------------
-
-private fun ditherScreen(screen: GlTexture) = mul(sampler(unifs(ditheringTexture)), sampler(unifs(screen)))
-private val ditheringTechnique = TechniquePostProcessing(window, ::ditherScreen)
-
-private fun ditheringUse(callback: Callback) {
-    glTextureUse(ditheringTexture) {
-        glTechPostProcessingUse(ditheringTechnique) {
-            callback.invoke()
-        }
-    }
-}
-
-private fun ditheringDraw(callback: Callback) {
-    glTextureBind(ditheringTexture) {
-        glTechPostProcessingDraw(ditheringTechnique) {
-            callback.invoke()
-        }
-    }
-}
+    unifTvItemAlbedo, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
 
 // -------------------------------- Main --------------------------------
 
@@ -245,20 +226,16 @@ fun main() {
             wasdInput.onKeyPressed(key, pressed)
         }
         tvsUse {
-            teapotsUse {
-                ditheringUse {
-                    window.show {
-                        lightsUpdate()
-                        glClear(col3().black())
-                        controller.apply { position, direction ->
-                            camera.setPosition(position)
-                            camera.lookAlong(direction)
-                        }
-                        teapotsDraw()
-                        //ditheringDraw {
-                            tvsDraw()
-                        //}
+            itemUse {
+                window.show {
+                    lightsUpdate()
+                    glClear(col3().black())
+                    controller.apply { position, direction ->
+                        camera.setPosition(position)
+                        camera.lookAlong(direction)
                     }
+                    itemDraw(rttTeapot, teapotObject.mesh)
+                    tvsDraw()
                 }
             }
         }
