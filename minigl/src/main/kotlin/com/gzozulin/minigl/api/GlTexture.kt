@@ -9,7 +9,8 @@ import java.nio.ByteOrder
 private const val MAX_ACTIVE_TEXTURES = 80
 private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
 
-data class GlTexture(val target: Int = backend.GL_TEXTURE_2D, val images: List<GlTextureImage> = emptyList(),
+data class GlTexture(val label: String,
+                     val target: Int = backend.GL_TEXTURE_2D, val images: List<GlTextureImage> = emptyList(),
                      val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR, val magFilter: Int = backend.GL_LINEAR,
                      val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT,
                      internal var handle: Int? = null, internal var unit: Int? = null)
@@ -41,7 +42,7 @@ private fun glTextureGetBound(texture: GlTexture): Int {
     when (texture.target) {
         backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
         backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
-        else -> error("Unknown GlTexture type!")
+        else -> error("Unknown GlTexture type! ${texture.label}")
     }
     return binding[0]
 }
@@ -54,7 +55,7 @@ private fun glTextureBindPrev(texture: GlTexture, callback: Callback) {
 }
 
 private fun glTextureUpload(texture: GlTexture) {
-    check(texture.handle == null) { "GlTexture is already in use" }
+    check(texture.handle == null) { "GlTexture is already in use! ${texture.label}" }
     texture.handle = backend.glGenTextures()
     texture.unit = glTextureUnitHold()
     glTextureBindPrev(texture) {
@@ -93,7 +94,7 @@ fun glTextureUse(texture: Collection<GlTexture>, callback: Callback) {
 }
 
 fun glTextureBind(texture: GlTexture, callback: Callback) {
-    check(texture.handle != null) { "GlTexture is not used!" }
+    check(texture.handle != null) { "GlTexture is not used! ${texture.label}" }
     glTextureBindPrev(texture) {
         backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
         backend.glBindTexture(texture.target, texture.handle!!)
@@ -103,17 +104,17 @@ fun glTextureBind(texture: GlTexture, callback: Callback) {
 
 fun glTextureCheckBound(texture: GlTexture) {
     check(texture.handle != null) { "GlTexture is not used!" }
-    check(glTextureGetBound(texture) == texture.handle) { "GlTexture is not bound!" }
+    check(glTextureGetBound(texture) == texture.handle) { "GlTexture is not bound! ${texture.label}" }
 }
 
-internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteBuffer): GlTexture {
-    return GlTexture(backend.GL_TEXTURE_2D,
+internal fun glTextureCreate2D(label: String, width: Int, height: Int, pixels: ByteBuffer): GlTexture {
+    return GlTexture(label, backend.GL_TEXTURE_2D,
         images = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height, pixels)))
 }
 
-internal fun glTextureCreate2D(width: Int, height: Int, pixels: ByteArray): GlTexture {
+internal fun glTextureCreate2D(label: String, width: Int, height: Int, pixels: ByteArray): GlTexture {
     val data = ByteBuffer.allocateDirect(width * height * 4).put(pixels)
-    return glTextureCreate2D(width, height, data)
+    return glTextureCreate2D(label, width, height, data)
 }
 
 internal fun glTextureCreate2D(width: Int, height: Int, pixels: List<col4>): GlTexture {
@@ -125,5 +126,5 @@ internal fun glTextureCreate2D(width: Int, height: Int, pixels: List<col4>): GlT
         data.put((it.w * 255f).toInt().toByte())
     }
     data.position(0)
-    return glTextureCreate2D(width, height, data)
+    return glTextureCreate2D("Manual", width, height, data)
 }

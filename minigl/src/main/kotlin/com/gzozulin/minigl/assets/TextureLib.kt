@@ -40,7 +40,7 @@ private fun ByteBuffer.addColor(color: Color) {
 fun libTextureCreate(file: File, mirrorX: Boolean = false, mirrorY: Boolean = false): GlTexture {
     val inputStream = file.inputStream()
     val decoded = libTextureDecodePixels(inputStream, mirrorX, mirrorY)
-    return glTextureCreate2D(decoded.width, decoded.height, decoded.pixels)
+    return glTextureCreate2D(file.absolutePath, decoded.width, decoded.height, decoded.pixels)
 }
 
 fun libTextureCreate(asset: String, mirrorX: Boolean = false, mirrorY: Boolean = false) =
@@ -55,6 +55,7 @@ fun libTextureCreateCubeMap(filename: String): GlTexture {
     val front   = libTextureDecodePixels(libAssetCreate(filename + "/" + file.name + "_ft.jpg").inputStream(), mirrorX = true, mirrorY = true)
     val back    = libTextureDecodePixels(libAssetCreate(filename + "/" + file.name + "_bk.jpg").inputStream(), mirrorX = true, mirrorY = true)
     return GlTexture(
+        label = filename,
         target = backend.GL_TEXTURE_CUBE_MAP,
         wrapS = backend.GL_CLAMP_TO_EDGE, wrapT = backend.GL_CLAMP_TO_EDGE, wrapR = backend.GL_CLAMP_TO_EDGE,
         images = listOf(
@@ -80,10 +81,10 @@ fun libTextureCreatePbr(directory: String, extension: String = "png",
     val decodedRoughness = libTextureDecodePixels(libAssetCreate(roughness).inputStream())
     val decodedAo       = libTextureDecodePixels(libAssetCreate(ao).inputStream())
     return PbrMaterial(
-        glTextureCreate2D(decodedAlbedo.width, decodedAlbedo.height, decodedAlbedo.pixels),
-        glTextureCreate2D(decodedNormal.width, decodedNormal.height, decodedNormal.pixels),
-        glTextureCreate2D(decodedMetallic.width, decodedMetallic.height, decodedMetallic.pixels),
-        glTextureCreate2D(decodedRoughness.width, decodedRoughness.height, decodedRoughness.pixels),
-        glTextureCreate2D(decodedAo.width, decodedAo.height, decodedAo.pixels),
+        glTextureCreate2D(albedo, decodedAlbedo.width, decodedAlbedo.height, decodedAlbedo.pixels),
+        glTextureCreate2D(normal, decodedNormal.width, decodedNormal.height, decodedNormal.pixels),
+        glTextureCreate2D(metallic, decodedMetallic.width, decodedMetallic.height, decodedMetallic.pixels),
+        glTextureCreate2D(roughness, decodedRoughness.width, decodedRoughness.height, decodedRoughness.pixels),
+        glTextureCreate2D(ao, decodedAo.width, decodedAo.height, decodedAo.pixels),
     )
 }

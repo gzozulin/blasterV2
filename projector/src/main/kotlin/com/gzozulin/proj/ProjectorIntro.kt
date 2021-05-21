@@ -20,6 +20,20 @@ private val camera = Camera(window)
 private val controller = ControllerFirstPerson(position = vec3().front().mul(10f), velocity = 0.1f)
 private val wasdInput = WasdInput(controller)
 
+// -------------------------------- Resources --------------------------------
+
+private val tvGroup = libWavefrontCreate("models/tv/tv")
+private val tvObject = tvGroup.objects.first()
+private val tvMaterial = libTextureCreatePbr("models/tv")
+
+private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
+
+private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
+private val teapotObject = teapotGroup.objects.first()
+
+private val computerGroup = libWavefrontCreate("models/pcjr/pcjr")
+private val computerObject = computerGroup.objects.first()
+
 // -------------------------------- Lights --------------------------------
 
 private val lightsColors = listOf(
@@ -73,20 +87,6 @@ private fun lightsUpdate() {
 
 private val lightsAll = lightsScene + lightCamera
 
-// -------------------------------- Resources --------------------------------
-
-private val tvGroup = libWavefrontCreate("models/tv/tv")
-private val tvObject = tvGroup.objects.first()
-private val tvMaterial = libTextureCreatePbr("models/tv")
-
-private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
-
-private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
-private val teapotObject = teapotGroup.objects.first()
-
-private val computerGroup = libWavefrontCreate("models/pcjr/pcjr")
-private val computerObject = computerGroup.objects.first()
-
 // -------------------------------- TVs --------------------------------
 
 private val unifTvModel       = unifm4()
@@ -98,6 +98,19 @@ private val unifTvNormal      = sampler(unifs(tvMaterial.normal))
 private val unifTvMetallic    = sampler(unifs(tvMaterial.metallic))
 private val unifTvRoughness   = sampler(unifs(tvMaterial.roughness))
 private val unifTvAO          = sampler(unifs(tvMaterial.ao))
+
+private enum class TvType { TEAPOT, COMPUTER }
+private data class TvInstance(val type: TvType, val matrix: mat4)
+
+private val tvs = mutableListOf<TvInstance>().apply {
+    for (i in 0 until HORIZONTAL_CNT) {
+        for (j in 0 until VERTICAL_CNT) {
+            add(TvInstance(
+                TvType.values().random(),
+                mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)))
+        }
+    }
+}
 
 private fun tvsUse(callback: Callback) {
     glShadingPbrUse(shadingPbr) {
@@ -114,15 +127,19 @@ private fun tvsDraw() {
     glCulling {
         glDepthTest {
             glTextureBind(computerRtt.color) {
-                glTextureBind(tvMaterial.normal) {
-                    glTextureBind(tvMaterial.metallic) {
-                        glTextureBind(tvMaterial.roughness) {
-                            glTextureBind(tvMaterial.ao) {
-                                lightCamera.position.set(camera.position).add(0f, 0f, -1f)
-                                glShadingPbrDraw(shadingPbr, lightsAll) {
-                                    for (i in 0 until HORIZONTAL_CNT) {
-                                        for (j in 0 until VERTICAL_CNT) {
-                                            unifTvModel.value = mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)
+                glTextureBind(teapotRtt.color) {
+                    glTextureBind(tvMaterial.normal) {
+                        glTextureBind(tvMaterial.metallic) {
+                            glTextureBind(tvMaterial.roughness) {
+                                glTextureBind(tvMaterial.ao) {
+                                    lightCamera.position.set(camera.position).add(0f, 0f, -1f)
+                                    glShadingPbrDraw(shadingPbr, lightsAll) {
+                                        tvs.forEach {
+                                            unifTvModel.value = it.matrix
+                                            when (it.type) {
+                                                TvType.TEAPOT -> unifTvItemAlbedo.value = teapotRtt.color
+                                                TvType.COMPUTER -> unifTvItemAlbedo.value = computerRtt.color
+                                            }
                                             glShadingPbrInstance(shadingPbr, tvObject.mesh)
                                         }
                                     }
@@ -140,14 +157,12 @@ private fun tvsDraw() {
 
 private var teapotRotation = 0f
 private val teapotMatrix = mat4()
-private val teapotAlbedo = vec4(vec3().red(), 1f)
 
 private var computerRotation = 0f
 private val computerMatrix = mat4()
-private val computerAlbedo = vec4(vec3().blue(), 1f)
 
 private val unifItemModel = unifm4()
-private val unifItemAlbedo = unifv4(vec4(vec3().rose(), 1f))
+private val unifItemAlbedo = unifv4()
 
 private val constItemView = constm4(mat4().identity())
 private val constItemProj = constm4(camera.projectionM)
@@ -226,11 +241,12 @@ private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: ve
 private val shadingPhong = ShadingPhong(unifItemModel, constItemView, constItemProj, constIteEye,
     unifItemAlbedo, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
 
-private val unifTvItemAlbedo = sampler(unifs(computerRtt.color))
+private val unifTvItemAlbedo = unifs(computerRtt.color)
+private val unifTvItemAlbedoSampler = sampler(unifTvItemAlbedo)
 
 private val shadingPbr = ShadingPbr(
     unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
-    unifTvItemAlbedo, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
+    unifTvItemAlbedoSampler, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
 
 // -------------------------------- Logo --------------------------------
 
@@ -264,8 +280,8 @@ fun main() {
                         camera.setPosition(position)
                         camera.lookAlong(direction)
                     }
-                    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotAlbedo)
-                    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerAlbedo)
+                    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, vec4(col3().red(), 1f))
+                    itemDraw(computerRtt, computerObject.mesh, computerMatrix, vec4(col3().blue(), 1f))
                     tvsDraw()
                 }
             }

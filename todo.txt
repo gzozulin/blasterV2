@@ -58,3 +58,4 @@ x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex
 2021-05-17 Direct lights for PBR +code @complex
 2021-05-17 Environment lighting for PBR +code @complex
 2021-05-18 Custom URL for channel (> 100 subs) +video @complex
+2021-05-20 Camera rotations with arrows, precision with shift for WASD input +code @simple
