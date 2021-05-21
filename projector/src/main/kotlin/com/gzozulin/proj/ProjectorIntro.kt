@@ -18,6 +18,7 @@ private const val SCREEN_WIDTH = 1920 // 1080p
 private const val SCREEN_HEIGHT = 1080
 
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
+private val capturer = Capturer(window)
 
 private var mouseLook = false
 private val camera = Camera(window).apply {
@@ -88,7 +89,7 @@ private fun lightsUpdate() {
     for (i in 0 until lightsScene.size) {
         val sceneLight = lightsScene[i] as PointLight
         val direction = lightsDirection[i]
-        val delta = randf(0.1f, 10f)
+        val delta = randf(0.1f, 5f)
         if (direction) {
             sceneLight.range += delta
             if (sceneLight.range >= 100f) {
@@ -326,6 +327,26 @@ private fun logoDraw() {
 
 // -------------------------------- Main --------------------------------
 
+private fun drawFrame() {
+    updateCamera()
+    lightsUpdate()
+    teapotUpdate()
+    computerUpdate()
+    mandalorianUpdate()
+    glClear(col3().black())
+    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
+    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
+    itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
+    glCulling {
+        glDepthTest {
+            tvsDraw()
+        }
+    }
+    glBlend {
+        logoDraw()
+    }
+}
+
 fun main() {
     window.create {
         window.buttonCallback = { button, pressed ->
@@ -336,23 +357,11 @@ fun main() {
         tvsUse {
             itemUse {
                 logoUse {
-                    window.show {
-                        updateCamera()
-                        lightsUpdate()
-                        teapotUpdate()
-                        computerUpdate()
-                        mandalorianUpdate()
-                        glClear(col3().black())
-                        itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
-                        itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
-                        itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
-                        glCulling {
-                            glDepthTest {
-                                tvsDraw()
-                            }
-                        }
-                        glBlend {
-                            logoDraw()
+                    capturer.capture {
+                        window.show {
+                            drawFrame()
+                            window.copyWindowBuffer()
+                            capturer.frame()
                         }
                     }
                 }
