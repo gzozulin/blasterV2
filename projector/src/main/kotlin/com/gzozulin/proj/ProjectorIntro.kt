@@ -1,7 +1,6 @@
 package com.gzozulin.proj
 
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.assets.libTextureCreate
 import com.gzozulin.minigl.assets.libTextureCreatePbr
 import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.assets.libWavefrontGroupUse
@@ -85,7 +84,8 @@ private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
 private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
 private val teapotObject = teapotGroup.objects.first()
 
-private val ditheringTexture = libTextureCreate("textures/points.jpg")
+private val computerGroup = libWavefrontCreate("models/pcjr/pcjr")
+private val computerObject = computerGroup.objects.first()
 
 // -------------------------------- TVs --------------------------------
 
@@ -113,7 +113,7 @@ private fun tvsUse(callback: Callback) {
 private fun tvsDraw() {
     glCulling {
         glDepthTest {
-            glTextureBind(rttTeapot.color) {
+            glTextureBind(computerRtt.color) {
                 glTextureBind(tvMaterial.normal) {
                     glTextureBind(tvMaterial.metallic) {
                         glTextureBind(tvMaterial.roughness) {
@@ -142,6 +142,10 @@ private var teapotRotation = 0f
 private val teapotMatrix = mat4()
 private val teapotAlbedo = vec4(vec3().red(), 1f)
 
+private var computerRotation = 0f
+private val computerMatrix = mat4()
+private val computerAlbedo = vec4(vec3().blue(), 1f)
+
 private val unifItemModel = unifm4()
 private val unifItemAlbedo = unifv4(vec4(vec3().rose(), 1f))
 
@@ -162,14 +166,19 @@ private fun mapItem(screen: GlTexture): Expression<vec4> {
 
 private val mergingItem = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::mapItem)
 
-private val rttTeapot = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
+private val teapotRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
+private val computerRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
 
 private fun itemUse(callback: Callback) {
-    glTechRttUse(rttTeapot) {
-        glTechPostProcessingUse(mergingItem) {
-            glShadingPhongUse(shadingPhong) {
-                libWavefrontGroupUse(teapotGroup) {
-                    callback.invoke()
+    glTechRttUse(teapotRtt) {
+        glTechRttUse(computerRtt) {
+            glTechPostProcessingUse(mergingItem) {
+                glShadingPhongUse(shadingPhong) {
+                    libWavefrontGroupUse(teapotGroup) {
+                        libWavefrontGroupUse(computerGroup) {
+                            callback.invoke()
+                        }
+                    }
                 }
             }
         }
@@ -182,6 +191,15 @@ private fun teapotUpdate() {
         .translate(-10f, 2f, -10f)
         .rotate(radf(-90f), vec3().front())
         .rotate(teapotRotation, vec3().up())
+}
+
+private fun computerUpdate() {
+    computerRotation += 0.01f
+    computerMatrix.identity()
+        .translate(-10f, 2f, -10f)
+        .rotate(radf(-90f), vec3().front())
+        .rotate(computerRotation, vec3().up())
+        .scale(5f)
 }
 
 private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: vec4) {
@@ -208,7 +226,7 @@ private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: ve
 private val shadingPhong = ShadingPhong(unifItemModel, constItemView, constItemProj, constIteEye,
     unifItemAlbedo, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
 
-private val unifTvItemAlbedo = sampler(unifs(rttTeapot.color))
+private val unifTvItemAlbedo = sampler(unifs(computerRtt.color))
 
 private val shadingPbr = ShadingPbr(
     unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
@@ -240,12 +258,14 @@ fun main() {
                 window.show {
                     lightsUpdate()
                     teapotUpdate()
+                    computerUpdate()
                     glClear(col3().black())
                     controller.apply { position, direction ->
                         camera.setPosition(position)
                         camera.lookAlong(direction)
                     }
-                    itemDraw(rttTeapot, teapotObject.mesh, teapotMatrix, teapotAlbedo)
+                    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotAlbedo)
+                    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerAlbedo)
                     tvsDraw()
                 }
             }
