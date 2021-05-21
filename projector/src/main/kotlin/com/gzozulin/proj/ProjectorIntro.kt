@@ -138,15 +138,11 @@ private fun tvsDraw() {
 
 // -------------------------------- Items --------------------------------
 
-var rotation = 0f
-private val unifTeapotModel = unifm4 {
-    rotation += 0.01f
-    mat4().identity()
-        .translate(-10f, 2f, -10f)
-        .rotate(radf(-90f), vec3().front())
-        .rotate(rotation, vec3().up())
-}
+private var teapotRotation = 0f
+private val teapotMatrix = mat4()
+private val teapotAlbedo = vec4(vec3().red(), 1f)
 
+private val unifItemModel = unifm4()
 private val unifItemAlbedo = unifv4(vec4(vec3().rose(), 1f))
 
 private val constItemView = constm4(mat4().identity())
@@ -180,7 +176,17 @@ private fun itemUse(callback: Callback) {
     }
 }
 
-private fun itemDraw(where: TechniqueRtt, mesh: GlMesh) {
+private fun teapotUpdate() {
+    teapotRotation += 0.01f
+    teapotMatrix.identity()
+        .translate(-10f, 2f, -10f)
+        .rotate(radf(-90f), vec3().front())
+        .rotate(teapotRotation, vec3().up())
+}
+
+private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: vec4) {
+    unifItemModel.value = matrix
+    unifItemAlbedo.value = albedo
     glTechRttDraw(where) {
         glTextureBind(tvMaterial.albedo) {
             glTechPostProcessingDraw(mergingItem) {
@@ -199,7 +205,7 @@ private fun itemDraw(where: TechniqueRtt, mesh: GlMesh) {
 
 // -------------------------------- Techniques --------------------------------
 
-private val shadingPhong = ShadingPhong(unifTeapotModel, constItemView, constItemProj, constIteEye,
+private val shadingPhong = ShadingPhong(unifItemModel, constItemView, constItemProj, constIteEye,
     unifItemAlbedo, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
 
 private val unifTvItemAlbedo = sampler(unifs(rttTeapot.color))
@@ -207,6 +213,10 @@ private val unifTvItemAlbedo = sampler(unifs(rttTeapot.color))
 private val shadingPbr = ShadingPbr(
     unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
     unifTvItemAlbedo, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
+
+// -------------------------------- Logo --------------------------------
+
+//private val logoTechnique = ShadingFlat()
 
 // -------------------------------- Main --------------------------------
 
@@ -229,12 +239,13 @@ fun main() {
             itemUse {
                 window.show {
                     lightsUpdate()
+                    teapotUpdate()
                     glClear(col3().black())
                     controller.apply { position, direction ->
                         camera.setPosition(position)
                         camera.lookAlong(direction)
                     }
-                    itemDraw(rttTeapot, teapotObject.mesh)
+                    itemDraw(rttTeapot, teapotObject.mesh, teapotMatrix, teapotAlbedo)
                     tvsDraw()
                 }
             }
