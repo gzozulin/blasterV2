@@ -10,19 +10,29 @@ import com.gzozulin.minigl.techniques.*
 
 private const val TEXTURE_SIDE = 4096
 private const val HORIZONTAL_CNT = 32
-private const val VERTICAL_CNT = 32
+private const val VERTICAL_CNT = 24
 private const val HORIZONTAL_STEP = 5f
 private const val VERTICAL_STEP = 3.5f
-private const val DRAW_DISTANCE = 100f
+private const val DRAW_DISTANCE_SQ = 10000f
+private const val SCREEN_WIDTH = 1920 // 1080p
+private const val SCREEN_HEIGHT = 1080
 
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 
 private var mouseLook = false
-private val camera = Camera(window)
-private val controller = ControllerFirstPerson(position = vec3().front().mul(10f), velocity = 0.1f)
-private val wasdInput = WasdInput(controller)
+private val camera = Camera(window).apply {
+    setPosition(vec3(3.630e0f, 1.909e1f, 7.099e0f))
+    lookAlong(vec3(3.877e-1f, 9.486e-2f, -9.169e-1f))
+}
+
+private fun updateCamera() {
+    camera.position.x += 0.03f
+    camera.viewVersion.increment()
+}
 
 // -------------------------------- Resources --------------------------------
+
+private val logoTexture = libTextureCreate("textures/logo.png")
 
 private val tvGroup = libWavefrontCreate("models/tv/tv")
 private val tvObject = tvGroup.objects.first()
@@ -132,31 +142,28 @@ private fun tvsUse(callback: Callback) {
 }
 
 private fun tvsDraw() {
-    glCulling {
-        glDepthTest {
-            glTextureBind(computerRtt.color) {
-                glTextureBind(teapotRtt.color) {
-                    glTextureBind(mandalorianRtt.color) {
-                        glTextureBind(tvMaterial.normal) {
-                            glTextureBind(tvMaterial.metallic) {
-                                glTextureBind(tvMaterial.roughness) {
-                                    glTextureBind(tvMaterial.ao) {
-                                        lightCamera.position.set(camera.position).add(0f, 0f, -1f)
-                                        glShadingPbrDraw(shadingPbr, lightsAll) {
-                                            for (tv in tvs) {
-                                                val worldPosition = tv.matrix.transform(vec4())
-                                                if (worldPosition.distance(vec4(camera.position, 1f)) > DRAW_DISTANCE) {
-                                                    continue
-                                                }
-                                                unifTvModel.value = tv.matrix
-                                                when (tv.type) {
-                                                    TvType.TEAPOT -> unifTvItemAlbedo.value = teapotRtt.color
-                                                    TvType.COMPUTER -> unifTvItemAlbedo.value = computerRtt.color
-                                                    TvType.MANDALORIAN -> unifTvItemAlbedo.value = mandalorianRtt.color
-                                                }
-                                                glShadingPbrInstance(shadingPbr, tvObject.mesh)
-                                            }
+    glTextureBind(computerRtt.color) {
+        glTextureBind(teapotRtt.color) {
+            glTextureBind(mandalorianRtt.color) {
+                glTextureBind(tvMaterial.normal) {
+                    glTextureBind(tvMaterial.metallic) {
+                        glTextureBind(tvMaterial.roughness) {
+                            glTextureBind(tvMaterial.ao) {
+                                lightCamera.position.set(camera.position).add(0f, 0f, -1f)
+                                glShadingPbrDraw(shadingPbr, lightsAll) {
+                                    val worldPosition = vec3()
+                                    for (tv in tvs) {
+                                        tv.matrix.getTranslation(worldPosition)
+                                        if (worldPosition.distanceSquared(camera.position) > DRAW_DISTANCE_SQ) {
+                                            continue
                                         }
+                                        unifTvModel.value = tv.matrix
+                                        when (tv.type) {
+                                            TvType.TEAPOT -> unifTvItemAlbedo.value = teapotRtt.color
+                                            TvType.COMPUTER -> unifTvItemAlbedo.value = computerRtt.color
+                                            TvType.MANDALORIAN -> unifTvItemAlbedo.value = mandalorianRtt.color
+                                        }
+                                        glShadingPbrInstance(shadingPbr, tvObject.mesh)
                                     }
                                 }
                             }
@@ -289,7 +296,33 @@ private val shadingPbr = ShadingPbr(
 
 // -------------------------------- Logo --------------------------------
 
-//private val logoTechnique = ShadingFlat()
+private val logoSampler = sampler(unifs(logoTexture))
+private val logoMatrix = unifm4 {
+    mat4().identity().set(camera.projectionM)
+        .mul(camera.calculateViewM())
+        .mul(mat4().translate(camera.position).translate(10f, 0f, -10f).scale(0.015f))
+}
+
+private val logoTechnique = ShadingFlat(logoMatrix, logoSampler)
+private val logoRect = glMeshCreateRect(SCREEN_WIDTH.toFloat(), SCREEN_HEIGHT.toFloat())
+
+private fun logoUse(callback: Callback) {
+    glShadingFlatUse(logoTechnique) {
+        glMeshUse(logoRect) {
+            glTextureUse(logoTexture) {
+                callback.invoke()
+            }
+        }
+    }
+}
+
+private fun logoDraw() {
+    glShadingFlatDraw(logoTechnique) {
+        glTextureBind(logoTexture) {
+            glShadingFlatInstance(logoTechnique, logoRect)
+        }
+    }
+}
 
 // -------------------------------- Main --------------------------------
 
@@ -300,30 +333,28 @@ fun main() {
                 mouseLook = pressed
             }
         }
-        window.deltaCallback = { delta ->
-            if (mouseLook) {
-                wasdInput.onCursorDelta(delta)
-            }
-        }
-        window.keyCallback = { key, pressed ->
-            wasdInput.onKeyPressed(key, pressed)
-        }
         tvsUse {
             itemUse {
-                window.show {
-                    lightsUpdate()
-                    teapotUpdate()
-                    computerUpdate()
-                    mandalorianUpdate()
-                    glClear(col3().black())
-                    controller.apply { position, direction ->
-                        camera.setPosition(position)
-                        camera.lookAlong(direction)
+                logoUse {
+                    window.show {
+                        updateCamera()
+                        lightsUpdate()
+                        teapotUpdate()
+                        computerUpdate()
+                        mandalorianUpdate()
+                        glClear(col3().black())
+                        itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
+                        itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
+                        itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
+                        glCulling {
+                            glDepthTest {
+                                tvsDraw()
+                            }
+                        }
+                        glBlend {
+                            logoDraw()
+                        }
                     }
-                    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
-                    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
-                    itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
-                    tvsDraw()
                 }
             }
         }

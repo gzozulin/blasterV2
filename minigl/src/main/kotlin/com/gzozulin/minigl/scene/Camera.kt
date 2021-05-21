@@ -15,10 +15,10 @@ class Camera(aspectRatio: Float) {
     val position: vec3 = vec3()
     val rotation: quat = quat()
 
-    private val viewVersion: Version = Version()
-    private val viewM: mat4 = mat4().identity()
-    private val negatedBuf: vec3 = vec3()
-    private val fullM: mat4 = mat4().identity()
+    val viewVersion: Version = Version()
+    val viewM: mat4 = mat4().identity()
+    val negatedBuf: vec3 = vec3()
+    val fullM: mat4 = mat4().identity()
 
     fun calculateViewM(): mat4 {
         if (viewVersion.check()) {
