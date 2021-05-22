@@ -3,10 +3,10 @@ x 2021-05-02 (A) 2021-04-23 Ambient jazzy music in video from youtube +video @co
 x 2021-05-02 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +video @simple
 x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +assets @simple
 x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe +assets @simple
-(A) 2021-04-23 Highlighting enums +code @simple
-(A) 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +code @simple
+x 2021-05-22 (A) 2021-04-23 Highlighting enums +code @simple
+x 2021-05-22 (A) 2021-04-23 Highlighting for named arguments and labels (kotlin_blue) +code @simple
 2021-04-23 Highlight sections of code +code @complex
-(A) 2021-04-23 Highlighting for method calls in function body +code @simple
+x 2021-05-22 (A) 2021-04-23 Highlighting for method calls in function body +code @simple
 2021-04-23 Create automatic video description, include link to source code +code @simple
 x 2021-04-23 2021-04-23 Minimap cursor window +code @simple
 (B) 2021-04-23 Show all pages continuously on minimap +code @complex

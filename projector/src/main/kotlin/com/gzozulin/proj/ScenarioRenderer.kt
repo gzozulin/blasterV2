@@ -202,14 +202,14 @@ private fun List<Token>.withOrder(order: Int) = stream().map { OrderedToken(orde
 
 private fun ParserRuleContext.select(tokens: List<Token>) = tokens[start.tokenIndex]
 
-private val kotlin_white    = col3(0.659f, 0.718f, 0.776f)
-private val kotlin_orange   = col3(0.706f, 0.427f, 0.192f)
-private val kotlin_blue     = col3(0.216f, 0.416f, 0.824f)
-private val kotlin_light_blue = col3(0.314f, 0.553f, 0.631f)
-private val kotlin_green    = col3(0.282f, 0.451f, 0.337f)
-private val kotlin_yellow   = col3(0.937f, 0.675f, 0.306f)
-private val kotlin_purple   = col3(0.596f, 0.463f, 0.667f)
-private val kotlin_red      = col3(0.780f, 0.329f, 0.314f)
+private val kotlin_white        = col3(0.659f, 0.718f, 0.776f)
+private val kotlin_orange       = col3(0.706f, 0.427f, 0.192f)
+private val kotlin_blue         = col3(0.216f, 0.416f, 0.824f)
+private val kotlin_light_blue   = col3(0.314f, 0.553f, 0.631f)
+private val kotlin_green        = col3(0.282f, 0.451f, 0.337f)
+private val kotlin_yellow       = col3(0.937f, 0.675f, 0.306f)
+private val kotlin_purple       = col3(0.596f, 0.463f, 0.667f)
+private val kotlin_red          = col3(0.780f, 0.329f, 0.314f)
 
 private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
     :  KotlinParserBaseVisitor<Unit>() {
@@ -217,6 +217,24 @@ private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap
     override fun visitFunctionDeclaration(ctx: KotlinParser.FunctionDeclarationContext) {
         updateColor(ctx.simpleIdentifier().select(tokens), kotlin_yellow)
         super.visitFunctionDeclaration(ctx)
+    }
+
+    override fun visitNavigationSuffix(ctx: KotlinParser.NavigationSuffixContext) {
+        val update = tokens.subList(ctx.start.tokenIndex, ctx.stop.tokenIndex + 1)
+        val color = if (tokens[ctx.stop.tokenIndex + 1].text.contains("(")) kotlin_yellow else kotlin_purple
+        update.forEach { updateColor(it, color) }
+        super.visitNavigationSuffix(ctx)
+    }
+
+    override fun visitValueArgument(ctx: KotlinParser.ValueArgumentContext) {
+        if (ctx.simpleIdentifier() != null) {
+            updateColor(ctx.simpleIdentifier().select(tokens), kotlin_blue)
+        }
+        super.visitValueArgument(ctx)
+    }
+
+    override fun visitDeclaration(ctx: KotlinParser.DeclarationContext?) {
+        super.visitDeclaration(ctx)
     }
 
     override fun visitPropertyDeclaration(ctx: KotlinParser.PropertyDeclarationContext) {
@@ -243,6 +261,11 @@ private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap
         val update = tokens.subList(ctx.start.tokenIndex, ctx.stop.tokenIndex + 1)
         update.forEach { updateColor(it, kotlin_green) }
         super.visitStringLiteral(ctx)
+    }
+
+    override fun visitEnumEntry(ctx: KotlinParser.EnumEntryContext) {
+        updateColor(ctx.simpleIdentifier().select(tokens), kotlin_purple)
+        super.visitEnumEntry(ctx)
     }
 
     override fun visitKotlinFile(ctx: KotlinParser.KotlinFileContext) {
