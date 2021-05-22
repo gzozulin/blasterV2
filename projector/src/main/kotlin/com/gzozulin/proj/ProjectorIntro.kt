@@ -34,6 +34,7 @@ private fun updateCamera() {
 // -------------------------------- Resources --------------------------------
 
 private val logoTexture = libTextureCreate("textures/logo.png")
+    .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
 
 private val tvGroup = libWavefrontCreate("models/tv/tv")
 private val tvObject = tvGroup.objects.first()
@@ -67,7 +68,7 @@ private val lightsColors = listOf(
     vec3().chartreuse()
 )
 
-private val lightCamera = PointLight(vec3(), vec3(5f), 100f)
+private val lightCamera = PointLight(vec3(), vec3(5f), 50f)
 private val lightsScene = mutableListOf<Light>().apply {
     for (i in 0 until HORIZONTAL_CNT/4) {
         for (j in 0 until VERTICAL_CNT/4) {
@@ -97,7 +98,7 @@ private fun lightsUpdate() {
             }
         } else {
             sceneLight.range -= delta
-            if (sceneLight.range <= 5f) {
+            if (sceneLight.range <= 30f) {
                 lightsDirection[i] = true
             }
         }
@@ -357,13 +358,12 @@ fun main() {
         tvsUse {
             itemUse {
                 logoUse {
-                    capturer.capture {
+                    //capturer.capture {
                         window.show {
                             drawFrame()
-                            window.copyWindowBuffer()
-                            capturer.frame()
+                            //capturer.frame()
                         }
-                    }
+                    //}
                 }
             }
         }

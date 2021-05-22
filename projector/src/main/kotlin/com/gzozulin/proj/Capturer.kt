@@ -14,7 +14,7 @@ import org.opencv.core.CvType
 
 private val converter = OpenCVFrameConverter.ToMat()
 
-class Capturer(window: GlWindow) : AutoCloseable {
+class Capturer(private val window: GlWindow) : AutoCloseable {
     var isCapturing = true
 
     private val recorder by lazy {
@@ -36,8 +36,9 @@ class Capturer(window: GlWindow) : AutoCloseable {
         close()
     }
 
-    fun frame() {
+    fun addFrame() {
         if (isCapturing) {
+            window.copyWindowBuffer()
             flip(originalFrame, flippedFrame, 0) // vertical flip
             recorder.record(frame, AV_PIX_FMT_RGBA)
         }

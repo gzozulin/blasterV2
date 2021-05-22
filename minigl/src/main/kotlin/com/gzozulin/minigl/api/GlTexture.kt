@@ -65,12 +65,12 @@ private fun glTextureUpload(texture: GlTexture) {
             backend.glTexImage2D(image.target, 0, image.internalFormat,
                 image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
         }
+        backend.glGenerateMipmap(texture.target)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
         backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
-        backend.glGenerateMipmap(texture.target)
     }
 }
 

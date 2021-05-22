@@ -24,8 +24,7 @@ private fun frameWithCapture() {
     capturer.capture {
         window.show {
             projectorController.onFrame()
-            window.copyWindowBuffer()
-            capturer.frame()
+            capturer.addFrame()
         }
     }
 }
