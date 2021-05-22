@@ -9,7 +9,7 @@ x 2021-04-25 (A) 2021-04-23 Fix texture Z-fighting or remove the globe +assets @
 (A) 2021-04-23 Highlighting for method calls in function body +code @simple
 2021-04-23 Create automatic video description, include link to source code +code @simple
 x 2021-04-23 2021-04-23 Minimap cursor window +code @simple
-(B) 2021-04-23 Move the minimap to accomodate any amounts of code +code @complex
+(B) 2021-04-23 Show all pages continuously on minimap +code @complex
 x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds +video @simple
 x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
@@ -53,7 +53,7 @@ x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders
 x 2021-05-15 (A) 2021-05-14 Fix fonts for ProjectorView +code @simple
 2021-05-14 Light shines even from the opposite side of the surface +code @complex
 x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex
-(A) 2021-05-15 Fix minimap cursor +code @simple
+x 2021-05-22 (A) 2021-05-15 Fix minimap cursor +code @simple
 (A) 2021-05-17 Use rule of thirds +video @simple
 2021-05-17 Direct lights for PBR +code @complex
 2021-05-17 Environment lighting for PBR +code @complex
