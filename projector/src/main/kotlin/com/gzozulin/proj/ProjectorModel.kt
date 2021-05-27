@@ -8,10 +8,8 @@ import java.io.File
 import kotlin.math.abs
 
 const val LINES_TO_SHOW = 20
-
 const val FRAMES_PER_UPDATE = 2
-
-const val FRAMES_TO_FINALIZE = 10000 / 16
+const val FRAMES_TO_FINALIZE = 20000 / 16
 
 typealias DeclCtx = KotlinParser.DeclarationContext
 
@@ -22,7 +20,7 @@ enum class AnimationState {
     FIND_KEY, WAIT_KEY, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
 class ProjectorModel {
-    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep1_model/scenario_copy").readText()) }
+    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep2_technique/3-stack-example/scenario").readText()) }
     private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>

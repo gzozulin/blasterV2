@@ -3,6 +3,8 @@ package com.gzozulin.proj
 import java.io.File
 import kotlin.streams.toList
 
+private const val FRAMES_PER_SECOND = 60
+
 private val scenarioExample = """
     # Aliases are declared here
     alias file=/home/greg/blaster/sfcs/src/main/kotlin/com/gzozulin/proj/ProjectorModel.kt
@@ -58,7 +60,13 @@ class ScenarioFile(private val text: String) {
 
     private fun parseNode(line: String) {
         val split = line.split(whitespaceRegex)
-        val frame = split[0].toInt() - offset
+        val timestamp = split[0]
+        val frame: Int
+        if (timestamp.contains("s")) {
+            frame = (timestamp.substring(0, timestamp.length - 1).toFloat() * FRAMES_PER_SECOND).toInt() - offset
+        } else {
+            frame = timestamp.toInt() - offset
+        }
         check(frame >= 0) { "Frame should be positive of 0!" }
         if (scenario.isNotEmpty()) {
             check(frame >= scenario.last().frame) { "Key frames are not in order! $line" }

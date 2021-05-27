@@ -28,7 +28,7 @@ x 2021-05-04 2021-04-28 Logo scene +code +assets @complex
 (B) 2021-04-29 Better tripod +video @simple
 2021-04-29 Better lighting +video @complex
 2021-04-29 Better camera +video @complex
-(A) 2021-04-29 Better teleprompter app +video @simple
+x 2021-05-26 (A) 2021-04-29 Better teleprompter app +video @simple
 x 2021-05-22 2021-04-29 Screen capture for any scene +code @simple
 2021-04-29 Learn about H264 codec +code +video @complex
 x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +code +video @complex
@@ -43,7 +43,7 @@ x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
 (B) 2021-05-02 Create avatar for a channel +video @complex
 (A) 2021-05-03 Create a header strip for the channel page +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
-(A) 2021-05-04 Blender file template +video @simple
+x 2021-05-26 (A) 2021-05-04 Blender file template +video @simple
 x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +code @complex
 (B) 2021-05-08 MSAA for RttTechnique (code rendering) +code @complex
 x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +code @simple
@@ -60,3 +60,6 @@ x 2021-05-22 (A) 2021-05-15 Fix minimap cursor +code @simple
 2021-05-18 Custom URL for channel (> 100 subs) +video @complex
 2021-05-20 Camera rotations with arrows, precision with shift for WASD input +code @simple
 (B) 2021-05-22 Multiple shots per one capture of code +code @complex
+2021-05-22 Anisotropic Filtering for GlTexture +code @simple
+(B) 2021-05-26 Random camera start positions/shots +code @simple
+(A) 2021-05-26 Establishing shot +video @simple
