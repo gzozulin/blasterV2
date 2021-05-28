@@ -22,34 +22,10 @@ private val capturer = Capturer(window)
 
 // -------------------------------- Camera --------------------------------
 
-private var mouseLook = false
 private val camera = Camera(window).apply {
     setPosition(vec3(3.630e0f, 1.909e1f, 7.099e0f))
     lookAlong(vec3(3.877e-1f, 9.486e-2f, -9.169e-1f))
 }
-
-// -------------------------------- Resources --------------------------------
-
-private val logoTexture = libTextureCreate("textures/logo.png")
-    .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
-
-private val tvGroup = libWavefrontCreate("models/tv/tv")
-private val tvObject = tvGroup.objects.first()
-private val tvMaterial = libTextureCreatePbr("models/tv")
-
-private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
-
-private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
-private val teapotObject = teapotGroup.objects.first()
-private val teapotTexture = libTextureCreate("textures/marble.jpg")
-
-private val computerGroup = libWavefrontCreate("models/pcjr/pcjr")
-private val computerObject = computerGroup.objects.first()
-private val computerTexture = computerObject.phong.mapDiffuse!!
-
-private val mandalorianGroup = libWavefrontCreate("models/mandalorian/mandalorian")
-private val mandalorianObject = mandalorianGroup.objects.first()
-private val mandalorianTexture = libTextureCreate("models/mandalorian/albedo.png")
 
 // -------------------------------- Lights --------------------------------
 
@@ -84,6 +60,29 @@ private val lightsDirection = mutableListOf<Boolean>().apply {
 }
 
 private val lightsAll = lightsScene + lightCamera
+
+// -------------------------------- Logo --------------------------------
+
+private val logoTexture = libTextureCreate("textures/logo.png")
+    .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
+
+private val tvGroup = libWavefrontCreate("models/tv/tv")
+private val tvObject = tvGroup.objects.first()
+private val tvMaterial = libTextureCreatePbr("models/tv")
+
+private val itemLight = PointLight(vec3(3f), vec3(1f), 100f)
+
+private val teapotGroup = libWavefrontCreate("models/teapot/teapot")
+private val teapotObject = teapotGroup.objects.first()
+private val teapotTexture = libTextureCreate("textures/marble.jpg")
+
+private val computerGroup = libWavefrontCreate("models/pcjr/pcjr")
+private val computerObject = computerGroup.objects.first()
+private val computerTexture = computerObject.phong.mapDiffuse!!
+
+private val mandalorianGroup = libWavefrontCreate("models/mandalorian/mandalorian")
+private val mandalorianObject = mandalorianGroup.objects.first()
+private val mandalorianTexture = libTextureCreate("models/mandalorian/albedo.png")
 
 // -------------------------------- TVs --------------------------------
 
@@ -174,11 +173,6 @@ private val logoRect = glMeshCreateRect(SCREEN_WIDTH.toFloat(), SCREEN_HEIGHT.to
 
 fun main() {
     window.create {
-        window.buttonCallback = { button, pressed ->
-            if (button == MouseButton.LEFT) {
-                mouseLook = pressed
-            }
-        }
         tvsUse {
             itemUse {
                 logoUse {
@@ -192,6 +186,51 @@ fun main() {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+private fun itemUse(callback: Callback) {
+    glTechRttUse(teapotRtt) {
+        glTechRttUse(computerRtt) {
+            glTechRttUse(mandalorianRtt) {
+                glTechPostProcessingUse(mergingItem) {
+                    glShadingPhongUse(shadingPhong) {
+                        glTextureUse(teapotTexture) {
+                            libWavefrontGroupUse(mandalorianGroup) {
+                                glTextureUse(mandalorianTexture) {
+                                    libWavefrontGroupUse(teapotGroup) {
+                                        libWavefrontGroupUse(computerGroup) {
+                                            callback.invoke()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun tvsUse(callback: Callback) {
+    glShadingPbrUse(shadingPbr) {
+        glMeshUse(tvObject.mesh) {
+            glTextureUse(listOf(tvMaterial.albedo, tvMaterial.normal, tvMaterial.metallic,
+                tvMaterial.roughness, tvMaterial.ao)) {
+                callback.invoke()
+            }
+        }
+    }
+}
+
+private fun logoUse(callback: Callback) {
+    glShadingFlatUse(logoTechnique) {
+        glMeshUse(logoRect) {
+            glTextureUse(logoTexture) {
+                callback.invoke()
             }
         }
     }
@@ -253,51 +292,6 @@ private fun mandalorianUpdate() {
         .rotate(radf(-90f), vec3().front())
         .rotate(mandalorianRotation, vec3().up())
         .scale(0.15f)
-}
-
-private fun itemUse(callback: Callback) {
-    glTechRttUse(teapotRtt) {
-        glTechRttUse(computerRtt) {
-            glTechRttUse(mandalorianRtt) {
-                glTechPostProcessingUse(mergingItem) {
-                    glShadingPhongUse(shadingPhong) {
-                        glTextureUse(teapotTexture) {
-                            libWavefrontGroupUse(mandalorianGroup) {
-                                glTextureUse(mandalorianTexture) {
-                                    libWavefrontGroupUse(teapotGroup) {
-                                        libWavefrontGroupUse(computerGroup) {
-                                            callback.invoke()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun tvsUse(callback: Callback) {
-    glShadingPbrUse(shadingPbr) {
-        glMeshUse(tvObject.mesh) {
-            glTextureUse(listOf(tvMaterial.albedo, tvMaterial.normal, tvMaterial.metallic,
-                tvMaterial.roughness, tvMaterial.ao)) {
-                callback.invoke()
-            }
-        }
-    }
-}
-
-private fun logoUse(callback: Callback) {
-    glShadingFlatUse(logoTechnique) {
-        glMeshUse(logoRect) {
-            glTextureUse(logoTexture) {
-                callback.invoke()
-            }
-        }
-    }
 }
 
 private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: GlTexture) {
