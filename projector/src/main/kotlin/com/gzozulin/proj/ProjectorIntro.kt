@@ -20,15 +20,12 @@ private const val SCREEN_HEIGHT = 1080
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 private val capturer = Capturer(window)
 
+// -------------------------------- Camera --------------------------------
+
 private var mouseLook = false
 private val camera = Camera(window).apply {
     setPosition(vec3(3.630e0f, 1.909e1f, 7.099e0f))
     lookAlong(vec3(3.877e-1f, 9.486e-2f, -9.169e-1f))
-}
-
-private fun updateCamera() {
-    camera.position.x += 0.03f
-    camera.viewVersion.increment()
 }
 
 // -------------------------------- Resources --------------------------------
@@ -86,25 +83,6 @@ private val lightsDirection = mutableListOf<Boolean>().apply {
     }
 }
 
-private fun lightsUpdate() {
-    for (i in 0 until lightsScene.size) {
-        val sceneLight = lightsScene[i] as PointLight
-        val direction = lightsDirection[i]
-        val delta = randf(0.1f, 5f)
-        if (direction) {
-            sceneLight.range += delta
-            if (sceneLight.range >= 100f) {
-                lightsDirection[i] = false
-            }
-        } else {
-            sceneLight.range -= delta
-            if (sceneLight.range <= 30f) {
-                lightsDirection[i] = true
-            }
-        }
-    }
-}
-
 private val lightsAll = lightsScene + lightCamera
 
 // -------------------------------- TVs --------------------------------
@@ -128,51 +106,6 @@ private val tvs = mutableListOf<TvInstance>().apply {
             add(TvInstance(
                 TvType.values().random(),
                 mat4().identity().translate(i * 5f, j * 3.5f, 0f).scale(10f)))
-        }
-    }
-}
-
-private fun tvsUse(callback: Callback) {
-    glShadingPbrUse(shadingPbr) {
-        glMeshUse(tvObject.mesh) {
-            glTextureUse(listOf(tvMaterial.albedo, tvMaterial.normal, tvMaterial.metallic,
-                tvMaterial.roughness, tvMaterial.ao)) {
-                callback.invoke()
-            }
-        }
-    }
-}
-
-private fun tvsDraw() {
-    glTextureBind(computerRtt.color) {
-        glTextureBind(teapotRtt.color) {
-            glTextureBind(mandalorianRtt.color) {
-                glTextureBind(tvMaterial.normal) {
-                    glTextureBind(tvMaterial.metallic) {
-                        glTextureBind(tvMaterial.roughness) {
-                            glTextureBind(tvMaterial.ao) {
-                                lightCamera.position.set(camera.position).add(0f, 0f, -1f)
-                                glShadingPbrDraw(shadingPbr, lightsAll) {
-                                    val worldPosition = vec3()
-                                    for (tv in tvs) {
-                                        tv.matrix.getTranslation(worldPosition)
-                                        if (worldPosition.distanceSquared(camera.position) > DRAW_DISTANCE_SQ) {
-                                            continue
-                                        }
-                                        unifTvModel.value = tv.matrix
-                                        when (tv.type) {
-                                            TvType.TEAPOT -> unifTvItemAlbedo.value = teapotRtt.color
-                                            TvType.COMPUTER -> unifTvItemAlbedo.value = computerRtt.color
-                                            TvType.MANDALORIAN -> unifTvItemAlbedo.value = mandalorianRtt.color
-                                        }
-                                        glShadingPbrInstance(shadingPbr, tvObject.mesh)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -213,25 +146,84 @@ private val teapotRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
 private val computerRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
 private val mandalorianRtt = TechniqueRtt(TEXTURE_SIDE, TEXTURE_SIDE)
 
-private fun itemUse(callback: Callback) {
-    glTechRttUse(teapotRtt) {
-        glTechRttUse(computerRtt) {
-            glTechRttUse(mandalorianRtt) {
-                glTechPostProcessingUse(mergingItem) {
-                    glShadingPhongUse(shadingPhong) {
-                        glTextureUse(teapotTexture) {
-                            libWavefrontGroupUse(mandalorianGroup) {
-                                glTextureUse(mandalorianTexture) {
-                                    libWavefrontGroupUse(teapotGroup) {
-                                        libWavefrontGroupUse(computerGroup) {
-                                            callback.invoke()
-                                        }
-                                    }
-                                }
-                            }
+// -------------------------------- Techniques --------------------------------
+
+private val shadingPhong = ShadingPhong(unifItemModel, constItemView, constItemProj, constIteEye,
+    unifItemAlbedoSampler, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
+
+private val unifTvItemAlbedo = unifs(computerRtt.color)
+private val unifTvItemAlbedoSampler = sampler(unifTvItemAlbedo)
+
+private val shadingPbr = ShadingPbr(
+    unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
+    unifTvItemAlbedoSampler, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
+
+// -------------------------------- Logo --------------------------------
+
+private val logoSampler = sampler(unifs(logoTexture))
+private val logoMatrix = unifm4 {
+    mat4().identity().set(camera.projectionM)
+        .mul(camera.calculateViewM())
+        .mul(mat4().translate(camera.position).translate(10f, 0f, -10f).scale(0.015f))
+}
+
+private val logoTechnique = ShadingFlat(logoMatrix, logoSampler)
+private val logoRect = glMeshCreateRect(SCREEN_WIDTH.toFloat(), SCREEN_HEIGHT.toFloat())
+
+// -------------------------------- Main --------------------------------
+
+fun main() {
+    window.create {
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
+                mouseLook = pressed
+            }
+        }
+        tvsUse {
+            itemUse {
+                logoUse {
+                    capturer.capture {
+                        window.show {
+                            updateFrame()
+                            drawItems()
+                            tvsDraw()
+                            logoDraw()
+                            capturer.addFrame()
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+private fun updateFrame() {
+    updateCamera()
+    lightsUpdate()
+    teapotUpdate()
+    computerUpdate()
+    mandalorianUpdate()
+}
+
+private fun updateCamera() {
+    camera.position.x += 0.03f
+    camera.viewVersion.increment()
+}
+
+private fun lightsUpdate() {
+    for (i in 0 until lightsScene.size) {
+        val sceneLight = lightsScene[i] as PointLight
+        val direction = lightsDirection[i]
+        val delta = randf(0.1f, 5f)
+        if (direction) {
+            sceneLight.range += delta
+            if (sceneLight.range >= 100f) {
+                lightsDirection[i] = false
+            }
+        } else {
+            sceneLight.range -= delta
+            if (sceneLight.range <= 30f) {
+                lightsDirection[i] = true
             }
         }
     }
@@ -263,6 +255,51 @@ private fun mandalorianUpdate() {
         .scale(0.15f)
 }
 
+private fun itemUse(callback: Callback) {
+    glTechRttUse(teapotRtt) {
+        glTechRttUse(computerRtt) {
+            glTechRttUse(mandalorianRtt) {
+                glTechPostProcessingUse(mergingItem) {
+                    glShadingPhongUse(shadingPhong) {
+                        glTextureUse(teapotTexture) {
+                            libWavefrontGroupUse(mandalorianGroup) {
+                                glTextureUse(mandalorianTexture) {
+                                    libWavefrontGroupUse(teapotGroup) {
+                                        libWavefrontGroupUse(computerGroup) {
+                                            callback.invoke()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun tvsUse(callback: Callback) {
+    glShadingPbrUse(shadingPbr) {
+        glMeshUse(tvObject.mesh) {
+            glTextureUse(listOf(tvMaterial.albedo, tvMaterial.normal, tvMaterial.metallic,
+                tvMaterial.roughness, tvMaterial.ao)) {
+                callback.invoke()
+            }
+        }
+    }
+}
+
+private fun logoUse(callback: Callback) {
+    glShadingFlatUse(logoTechnique) {
+        glMeshUse(logoRect) {
+            glTextureUse(logoTexture) {
+                callback.invoke()
+            }
+        }
+    }
+}
+
 private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: GlTexture) {
     unifItemModel.value = matrix
     unifItemAlbedo.value = albedo
@@ -284,87 +321,60 @@ private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: Gl
     }
 }
 
-// -------------------------------- Techniques --------------------------------
-
-private val shadingPhong = ShadingPhong(unifItemModel, constItemView, constItemProj, constIteEye,
-    unifItemAlbedoSampler, constItemMatAmbient, constItemMatDiffuse, constItemMatSpecular, constItemMatShine)
-
-private val unifTvItemAlbedo = unifs(computerRtt.color)
-private val unifTvItemAlbedoSampler = sampler(unifTvItemAlbedo)
-
-private val shadingPbr = ShadingPbr(
-    unifTvModel, unifTvView, constm4(camera.projectionM), unifTvEye,
-    unifTvItemAlbedoSampler, unifTvNormal, unifTvMetallic, unifTvRoughness, unifTvAO)
-
-// -------------------------------- Logo --------------------------------
-
-private val logoSampler = sampler(unifs(logoTexture))
-private val logoMatrix = unifm4 {
-    mat4().identity().set(camera.projectionM)
-        .mul(camera.calculateViewM())
-        .mul(mat4().translate(camera.position).translate(10f, 0f, -10f).scale(0.015f))
+private fun drawItems() {
+    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
+    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
+    itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
 }
 
-private val logoTechnique = ShadingFlat(logoMatrix, logoSampler)
-private val logoRect = glMeshCreateRect(SCREEN_WIDTH.toFloat(), SCREEN_HEIGHT.toFloat())
+private val worldPosition = vec3()
+private fun drawTv(tv: TvInstance) {
+    tv.matrix.getTranslation(worldPosition)
+    if (worldPosition.distanceSquared(camera.position) > DRAW_DISTANCE_SQ) {
+        return // too far
+    }
+    unifTvModel.value = tv.matrix
+    when (tv.type) {
+        TvType.TEAPOT -> unifTvItemAlbedo.value = teapotRtt.color
+        TvType.COMPUTER -> unifTvItemAlbedo.value = computerRtt.color
+        TvType.MANDALORIAN -> unifTvItemAlbedo.value = mandalorianRtt.color
+    }
+    glShadingPbrInstance(shadingPbr, tvObject.mesh)
+}
 
-private fun logoUse(callback: Callback) {
-    glShadingFlatUse(logoTechnique) {
-        glMeshUse(logoRect) {
-            glTextureUse(logoTexture) {
-                callback.invoke()
+private fun tvsDraw() {
+    glClear(col3().black())
+    glCulling {
+        glDepthTest {
+            glTextureBind(computerRtt.color) {
+                glTextureBind(teapotRtt.color) {
+                    glTextureBind(mandalorianRtt.color) {
+                        glTextureBind(tvMaterial.normal) {
+                            glTextureBind(tvMaterial.metallic) {
+                                glTextureBind(tvMaterial.roughness) {
+                                    glTextureBind(tvMaterial.ao) {
+                                        lightCamera.position.set(camera.position).add(0f, 0f, -1f)
+                                        glShadingPbrDraw(shadingPbr, lightsAll) {
+                                            for (tv in tvs) {
+                                                drawTv(tv)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 private fun logoDraw() {
-    glShadingFlatDraw(logoTechnique) {
-        glTextureBind(logoTexture) {
-            glShadingFlatInstance(logoTechnique, logoRect)
-        }
-    }
-}
-
-// -------------------------------- Main --------------------------------
-
-private fun drawFrame() {
-    updateCamera()
-    lightsUpdate()
-    teapotUpdate()
-    computerUpdate()
-    mandalorianUpdate()
-    glClear(col3().black())
-    itemDraw(teapotRtt, teapotObject.mesh, teapotMatrix, teapotTexture)
-    itemDraw(computerRtt, computerObject.mesh, computerMatrix, computerTexture)
-    itemDraw(mandalorianRtt, mandalorianObject.mesh, mandalorianMatrix, mandalorianTexture)
-    glCulling {
-        glDepthTest {
-            tvsDraw()
-        }
-    }
     glBlend {
-        logoDraw()
-    }
-}
-
-fun main() {
-    window.create {
-        window.buttonCallback = { button, pressed ->
-            if (button == MouseButton.LEFT) {
-                mouseLook = pressed
-            }
-        }
-        tvsUse {
-            itemUse {
-                logoUse {
-                    //capturer.capture {
-                        window.show {
-                            drawFrame()
-                            //capturer.frame()
-                        }
-                    //}
-                }
+        glShadingFlatDraw(logoTechnique) {
+            glTextureBind(logoTexture) {
+                glShadingFlatInstance(logoTechnique, logoRect)
             }
         }
     }
