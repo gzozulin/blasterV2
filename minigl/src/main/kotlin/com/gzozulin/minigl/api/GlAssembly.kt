@@ -274,6 +274,12 @@ fun unifv2i(v: vec2i? = null) = object : Uniform<vec2i>(null, v) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun unifv2i(x: Int, y: Int) = object : Uniform<vec2i>(null, vec2i(x, y)) {
+    override fun declare() = "uniform ivec2 $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
+
 fun unifv2i(p: () -> vec2i) = object : Uniform<vec2i>(p, null) {
     override fun declare() = "uniform ivec2 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
@@ -331,6 +337,10 @@ fun constf(value: Float) = object : Constant<Float>(value) {
 }
 
 fun constv2i(value: vec2i) = object : Constant<vec2i>(value) {
+    override fun declare() = "const ivec2 $name = ivec2(${value.x}, ${value.y});"
+}
+
+fun constv2i(x: Int, y: Int) = object : Constant<vec2i>(vec2i(x, y)) {
     override fun declare() = "const ivec2 $name = ivec2(${value.x}, ${value.y});"
 }
 

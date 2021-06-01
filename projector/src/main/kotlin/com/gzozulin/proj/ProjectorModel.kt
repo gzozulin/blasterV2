@@ -17,7 +17,7 @@ data class OrderedSpan(override var text: String, val order: Int, override var c
                        override var visibility: SpanVisibility) : TextSpan
 
 enum class AnimationState {
-    FIND_KEY, WAIT_KEY, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
+    FIND_KEY, SYNC_UP, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
 class ProjectorModel {
     private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep2_technique/8-projector-intro/scenario").readText()) }
@@ -46,7 +46,7 @@ class ProjectorModel {
         currentFrame++
         when (animationState) {
             AnimationState.FIND_KEY   -> findKeyFrame()
-            AnimationState.WAIT_KEY   -> waitForKeyFrame()
+            AnimationState.SYNC_UP    -> syncWithKeyFrame()
             AnimationState.MAKE_SPACE -> makeSpace()
             AnimationState.ADVANCING  -> advanceSpans()
             AnimationState.SCROLLING  -> scrollToPageCenter()
@@ -60,10 +60,10 @@ class ProjectorModel {
 
     private fun findKeyFrame() {
         findOrderKeyFrame()
-        animationState = AnimationState.WAIT_KEY
+        animationState = AnimationState.SYNC_UP
     }
 
-    private fun waitForKeyFrame() {
+    private fun syncWithKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
             animationState = AnimationState.MAKE_SPACE
         }

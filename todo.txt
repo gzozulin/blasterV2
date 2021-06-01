@@ -63,3 +63,5 @@ x 2021-05-22 (A) 2021-05-15 Fix minimap cursor +code @simple
 2021-05-22 Anisotropic Filtering for GlTexture +code @simple
 (B) 2021-05-26 Random camera start positions/shots +code @simple
 (A) 2021-05-26 Establishing shot +video @simple
+(B) 2021-05-31 Basic support for C and interop +code @complex
+2021-06-01 Channel watermarks, especially for captures +video @simple

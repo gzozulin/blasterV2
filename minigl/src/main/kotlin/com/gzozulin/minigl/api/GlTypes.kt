@@ -109,3 +109,5 @@ fun aabb.scaleTo(to: Float): Float {
 }
 
 fun mat4.orthoBox(side: Float) = identity().ortho(-side, side, -side, side, side, -side)
+fun mat4.perspCam(window: GlWindow) = identity().identity()
+    .perspective(Math.toRadians(90.0).toFloat(), window.width.toFloat() / window.height.toFloat(), 0.1f, 500f)
