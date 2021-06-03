@@ -3,3 +3,5 @@ include ':minigl'
 include ':miniui'
 include ':sfcs'
 include ':projector'
+include ':shadergen'
+

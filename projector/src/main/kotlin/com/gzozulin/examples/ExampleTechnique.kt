@@ -95,7 +95,7 @@ fun main() {
                             glClear(col3().azure().mul(0.5f))
                             glShadingFlatInstance(shadingFlat, mesh)
                         }
-                        capturer.addFrame()
+                        //capturer.addFrame()
                     }
                 }
             }
