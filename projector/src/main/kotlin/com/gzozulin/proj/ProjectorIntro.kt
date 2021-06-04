@@ -176,15 +176,15 @@ fun main() {
         tvsUse {
             itemUse {
                 logoUse {
-                    //capturer.capture {
+                    capturer.capture {
                         window.show {
                             updateFrame()
                             drawItems()
                             tvsDraw()
                             logoDraw()
-                            //capturer.addFrame()
+                            capturer.addFrame()
                         }
-                    //}
+                    }
                 }
             }
         }
@@ -245,7 +245,7 @@ private fun updateFrame() {
 }
 
 private fun updateCamera() {
-    camera.position.x += 0.03f
+    camera.position.x += 0.01f
     camera.viewVersion.increment()
 }
 
@@ -253,7 +253,7 @@ private fun lightsUpdate() {
     for (i in 0 until lightsScene.size) {
         val sceneLight = lightsScene[i] as PointLight
         val direction = lightsDirection[i]
-        val delta = randf(0.1f, 5f)
+        val delta = randf(0.1f, 1f)
         if (direction) {
             sceneLight.range += delta
             if (sceneLight.range >= 100f) {

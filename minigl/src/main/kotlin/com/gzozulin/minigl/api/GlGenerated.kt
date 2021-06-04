@@ -1,11 +1,11 @@
 package com.gzozulin.minigl.api
 
-private const val DEF_MUL = "generate int mul ( int left , int right ) { return left * right ; }"
+private const val DEF_DOTV3 = "generate float dotv3 ( vec3 left , vec3 right ) { return left [ 0 ] * right [ 0 ] + left [ 1 ] * right [ 1 ] + left [ 2 ] * right [ 2 ] ; }"
 
-private const val DEF_BOTH = DEF_MUL
+private const val DEF_BOTH = DEF_DOTV3
 
-fun mul(left: Expression<Int>, right: Expression<Int>) = object : Expression<Int>() {
-    override fun expr() = "mul(left, right)"
+fun dotv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "dotv3(left, right)"
     override fun roots() = listOf(left, right)
 }
 

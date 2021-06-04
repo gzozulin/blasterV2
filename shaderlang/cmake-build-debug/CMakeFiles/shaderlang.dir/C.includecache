@@ -7,8 +7,8 @@
 #IncludeRegexTransform: 
 
 /home/greg/blaster/shaderlang/main.c
-stdio.h
--
 assert.h
+-
+malloc.h
 -
 
