@@ -16,7 +16,8 @@ private typealias FunctionCtx = CParser.FunctionDefinitionContext
 
 private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: CommonTokenStream, val parser: CParser)
 private data class CParam(val type: String, val name: String)
-private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String)
+private enum class COperationEnv { VERTEX, FRAGMENT, BOTH }
+private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String, val env: COperationEnv)
 
 fun main(): Unit = doCreateOutput(
     renderAssembly(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
@@ -28,21 +29,32 @@ private fun doCreateOutput(content: String, file: File) {
 
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n"
-
-    var decl = """ val DECLARATIONS =
-        
-    """.trimIndent()
-
+    val both = mutableListOf<COperation>()
+    val frag = mutableListOf<COperation>()
+    val vert = mutableListOf<COperation>()
     operations.forEach { operation ->
-
-
+        result += renderDefinition(operation) + "\n\n"
+        when (operation.env) {
+            COperationEnv.VERTEX -> vert.add(operation)
+            COperationEnv.FRAGMENT -> frag.add(operation)
+            COperationEnv.BOTH -> both.add(operation)
+        }
     }
-
+    result += "private const val DEF_BOTH = ${both.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    if (frag.isNotEmpty()) {
+        result += "private const val DEF_FRAG = DEF_BOTH + ${frag.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    }
+    if (vert.isNotEmpty()) {
+        result += "private const val DEF_VERT = DEF_VERT + ${vert.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    }
     operations.forEach { operation ->
         result += renderOperation(operation) + "\n\n"
     }
     return result
 }
+
+private fun renderDefinition(operation: COperation) =
+    "private const val DEF_${operation.name.toUpperCase()} = \"${operation.def}\""
 
 private fun renderOperation(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
@@ -69,16 +81,28 @@ private fun convertType(ctype: String) = when (ctype) {
 private fun visitCFile(cfile: CFile): List<COperation> {
     val result = mutableListOf<COperation>()
     val visitor = FunctionVisitor { ctx ->
-        result.add(parseCFunction(ctx, cfile.tokens))
+        parseCFunction(ctx, cfile.tokens)?.let {
+            result.add(it)
+        }
     }
     visitor.visit(cfile.parser.compilationUnit())
     return result
 }
 
-private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation {
+private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation? {
     val name = ctx.declarator().directDeclarator().directDeclarator().text
     val definition = tokens.extract(ctx)
-    val type = ctx.declarationSpecifiers().text
+    val declSpecifiers = ctx.declarationSpecifiers()
+    if (declSpecifiers.childCount == 1) {
+        return null
+    }
+    val env = when (declSpecifiers.declarationSpecifier()[0].text) {
+        "generate"      -> COperationEnv.BOTH
+        "generate_vert" -> COperationEnv.VERTEX
+        "generate_frag" -> COperationEnv.FRAGMENT
+        else -> error("Unknown environment specifier! $")
+    }
+    val type = declSpecifiers.declarationSpecifier()[1].text
     val params = mutableListOf<CParam>()
     if (ctx.declarator().directDeclarator().parameterTypeList() != null) {
         val paramList = ctx.declarator().directDeclarator().parameterTypeList().parameterList()
@@ -90,7 +114,7 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
             }
         }
     }
-    return COperation(type, name, params, definition)
+    return COperation(type, name, params, definition, env)
 }
 
 private fun parseCFile(file: File): CFile {
