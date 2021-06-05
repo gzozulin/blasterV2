@@ -29,10 +29,8 @@ private fun doCreateOutput(content: String, file: File) {
 }
 
 private fun renderAssembly(operations: List<COperation>): String {
-    var result = "package com.gzozulin.minigl.api.test\n\n" +
-            "import com.gzozulin.minigl.api.Expression\n" +
-            "import com.gzozulin.minigl.api.vec2\n" +
-            "import com.gzozulin.minigl.api.vec2i\n\n"
+    var result = "package com.gzozulin.minigl.api\n\n" +
+            "import com.gzozulin.minigl.scene.Light\n\n"
     operations.forEach { operation ->
         result += renderDefinition(operation) + "\n"
     }
@@ -45,7 +43,7 @@ private fun renderAssembly(operations: List<COperation>): String {
 }
 
 private fun renderDefinition(operation: COperation) =
-    "private const val DEF_${operation.name.toUpperCase()} = \"${operation.def}\""
+    "private const val DEF_${operation.name.toUpperCase()} = \"${operation.def}\\n\\n\""
 
 private fun renderOperation(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
@@ -71,6 +69,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "vec2"      -> "vec2"
     "ivec2"     -> "vec2i"
     "mat4"      -> "mat4"
+    "Light"     -> "Light"
     else        -> error("Unknown type! $ctype")
 }
 

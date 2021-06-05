@@ -59,19 +59,6 @@ private const val EXPR_SET_W = """
     }
 """
 
-private const val EXPR_TILE =
-    "vec2 expr_tile(vec2 texCoord, ivec2 uv, ivec2 cnt) {\n" +
-            "    vec2 result;\n" +
-            "    float tileSideX = 1.0 / float(cnt.x);\n" +
-            "    float tileStartX = float(uv.x) * tileSideX;\n" +
-            "    result.x = tileStartX + texCoord.x * tileSideX;\n" +
-            "    \n" +
-            "    float tileSideY = 1.0 / float(cnt.y);\n" +
-            "    float tileStartY = float(uv.y) * tileSideY;\n" +
-            "    result.y = tileStartY + texCoord.y * tileSideY;\n" +
-            "    return result;\n" +
-            "}\n"
-
 private const val EXPR_DISCARD =
     "vec4 expr_discard() {\n" +
             "    discard;\n" +
@@ -88,12 +75,6 @@ private const val EXPR_LIGHT_DECL = """
     };
 """
 
-private const val EXPR_LUMINOSITY = """
-    float expr_luminosity(float distance, Light light) {
-        return 1.0 / (light.attenConstant + light.attenLinear * distance + light.attenQuadratic * distance * distance);
-    }
-"""
-
 private const val EXPR_PHONG_MATERIAL_DECL = """
     struct PhongMaterial {
         vec3 ambient;
@@ -108,7 +89,7 @@ private const val EXPR_POINT_LIGHT_CONTRIB = """
     vec3 expr_pointLightContrib(vec3 viewDir, vec3 fragPosition, vec3 fragNormal, Light light, PhongMaterial material) {
         vec3 direction = light.vector - fragPosition;
         float distance = length(direction);
-        float luminosity = expr_luminosity(distance, light);
+        float luminosity = luminosity(distance, light);
         vec3 lightDir = normalize(direction);
         return expr_lightContrib(viewDir, lightDir, fragNormal, luminosity, light, material);
     }
@@ -151,24 +132,58 @@ private const val EXPR_SPECULAR_CONTRIB = """
     }
 """
 
-const val DECLARATIONS_VERT = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
-        EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-        EXPR_TILE
+private const val EXPR_ITOF = """
+    float itof(int i) {
+        return float(i);
+    }
+"""
 
-const val DECLARATIONS_FRAG = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+private const val EXPR_FTOI = """
+    float ftoi(float f) {
+        return int(f);
+    }
+"""
+
+private const val EXPR_V2 = """
+    vec2 v2(float x, float y) {
+        return vec2(x, y);
+    }
+"""
+
+private const val EXPR_V2I = """
+    ivec2 v2i(int x, int y) {
+        return ivec2(x, y);
+    }
+"""
+
+private const val EXPR_V3 = """
+    vec3 v3(float x, float y, float z) {
+        return vec3(x, y, z);
+    }
+"""
+
+const val PRIVATE_DEFINITIONS = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-        EXPR_TILE + EXPR_DISCARD +
-        EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
-        EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
-        EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
+        EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL +
+        EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3
 
 private const val MAIN_DECL = "void main() {"
 
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_VERT\n"
-const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$DECLARATIONS_FRAG\n"
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
+const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n" +
+        "$EXPR_DIFFUSE_CONTRIB$EXPR_SPECULAR_CONTRIB$EXPR_LIGHT_CONTRIB$EXPR_POINT_LIGHT_CONTRIB$EXPR_DIR_LIGHT_CONTRIB" // TODO: remove
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
+
+abstract class Expression<T> {
+    open val name: String = nextName()
+    abstract fun expr(): String
+    open fun roots(): List<Expression<*>> = emptyList()
+    open fun submit(program: GlProgram) {
+        roots().forEach { it.submit(program) }
+    }
+}
 
 // ----------------------------- Substitution -----------------------------
 
@@ -204,15 +219,6 @@ fun glExprSubstitute(source: String, expressions: Map<String, Expression<*>>): S
 
 // ----------------------------- Expressions -----------------------------
 
-abstract class Expression<T> {
-    open val name: String = nextName()
-    abstract fun expr(): String
-    open fun roots(): List<Expression<*>> = emptyList()
-    open fun submit(program: GlProgram) {
-        roots().forEach { it.submit(program) }
-    }
-}
-
 data class Named<T>(val given: String) : Expression<T>() {
     override fun expr() = given
 }
@@ -238,7 +244,7 @@ abstract class Constant<T>(internal val value: T) : Expression<T>() {
     abstract fun declare(): String
 }
 
-abstract class Cache<T>() : Expression<T>() {
+abstract class Cache<T> : Expression<T>() {
     override fun expr() = name
     abstract fun declare(): String
 }
@@ -346,12 +352,41 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
             "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
 }
 
+// ----------------------------- Ctors -----------------------------
+
+fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "v2(${x.expr()}, ${y.expr()})"
+    override fun roots() = listOf(x, y)
+}
+
+fun v2i(x: Expression<Int>, y: Expression<Int>) = object : Expression<vec2i>() {
+    override fun expr() = "v2i(${x.expr()}, ${y.expr()})"
+    override fun roots() = listOf(x, y)
+}
+
+fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "v3(${x.expr()}, ${y.expr()}, ${z.expr()})"
+    override fun roots() = listOf(x, y, z)
+}
+
 // ----------------------------- Cache -----------------------------
 
 // todo: can be done automatically by reference counting?
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
     override fun declare() = "vec4 $name = ${value.expr()};"
     override fun roots() = listOf(value)
+}
+
+// ----------------------------- Casts -----------------------------
+
+fun itof(i: Expression<Int>) = object : Expression<Float>() {
+    override fun expr() = "itof(${i.expr()})"
+    override fun roots() = listOf(i)
+}
+
+fun ftoi(f: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "ftoi(${f.expr()})"
+    override fun roots() = listOf(f)
 }
 
 // ----------------------------- Arithmetics -----------------------------
@@ -386,13 +421,6 @@ fun sampler(sampler: Expression<GlTexture>, texCoord: Expression<vec2> = namedTe
 fun samplerq(texCoord: Expression<vec3>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(texCoord, sampler)
-}
-
-// ----------------------------- Tile -----------------------------
-
-fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
-    override fun expr() = "expr_tile(${texCoord.expr()}, ${uv.expr()}, ${cnt.expr()})"
-    override fun roots() = listOf(texCoord, uv, cnt)
 }
 
 // ------------------------- Discard -------------------------

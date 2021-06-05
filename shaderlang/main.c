@@ -25,6 +25,18 @@ struct vec3 {
     float z;
 };
 
+struct vec4 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+struct mat4 {
+    float value;
+};
+
+// todo: export
 struct Light {
     struct vec3 vector;
     struct vec3 color;
@@ -33,6 +45,7 @@ struct Light {
     float attenQuadratic;
 };
 
+// todo: export
 struct PhongMaterial {
     struct vec3 ambient;
     struct vec3 diffuse;
@@ -71,15 +84,19 @@ vec3 v3muli(vec3 left, int right) {
 
 }*/
 
-// ------------------- PUBLIC ---------------
+/*struct vec4 transform(struct mat4 m, struct vec4 vec) {
 
-public float itof(int i) {
+}*/
+
+float itof(int i) {
     return (float)i;
 }
 
-public float ftoi(float f) {
+float ftoi(float f) {
     return (int)f;
 }
+
+// ------------------- PUBLIC ---------------
 
 public struct vec2 tile(struct vec2 texCoord, struct ivec2 uv, struct ivec2 cnt) {
     struct vec2 result = v2(0.0f, 0.0f);
