@@ -12,12 +12,13 @@ import java.io.File
 private const val DEFINITIONS = "shaderlang/main.c"
 private const val ASSEMBLY = "minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
 
+private const val PUBLIC_DEF = "public"
+
 private typealias FunctionCtx = CParser.FunctionDefinitionContext
 
 private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: CommonTokenStream, val parser: CParser)
 private data class CParam(val type: String, val name: String)
-private enum class COperationEnv { VERTEX, FRAGMENT, BOTH }
-private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String, val env: COperationEnv)
+private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String)
 
 fun main(): Unit = doCreateOutput(
     renderAssembly(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
@@ -29,24 +30,10 @@ private fun doCreateOutput(content: String, file: File) {
 
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n"
-    val both = mutableListOf<COperation>()
-    val frag = mutableListOf<COperation>()
-    val vert = mutableListOf<COperation>()
     operations.forEach { operation ->
-        result += renderDefinition(operation) + "\n\n"
-        when (operation.env) {
-            COperationEnv.VERTEX -> vert.add(operation)
-            COperationEnv.FRAGMENT -> frag.add(operation)
-            COperationEnv.BOTH -> both.add(operation)
-        }
+        result += renderDefinition(operation) + "\n"
     }
-    result += "private const val DEF_BOTH = ${both.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    if (frag.isNotEmpty()) {
-        result += "private const val DEF_FRAG = DEF_BOTH + ${frag.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    }
-    if (vert.isNotEmpty()) {
-        result += "private const val DEF_VERT = DEF_VERT + ${vert.joinToString { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    }
+    result += "const val PUBLIC_DEFINITIONS = ${operations.joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     operations.forEach { operation ->
         result += renderOperation(operation) + "\n\n"
     }
@@ -74,6 +61,8 @@ private fun convertType(ctype: String) = when (ctype) {
     "int"       -> "Int"
     "float"     -> "Float"
     "vec3"      -> "vec3"
+    "vec2"      -> "vec2"
+    "ivec2"     -> "vec2i"
     "mat4"      -> "mat4"
     else        -> error("Unknown type! $ctype")
 }
@@ -91,18 +80,19 @@ private fun visitCFile(cfile: CFile): List<COperation> {
 
 private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation? {
     val name = ctx.declarator().directDeclarator().directDeclarator().text
-    val definition = tokens.extract(ctx)
     val declSpecifiers = ctx.declarationSpecifiers()
-    if (declSpecifiers.childCount == 1) {
+    var shouldExport = false
+    for (i in 0 until declSpecifiers.childCount) {
+        val specifier = declSpecifiers.getChild(i)
+        if (specifier.text == PUBLIC_DEF) {
+            shouldExport = true
+        }
+    }
+    val definition = tokens.filterAndExtract(ctx)
+    if (!shouldExport) {
         return null
     }
-    val env = when (declSpecifiers.declarationSpecifier()[0].text) {
-        "generate"      -> COperationEnv.BOTH
-        "generate_vert" -> COperationEnv.VERTEX
-        "generate_frag" -> COperationEnv.FRAGMENT
-        else -> error("Unknown environment specifier! $")
-    }
-    val type = declSpecifiers.declarationSpecifier()[1].text
+    val type = declSpecifiers.declarationSpecifier()[declSpecifiers.childCount - 1].text
     val params = mutableListOf<CParam>()
     if (ctx.declarator().directDeclarator().parameterTypeList() != null) {
         val paramList = ctx.declarator().directDeclarator().parameterTypeList().parameterList()
@@ -114,7 +104,7 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
             }
         }
     }
-    return COperation(type, name, params, definition, env)
+    return COperation(type, name, params, definition)
 }
 
 private fun parseCFile(file: File): CFile {
@@ -132,5 +122,10 @@ private class FunctionVisitor(val callback: (ctx: FunctionCtx) -> Unit) : CBaseV
     }
 }
 
-private fun CommonTokenStream.extract(ctx: ParserRuleContext, separator: String = " ") =
-    get(ctx.start.tokenIndex, ctx.stop.tokenIndex).joinToString(separator) { it.text }
+private fun CommonTokenStream.filterAndExtract(ctx: ParserRuleContext, separator: String = " ") =
+    get(ctx.start.tokenIndex, ctx.stop.tokenIndex)
+        .filter { it.text == "const" }
+        .filter { it.text == "struct" }
+        .filter { it.text == "public" }
+        .joinToString(separator) { it.text }
+        .trim()
