@@ -78,20 +78,6 @@ private const val EXPR_DISCARD =
             "    return vec4(1.0);\n" +
             "}\n"
 
-private const val EXPR_NEAR =
-    "bool expr_near(float left, float right) {\n" +
-            "    return abs(left - right) < 0.00001;\n" +
-            "}\n"
-
-private const val EXPR_NEAR_V4 =
-    "bool expr_near(vec4 left, vec4 right) {\n" +
-            "    return " +
-            "       expr_near(left.x, right.x) && " +
-            "       expr_near(left.y, right.y) && " +
-            "       expr_near(left.z, right.z) && " +
-            "       expr_near(left.w, right.w);\n" +
-            "}\n"
-
 private const val EXPR_LIGHT_DECL = """
     struct Light {
         vec3 vector;
@@ -167,11 +153,11 @@ private const val EXPR_SPECULAR_CONTRIB = """
 
 const val DECLARATIONS_VERT = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-        EXPR_TILE + EXPR_NEAR + EXPR_NEAR_V4
+        EXPR_TILE
 
 const val DECLARATIONS_FRAG = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
         EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-        EXPR_TILE + EXPR_DISCARD + EXPR_NEAR + EXPR_NEAR_V4 +
+        EXPR_TILE + EXPR_DISCARD +
         EXPR_LIGHT_DECL + EXPR_LUMINOSITY + EXPR_PHONG_MATERIAL_DECL +
         EXPR_DIFFUSE_CONTRIB + EXPR_SPECULAR_CONTRIB + EXPR_LIGHT_CONTRIB +
         EXPR_POINT_LIGHT_CONTRIB + EXPR_DIR_LIGHT_CONTRIB
@@ -422,18 +408,8 @@ fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression
     override fun roots() = listOf(check, left, right)
 }
 
-fun <R> eq(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
-    override fun expr() = "(${left.expr()} == ${right.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
 fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
     override fun expr() = "(${left.expr()} > ${right.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
-fun <R> near(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
-    override fun expr() = "expr_near(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 

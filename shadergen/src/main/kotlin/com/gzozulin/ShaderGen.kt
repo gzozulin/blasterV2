@@ -29,10 +29,14 @@ private fun doCreateOutput(content: String, file: File) {
 }
 
 private fun renderAssembly(operations: List<COperation>): String {
-    var result = "package com.gzozulin.minigl.api\n\n"
+    var result = "package com.gzozulin.minigl.api.test\n\n" +
+            "import com.gzozulin.minigl.api.Expression\n" +
+            "import com.gzozulin.minigl.api.vec2\n" +
+            "import com.gzozulin.minigl.api.vec2i\n\n"
     operations.forEach { operation ->
         result += renderDefinition(operation) + "\n"
     }
+    result += "\n"
     result += "const val PUBLIC_DEFINITIONS = ${operations.joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     operations.forEach { operation ->
         result += renderOperation(operation) + "\n\n"
@@ -45,13 +49,16 @@ private fun renderDefinition(operation: COperation) =
 
 private fun renderOperation(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
-        override fun expr() = "${operation.name}(${renderRoots(operation.params)})"
+        override fun expr() = "${operation.name}(${renderExpressions(operation.params)})"
         override fun roots() = listOf(${renderRoots(operation.params)})
     }
 """.trimIndent()
 
 private fun renderParams(params: List<CParam>) =
     params.joinToString { "${it.name}: Expression<${convertType(it.type)}>" }
+
+private fun renderExpressions(params: List<CParam>) =
+    params.joinToString { "\${${it.name}.expr()}" }
 
 private fun renderRoots(params: List<CParam>): String {
     return params.joinToString { it.name }
@@ -92,7 +99,7 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
     if (!shouldExport) {
         return null
     }
-    val type = declSpecifiers.declarationSpecifier()[declSpecifiers.childCount - 1].text
+    val type = tokens.filterAndExtract(declSpecifiers)
     val params = mutableListOf<CParam>()
     if (ctx.declarator().directDeclarator().parameterTypeList() != null) {
         val paramList = ctx.declarator().directDeclarator().parameterTypeList().parameterList()
@@ -100,7 +107,7 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
             val child = paramList.getChild(i)
             if (child is CParser.ParameterDeclarationContext) {
                 check(child.childCount == 2) { "Too many children for a parameter declaration! ${child.text}" }
-                params.add(CParam(child.getChild(0).text, child.getChild(1).text))
+                params.add(CParam(tokens.filterAndExtract(child.declarationSpecifiers()), child.getChild(1).text))
             }
         }
     }
@@ -124,8 +131,8 @@ private class FunctionVisitor(val callback: (ctx: FunctionCtx) -> Unit) : CBaseV
 
 private fun CommonTokenStream.filterAndExtract(ctx: ParserRuleContext, separator: String = " ") =
     get(ctx.start.tokenIndex, ctx.stop.tokenIndex)
-        .filter { it.text == "const" }
-        .filter { it.text == "struct" }
-        .filter { it.text == "public" }
+        .filterNot { it.text == "const" }
+        .filterNot { it.text == "struct" }
+        .filterNot { it.text == "public" }
         .joinToString(separator) { it.text }
         .trim()

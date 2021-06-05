@@ -4,15 +4,26 @@
 #pragma ide diagnostic ignored "readability-non-const-parameter"
 
 #include <assert.h>
-#include <malloc.h>
 
 #define public
 
 // ------------------- TYPES -------------------
 
-struct vec2 { float x; float y; };
-struct ivec2 { int x; int y; };
-struct vec3 { float x; float y; float z; };
+struct vec2 {
+    float x;
+    float y;
+};
+
+struct ivec2 {
+    int x;
+    int y;
+};
+
+struct vec3 {
+    float x;
+    float y;
+    float z;
+};
 
 struct Light {
     struct vec3 vector;
@@ -20,6 +31,14 @@ struct Light {
     float attenConstant;
     float attenLinear;
     float attenQuadratic;
+};
+
+struct PhongMaterial {
+    struct vec3 ambient;
+    struct vec3 diffuse;
+    struct vec3 specular;
+    float shine;
+    float transparency;
 };
 
 // ------------------- CTORS -------------------
@@ -73,7 +92,7 @@ public struct vec2 tile(struct vec2 texCoord, struct ivec2 uv, struct ivec2 cnt)
     return result;
 }
 
-float luminosity(float distance, struct Light light) {
+public float luminosity(float distance, struct Light light) {
     return 1.0f / (light.attenConstant + light.attenLinear * distance + light.attenQuadratic * distance * distance);
 }
 
