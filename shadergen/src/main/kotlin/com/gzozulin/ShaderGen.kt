@@ -12,13 +12,16 @@ import java.io.File
 private const val DEFINITIONS = "shaderlang/main.c"
 private const val ASSEMBLY = "minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
 
-private const val PUBLIC_DEF = "public"
+private const val ACCESS_PUBLIC = "public"
+private const val ACCESS_CUSTOM = "custom"
 
 private typealias FunctionCtx = CParser.FunctionDefinitionContext
 
 private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: CommonTokenStream, val parser: CParser)
 private data class CParam(val type: String, val name: String)
-private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String)
+private enum class COperationAccess { PRIVATE, CUSTOM, PUBLIC }
+private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String,
+                              val access: COperationAccess)
 
 fun main(): Unit = doCreateOutput(
     renderAssembly(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
@@ -33,10 +36,13 @@ private fun renderAssembly(operations: List<COperation>): String {
             "import com.gzozulin.minigl.scene.Light\n" +
             "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
     operations.forEach { operation ->
-        result += renderDefinition(operation) + "\n"
+        if (operation.access == COperationAccess.PUBLIC) {
+            result += renderDefinition(operation) + "\n"
+        }
     }
     result += "\n"
-    result += "const val PUBLIC_DEFINITIONS = ${operations.joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    result += "const val PUBLIC_DEFINITIONS = ${operations.filter { it.access == COperationAccess.PUBLIC }
+        .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     operations.forEach { operation ->
         result += renderOperation(operation) + "\n\n"
     }
@@ -49,7 +55,7 @@ private fun renderDefinition(operation: COperation) =
 private fun renderOperation(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
         override fun expr() = "${operation.name}(${renderExpressions(operation.params)})"
-        override fun roots() = listOf(${renderRoots(operation.params)})
+        ${renderRoots(operation.params)}
     }
 """.trimIndent()
 
@@ -60,10 +66,12 @@ private fun renderExpressions(params: List<CParam>) =
     params.joinToString { "\${${it.name}.expr()}" }
 
 private fun renderRoots(params: List<CParam>): String {
-    return params.joinToString { it.name }
+    return if (params.isNotEmpty()) "override fun roots() = listOf(${params.joinToString { it.name }})"
+    else "override fun roots() = listOf<Expression<*>>()"
 }
 
 private fun convertType(ctype: String) = when (ctype) {
+    "bool"      -> "Boolean"
     "int"       -> "Int"
     "float"     -> "Float"
     "vec3"      -> "vec3"
@@ -89,17 +97,19 @@ private fun visitCFile(cfile: CFile): List<COperation> {
 private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation? {
     val name = ctx.declarator().directDeclarator().directDeclarator().text
     val declSpecifiers = ctx.declarationSpecifiers()
-    var shouldExport = false
+    var access = COperationAccess.PRIVATE
     for (i in 0 until declSpecifiers.childCount) {
         val specifier = declSpecifiers.getChild(i)
-        if (specifier.text == PUBLIC_DEF) {
-            shouldExport = true
+        if (specifier.text == ACCESS_CUSTOM) {
+            access = COperationAccess.CUSTOM
+        } else if (specifier.text == ACCESS_PUBLIC) {
+            access = COperationAccess.PUBLIC
         }
     }
-    val definition = tokens.filterAndExtract(ctx)
-    if (!shouldExport) {
+    if (access == COperationAccess.PRIVATE) {
         return null
     }
+    val definition = tokens.filterAndExtract(ctx)
     val type = tokens.filterAndExtract(declSpecifiers)
     val params = mutableListOf<CParam>()
     if (ctx.declarator().directDeclarator().parameterTypeList() != null) {
@@ -112,7 +122,7 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
             }
         }
     }
-    return COperation(type, name, params, definition)
+    return COperation(type, name, params, definition, access)
 }
 
 private fun parseCFile(file: File): CFile {
@@ -134,6 +144,7 @@ private fun CommonTokenStream.filterAndExtract(ctx: ParserRuleContext, separator
     get(ctx.start.tokenIndex, ctx.stop.tokenIndex)
         .filterNot { it.text == "const" }
         .filterNot { it.text == "struct" }
-        .filterNot { it.text == "public" }
+        .filterNot { it.text == ACCESS_PUBLIC }
+        .filterNot { it.text == ACCESS_CUSTOM }
         .joinToString(separator) { it.text }
         .trim()

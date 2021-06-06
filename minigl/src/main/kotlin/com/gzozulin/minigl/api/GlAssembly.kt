@@ -115,15 +115,19 @@ private const val EXPR_V3 = """
     }
 """
 
-const val PRIVATE_DEFINITIONS = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
-        EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-        EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL +
-        EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3
+// TODO: should be gone eventually
+private const val PRIVATE_DEFINITIONS =
+    EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
+    EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
+    EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL
+
+private const val CUSTOM_DEFINITIONS =
+    EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3
 
 private const val MAIN_DECL = "void main() {"
 
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
-const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n"
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
+const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
@@ -304,41 +308,12 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
             "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
 }
 
-// ----------------------------- Ctors -----------------------------
-
-fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
-    override fun expr() = "v2(${x.expr()}, ${y.expr()})"
-    override fun roots() = listOf(x, y)
-}
-
-fun v2i(x: Expression<Int>, y: Expression<Int>) = object : Expression<vec2i>() {
-    override fun expr() = "v2i(${x.expr()}, ${y.expr()})"
-    override fun roots() = listOf(x, y)
-}
-
-fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = object : Expression<vec3>() {
-    override fun expr() = "v3(${x.expr()}, ${y.expr()}, ${z.expr()})"
-    override fun roots() = listOf(x, y, z)
-}
-
 // ----------------------------- Cache -----------------------------
 
 // todo: can be done automatically by reference counting?
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
     override fun declare() = "vec4 $name = ${value.expr()};"
     override fun roots() = listOf(value)
-}
-
-// ----------------------------- Casts -----------------------------
-
-fun itof(i: Expression<Int>) = object : Expression<Float>() {
-    override fun expr() = "itof(${i.expr()})"
-    override fun roots() = listOf(i)
-}
-
-fun ftoi(f: Expression<Float>) = object : Expression<Float>() {
-    override fun expr() = "ftoi(${f.expr()})"
-    override fun roots() = listOf(f)
 }
 
 // ----------------------------- Arithmetics -----------------------------

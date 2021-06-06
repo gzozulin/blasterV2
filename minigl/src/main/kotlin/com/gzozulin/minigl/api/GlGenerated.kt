@@ -3,15 +3,118 @@ package com.gzozulin.minigl.api
 import com.gzozulin.minigl.scene.Light
 import com.gzozulin.minigl.scene.PhongMaterial
 
+private const val DEF_V3VAL = "vec3 v3val ( float v ) { return v3 ( v , v , v ) ; }\n\n"
+private const val DEF_V3ZERO = "vec3 v3zero ( ) { return v3val ( 0.0f ) ; }\n\n"
+private const val DEF_EQV3 = "bool eqv3 ( vec3 left , vec3 right ) { return left . x == right . x && left . y == right . y && left . z == right . z ; }\n\n"
+private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n\n"
+private const val DEF_DOTV3 = "float dotv3 ( vec3 left , vec3 right ) { return left . x * right . x + left . y * right . y + left . z * right . z ; }\n\n"
+private const val DEF_CROSSV3 = "vec3 crossv3 ( vec3 left , vec3 right ) { return v3 ( left . y * right . z - left . z * right . y , left . z * right . x - left . x * right . z , left . x * right . y - left . y * right . x ) ; }\n\n"
+private const val DEF_ADDV3 = "vec3 addv3 ( vec3 left , vec3 right ) { return v3 ( left . x + right . x , left . y + right . y , left . z + right . z ) ; }\n\n"
+private const val DEF_SUBV3 = "vec3 subv3 ( vec3 left , vec3 right ) { return v3 ( left . x - right . x , left . y - right . y , left . z - right . z ) ; }\n\n"
+private const val DEF_MULV3 = "vec3 mulv3 ( vec3 left , vec3 right ) { return v3 ( left . x * right . x , left . y * right . y , left . z * right . z ) ; }\n\n"
+private const val DEF_MULV3F = "vec3 mulv3f ( vec3 left , float right ) { return v3 ( left . x * right , left . y * right , left . z * right ) ; }\n\n"
+private const val DEF_DIVV3F = "vec3 divv3f ( vec3 left , float right ) { return v3 ( left . x / right , left . y / right , left . z / right ) ; }\n\n"
+private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrt ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n\n"
+private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { vec2 result = v2 ( 0.0f , 0.0f ) ; float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; result . x = tileStartX + texCoord . x * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; result . y = tileStartY + texCoord . y * tileSideY ; return result ; }\n\n"
 private const val DEF_LUMINOSITY = "float luminosity ( float distance , Light light ) { return 1.0f / ( light . attenConstant + light . attenLinear * distance + light . attenQuadratic * distance * distance ) ; }\n\n"
-private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; if ( diffuseTerm > 0.0 ) { return mulv3f ( material . diffuse , diffuseTerm ) ; } return v3 ( 0.0f , 0.0f , 0.0f ) ; }\n\n"
-private const val DEF_SPECULARCONTRIB = "vec3 specularContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { vec3 halfVector = normv3 ( addv3 ( viewDir , lightDir ) ) ; float specularTerm = dotv3 ( halfVector , fragNormal ) ; if ( specularTerm > 0.0 ) { return mulv3f ( material . specular , powf ( specularTerm , material . shine ) ) ; } return v3 ( 0.0f , 0.0f , 0.0f ) ; }\n\n"
+private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; if ( diffuseTerm > 0.0 ) { return mulv3f ( material . diffuse , diffuseTerm ) ; } return v3zero ( ) ; }\n\n"
+private const val DEF_SPECULARCONTRIB = "vec3 specularContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { vec3 halfVector = normv3 ( addv3 ( viewDir , lightDir ) ) ; float specularTerm = dotv3 ( halfVector , fragNormal ) ; if ( specularTerm > 0.0 ) { return mulv3f ( material . specular , pow ( specularTerm , material . shine ) ) ; } return v3zero ( ) ; }\n\n"
 private const val DEF_LIGHTCONTRIB = "vec3 lightContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , float attenuation , Light light , PhongMaterial material ) { vec3 lighting = v3 ( 0.0f , 0.0f , 0.0f ) ; lighting = addv3 ( lighting , diffuseContrib ( lightDir , fragNormal , material ) ) ; lighting = addv3 ( lighting , specularContrib ( viewDir , lightDir , fragNormal , material ) ) ; return mulv3 ( mulv3f ( light . color , attenuation ) , lighting ) ; }\n\n"
 private const val DEF_POINTLIGHTCONTRIB = "vec3 pointLightContrib ( vec3 viewDir , vec3 fragPosition , vec3 fragNormal , Light light , PhongMaterial material ) { vec3 direction = subv3 ( light . vector , fragPosition ) ; float distance = lenv3 ( direction ) ; float lum = luminosity ( distance , light ) ; vec3 lightDir = normv3 ( direction ) ; return lightContrib ( viewDir , lightDir , fragNormal , lum , light , material ) ; }\n\n"
 private const val DEF_DIRLIGHTCONTRIB = "vec3 dirLightContrib ( vec3 viewDir , vec3 fragNormal , Light light , PhongMaterial material ) { vec3 lightDir = negv3 ( normv3 ( light . vector ) ) ; return lightContrib ( viewDir , lightDir , fragNormal , 1.0f , light , material ) ; }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB
+const val PUBLIC_DEFINITIONS = DEF_V3VAL+DEF_V3ZERO+DEF_EQV3+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_DIVV3F+DEF_LENV3+DEF_NORMV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB
+
+fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "v2(${x.expr()}, ${y.expr()})"
+    override fun roots() = listOf(x, y)
+}
+
+fun iv2(x: Expression<Int>, y: Expression<Int>) = object : Expression<vec2i>() {
+    override fun expr() = "iv2(${x.expr()}, ${y.expr()})"
+    override fun roots() = listOf(x, y)
+}
+
+fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "v3(${x.expr()}, ${y.expr()}, ${z.expr()})"
+    override fun roots() = listOf(x, y, z)
+}
+
+fun v3val(v: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "v3val(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun v3zero() = object : Expression<vec3>() {
+    override fun expr() = "v3zero()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun eqv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<Boolean>() {
+    override fun expr() = "eqv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun negv3(v: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "negv3(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun dotv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "dotv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun crossv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "crossv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun addv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "addv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun subv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "subv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun mulv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "mulv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun mulv3f(left: Expression<vec3>, right: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "mulv3f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun divv3f(left: Expression<vec3>, right: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "divv3f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun lenv3(v: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "lenv3(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun normv3(v: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "normv3(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun itof(i: Expression<Int>) = object : Expression<Float>() {
+    override fun expr() = "itof(${i.expr()})"
+    override fun roots() = listOf(i)
+}
+
+fun ftoi(f: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "ftoi(${f.expr()})"
+    override fun roots() = listOf(f)
+}
 
 fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
     override fun expr() = "tile(${texCoord.expr()}, ${uv.expr()}, ${cnt.expr()})"
