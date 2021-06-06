@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = 
 
-C_FLAGS = -g -o %e -lm -std=gnu11
+C_FLAGS = -g -std=gnu11
 

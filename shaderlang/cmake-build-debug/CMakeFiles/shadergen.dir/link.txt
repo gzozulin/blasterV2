@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/shadergen.dir/main.c.o -o shadergen  -lm 

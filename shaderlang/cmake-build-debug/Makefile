@@ -130,17 +130,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named shaderlang
+# Target rules for targets named shadergen
 
 # Build rule for target.
-shaderlang: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 shaderlang
-.PHONY : shaderlang
+shadergen: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 shadergen
+.PHONY : shadergen
 
 # fast build rule for target.
-shaderlang/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaderlang.dir/build.make CMakeFiles/shaderlang.dir/build
-.PHONY : shaderlang/fast
+shadergen/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/build
+.PHONY : shadergen/fast
 
 main.o: main.c.o
 
@@ -148,7 +148,7 @@ main.o: main.c.o
 
 # target to build an object file
 main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaderlang.dir/build.make CMakeFiles/shaderlang.dir/main.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/main.c.o
 .PHONY : main.c.o
 
 main.i: main.c.i
@@ -157,7 +157,7 @@ main.i: main.c.i
 
 # target to preprocess a source file
 main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaderlang.dir/build.make CMakeFiles/shaderlang.dir/main.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/main.c.i
 .PHONY : main.c.i
 
 main.s: main.c.s
@@ -166,7 +166,7 @@ main.s: main.c.s
 
 # target to generate assembly for a file
 main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/shaderlang.dir/build.make CMakeFiles/shaderlang.dir/main.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/main.c.s
 .PHONY : main.c.s
 
 # Help Target
@@ -177,7 +177,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... shaderlang"
+	@echo "... shadergen"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

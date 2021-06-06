@@ -85,53 +85,6 @@ private const val EXPR_PHONG_MATERIAL_DECL = """
     };
 """
 
-private const val EXPR_POINT_LIGHT_CONTRIB = """
-    vec3 expr_pointLightContrib(vec3 viewDir, vec3 fragPosition, vec3 fragNormal, Light light, PhongMaterial material) {
-        vec3 direction = light.vector - fragPosition;
-        float distance = length(direction);
-        float luminosity = luminosity(distance, light);
-        vec3 lightDir = normalize(direction);
-        return expr_lightContrib(viewDir, lightDir, fragNormal, luminosity, light, material);
-    }
-"""
-
-private const val EXPR_DIR_LIGHT_CONTRIB = """
-    vec3 expr_dirLightContrib(vec3 viewDir, vec3 fragNormal, Light light, PhongMaterial material) {
-        vec3 lightDir = -normalize(light.vector);
-        return expr_lightContrib(viewDir, lightDir, fragNormal, 1.0, light, material);
-    }
-"""
-
-private const val EXPR_LIGHT_CONTRIB = """
-    vec3 expr_lightContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, float attenuation, Light light, PhongMaterial material) {
-        vec3 lighting = vec3(0.0);
-        lighting += expr_diffuseContrib(lightDir, fragNormal, material);
-        lighting += expr_specularContrib(viewDir, lightDir, fragNormal, material);
-        return light.color * attenuation * lighting;
-    }
-"""
-
-private const val EXPR_DIFFUSE_CONTRIB = """
-    vec3 expr_diffuseContrib(vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
-        float diffuseTerm = dot(fragNormal, lightDir);
-        if (diffuseTerm > 0.0) {
-            return material.diffuse * diffuseTerm;
-        }
-        return vec3(0.0);
-    }
-"""
-
-private const val EXPR_SPECULAR_CONTRIB = """
-    vec3 expr_specularContrib(vec3 viewDir, vec3 lightDir, vec3 fragNormal, PhongMaterial material) {
-        vec3 halfVector = normalize(viewDir + lightDir);
-        float specularTerm = dot(halfVector, fragNormal);
-        if (specularTerm > 0.0) {
-            return material.specular * pow(specularTerm, material.shine);
-        }
-        return vec3(0.0);
-    }
-"""
-
 private const val EXPR_ITOF = """
     float itof(int i) {
         return float(i);
@@ -170,8 +123,7 @@ const val PRIVATE_DEFINITIONS = EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
 private const val MAIN_DECL = "void main() {"
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
-const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n" +
-        "$EXPR_DIFFUSE_CONTRIB$EXPR_SPECULAR_CONTRIB$EXPR_LIGHT_CONTRIB$EXPR_POINT_LIGHT_CONTRIB$EXPR_DIR_LIGHT_CONTRIB" // TODO: remove
+const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"

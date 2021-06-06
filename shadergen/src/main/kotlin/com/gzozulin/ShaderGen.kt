@@ -30,7 +30,8 @@ private fun doCreateOutput(content: String, file: File) {
 
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
-            "import com.gzozulin.minigl.scene.Light\n\n"
+            "import com.gzozulin.minigl.scene.Light\n" +
+            "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
     operations.forEach { operation ->
         result += renderDefinition(operation) + "\n"
     }
@@ -70,6 +71,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "ivec2"     -> "vec2i"
     "mat4"      -> "mat4"
     "Light"     -> "Light"
+    "PhongMaterial"     -> "PhongMaterial"
     else        -> error("Unknown type! $ctype")
 }
 

@@ -11,4 +11,8 @@ assert.h
 -
 math.h
 -
+stdbool.h
+-
+float.h
+-
 
