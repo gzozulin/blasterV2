@@ -59,10 +59,10 @@ private const val fragSrc = """
         vec3 color = matAmbient;
 
         for (int i = 0; i < uLightsPointCnt; ++i) {
-            color += expr_pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
+            color += pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
         }
         for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
-            color += expr_dirLightContrib(viewDir, fragNormal, uLights[i], material);
+            color += dirLightContrib(viewDir, fragNormal, uLights[i], material);
         }
         
         // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
