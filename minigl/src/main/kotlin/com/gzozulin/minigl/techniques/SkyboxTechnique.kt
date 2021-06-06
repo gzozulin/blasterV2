@@ -105,7 +105,7 @@ private var timer = 0
 private var proportion = 0.5f
 private val unifProportion1 = uniff { proportion }
 private val unifProportion2 = uniff { 1f - proportion }
-private val color = add(mul(color1, tov4(unifProportion1)), mul(color2, tov4(unifProportion2)))
+private val color = addv4(mulv4(color1, v4val(unifProportion1)), mulv4(color2, v4val(unifProportion2)))
 
 private val techniqueSkybox = TechniqueSkybox(camera, color)
 

@@ -78,7 +78,7 @@ private val shadingPbr = ShadingPbr(
 private val foggyTexture = libTextureCreate("textures/foggy.jpg")
 private val foggyUniform = sampler(unifs { foggyTexture })
 
-private fun filter(screen: GlTexture) = mul(sampler(unifs(screen)), foggyUniform)
+private fun filter(screen: GlTexture) = mulv4(sampler(unifs(screen)), foggyUniform)
 
 private val techniquePostProcessing = TechniquePostProcessing(window, ::filter)
 

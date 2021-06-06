@@ -5,7 +5,10 @@ import com.gzozulin.minigl.scene.PhongMaterial
 
 private const val DEF_V3VAL = "vec3 v3val ( float v ) { return v3 ( v , v , v ) ; }\n\n"
 private const val DEF_V3ZERO = "vec3 v3zero ( ) { return v3val ( 0.0f ) ; }\n\n"
+private const val DEF_V4VAL = "vec4 v4val ( float v ) { return v4 ( v , v , v , v ) ; }\n\n"
+private const val DEF_V4ZERO = "vec4 v4zero ( ) { return v4val ( 0.0f ) ; }\n\n"
 private const val DEF_EQV3 = "bool eqv3 ( vec3 left , vec3 right ) { return left . x == right . x && left . y == right . y && left . z == right . z ; }\n\n"
+private const val DEF_EQV4 = "bool eqv4 ( vec4 left , vec4 right ) { return left . x == right . x && left . y == right . y && left . z == right . z && left . w == right . w ; }\n\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n\n"
 private const val DEF_DOTV3 = "float dotv3 ( vec3 left , vec3 right ) { return left . x * right . x + left . y * right . y + left . z * right . z ; }\n\n"
 private const val DEF_CROSSV3 = "vec3 crossv3 ( vec3 left , vec3 right ) { return v3 ( left . y * right . z - left . z * right . y , left . z * right . x - left . x * right . z , left . x * right . y - left . y * right . x ) ; }\n\n"
@@ -14,6 +17,11 @@ private const val DEF_SUBV3 = "vec3 subv3 ( vec3 left , vec3 right ) { return v3
 private const val DEF_MULV3 = "vec3 mulv3 ( vec3 left , vec3 right ) { return v3 ( left . x * right . x , left . y * right . y , left . z * right . z ) ; }\n\n"
 private const val DEF_MULV3F = "vec3 mulv3f ( vec3 left , float right ) { return v3 ( left . x * right , left . y * right , left . z * right ) ; }\n\n"
 private const val DEF_DIVV3F = "vec3 divv3f ( vec3 left , float right ) { return v3 ( left . x / right , left . y / right , left . z / right ) ; }\n\n"
+private const val DEF_ADDV4 = "vec4 addv4 ( vec4 left , vec4 right ) { return v4 ( left . x + right . x , left . y + right . y , left . z + right . z , left . w + right . w ) ; }\n\n"
+private const val DEF_SUBV4 = "vec4 subv4 ( vec4 left , vec4 right ) { return v4 ( left . x - right . x , left . y - right . y , left . z - right . z , left . w - right . w ) ; }\n\n"
+private const val DEF_MULV4 = "vec4 mulv4 ( vec4 left , vec4 right ) { return v4 ( left . x * right . x , left . y * right . y , left . z * right . z , left . w * right . w ) ; }\n\n"
+private const val DEF_MULV4F = "vec4 mulv4f ( vec4 left , float right ) { return v4 ( left . x * right , left . y * right , left . z * right , left . w * right ) ; }\n\n"
+private const val DEF_DIVV4F = "vec4 divv4f ( vec4 left , float right ) { return v4 ( left . x / right , left . y / right , left . z / right , left . z / right ) ; }\n\n"
 private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrt ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { vec2 result = v2 ( 0.0f , 0.0f ) ; float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; result . x = tileStartX + texCoord . x * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; result . y = tileStartY + texCoord . y * tileSideY ; return result ; }\n\n"
@@ -40,7 +48,7 @@ private const val DEF_SETGV4 = "vec4 setgv4 ( vec4 v , float f ) { return v4 ( v
 private const val DEF_SETBV4 = "vec4 setbv4 ( vec4 v , float f ) { return v4 ( v . x , v . y , f , v . w ) ; }\n\n"
 private const val DEF_SETAV4 = "vec4 setav4 ( vec4 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_V3VAL+DEF_V3ZERO+DEF_EQV3+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_DIVV3F+DEF_LENV3+DEF_NORMV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4
+const val PUBLIC_DEFINITIONS = DEF_V3VAL+DEF_V3ZERO+DEF_V4VAL+DEF_V4ZERO+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_DIVV3F+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4
 
 fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "v2(${x.expr()}, ${y.expr()})"
@@ -57,11 +65,6 @@ fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = objec
     override fun roots() = listOf(x, y, z)
 }
 
-fun v4(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>, w: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "v4(${x.expr()}, ${y.expr()}, ${z.expr()}, ${w.expr()})"
-    override fun roots() = listOf(x, y, z, w)
-}
-
 fun v3val(v: Expression<Float>) = object : Expression<vec3>() {
     override fun expr() = "v3val(${v.expr()})"
     override fun roots() = listOf(v)
@@ -72,8 +75,28 @@ fun v3zero() = object : Expression<vec3>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
+fun v4(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>, w: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "v4(${x.expr()}, ${y.expr()}, ${z.expr()}, ${w.expr()})"
+    override fun roots() = listOf(x, y, z, w)
+}
+
+fun v4val(v: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "v4val(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun v4zero() = object : Expression<vec4>() {
+    override fun expr() = "v4zero()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
 fun eqv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<Boolean>() {
     override fun expr() = "eqv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun eqv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<Boolean>() {
+    override fun expr() = "eqv4(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 
@@ -114,6 +137,31 @@ fun mulv3f(left: Expression<vec3>, right: Expression<Float>) = object : Expressi
 
 fun divv3f(left: Expression<vec3>, right: Expression<Float>) = object : Expression<vec3>() {
     override fun expr() = "divv3f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun addv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<vec4>() {
+    override fun expr() = "addv4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun subv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<vec4>() {
+    override fun expr() = "subv4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun mulv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<vec4>() {
+    override fun expr() = "mulv4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun mulv4f(left: Expression<vec4>, right: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "mulv4f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun divv4f(left: Expression<vec4>, right: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "divv4f(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 

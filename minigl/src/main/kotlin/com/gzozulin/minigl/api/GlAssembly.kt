@@ -73,7 +73,6 @@ private const val EXPR_V4 = """
     }
 """
 
-// TODO: should be gone eventually
 private const val PRIVATE_DEFINITIONS =
     EXPR_PI + EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL
 
@@ -183,7 +182,6 @@ fun unifv2i(x: Int, y: Int) = object : Uniform<vec2i>(null, vec2i(x, y)) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-
 fun unifv2i(p: () -> vec2i) = object : Uniform<vec2i>(p, null) {
     override fun declare() = "uniform ivec2 $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
@@ -266,32 +264,9 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
 
 // ----------------------------- Cache -----------------------------
 
-// todo: can be done automatically by reference counting?
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
     override fun declare() = "vec4 $name = ${value.expr()};"
     override fun roots() = listOf(value)
-}
-
-// ----------------------------- Arithmetics -----------------------------
-
-fun <T> add(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
-    override fun expr() = "(${right.expr()} + ${left.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
-fun <T> sub(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
-    override fun expr() = "(${right.expr()} - ${left.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
-fun <T> mul(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
-    override fun expr() = "(${right.expr()} * ${left.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
-fun <T> div(left: Expression<T>, right: Expression<T>) = object : Expression<T>() {
-    override fun expr() = "(${right.expr()} / ${left.expr()})"
-    override fun roots() = listOf(left, right)
 }
 
 // ----------------------------- Sampler -----------------------------
@@ -327,11 +302,4 @@ fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Bo
 fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
     override fun expr() = expr.expr() + listOf("(!${expr.expr()})")
     override fun roots() = listOf(expr)
-}
-
-// ------------------------- Casts -------------------------
-
-fun tov4(value: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "vec4(${value.expr()})"
-    override fun roots() = listOf(value)
 }

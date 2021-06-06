@@ -78,11 +78,6 @@ struct vec3 v3(float x, float y, float z) {
     return (struct vec3) {x, y, z};
 }
 
-custom
-struct vec4 v4(float x, float y, float z, float w) {
-    return (struct vec4) {x, y, z, w};
-}
-
 public
 struct vec3 v3val(float v) {
     return v3(v, v, v);
@@ -93,11 +88,31 @@ struct vec3 v3zero() {
     return v3val(0.0f);
 }
 
+custom
+struct vec4 v4(float x, float y, float z, float w) {
+    return (struct vec4) {x, y, z, w};
+}
+
+public
+struct vec4 v4val(float v) {
+    return v4(v, v, v, v);
+}
+
+public
+struct vec4 v4zero() {
+    return v4val(0.0f);
+}
+
 // ------------------- BOOL -------------------
 
 public
 bool eqv3(const struct vec3 left, const struct vec3 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z;
+}
+
+public
+bool eqv4(const struct vec4 left, const struct vec4 right) {
+    return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
 }
 
 // ------------------- MATH -------------------
@@ -143,6 +158,31 @@ struct vec3 mulv3f(const struct vec3 left, float right) {
 public
 struct vec3 divv3f(const struct vec3 left, float right) {
     return v3(left.x / right, left.y / right, left.z / right);
+}
+
+public
+struct vec4 addv4(const struct vec4 left, const struct vec4 right) {
+    return v4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
+}
+
+public
+struct vec4 subv4(const struct vec4 left, const struct vec4 right) {
+    return v4(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w);
+}
+
+public
+struct vec4 mulv4(const struct vec4 left, const struct vec4 right) {
+    return v4(left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w);
+}
+
+public
+struct vec4 mulv4f(const struct vec4 left, float right) {
+    return v4(left.x * right, left.y * right, left.z * right, left.w * right);
+}
+
+public
+struct vec4 divv4f(const struct vec4 left, float right) {
+    return v4(left.x / right, left.y / right, left.z / right, left.z / right);
 }
 
 public
@@ -340,6 +380,11 @@ int main() {
         assert(eqv3(mulv3(v3(1, 1, 1), v3(2, 2, 2)), v3(2, 2, 2)));
         assert(eqv3(mulv3f(v3(1, 1, 1), 2.5f), v3(2.5f, 2.5f, 2.5f)));
         assert(eqv3(divv3f(v3(10, 10, 10), 5.0f), v3(2.0f, 2.0f, 2.0f)));
+        assert(eqv4(addv4(v4(1, 1, 1, 1), v4(2, 2, 2, 2)), v4(3, 3, 3, 3)));
+        assert(eqv4(subv4(v4(1, 1, 1, 1), v4(2, 2, 2, 2)), v4(-1, -1, -1, -1)));
+        assert(eqv4(mulv4(v4(1, 1, 1, 1), v4(2, 2, 2, 2)), v4(2, 2, 2, 2)));
+        assert(eqv4(mulv4f(v4(1, 1, 1, 1), 2.5f), v4(2.5f, 2.5f, 2.5f, 2.5f)));
+        assert(eqv4(divv4f(v4(10, 10, 10, 10), 5.0f), v4(2.0f, 2.0f, 2.0f, 2.0f)));
     }
     {
         assert(itof(123) == 123.0f);
