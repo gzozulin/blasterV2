@@ -3,10 +3,10 @@ package com.gzozulin.minigl.api
 import com.gzozulin.minigl.scene.Light
 import com.gzozulin.minigl.scene.PhongMaterial
 
-private const val DEF_V3VAL = "vec3 v3val ( float v ) { return v3 ( v , v , v ) ; }\n\n"
-private const val DEF_V3ZERO = "vec3 v3zero ( ) { return v3val ( 0.0f ) ; }\n\n"
-private const val DEF_V4VAL = "vec4 v4val ( float v ) { return v4 ( v , v , v , v ) ; }\n\n"
-private const val DEF_V4ZERO = "vec4 v4zero ( ) { return v4val ( 0.0f ) ; }\n\n"
+private const val DEF_FTOV3 = "vec3 ftov3 ( float v ) { return v3 ( v , v , v ) ; }\n\n"
+private const val DEF_V3ZERO = "vec3 v3zero ( ) { return ftov3 ( 0.0f ) ; }\n\n"
+private const val DEF_FTOV4 = "vec4 ftov4 ( float v ) { return v4 ( v , v , v , v ) ; }\n\n"
+private const val DEF_V4ZERO = "vec4 v4zero ( ) { return ftov4 ( 0.0f ) ; }\n\n"
 private const val DEF_EQV3 = "bool eqv3 ( vec3 left , vec3 right ) { return left . x == right . x && left . y == right . y && left . z == right . z ; }\n\n"
 private const val DEF_EQV4 = "bool eqv4 ( vec4 left , vec4 right ) { return left . x == right . x && left . y == right . y && left . z == right . z && left . w == right . w ; }\n\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n\n"
@@ -27,9 +27,10 @@ private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , len
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { vec2 result = v2 ( 0.0f , 0.0f ) ; float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; result . x = tileStartX + texCoord . x * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; result . y = tileStartY + texCoord . y * tileSideY ; return result ; }\n\n"
 private const val DEF_LUMINOSITY = "float luminosity ( float distance , Light light ) { return 1.0f / ( light . attenConstant + light . attenLinear * distance + light . attenQuadratic * distance * distance ) ; }\n\n"
 private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; if ( diffuseTerm > 0.0 ) { return mulv3f ( material . diffuse , diffuseTerm ) ; } return v3zero ( ) ; }\n\n"
-private const val DEF_SPECULARCONTRIB = "vec3 specularContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { vec3 halfVector = normv3 ( addv3 ( viewDir , lightDir ) ) ; float specularTerm = dotv3 ( halfVector , fragNormal ) ; if ( specularTerm > 0.0 ) { return mulv3f ( material . specular , pow ( specularTerm , material . shine ) ) ; } return v3zero ( ) ; }\n\n"
-private const val DEF_LIGHTCONTRIB = "vec3 lightContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , float attenuation , Light light , PhongMaterial material ) { vec3 lighting = v3 ( 0.0f , 0.0f , 0.0f ) ; lighting = addv3 ( lighting , diffuseContrib ( lightDir , fragNormal , material ) ) ; lighting = addv3 ( lighting , specularContrib ( viewDir , lightDir , fragNormal , material ) ) ; return mulv3 ( mulv3f ( light . color , attenuation ) , lighting ) ; }\n\n"
-private const val DEF_POINTLIGHTCONTRIB = "vec3 pointLightContrib ( vec3 viewDir , vec3 fragPosition , vec3 fragNormal , Light light , PhongMaterial material ) { vec3 direction = subv3 ( light . vector , fragPosition ) ; float distance = lenv3 ( direction ) ; float lum = luminosity ( distance , light ) ; vec3 lightDir = normv3 ( direction ) ; return lightContrib ( viewDir , lightDir , fragNormal , lum , light , material ) ; }\n\n"
+private const val DEF_HALFVECTOR = "vec3 halfVector ( vec3 left , vec3 right ) { return normv3 ( addv3 ( left , right ) ) ; }\n\n"
+private const val DEF_SPECULARCONTRIB = "vec3 specularContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { vec3 hv = halfVector ( viewDir , lightDir ) ; float specularTerm = dotv3 ( hv , fragNormal ) ; if ( specularTerm > 0.0 ) { return mulv3f ( material . specular , pow ( specularTerm , material . shine ) ) ; } return v3zero ( ) ; }\n\n"
+private const val DEF_LIGHTCONTRIB = "vec3 lightContrib ( vec3 viewDir , vec3 lightDir , vec3 fragNormal , float attenuation , Light light , PhongMaterial material ) { vec3 lighting = v3zero ( ) ; lighting = addv3 ( lighting , diffuseContrib ( lightDir , fragNormal , material ) ) ; lighting = addv3 ( lighting , specularContrib ( viewDir , lightDir , fragNormal , material ) ) ; return mulv3 ( mulv3f ( light . color , attenuation ) , lighting ) ; }\n\n"
+private const val DEF_POINTLIGHTCONTRIB = "vec3 pointLightContrib ( vec3 viewDir , vec3 fragPosition , vec3 fragNormal , Light light , PhongMaterial material ) { vec3 direction = subv3 ( light . vector , fragPosition ) ; vec3 lightDir = normv3 ( direction ) ; if ( dotv3 ( lightDir , fragNormal ) < .0f ) { return v3zero ( ) ; } float distance = lenv3 ( direction ) ; float lum = luminosity ( distance , light ) ; return lightContrib ( viewDir , lightDir , fragNormal , lum , light , material ) ; }\n\n"
 private const val DEF_DIRLIGHTCONTRIB = "vec3 dirLightContrib ( vec3 viewDir , vec3 fragNormal , Light light , PhongMaterial material ) { vec3 lightDir = negv3 ( normv3 ( light . vector ) ) ; return lightContrib ( viewDir , lightDir , fragNormal , 1.0f , light , material ) ; }\n\n"
 private const val DEF_GETXV4 = "float getxv4 ( vec4 v ) { return v . x ; }\n\n"
 private const val DEF_GETYV4 = "float getyv4 ( vec4 v ) { return v . y ; }\n\n"
@@ -48,7 +49,17 @@ private const val DEF_SETGV4 = "vec4 setgv4 ( vec4 v , float f ) { return v4 ( v
 private const val DEF_SETBV4 = "vec4 setbv4 ( vec4 v , float f ) { return v4 ( v . x , v . y , f , v . w ) ; }\n\n"
 private const val DEF_SETAV4 = "vec4 setav4 ( vec4 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_V3VAL+DEF_V3ZERO+DEF_V4VAL+DEF_V4ZERO+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_DIVV3F+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4
+const val PUBLIC_DEFINITIONS = DEF_FTOV3+DEF_V3ZERO+DEF_FTOV4+DEF_V4ZERO+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_DIVV3F+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4
+
+fun itof(i: Expression<Int>) = object : Expression<Float>() {
+    override fun expr() = "itof(${i.expr()})"
+    override fun roots() = listOf(i)
+}
+
+fun ftoi(f: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "ftoi(${f.expr()})"
+    override fun roots() = listOf(f)
+}
 
 fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "v2(${x.expr()}, ${y.expr()})"
@@ -65,8 +76,8 @@ fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = objec
     override fun roots() = listOf(x, y, z)
 }
 
-fun v3val(v: Expression<Float>) = object : Expression<vec3>() {
-    override fun expr() = "v3val(${v.expr()})"
+fun ftov3(v: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "ftov3(${v.expr()})"
     override fun roots() = listOf(v)
 }
 
@@ -80,8 +91,8 @@ fun v4(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>, w: Expr
     override fun roots() = listOf(x, y, z, w)
 }
 
-fun v4val(v: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "v4val(${v.expr()})"
+fun ftov4(v: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "ftov4(${v.expr()})"
     override fun roots() = listOf(v)
 }
 
@@ -175,16 +186,6 @@ fun normv3(v: Expression<vec3>) = object : Expression<vec3>() {
     override fun roots() = listOf(v)
 }
 
-fun itof(i: Expression<Int>) = object : Expression<Float>() {
-    override fun expr() = "itof(${i.expr()})"
-    override fun roots() = listOf(i)
-}
-
-fun ftoi(f: Expression<Float>) = object : Expression<Float>() {
-    override fun expr() = "ftoi(${f.expr()})"
-    override fun roots() = listOf(f)
-}
-
 fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
     override fun expr() = "tile(${texCoord.expr()}, ${uv.expr()}, ${cnt.expr()})"
     override fun roots() = listOf(texCoord, uv, cnt)
@@ -198,6 +199,11 @@ fun luminosity(distance: Expression<Float>, light: Expression<Light>) = object :
 fun diffuseContrib(lightDir: Expression<vec3>, fragNormal: Expression<vec3>, material: Expression<PhongMaterial>) = object : Expression<vec3>() {
     override fun expr() = "diffuseContrib(${lightDir.expr()}, ${fragNormal.expr()}, ${material.expr()})"
     override fun roots() = listOf(lightDir, fragNormal, material)
+}
+
+fun halfVector(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "halfVector(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
 }
 
 fun specularContrib(viewDir: Expression<vec3>, lightDir: Expression<vec3>, fragNormal: Expression<vec3>, material: Expression<PhongMaterial>) = object : Expression<vec3>() {

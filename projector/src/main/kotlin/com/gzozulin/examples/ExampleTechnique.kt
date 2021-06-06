@@ -39,7 +39,7 @@ private val tintedGrassSampler = sampler(unifs(textureGrass))
 private val tintedGrassRUniform = uniff(1f)
 private val tintedGrassColor = setrv4(tintedGrassSampler, tintedGrassRUniform)
 
-private val resultingColor = mul(tiledFontSampler, tintedGrassColor)
+private val resultingColor = mulv4(tiledFontSampler, tintedGrassColor)
 
 private val shadingFlat = ShadingFlat(uniformMatrix, resultingColor)
 

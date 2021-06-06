@@ -70,7 +70,6 @@ private const val fragSrc = """
 
         color *= fragDiffuse;
         oFragColor = vec4(color, transparency);
-       
     }
 """
 

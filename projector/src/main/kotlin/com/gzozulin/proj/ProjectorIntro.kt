@@ -135,7 +135,7 @@ private val constItemMatShine = constf(100f)
 private fun mapItem(screen: GlTexture): Expression<vec4> {
     val tvAlbedo = cachev4(unifTvAlbedo)
     val itemColor = cachev4(sampler(unifs { screen }))
-    val itemMerged = add(mul(itemColor, tov4(constf(0.8f))), mul(tvAlbedo, tov4(constf(0.2f))))
+    val itemMerged = addv4(mulv4(itemColor, ftov4(constf(0.8f))), mulv4(tvAlbedo, ftov4(constf(0.2f))))
     return ifexp(more(getav4(itemColor), constf(0f)), itemMerged, tvAlbedo)
 }
 

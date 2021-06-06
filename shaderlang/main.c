@@ -61,6 +61,18 @@ struct PhongMaterial {
     float transparency;
 };
 
+// ------------------- CASTS -------------------
+
+custom
+float itof(int i) {
+    return (float) i;
+}
+
+custom
+float ftoi(float f) {
+    return (int) f;
+}
+
 // ------------------- CTORS -------------------
 
 custom
@@ -79,13 +91,13 @@ struct vec3 v3(float x, float y, float z) {
 }
 
 public
-struct vec3 v3val(float v) {
+struct vec3 ftov3(float v) {
     return v3(v, v, v);
 }
 
 public
 struct vec3 v3zero() {
-    return v3val(0.0f);
+    return ftov3(0.0f);
 }
 
 custom
@@ -94,13 +106,13 @@ struct vec4 v4(float x, float y, float z, float w) {
 }
 
 public
-struct vec4 v4val(float v) {
+struct vec4 ftov4(float v) {
     return v4(v, v, v, v);
 }
 
 public
 struct vec4 v4zero() {
-    return v4val(0.0f);
+    return ftov4(0.0f);
 }
 
 // ------------------- BOOL -------------------
@@ -201,18 +213,6 @@ struct vec4 transform(struct mat4 m, struct vec4 vec) {
 
 }*/
 
-// ------------------- CASTS -------------------
-
-custom
-float itof(int i) {
-    return (float) i;
-}
-
-custom
-float ftoi(float f) {
-    return (int) f;
-}
-
 // ------------------- TILE ---------------
 
 public
@@ -243,11 +243,15 @@ struct vec3 diffuseContrib(const struct vec3 lightDir, const struct vec3 fragNor
     return v3zero();
 }
 
+public struct vec3 halfVector(struct vec3 left, struct vec3 right) {
+    return normv3(addv3(left, right));
+}
+
 public
 struct vec3 specularContrib(const struct vec3 viewDir, const struct vec3 lightDir, const struct vec3 fragNormal,
         const struct PhongMaterial material) {
-    struct vec3 halfVector = normv3(addv3(viewDir, lightDir));
-    float specularTerm = dotv3(halfVector, fragNormal);
+    struct vec3 hv = halfVector(viewDir, lightDir);
+    float specularTerm = dotv3(hv, fragNormal);
     if (specularTerm > 0.0) {
         return mulv3f(material.specular, pow(specularTerm, material.shine));
     }
@@ -257,7 +261,7 @@ struct vec3 specularContrib(const struct vec3 viewDir, const struct vec3 lightDi
 public
 struct vec3 lightContrib(const struct vec3 viewDir, const struct vec3 lightDir, const struct vec3 fragNormal,
         float attenuation, const struct Light light, const struct PhongMaterial material) {
-    struct vec3 lighting = v3(0.0f, 0.0f, 0.0f);
+    struct vec3 lighting = v3zero();
     lighting = addv3(lighting, diffuseContrib(lightDir, fragNormal, material));
     lighting = addv3(lighting, specularContrib(viewDir, lightDir, fragNormal, material));
     return mulv3(mulv3f(light.color, attenuation), lighting);
@@ -267,9 +271,12 @@ public
 struct vec3 pointLightContrib(const struct vec3 viewDir, const struct vec3 fragPosition, struct vec3 fragNormal,
         const struct Light light, const struct PhongMaterial material) {
     struct vec3 direction = subv3(light.vector, fragPosition);
+    struct vec3 lightDir = normv3(direction);
+    if (dotv3(lightDir, fragNormal) < .0f) {
+        return v3zero();
+    }
     float distance = lenv3(direction);
     float lum = luminosity(distance, light);
-    struct vec3 lightDir = normv3(direction);
     return lightContrib(viewDir, lightDir, fragNormal, lum, light, material);
 }
 
@@ -371,7 +378,7 @@ int main() {
         assert(!eqv3(v3(1, 1, 1), v3(1, 0, 1)));
     }
     {
-        assert(eqv3(negv3(v3val(1)), v3val(-1)));
+        assert(eqv3(negv3(ftov3(1)), ftov3(-1)));
         assert(dotv3(v3(1, 0, 0), v3(0, 1, 0)) == 0.0);
         assert(dotv3(v3(1, 0, 0), v3(1, 0, 0)) == 1.0);
         assert(eqv3(crossv3(v3(1, 0, 0), v3(0, 1, 0)), v3(0, 0, 1)));
