@@ -37,7 +37,7 @@ private val tiledFontSampler = sampler(unifs(textureFont), tiledFontTexCoords)
 private var tintedGrassTick = 0f
 private val tintedGrassSampler = sampler(unifs(textureGrass))
 private val tintedGrassRUniform = uniff(1f)
-private val tintedGrassColor = setr(tintedGrassSampler, tintedGrassRUniform)
+private val tintedGrassColor = setrv4(tintedGrassSampler, tintedGrassRUniform)
 
 private val resultingColor = mul(tiledFontSampler, tintedGrassColor)
 

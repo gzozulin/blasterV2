@@ -78,6 +78,11 @@ struct vec3 v3(float x, float y, float z) {
     return (struct vec3) {x, y, z};
 }
 
+custom
+struct vec4 v4(float x, float y, float z, float w) {
+    return (struct vec4) {x, y, z, w};
+}
+
 public
 struct vec3 v3val(float v) {
     return v3(v, v, v);
@@ -168,7 +173,7 @@ float ftoi(float f) {
     return (int) f;
 }
 
-// ------------------- PUBLIC ---------------
+// ------------------- TILE ---------------
 
 public
 struct vec2 tile(const struct vec2 texCoord, const struct ivec2 uv, const struct ivec2 cnt) {
@@ -181,6 +186,8 @@ struct vec2 tile(const struct vec2 texCoord, const struct ivec2 uv, const struct
     result.y = tileStartY + texCoord.y * tileSideY;
     return result;
 }
+
+// ------------------- LIGHT ---------------
 
 public
 float luminosity(float distance, const struct Light light) {
@@ -230,6 +237,90 @@ public
 struct vec3 dirLightContrib(const struct vec3 viewDir, const struct vec3 fragNormal, const struct Light light, const struct PhongMaterial material) {
     struct vec3 lightDir = negv3(normv3(light.vector));
     return lightContrib(viewDir, lightDir, fragNormal, 1.0f, light, material);
+}
+
+// ------------------- GET ---------------
+
+public
+float getxv4(const struct vec4 v) {
+    return v.x;
+}
+
+public
+float getyv4(const struct vec4 v) {
+    return v.y;
+}
+
+public
+float getzv4(const struct vec4 v) {
+    return v.z;
+}
+
+public
+float getwv4(const struct vec4 v) {
+    return v.w;
+}
+
+public
+float getrv4(const struct vec4 v) {
+    return v.x;
+}
+
+public
+float getgv4(const struct vec4 v) {
+    return v.y;
+}
+
+public
+float getbv4(const struct vec4 v) {
+    return v.z;
+}
+
+public
+float getav4(const struct vec4 v) {
+    return v.w;
+}
+
+// ------------------- SET ---------------
+
+public
+struct vec4 setxv4(const struct vec4 v, float f) {
+    return v4(f, v.y, v.z, v.w);
+}
+
+public
+struct vec4 setyv4(const struct vec4 v, float f) {
+    return v4(v.x, f, v.z, v.w);
+}
+
+public
+struct vec4 setzv4(const struct vec4 v, float f) {
+    return v4(v.x, v.y, f, v.w);
+}
+
+public
+struct vec4 setwv4(const struct vec4 v, float f) {
+    return v4(v.x, v.y, v.z, f);
+}
+
+public
+struct vec4 setrv4(const struct vec4 v, float f) {
+    return v4(f, v.y, v.z, v.w);
+}
+
+public
+struct vec4 setgv4(const struct vec4 v, float f) {
+    return v4(v.x, f, v.z, v.w);
+}
+
+public
+struct vec4 setbv4(const struct vec4 v, float f) {
+    return v4(v.x, v.y, f, v.w);
+}
+
+public
+struct vec4 setav4(const struct vec4 v, float f) {
+    return v4(v.x, v.y, v.z, f);
 }
 
 // ------------------- MAIN ---------------

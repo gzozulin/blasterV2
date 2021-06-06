@@ -136,7 +136,7 @@ private fun mapItem(screen: GlTexture): Expression<vec4> {
     val tvAlbedo = cachev4(unifTvAlbedo)
     val itemColor = cachev4(sampler(unifs { screen }))
     val itemMerged = add(mul(itemColor, tov4(constf(0.8f))), mul(tvAlbedo, tov4(constf(0.2f))))
-    return ifexp(more(geta(itemColor), constf(0f)), itemMerged, tvAlbedo)
+    return ifexp(more(getav4(itemColor), constf(0f)), itemMerged, tvAlbedo)
 }
 
 private val mergingItem = TechniquePostProcessing(TEXTURE_SIDE, TEXTURE_SIDE, ::mapItem)

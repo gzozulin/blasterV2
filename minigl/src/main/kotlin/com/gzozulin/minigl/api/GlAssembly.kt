@@ -11,54 +11,6 @@ const val V_TEX_COORD = "vTexCoord"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
-private const val EXPR_X = """
-    float expr_x(vec4 v) {
-        return v.x;
-    }
-"""
-
-private const val EXPR_Y = """
-    float expr_y(vec4 v) {
-        return v.y;
-    }
-"""
-
-private const val EXPR_Z = """
-    float expr_z(vec4 v) {
-        return v.z;
-    }
-"""
-
-private const val EXPR_W = """
-    float expr_w(vec4 v) {
-        return v.w;
-    }
-"""
-
-private const val EXPR_SET_X = """
-    vec4 expr_set_x(vec4 vec, float x) {
-        return vec4(x, vec.y, vec.z, vec.w);
-    }
-"""
-
-private const val EXPR_SET_Y = """
-    vec4 expr_set_y(vec4 vec, float y) {
-        return vec4(vec.x, y, vec.z, vec.w);
-    }
-"""
-
-private const val EXPR_SET_Z = """
-    vec4 expr_set_z(vec4 vec, float z) {
-        return vec4(vec.x, vec.y, z, vec.w);
-    }
-"""
-
-private const val EXPR_SET_W = """
-    vec4 expr_set_w(vec4 vec, float w) {
-        return vec4(vec.x, vec.y, vec.z, w);
-    }
-"""
-
 private const val EXPR_DISCARD =
     "vec4 expr_discard() {\n" +
             "    discard;\n" +
@@ -115,14 +67,18 @@ private const val EXPR_V3 = """
     }
 """
 
+private const val EXPR_V4 = """
+    vec4 v4(float x, float y, float z, float w) {
+        return vec4(x, y, z, w);
+    }
+"""
+
 // TODO: should be gone eventually
 private const val PRIVATE_DEFINITIONS =
-    EXPR_PI + EXPR_X + EXPR_Y + EXPR_Z + EXPR_W +
-    EXPR_SET_X + EXPR_SET_Y + EXPR_SET_Z + EXPR_SET_W +
-    EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL
+    EXPR_PI + EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL
 
 private const val CUSTOM_DEFINITIONS =
-    EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3
+    EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
 private const val MAIN_DECL = "void main() {"
 
@@ -372,58 +328,6 @@ fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
     override fun expr() = expr.expr() + listOf("(!${expr.expr()})")
     override fun roots() = listOf(expr)
 }
-
-// ------------------------- Accessors -------------------------
-
-fun getx(expr: Expression<vec4>) = object : Expression<Float>() {
-    override fun expr() = "expr_x(${expr.expr()})"
-    override fun roots() = listOf(expr)
-}
-
-fun gety(expr: Expression<vec4>) = object : Expression<Float>() {
-    override fun expr() = "expr_y(${expr.expr()})"
-    override fun roots() = listOf(expr)
-}
-
-fun getz(expr: Expression<vec4>) = object : Expression<Float>() {
-    override fun expr() = "expr_z(${expr.expr()})"
-    override fun roots() = listOf(expr)
-}
-
-fun getw(expr: Expression<vec4>) = object : Expression<Float>() {
-    override fun expr() = "expr_w(${expr.expr()})"
-    override fun roots() = listOf(expr)
-}
-
-fun getr(expr: Expression<vec4>) = getx(expr)
-fun getg(expr: Expression<vec4>) = gety(expr)
-fun getb(expr: Expression<vec4>) = getz(expr)
-fun geta(expr: Expression<vec4>) = getw(expr)
-
-fun setx(vec: Expression<vec4>, x: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "expr_set_x(${vec.expr()}, ${x.expr()})"
-    override fun roots() = listOf(vec, x)
-}
-
-fun sety(vec: Expression<vec4>, y: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "expr_set_y(${vec.expr()}, ${y.expr()})"
-    override fun roots() = listOf(vec, y)
-}
-
-fun setz(vec: Expression<vec4>, z: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "expr_set_z(${vec.expr()}, ${z.expr()})"
-    override fun roots() = listOf(vec, z)
-}
-
-fun setw(vec: Expression<vec4>, w: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "expr_set_w(${vec.expr()}, ${w.expr()})"
-    override fun roots() = listOf(vec, w)
-}
-
-fun setr(vec: Expression<vec4>, r: Expression<Float>) = setx(vec, r)
-fun setg(vec: Expression<vec4>, g: Expression<Float>) = sety(vec, g)
-fun setb(vec: Expression<vec4>, b: Expression<Float>) = setz(vec, b)
-fun seta(vec: Expression<vec4>, a: Expression<Float>) = setw(vec, a)
 
 // ------------------------- Casts -------------------------
 
