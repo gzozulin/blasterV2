@@ -111,7 +111,7 @@ private val fragmentSrc = """
             vec3 L = normalize(uLights[i].vector - vWorldPos);
             vec3 H = normalize(V + L);
             float distance = length(uLights[i].vector - vWorldPos);
-            float luminosity = expr_luminosity(distance, uLights[i]);
+            float luminosity = luminosity(distance, uLights[i]);
             vec3 radiance = uLights[i].color * luminosity;
 
             // Cook-Torrance BRDF
