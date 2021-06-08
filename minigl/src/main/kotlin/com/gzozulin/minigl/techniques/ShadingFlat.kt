@@ -36,7 +36,7 @@ private val fragmentSrs = """
     layout (location = 0) out vec4 oFragColor;
 
     void main() {
-        oFragColor = %COLOR%;
+        oFragColor = shadingFlat(%COLOR%);
     }
 """.trimIndent()
 

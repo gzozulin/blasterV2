@@ -11,13 +11,7 @@ const val V_TEX_COORD = "vTexCoord"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
-private const val EXPR_DISCARD =
-    "vec4 expr_discard() {\n" +
-            "    discard;\n" +
-            "    return vec4(1.0);\n" +
-            "}\n"
-
-private const val EXPR_LIGHT_DECL = """
+private const val CONST_LIGHT_DECL = """
     struct Light {
         vec3 vector;
         vec3 color;
@@ -27,7 +21,7 @@ private const val EXPR_LIGHT_DECL = """
     };
 """
 
-private const val EXPR_PHONG_MATERIAL_DECL = """
+private const val CONST_MAT_DECL = """
     struct PhongMaterial {
         vec3 ambient;
         vec3 diffuse;
@@ -36,6 +30,21 @@ private const val EXPR_PHONG_MATERIAL_DECL = """
         float transparency;
     };
 """
+
+private const val CONST_LIGHTS = """
+    const int MAX_LIGHTS = 128;
+    uniform int uLightsPointCnt;
+    uniform int uLightsDirCnt;
+    uniform Light uLights[$MAX_LIGHTS];
+"""
+
+const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$CONST_LIGHT_DECL\n$CONST_MAT_DECL\n$CONST_LIGHTS\n"
+
+private const val EXPR_DISCARD =
+    "vec4 expr_discard() {\n" +
+            "    discard;\n" +
+            "    return vec4(1.0);\n" +
+            "}\n"
 
 private const val EXPR_ITOF = """
     float itof(int i) {
@@ -73,8 +82,23 @@ private const val EXPR_V4 = """
     }
 """
 
-private const val PRIVATE_DEFINITIONS =
-    EXPR_PI + EXPR_LIGHT_DECL + EXPR_PHONG_MATERIAL_DECL
+private const val EXPR_getNormalFromMap = """
+    vec3 getNormalFromMap(vec3 normal, vec3 worldPos, vec2 texCoord, vec3 vnormal) {
+        vec3 tangentNormal = normal * 2.0 - 1.0;
+
+        vec3 Q1  = dFdx(worldPos);
+        vec3 Q2  = dFdy(worldPos);
+        vec2 st1 = dFdx(texCoord);
+        vec2 st2 = dFdy(texCoord);
+
+        vec3 N   = normalize(vnormal);
+        vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+        vec3 B  = -normalize(cross(N, T));
+        mat3 TBN = mat3(T, B, N);
+
+        return normalize(TBN * tangentNormal);
+    }
+"""
 
 private const val CUSTOM_DEFINITIONS =
     EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
@@ -82,7 +106,7 @@ private const val CUSTOM_DEFINITIONS =
 private const val MAIN_DECL = "void main() {"
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
-const val FRAG_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n$EXPR_DISCARD\n"
+const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$EXPR_DISCARD\n$EXPR_getNormalFromMap\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"

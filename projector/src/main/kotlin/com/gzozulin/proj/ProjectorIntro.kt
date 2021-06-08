@@ -176,15 +176,15 @@ fun main() {
         tvsUse {
             itemUse {
                 logoUse {
-                    capturer.capture {
+                    //capturer.capture {
                         window.show {
                             updateFrame()
                             drawItems()
                             tvsDraw()
-                            logoDraw()
-                            capturer.addFrame()
+                            //logoDraw()
+                            //capturer.addFrame()
                         }
-                    }
+                    //}
                 }
             }
         }

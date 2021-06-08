@@ -56,14 +56,16 @@ x 2021-05-15 (A) 2021-05-15 Show filename when start typing +code @complex
 x 2021-05-22 (A) 2021-05-15 Fix minimap cursor +code @simple
 x 2021-06-03 (A) 2021-05-17 Use rule of thirds +video @simple
 2021-05-17 Direct lights for PBR +code @complex
-2021-05-17 Environment lighting for PBR +code @complex
+2021-05-17 Image-based lighting for PBR +code @complex
 2021-05-18 Custom URL for channel (> 100 subs) +video @complex
 2021-05-20 Camera rotations with arrows, precision with shift for WASD input +code @simple
 (B) 2021-05-22 Multiple shots per one capture of code +code @complex
 2021-05-22 Anisotropic Filtering for GlTexture +code @simple
 (B) 2021-05-26 Random camera start positions/shots +code @simple
-(A) 2021-05-26 Establishing shot +video @simple
+x 2021-06-05 (A) 2021-05-26 Establishing shot +video @simple
 (B) 2021-05-31 Basic support for C and interop +code @complex
 2021-06-01 Channel watermarks, especially for captures +video @simple
 2021-06-02 Channel trailer +video @complex
 2021-06-03 Cron job to copy the current video once a day +video @simple
+2021-06-05 Chart as overlay on top of video +video @simple
+(A) 2021-06-08 Intrigue, humor, establishing shot +video @complex

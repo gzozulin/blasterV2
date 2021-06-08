@@ -32,10 +32,6 @@ private const val vertSrc = """
 
 private const val fragSrc = """
     $FRAG_SHADER_HEADER
-    
-    uniform int uLightsPointCnt;
-    uniform int uLightsDirCnt;
-    uniform Light uLights[$MAX_LIGHTS];
 
     in vec4 vPosition;
     in vec2 vTexCoord;
@@ -46,7 +42,7 @@ private const val fragSrc = """
     void main() {
         vec3 fragPosition = vPosition.xyz;
         vec3 fragNormal = normalize(vNormal);
-        vec3 fragDiffuse = %ALBEDO%.rgb;
+        vec3 fragAlbedo = %ALBEDO%.rgb;
         vec3 matAmbient = %MAT_AMBIENT%;
         vec3 matDiffuse = %MAT_DIFFUSE%;
         vec3 matSpecular = %MAT_SPECULAR%;
@@ -54,22 +50,8 @@ private const val fragSrc = """
         float transparency = %MAT_TRANSPARENCY%;
         
         PhongMaterial material = { matAmbient, matDiffuse, matSpecular, shine, transparency };
-
-        vec3 viewDir = normalize(%EYE% - fragPosition);
-        vec3 color = matAmbient;
-
-        for (int i = 0; i < uLightsPointCnt; ++i) {
-            color += pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material);
-        }
-        for (int i = uLightsPointCnt; i < uLightsPointCnt + uLightsDirCnt; ++i) {
-            color += dirLightContrib(viewDir, fragNormal, uLights[i], material);
-        }
         
-        // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
-        // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
-
-        color *= fragDiffuse;
-        oFragColor = vec4(color, transparency);
+        oFragColor = shadingPhong(fragPosition, %EYE%, fragNormal, fragAlbedo, material);
     }
 """
 
