@@ -35,7 +35,7 @@ private val fragmentSrc = """
     
     void main() {
         vec3 N = getNormalFromMap(%NORMAL%.xyz, vWorldPos, vTexCoord, vNormal);
-        oFragColor = shadingPbr(%ALBEDO%.rgb, N, %METALLIC%.r, %ROUGHNESS%.r, %AO%.r, %EYE%, vWorldPos);
+        oFragColor = shadingPbr(%EYE%, vWorldPos, %ALBEDO%.rgb, N, %METALLIC%.r, %ROUGHNESS%.r, %AO%.r);
     }
 """.trimIndent()
 

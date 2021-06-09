@@ -452,7 +452,7 @@ struct vec4 shadingPhong(const struct vec3 fragPosition, const struct vec3 eye, 
 
 custom
 struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPos, const struct vec2 texCoord,
-        const struct vec3 vnormal) {
+                             const struct vec3 vnormal) {
     assert(0 && "Some chicken shit happens here..");
     /*vec3 tangentNormal = fromMap * 2.0 - 1.0;
     vec3 Q1  = dFdx(vWorldPos);
@@ -502,11 +502,11 @@ struct vec3 fresnelSchlick(const float cosTheta, const struct vec3 F0) {
 }
 
 public
-struct vec4 shadingPbr(const struct vec3 albedo, const struct vec3 N, const float metallic, const float roughness, const float ao,
-        const struct vec3 eye, const struct vec3 worldPos) {
+struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
+                       const struct vec3 albedo, const struct vec3 N, const float metallic, const float roughness, const float ao) {
 
-    struct vec3 alb = powv3(albedo, ftov3(2.2f));
-    struct vec3 V   = normv3(subv3(eye, worldPos));
+    const struct vec3 alb = powv3(albedo, ftov3(2.2f));
+    const struct vec3 V   = normv3(subv3(eye, worldPos));
 
     struct vec3 F0  = ftov3(0.04f);
     F0 = mixv3(F0, alb, metallic);
@@ -515,30 +515,30 @@ struct vec4 shadingPbr(const struct vec3 albedo, const struct vec3 N, const floa
 
     for(int i = 0; i < uLightsPointCnt; ++i)
     {
-        struct vec3 toLight = subv3(uLights[i].vector, worldPos);
-        struct vec3 L = normv3(toLight);
-        struct vec3 H = normv3(addv3(V, L));
+        const struct vec3 toLight = subv3(uLights[i].vector, worldPos);
+        const struct vec3 L = normv3(toLight);
+        const struct vec3 H = normv3(addv3(V, L));
 
-        float distance          = lenv3(toLight);
-        float lum               = luminosity(distance, uLights[i]);
-        struct vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
+        const float distance          = lenv3(toLight);
+        const float lum               = luminosity(distance, uLights[i]);
+        const struct vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
 
-        float NDF       = distributionGGX(N, H, roughness);
-        float G         = geometrySmith(N, V, L, roughness);
-        struct vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
+        const float NDF       = distributionGGX(N, H, roughness);
+        const float G         = geometrySmith(N, V, L, roughness);
+        const struct vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
 
-        struct vec3 nominator = mulv3(F, ftov3(NDF * G));
-        float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
+        const struct vec3 nominator = mulv3(F, ftov3(NDF * G));
+        const float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
 
-        struct vec3 specular = divv3f(nominator, denominator);
+        const struct vec3 specular = divv3f(nominator, denominator);
+
         struct vec3 kD = subv3(ftov3(1.0f), F);
-
         kD = mulv3(kD, ftov3(1.0f - metallic));
-        float NdotL = max(dotv3(N, L), 0.0f);
+        const float NdotL = max(dotv3(N, L), 0.0f);
         Lo = addv3(Lo, mulv3(mulv3(addv3(divv3(mulv3(kD, alb), ftov3(PI)), specular), radiance), ftov3(NdotL)));
     }
 
-    struct vec3 ambient = mulv3(ftov3(0.1f * ao), alb);
+    const struct vec3 ambient = mulv3(ftov3(0.1f * ao), alb);
     struct vec3 color = addv3(ambient, Lo);
     color = divv3(color, addv3(color, ftov3(1.0f)));
     color = powv3(color, ftov3(1.0f/2.2f));
