@@ -519,24 +519,22 @@ struct vec4 shadingPbr(const struct vec3 albedo, const struct vec3 N, const floa
         struct vec3 L = normv3(toLight);
         struct vec3 H = normv3(addv3(V, L));
 
-        float distance  = lenv3(toLight);
-        float lum       = luminosity(distance, uLights[i]);
-        struct vec3 radiance = mulv3(uLights[i].color, ftov3(lum));
+        float distance          = lenv3(toLight);
+        float lum               = luminosity(distance, uLights[i]);
+        struct vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
 
         float NDF       = distributionGGX(N, H, roughness);
         float G         = geometrySmith(N, V, L, roughness);
         struct vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
 
-        struct vec3 nominator    = mulv3(F, ftov3(NDF * G));
+        struct vec3 nominator = mulv3(F, ftov3(NDF * G));
         float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
 
         struct vec3 specular = divv3f(nominator, denominator);
         struct vec3 kD = subv3(ftov3(1.0f), F);
 
         kD = mulv3(kD, ftov3(1.0f - metallic));
-
         float NdotL = max(dotv3(N, L), 0.0f);
-
         Lo = addv3(Lo, mulv3(mulv3(addv3(divv3(mulv3(kD, alb), ftov3(PI)), specular), radiance), ftov3(NdotL)));
     }
 
