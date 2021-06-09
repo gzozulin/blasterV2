@@ -50,7 +50,6 @@ struct mat4 {
     float value;
 };
 
-// todo: export
 struct Light {
     struct vec3 vector;
     struct vec3 color;
@@ -59,7 +58,6 @@ struct Light {
     float attenQuadratic;
 };
 
-// todo: export
 struct PhongMaterial {
     struct vec3 ambient;
     struct vec3 diffuse;
@@ -89,7 +87,7 @@ float itof(const int i) {
 }
 
 custom
-float ftoi(const float f) {
+int ftoi(const float f) {
     return (int) f;
 }
 
@@ -415,7 +413,7 @@ struct vec3 pointLightContrib(const struct vec3 viewDir, const struct vec3 fragP
                               const struct Light light, const struct PhongMaterial material) {
     struct vec3 direction = subv3(light.vector, fragPosition);
     struct vec3 lightDir = normv3(direction);
-    if (dotv3(lightDir, fragNormal) < .0f) {
+    if (dotv3(lightDir, fragNormal) < 0.0f) {
         return v3zero();
     }
     float distance = lenv3(direction);
@@ -467,32 +465,31 @@ struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPo
 }
 
 public
-float distributionGGX(const struct vec3 N, const struct vec3 H, const float roughness) {
-    float a = roughness*roughness;
-    float a2 = a*a;
-    float NdotH = max(dotv3(N, H), 0.0f);
-    float NdotH2 = NdotH*NdotH;
-    float nom   = a2;
-    float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
-    denom = PI * denom * denom;
+float distributionGGX(const struct vec3 N, const struct vec3 H, const float a) {
+    float a2        = a * a;
+    float NdotH     = max(dotv3(N, H), 0.0f);
+    float NdotH2    = NdotH*NdotH;
+    float nom       = a2;
+    float denom     = (NdotH2 * (a2 - 1.0f) + 1.0f);
+    denom           = PI * denom * denom;
     return nom / denom;
 }
 
 public
 float geometrySchlickGGX(const float NdotV, const float roughness) {
-    float r = (roughness + 1.0f);
-    float k = (r*r) / 8.0f;
-    float nom   = NdotV;
-    float denom = NdotV * (1.0f - k) + k;
+    float r         = (roughness + 1.0f);
+    float k         = (r*r) / 8.0f;
+    float nom       = NdotV;
+    float denom     = NdotV * (1.0f - k) + k;
     return nom / denom;
 }
 
 public
 float geometrySmith(const struct vec3 N, const struct vec3 V, const struct vec3 L, const float roughness) {
-    float NdotV = max(dotv3(N, V), 0.0f);
-    float NdotL = max(dotv3(N, L), 0.0f);
-    float ggx2 = geometrySchlickGGX(NdotV, roughness);
-    float ggx1 = geometrySchlickGGX(NdotL, roughness);
+    float NdotV     = max(dotv3(N, V), 0.0f);
+    float NdotL     = max(dotv3(N, L), 0.0f);
+    float ggx2      = geometrySchlickGGX(NdotV, roughness);
+    float ggx1      = geometrySchlickGGX(NdotL, roughness);
     return ggx1 * ggx2;
 }
 
@@ -511,10 +508,9 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
     struct vec3 F0  = ftov3(0.04f);
     F0 = mixv3(F0, alb, metallic);
 
-    struct vec3 Lo = ftov3(0.0f);
+    struct vec3 Lo = v3zero();
 
-    for(int i = 0; i < uLightsPointCnt; ++i)
-    {
+    for(int i = 0; i < uLightsPointCnt; ++i) {
         const struct vec3 toLight = subv3(uLights[i].vector, worldPos);
         const struct vec3 L = normv3(toLight);
         const struct vec3 H = normv3(addv3(V, L));

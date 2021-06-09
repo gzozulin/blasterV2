@@ -38,8 +38,6 @@ private const val CONST_LIGHTS = """
     uniform Light uLights[$MAX_LIGHTS];
 """
 
-const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$CONST_LIGHT_DECL\n$CONST_MAT_DECL\n$CONST_LIGHTS\n"
-
 private const val EXPR_DISCARD =
     "vec4 expr_discard() {\n" +
             "    discard;\n" +
@@ -82,7 +80,7 @@ private const val EXPR_V4 = """
     }
 """
 
-private const val EXPR_getNormalFromMap = """
+private const val EXPR_GET_NORMAL = """
     vec3 getNormalFromMap(vec3 normal, vec3 worldPos, vec2 texCoord, vec3 vnormal) {
         vec3 tangentNormal = normal * 2.0 - 1.0;
 
@@ -100,13 +98,14 @@ private const val EXPR_getNormalFromMap = """
     }
 """
 
-private const val CUSTOM_DEFINITIONS =
-    EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
+private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$CONST_LIGHT_DECL\n$CONST_MAT_DECL\n$CONST_LIGHTS\n"
+
+private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
 private const val MAIN_DECL = "void main() {"
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
-const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$EXPR_DISCARD\n$EXPR_getNormalFromMap\n"
+const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$EXPR_GET_NORMAL\n$EXPR_DISCARD\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
