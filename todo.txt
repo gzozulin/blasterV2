@@ -1,4 +1,4 @@
-(B) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
+(A) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
 x 2021-05-02 (A) 2021-04-23 Ambient jazzy music in video from youtube +video @complex
 x 2021-05-02 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +video @simple
 x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +assets @simple
@@ -25,7 +25,7 @@ x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +code @simple
 x 2021-05-19 2021-04-25 Fix texture UV missing on doors +assets @complex
 x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +video +code @complex
 x 2021-05-04 2021-04-28 Logo scene +code +assets @complex
-(B) 2021-04-29 Better tripod +video @simple
+2021-04-29 Better tripod +video @simple
 2021-04-29 Better lighting +video @complex
 2021-04-29 Better camera +video @complex
 x 2021-05-26 (A) 2021-04-29 Better teleprompter app +video @simple
@@ -33,14 +33,14 @@ x 2021-05-22 2021-04-29 Screen capture for any scene +code @simple
 2021-04-29 Learn about H264 codec +code +video @complex
 x 2021-04-29 2021-04-29 Find a way to import HuffYUV to Blender +code +video @complex
 x 2021-05-03 2021-04-29 Find a way to directly incode H264 lossless in code +code @complex
-(B) 2021-04-29 gdx-freetype fonts +code @complex
+2021-04-29 gdx-freetype fonts +code @complex
 x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +video @simple
 x 2021-05-15 (A) 2021-04-30 Show whitespace only before typing, not before scrolling +code @simple
 x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
 2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
-(B) 2021-04-30 Generate typing sounds with video +code @complex
+x 2021-06-09 (B) 2021-04-30 Generate typing sounds with video +code @complex
 (A) 2021-05-02 Ask questions from audience +video @simple
-(B) 2021-05-02 Create avatar for a channel +video @complex
+2021-05-02 Create avatar for a channel +video @complex
 (A) 2021-05-03 Create a header strip for the channel page +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
 x 2021-05-26 (A) 2021-05-04 Blender file template +video @simple
@@ -59,13 +59,15 @@ x 2021-06-03 (A) 2021-05-17 Use rule of thirds +video @simple
 2021-05-17 Image-based lighting for PBR +code @complex
 2021-05-18 Custom URL for channel (> 100 subs) +video @complex
 2021-05-20 Camera rotations with arrows, precision with shift for WASD input +code @simple
-(B) 2021-05-22 Multiple shots per one capture of code +code @complex
+x 2021-06-09 (B) 2021-05-22 Multiple shots per one capture of code +code @complex
 2021-05-22 Anisotropic Filtering for GlTexture +code @simple
 (B) 2021-05-26 Random camera start positions/shots +code @simple
 x 2021-06-05 (A) 2021-05-26 Establishing shot +video @simple
 (B) 2021-05-31 Basic support for C and interop +code @complex
 2021-06-01 Channel watermarks, especially for captures +video @simple
-2021-06-02 Channel trailer +video @complex
+2021-06-02 Channel preview video on main page +video @complex
 2021-06-03 Cron job to copy the current video once a day +video @simple
-2021-06-05 Chart as overlay on top of video +video @simple
+x 2021-06-09 2021-06-05 Chart as overlay on top of video +video @simple
 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
+(A) 2021-06-09 Journal cleanup: playlists and hashtags +video @simple
+2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple

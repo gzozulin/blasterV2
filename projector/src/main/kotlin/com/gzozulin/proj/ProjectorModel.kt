@@ -20,7 +20,7 @@ enum class AnimationState {
     FIND_KEY, SYNC_UP, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
 class ProjectorModel {
-    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep2_technique/8-projector-intro/scenario").readText()) }
+    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/ep3-shadergen/scenario").readText()) }
     private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>

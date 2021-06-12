@@ -4,6 +4,7 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.libTextureCreatePbr
 import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.scene.*
+import java.util.regex.Pattern
 
 private val vertexSrc = """
     $VERT_SHADER_HEADER
@@ -122,6 +123,31 @@ private val unifAO          = sampler(unifs { material.ao })
 private val shadingPbr = ShadingPbr(
     unifModel, unifView, constm4(camera.projectionM), unifEye,
     unifAlbedo, unifNormal, unifMetallic, unifRoughness, unifAO)
+
+
+internal object SplitExample {
+    private val twopart = Pattern.compile("(\\d+)-(\\d+)")
+    fun checkString(s: String) {
+        val m = twopart.matcher(s)
+        if (m.matches()) {
+            println(
+                s + " matches; first part is " + m.group(1) +
+                        ", second part is " + m.group(2) + "."
+            )
+        } else {
+            println("$s does not match.")
+        }
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        checkString("123-4567")
+        checkString("foo-bar")
+        checkString("123-")
+        checkString("-4567")
+        checkString("123-4567-890")
+    }
+}
 
 fun main() {
     window.create {

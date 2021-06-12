@@ -153,6 +153,90 @@ struct mat3 m3ident() {
     return (struct mat3) { 0.0f };
 }
 
+// ------------------- GET ---------------
+
+public
+float getxv4(const struct vec4 v) {
+    return v.x;
+}
+
+public
+float getyv4(const struct vec4 v) {
+    return v.y;
+}
+
+public
+float getzv4(const struct vec4 v) {
+    return v.z;
+}
+
+public
+float getwv4(const struct vec4 v) {
+    return v.w;
+}
+
+public
+float getrv4(const struct vec4 v) {
+    return v.x;
+}
+
+public
+float getgv4(const struct vec4 v) {
+    return v.y;
+}
+
+public
+float getbv4(const struct vec4 v) {
+    return v.z;
+}
+
+public
+float getav4(const struct vec4 v) {
+    return v.w;
+}
+
+// ------------------- SET ---------------
+
+public
+struct vec4 setxv4(const struct vec4 v, const float f) {
+    return v4(f, v.y, v.z, v.w);
+}
+
+public
+struct vec4 setyv4(const struct vec4 v, const float f) {
+    return v4(v.x, f, v.z, v.w);
+}
+
+public
+struct vec4 setzv4(const struct vec4 v, const float f) {
+    return v4(v.x, v.y, f, v.w);
+}
+
+public
+struct vec4 setwv4(const struct vec4 v, const float f) {
+    return v4(v.x, v.y, v.z, f);
+}
+
+public
+struct vec4 setrv4(const struct vec4 v, const float f) {
+    return v4(f, v.y, v.z, v.w);
+}
+
+public
+struct vec4 setgv4(const struct vec4 v, const float f) {
+    return v4(v.x, f, v.z, v.w);
+}
+
+public
+struct vec4 setbv4(const struct vec4 v, const float f) {
+    return v4(v.x, v.y, f, v.w);
+}
+
+public
+struct vec4 setav4(const struct vec4 v, const float f) {
+    return v4(v.x, v.y, v.z, f);
+}
+
 // ------------------- BOOL -------------------
 
 public
@@ -268,96 +352,6 @@ float lenv3(const struct vec3 v) {
 public
 struct vec3 normv3(const struct vec3 v) {
     return divv3f(v, lenv3(v));
-}
-
-/*
-custom
-struct vec4 transform(struct mat4 m, struct vec4 vec) {
-
-}*/
-
-// ------------------- GET ---------------
-
-public
-float getxv4(const struct vec4 v) {
-    return v.x;
-}
-
-public
-float getyv4(const struct vec4 v) {
-    return v.y;
-}
-
-public
-float getzv4(const struct vec4 v) {
-    return v.z;
-}
-
-public
-float getwv4(const struct vec4 v) {
-    return v.w;
-}
-
-public
-float getrv4(const struct vec4 v) {
-    return v.x;
-}
-
-public
-float getgv4(const struct vec4 v) {
-    return v.y;
-}
-
-public
-float getbv4(const struct vec4 v) {
-    return v.z;
-}
-
-public
-float getav4(const struct vec4 v) {
-    return v.w;
-}
-
-// ------------------- SET ---------------
-
-public
-struct vec4 setxv4(const struct vec4 v, const float f) {
-    return v4(f, v.y, v.z, v.w);
-}
-
-public
-struct vec4 setyv4(const struct vec4 v, const float f) {
-    return v4(v.x, f, v.z, v.w);
-}
-
-public
-struct vec4 setzv4(const struct vec4 v, const float f) {
-    return v4(v.x, v.y, f, v.w);
-}
-
-public
-struct vec4 setwv4(const struct vec4 v, const float f) {
-    return v4(v.x, v.y, v.z, f);
-}
-
-public
-struct vec4 setrv4(const struct vec4 v, const float f) {
-    return v4(f, v.y, v.z, v.w);
-}
-
-public
-struct vec4 setgv4(const struct vec4 v, const float f) {
-    return v4(v.x, f, v.z, v.w);
-}
-
-public
-struct vec4 setbv4(const struct vec4 v, const float f) {
-    return v4(v.x, v.y, f, v.w);
-}
-
-public
-struct vec4 setav4(const struct vec4 v, const float f) {
-    return v4(v.x, v.y, v.z, f);
 }
 
 // ------------------- TILE ---------------
