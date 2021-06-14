@@ -15,8 +15,8 @@ fun main() {
             projectorController.keyPressed(key, pressed)
         }
         projectorView.use {
-            frameWithCapture()
-            //justFrame()
+            //frameWithCapture()
+            justFrame()
         }
     }
 }

@@ -39,7 +39,7 @@ x 2021-05-15 (A) 2021-04-30 Show whitespace only before typing, not before scrol
 x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
 2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
 x 2021-06-09 (B) 2021-04-30 Generate typing sounds with video +code @complex
-(A) 2021-05-02 Ask questions from audience +video @simple
+x 2021-06-12 (A) 2021-05-02 Ask questions from audience +video @simple
 2021-05-02 Create avatar for a channel +video @complex
 (A) 2021-05-03 Create a header strip for the channel page +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
@@ -68,6 +68,8 @@ x 2021-06-05 (A) 2021-05-26 Establishing shot +video @simple
 2021-06-02 Channel preview video on main page +video @complex
 2021-06-03 Cron job to copy the current video once a day +video @simple
 x 2021-06-09 2021-06-05 Chart as overlay on top of video +video @simple
-(A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
+x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
 (A) 2021-06-09 Journal cleanup: playlists and hashtags +video @simple
 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
+2021-06-12 Highlight string injected code +code @complex
+(B) 2021-06-12 Blurred rendered background for pictures (or even integrate it with Projector) +code @complex
