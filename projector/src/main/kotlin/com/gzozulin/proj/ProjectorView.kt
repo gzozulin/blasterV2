@@ -31,7 +31,7 @@ private const val CODE_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 private const val MINIMAP_MAX_LINES = 114
 private const val MINIMAP_PANEL_WIDTH = 400
 private const val MINIMAP_PANEL_HEIGHT = 1000
-private const val MINIMAP_CURSOR_HEIGHT = 400
+private const val MINIMAP_CURSOR_HEIGHT = 100
 private const val MINIMAP_PANEL_POS_X = 1550
 private const val MINIMAP_PANEL_POS_Y = SCREEN_HEIGHT / 2f
 
@@ -227,7 +227,7 @@ class ProjectorView(private val model: ProjectorModel) {
     private fun prepareMinimap() {
         glTechRttDraw(minimapRttTechnique) {
             glClear(panelColor)
-            glTechTextPage(minimapTextTechnique, model.currentPage)
+            glTechTextPageCentered(minimapTextTechnique, model.minimapPage, model.currentMinimapCenter, MINIMAP_MAX_LINES)
         }
         glTechRttDraw(minimapRttCursorTechnique) {
             glClear(minimapCursorColor)
@@ -235,7 +235,7 @@ class ProjectorView(private val model: ProjectorModel) {
     }
 
     private fun updateMinimapCursor() {
-        val progress = 1f - model.currentPageCenter.toFloat() / MINIMAP_MAX_LINES.toFloat()
+        val progress = 1f - model.currentMinimapCenter.toFloat() / MINIMAP_MAX_LINES.toFloat()
         val minimapStart = MINIMAP_PANEL_POS_Y - MINIMAP_PANEL_HEIGHT/2
         val minimapEnd = MINIMAP_PANEL_POS_Y + MINIMAP_PANEL_HEIGHT/2
         val minimapSpan = minimapEnd - minimapStart

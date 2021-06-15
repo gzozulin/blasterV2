@@ -2,7 +2,9 @@ package com.gzozulin.proj
 
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.minigl.api.col3
+import com.gzozulin.minigl.api.cyan
 import com.gzozulin.minigl.techniques.SpanVisibility
+import com.gzozulin.minigl.techniques.TextPage
 import com.gzozulin.minigl.techniques.TextSpan
 import java.io.File
 import kotlin.math.abs
@@ -25,6 +27,7 @@ class ProjectorModel {
 
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
     lateinit var currentPage: ProjectorTextPage<OrderedSpan>
+    lateinit var minimapPage: TextPage<OrderedSpan>
 
     var animationState = AnimationState.FIND_KEY
 
@@ -34,12 +37,27 @@ class ProjectorModel {
     private var lastFrame    = 0
 
     var currentPageCenter = 0
+    var currentMinimapCenter = 0
     private var nextPageCenter = 0
 
     fun isPageReady() = ::currentPage.isInitialized
 
     fun renderScenario() {
         pages = scenarioRenderer.renderScenario()
+        createMinimap()
+    }
+
+    private fun createMinimap() {
+        val allSpans = mutableListOf<OrderedSpan>()
+        pages.forEach { page ->
+            allSpans.add(OrderedSpan(
+                "\n------------------------------------------------ " +
+                        page.file.name +
+                " ------------------------------------------------\n",
+                0, col3().cyan(), SpanVisibility.VISIBLE))
+            allSpans.addAll(page.spans)
+        }
+        minimapPage = TextPage(allSpans)
     }
 
     fun advanceScenario() {
@@ -82,6 +100,7 @@ class ProjectorModel {
             val found = findNextInvisibleSpan()
             if (found != null) {
                 showNextInvisibleSpan(found)
+                updateMinimapCenter(found)
             } else {
                 animationState = AnimationState.NEXT_ORDER
             }
@@ -134,6 +153,10 @@ class ProjectorModel {
             }
         }
         span.visibility = SpanVisibility.VISIBLE
+    }
+
+    private fun updateMinimapCenter(span: OrderedSpan) {
+        currentMinimapCenter = minimapPage.findLineNo(span)
     }
 
     private fun findCurrentPage() {
