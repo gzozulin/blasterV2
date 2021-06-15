@@ -51,9 +51,9 @@ class ProjectorModel {
         val allSpans = mutableListOf<OrderedSpan>()
         pages.forEach { page ->
             allSpans.add(OrderedSpan(
-                "\n------------------------------------------------ " +
+                "\n-------------------------------------------------- " +
                         page.file.name +
-                " ------------------------------------------------\n",
+                " --------------------------------------------------\n\n",
                 0, col3().cyan(), SpanVisibility.VISIBLE))
             allSpans.addAll(page.spans)
         }

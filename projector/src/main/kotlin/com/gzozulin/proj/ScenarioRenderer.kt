@@ -286,7 +286,7 @@ fun Token.color(): col3 = when (type) {
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE, KotlinLexer.CONST, KotlinLexer.DATA,
     KotlinLexer.TYPE_ALIAS, KotlinLexer.AS, KotlinLexer.BY, KotlinLexer.VAR, KotlinLexer.OVERRIDE,
-    KotlinLexer.LATEINIT, KotlinLexer.ENUM -> kotlin_orange
+    KotlinLexer.LATEINIT, KotlinLexer.ENUM, KotlinLexer.ABSTRACT, KotlinLexer.OPEN -> kotlin_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
     KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral -> kotlin_light_blue
     KotlinLexer.LineStrText -> kotlin_green
