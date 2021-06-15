@@ -9,7 +9,7 @@ import com.gzozulin.minigl.techniques.TextSpan
 import java.io.File
 import kotlin.math.abs
 
-const val LINES_TO_SHOW = 20
+const val LINES_TO_SHOW = 21
 const val FRAMES_PER_UPDATE = 2
 const val FRAMES_TO_FINALIZE = 20000 / 16
 
