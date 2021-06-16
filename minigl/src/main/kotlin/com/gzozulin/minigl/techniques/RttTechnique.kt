@@ -20,16 +20,6 @@ fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
     glFrameBufferUse(techniqueRtt.frameBuffer) {
         glTextureUse(techniqueRtt.color) {
             glRenderBufferUse(techniqueRtt.depth) {
-                glFrameBufferBind(techniqueRtt.frameBuffer) {
-                    glTextureBind(techniqueRtt.color) {
-                        glRenderBufferBind(techniqueRtt.depth) {
-                            glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.color)
-                            glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_DEPTH_ATTACHMENT, techniqueRtt.depth)
-                            glFrameBufferOutputs(techniqueRtt.frameBuffer, outputs)
-                            glFrameBufferIsComplete(techniqueRtt.frameBuffer)
-                        }
-                    }
-                }
                 callback.invoke()
             }
         }
@@ -38,9 +28,18 @@ fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
 
 fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
     glFrameBufferBind(techniqueRtt.frameBuffer) {
-        glViewportBindPrev {
-            backend.glViewport(0, 0, techniqueRtt.width, techniqueRtt.height)
-            callback.invoke()
+        glTextureBind(techniqueRtt.color) {
+            glRenderBufferBind(techniqueRtt.depth) {
+                glViewportBindPrev {
+                    backend.glViewport(0, 0, techniqueRtt.width, techniqueRtt.height)
+                    glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_COLOR_ATTACHMENT0, techniqueRtt.color)
+                    glFrameBufferAttachment(techniqueRtt.frameBuffer, backend.GL_DEPTH_ATTACHMENT, techniqueRtt.depth)
+                    glFrameBufferOutputs(techniqueRtt.frameBuffer, outputs)
+                    glFrameBufferIsComplete(techniqueRtt.frameBuffer)
+                    backend.glGenerateMipmap(techniqueRtt.color.target)
+                    callback.invoke()
+                }
+            }
         }
     }
 }
