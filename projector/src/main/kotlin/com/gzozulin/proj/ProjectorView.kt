@@ -79,10 +79,10 @@ class ProjectorView(private val model: ProjectorModel) {
     // ----------------- Text ------------------
 
     private val codeTextTechnique = TechniqueText(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT, codeFontDescription)
-    private val codeRttTechnique = TechniqueRtt(CODE_PANEL_WIDTH, CODE_PANEL_HEIGHT)
+    private val codeRttTechnique = TechniqueRtt(CODE_PANEL_WIDTH*4, CODE_PANEL_HEIGHT*4) // text-AA
 
     private val minimapTextTechnique = TechniqueText(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT, minimapFontDescription)
-    private val minimapRttTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)
+    private val minimapRttTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH*4, MINIMAP_PANEL_HEIGHT*4) // text-AA
     private val minimapRttCursorTechnique = TechniqueRtt(MINIMAP_PANEL_WIDTH, MINIMAP_CURSOR_HEIGHT)
     private val minimapCursorColor = vec4(0.25f)
 
@@ -99,7 +99,7 @@ class ProjectorView(private val model: ProjectorModel) {
     // ----------------- File pop-up ------------------
 
     private val filePopUpTextTechnique = TechniqueText(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT, filePopUpFontDescription)
-    private val filePopUpRttTechnique = TechniqueRtt(FILE_POP_UP_WIDTH, FILE_POP_UP_HEIGHT)
+    private val filePopUpRttTechnique = TechniqueRtt(FILE_POP_UP_WIDTH*4, FILE_POP_UP_HEIGHT*4) // text-AA
 
     private var lastShownPage: ProjectorTextPage<OrderedSpan>? = null
     private var filePopUp = TextPage(listOf(SimpleSpan("ProjectorView.kt", col3().white())))
