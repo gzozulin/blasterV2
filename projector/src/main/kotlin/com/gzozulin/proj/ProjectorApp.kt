@@ -3,7 +3,7 @@ package com.gzozulin.proj
 import com.gzozulin.minigl.api.GlWindow
 
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
-private val capturer = Capturer(window)
+private val capturer = Capturer(window, "code")
 
 private val projectorModel = ProjectorModel()
 private val projectorView = ProjectorView(projectorModel)
@@ -15,8 +15,8 @@ fun main() {
             projectorController.keyPressed(key, pressed)
         }
         projectorView.use {
-            frameWithCapture()
-            //justFrame()
+            //frameWithCapture()
+            justFrame()
         }
     }
 }

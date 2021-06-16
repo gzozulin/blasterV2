@@ -16,7 +16,7 @@ data class TechniqueRtt(val width: Int, val height: Int) {
     val depth = GlRenderBuffer(width, height)
 }
 
-fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
+fun glRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
     glFrameBufferUse(techniqueRtt.frameBuffer) {
         glTextureUse(techniqueRtt.color) {
             glRenderBufferUse(techniqueRtt.depth) {
@@ -26,7 +26,7 @@ fun glTechRttUse(techniqueRtt: TechniqueRtt, callback: Callback) {
     }
 }
 
-fun glTechRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
+fun glRttDraw(techniqueRtt: TechniqueRtt, callback: Callback) {
     glFrameBufferBind(techniqueRtt.frameBuffer) {
         glTextureBind(techniqueRtt.color) {
             glRenderBufferBind(techniqueRtt.depth) {
@@ -55,12 +55,12 @@ private val window = GlWindow()
 
 fun main() {
     window.create {
-        glTechRttUse(techniqueRtt) {
+        glRttUse(techniqueRtt) {
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
                     window.show {
                         glClear(vec3().rose())
-                        glTechRttDraw(techniqueRtt) {
+                        glRttDraw(techniqueRtt) {
                             glClear(vec3().chartreuse())
                         }
                         glShadingFlatDraw(shadingFlat) {

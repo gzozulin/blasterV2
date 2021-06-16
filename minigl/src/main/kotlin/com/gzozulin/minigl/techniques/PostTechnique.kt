@@ -23,8 +23,8 @@ data class TechniquePostProcessing(val width: Int, val height: Int, val filter: 
     internal val rect = glMeshCreateRect()
 }
 
-fun glTechPostProcessingUse(techniquePP: TechniquePostProcessing, callback: Callback) {
-    glTechRttUse(techniquePP.techniqueRtt) {
+fun glPostProcessingUse(techniquePP: TechniquePostProcessing, callback: Callback) {
+    glRttUse(techniquePP.techniqueRtt) {
         glShadingFlatUse(techniquePP.shadingFlat) {
             glMeshUse(techniquePP.rect) {
                 callback.invoke()
@@ -33,8 +33,8 @@ fun glTechPostProcessingUse(techniquePP: TechniquePostProcessing, callback: Call
     }
 }
 
-fun glTechPostProcessingDraw(techniquePP: TechniquePostProcessing, callback: Callback) {
-    glTechRttDraw(techniquePP.techniqueRtt) {
+fun glPostProcessingDraw(techniquePP: TechniquePostProcessing, callback: Callback) {
+    glRttDraw(techniquePP.techniqueRtt) {
         callback.invoke()
     }
     glShadingFlatDraw(techniquePP.shadingFlat) {
@@ -84,7 +84,7 @@ private val techniquePostProcessing = TechniquePostProcessing(window, ::filter)
 
 private fun useScene(callback: Callback) {
     glShadingPbrUse(shadingPbr) {
-        glTechPostProcessingUse(techniquePostProcessing) {
+        glPostProcessingUse(techniquePostProcessing) {
             glMeshUse(obj.mesh) {
                 glTextureUse(listOf(material.albedo, material.normal, material.metallic,
                     material.roughness, material.ao, foggyTexture)) {
@@ -138,7 +138,7 @@ fun main() {
                     camera.lookAlong(direction)
                 }
                 glTextureBind(foggyTexture) {
-                    glTechPostProcessingDraw(techniquePostProcessing) {
+                    glPostProcessingDraw(techniquePostProcessing) {
                         drawScene()
                     }
                 }

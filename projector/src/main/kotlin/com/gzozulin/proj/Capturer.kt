@@ -14,11 +14,11 @@ import org.opencv.core.CvType
 
 private val converter = OpenCVFrameConverter.ToMat()
 
-class Capturer(private val window: GlWindow) : AutoCloseable {
+class Capturer(private val window: GlWindow, private val filename: String = "output") : AutoCloseable {
     var isCapturing = true
 
     private val recorder by lazy {
-        FFmpegFrameRecorder("output.avi", window.width, window.height, 0)
+        FFmpegFrameRecorder("$filename.avi", window.width, window.height, 0)
             .apply {
                 videoCodec = AV_CODEC_ID_RAWVIDEO
                 frameRate = 60.0

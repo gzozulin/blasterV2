@@ -63,7 +63,7 @@ data class TechniqueSkybox(val camera: Camera, val color: Expression<vec4>) {
         .objects.first().mesh
 }
 
-fun glTechSkyboxUse(techniqueSkybox: TechniqueSkybox, callback: Callback) {
+fun glSkyboxUse(techniqueSkybox: TechniqueSkybox, callback: Callback) {
     glProgramUse(techniqueSkybox.program) {
         glMeshUse(techniqueSkybox.cube) {
             callback.invoke()
@@ -71,7 +71,7 @@ fun glTechSkyboxUse(techniqueSkybox: TechniqueSkybox, callback: Callback) {
     }
 }
 
-fun glTechSkyboxDraw(techniqueSkybox: TechniqueSkybox) {
+fun glSkyboxDraw(techniqueSkybox: TechniqueSkybox) {
     glProgramBind(techniqueSkybox.program) {
         techniqueSkybox.unifProjM.submit(techniqueSkybox.program)
         techniqueSkybox.unifViewM.submit(techniqueSkybox.program)
@@ -121,7 +121,7 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }
-        glTechSkyboxUse(techniqueSkybox) {
+        glSkyboxUse(techniqueSkybox) {
             glTextureUse(cubeMap1) {
                 glTextureUse(cubeMap2) {
                     window.show {
@@ -138,7 +138,7 @@ fun main() {
                         }
                         glTextureBind(cubeMap1) {
                             glTextureBind(cubeMap2) {
-                                glTechSkyboxDraw(techniqueSkybox)
+                                glSkyboxDraw(techniqueSkybox)
                             }
                         }
                     }

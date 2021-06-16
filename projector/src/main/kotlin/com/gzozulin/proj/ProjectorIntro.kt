@@ -192,10 +192,10 @@ fun main() {
 }
 
 private fun itemUse(callback: Callback) {
-    glTechRttUse(teapotRtt) {
-        glTechRttUse(computerRtt) {
-            glTechRttUse(mandalorianRtt) {
-                glTechPostProcessingUse(mergingItem) {
+    glRttUse(teapotRtt) {
+        glRttUse(computerRtt) {
+            glRttUse(mandalorianRtt) {
+                glPostProcessingUse(mergingItem) {
                     glShadingPhongUse(shadingPhong) {
                         glTextureUse(teapotTexture) {
                             libWavefrontGroupUse(mandalorianGroup) {
@@ -297,10 +297,10 @@ private fun mandalorianUpdate() {
 private fun itemDraw(where: TechniqueRtt, mesh: GlMesh, matrix: mat4, albedo: GlTexture) {
     unifItemModel.value = matrix
     unifItemAlbedo.value = albedo
-    glTechRttDraw(where) {
+    glRttDraw(where) {
         glTextureBind(tvMaterial.albedo) {
             glTextureBind(albedo) {
-                glTechPostProcessingDraw(mergingItem) {
+                glPostProcessingDraw(mergingItem) {
                     glDepthTest {
                         glCulling {
                             glClear()

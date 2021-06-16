@@ -157,10 +157,10 @@ class ProjectorView(private val model: ProjectorModel) {
                     glTechTextUse(codeTextTechnique) {
                         glTechTextUse(minimapTextTechnique) {
                             glTechTextUse(filePopUpTextTechnique) {
-                                glTechRttUse(codeRttTechnique) {
-                                    glTechRttUse(minimapRttTechnique) {
-                                        glTechRttUse(minimapRttCursorTechnique) {
-                                            glTechRttUse(filePopUpRttTechnique) {
+                                glRttUse(codeRttTechnique) {
+                                    glRttUse(minimapRttTechnique) {
+                                        glRttUse(minimapRttCursorTechnique) {
+                                            glRttUse(filePopUpRttTechnique) {
                                                 glTextureUse(noiseTexture) {
                                                     glMeshUse(panelMesh) {
                                                         callback.invoke()
@@ -218,18 +218,18 @@ class ProjectorView(private val model: ProjectorModel) {
     }
 
     private fun prepareCode() {
-        glTechRttDraw(codeRttTechnique) {
+        glRttDraw(codeRttTechnique) {
             glClear(panelColor)
             glTechTextPageCentered(codeTextTechnique, model.currentPage, model.currentPageCenter, LINES_TO_SHOW)
         }
     }
 
     private fun prepareMinimap() {
-        glTechRttDraw(minimapRttTechnique) {
+        glRttDraw(minimapRttTechnique) {
             glClear(panelColor)
             glTechTextPageCentered(minimapTextTechnique, model.minimapPage, model.currentMinimapCenter, MINIMAP_MAX_LINES)
         }
-        glTechRttDraw(minimapRttCursorTechnique) {
+        glRttDraw(minimapRttCursorTechnique) {
             glClear(minimapCursorColor)
         }
     }
@@ -254,7 +254,7 @@ class ProjectorView(private val model: ProjectorModel) {
             filePopUp = TextPage(listOf(SimpleSpan(lastShownPage!!.file.name, col3().cyan())))
             filePopUpState = FilePopUp.MOVE_IN
         }
-        glTechRttDraw(filePopUpRttTechnique) {
+        glRttDraw(filePopUpRttTechnique) {
             glClear(filePopUpBackground)
             when (filePopUpState) {
                 FilePopUp.MOVE_IN -> {

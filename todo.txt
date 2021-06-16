@@ -9,7 +9,7 @@ x 2021-05-22 (A) 2021-04-23 Highlighting for named arguments and labels (kotlin_
 x 2021-05-22 (A) 2021-04-23 Highlighting for method calls in function body +code @simple
 2021-04-23 Create automatic video description, include link to source code +code @simple
 x 2021-04-23 2021-04-23 Minimap cursor window +code @simple
-(B) 2021-04-23 Show all pages continuously on minimap +code @complex
+x 2021-06-15 (B) 2021-04-23 Show all pages continuously on minimap +code @complex
 x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds +video @simple
 x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
@@ -45,7 +45,7 @@ x 2021-06-12 (A) 2021-05-02 Ask questions from audience +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
 x 2021-05-26 (A) 2021-05-04 Blender file template +video @simple
 x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +code @complex
-(B) 2021-05-08 MSAA for RttTechnique (code rendering) +code @complex
+x 2021-06-15 (B) 2021-05-08 MSAA for RttTechnique (code rendering) +code @complex
 x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +code @simple
 x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +code @complex
 (B) 2021-05-13 Learn about licenses for creative use +video @complex
@@ -61,7 +61,7 @@ x 2021-06-03 (A) 2021-05-17 Use rule of thirds +video @simple
 2021-05-20 Camera rotations with arrows, precision with shift for WASD input +code @simple
 x 2021-06-09 (B) 2021-05-22 Multiple shots per one capture of code +code @complex
 2021-05-22 Anisotropic Filtering for GlTexture +code @simple
-(B) 2021-05-26 Random camera start positions/shots +code @simple
+x 2021-06-16 (B) 2021-05-26 Random camera start positions/shots +code @simple
 x 2021-06-05 (A) 2021-05-26 Establishing shot +video @simple
 (B) 2021-05-31 Basic support for C and interop +code @complex
 2021-06-01 Channel watermarks, especially for captures +video @simple
