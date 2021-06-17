@@ -276,6 +276,12 @@ struct mat3 m3ident() {
     return (struct mat3) { 0.0f };
 }
 
+public
+struct ray rayFront() {
+    const struct ray result = { v3zero(), v3front() };
+    return result;
+}
+
 // ------------------- GET ---------------
 
 public
@@ -482,6 +488,11 @@ struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) 
     return addv3(mulv3f(from, 1.0f - t), mulv3f(to, t));
 }
 
+public
+struct vec3 pointOnRay(const struct ray ray, const float t) {
+    return addv3(ray.origin, mulv3f(ray.direction, t));
+}
+
 // ------------------- TILE ---------------
 
 public
@@ -686,24 +697,26 @@ struct ray createRayFromTexCoord(const struct vec2 texCoord) {
 }
 
 public
-bool hitRaySphere(const struct ray ray, const struct vec3 center, const float radius) {
+float hitRaySphere(const struct ray ray, const struct vec3 center, const float radius) {
     const struct vec3 oc = subv3(ray.origin, center);
     const float a = dotv3(ray.direction, ray.direction);
     const float b = 2 * dotv3(oc, ray.direction);
     const float c = dotv3(oc, oc) - radius * radius;
     const float D = b*b - 4*a*c;
-    return D > 0;
+    return D < 0 ? -1.0f : (-b - sqrt(D)) / 2 * a;
 }
 
 public
 struct vec4 shadingRt(const struct vec2 texCoord) {
+    const struct vec3 sphereCenter = v3front();
     const struct ray ray = createRayFromTexCoord(texCoord);
-    if (hitRaySphere(ray, v3front(), 0.5f)) {
-        return v3tov4(v3red(), 1.0f);
+    const float t = hitRaySphere(ray, sphereCenter, 0.5f);
+    if (t > 0) {
+        const struct vec3 N = normv3(subv3(pointOnRay(ray, t), sphereCenter));
+        return v3tov4(mulv3f(addv3(N, v3one()), 0.5f), 1.0f);
     } else {
         return background(ray);
     }
-    return background(ray);
 }
 
 // ------------------- MAIN ---------------
@@ -738,6 +751,7 @@ int main() {
     assert(lenv3(v3(0, 0, 1)) == 1);
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
+    assert(eqv3(pointOnRay(rayFront(), 10.0f), v3(0, 0, -10)));
     return 0;
 }
 

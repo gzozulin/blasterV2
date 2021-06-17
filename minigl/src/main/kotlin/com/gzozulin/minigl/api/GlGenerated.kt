@@ -34,6 +34,7 @@ private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f ,
 private const val DEF_V3TOV4 = "vec4 v3tov4 ( vec3 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n\n"
 private const val DEF_FTOV4 = "vec4 ftov4 ( float v ) { return v4 ( v , v , v , v ) ; }\n\n"
 private const val DEF_V4ZERO = "vec4 v4zero ( ) { return ftov4 ( 0.0f ) ; }\n\n"
+private const val DEF_RAYFRONT = "ray rayFront ( ) { ray result = { v3zero ( ) , v3front ( ) } ; return result ; }\n\n"
 private const val DEF_GETXV4 = "float getxv4 ( vec4 v ) { return v . x ; }\n\n"
 private const val DEF_GETYV4 = "float getyv4 ( vec4 v ) { return v . y ; }\n\n"
 private const val DEF_GETZV4 = "float getzv4 ( vec4 v ) { return v . z ; }\n\n"
@@ -73,6 +74,7 @@ private const val DEF_DIVV4F = "vec4 divv4f ( vec4 left , float right ) { return
 private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrt ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n\n"
 private const val DEF_LERPV3 = "vec3 lerpv3 ( vec3 from , vec3 to , float t ) { return addv3 ( mulv3f ( from , 1.0f - t ) , mulv3f ( to , t ) ) ; }\n\n"
+private const val DEF_POINTONRAY = "vec3 pointOnRay ( ray ray , float t ) { return addv3 ( ray . origin , mulv3f ( ray . direction , t ) ) ; }\n\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; return v2 ( tileStartX + texCoord . x * tileSideX , tileStartY + texCoord . y * tileSideY ) ; }\n\n"
 private const val DEF_LUMINOSITY = "float luminosity ( float distance , Light light ) { return 1.0f / ( light . attenConstant + light . attenLinear * distance + light . attenQuadratic * distance * distance ) ; }\n\n"
 private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; return diffuseTerm > 0.0f ? mulv3f ( material . diffuse , diffuseTerm ) : v3zero ( ) ; }\n\n"
@@ -90,10 +92,10 @@ private const val DEF_FRESNELSCHLICK = "vec3 fresnelSchlick ( float cosTheta , v
 private const val DEF_SHADINGPBR = "vec4 shadingPbr ( vec3 eye , vec3 worldPos , vec3 albedo , vec3 N , float metallic , float roughness , float ao ) { vec3 alb = powv3 ( albedo , ftov3 ( 2.2f ) ) ; vec3 V = normv3 ( subv3 ( eye , worldPos ) ) ; vec3 F0 = ftov3 ( 0.04f ) ; F0 = mixv3 ( F0 , alb , metallic ) ; vec3 Lo = v3zero ( ) ; for ( int i = 0 ; i < uLightsPointCnt ; ++ i ) { vec3 toLight = subv3 ( uLights [ i ] . vector , worldPos ) ; vec3 L = normv3 ( toLight ) ; vec3 H = normv3 ( addv3 ( V , L ) ) ; float distance = lenv3 ( toLight ) ; float lum = luminosity ( distance , uLights [ i ] ) ; vec3 radiance = mulv3 ( uLights [ i ] . color , ftov3 ( lum ) ) ; float NDF = distributionGGX ( N , H , roughness ) ; float G = geometrySmith ( N , V , L , roughness ) ; vec3 F = fresnelSchlick ( max ( dotv3 ( H , V ) , 0.0f ) , F0 ) ; vec3 nominator = mulv3 ( F , ftov3 ( NDF * G ) ) ; float denominator = 4.0f * max ( dotv3 ( N , V ) , 0.0f ) * max ( dotv3 ( N , L ) , 0.0f ) + 0.001f ; vec3 specular = divv3f ( nominator , denominator ) ; vec3 kD = subv3 ( ftov3 ( 1.0f ) , F ) ; kD = mulv3 ( kD , ftov3 ( 1.0f - metallic ) ) ; float NdotL = max ( dotv3 ( N , L ) , 0.0f ) ; Lo = addv3 ( Lo , mulv3 ( mulv3 ( addv3 ( divv3 ( mulv3 ( kD , alb ) , ftov3 ( PI ) ) , specular ) , radiance ) , ftov3 ( NdotL ) ) ) ; } vec3 ambient = mulv3 ( ftov3 ( 0.1f * ao ) , alb ) ; vec3 color = addv3 ( ambient , Lo ) ; color = divv3 ( color , addv3 ( color , ftov3 ( 1.0f ) ) ) ; color = powv3 ( color , ftov3 ( 1.0f / 2.2f ) ) ; return v3tov4 ( color , 1.0f ) ; }\n\n"
 private const val DEF_BACKGROUND = "vec4 background ( ray ray ) { float t = ( ray . direction . y + 1.0f ) * 0.5f ; vec3 gradient = lerpv3 ( v3one ( ) , v3 ( 0.5f , 0.7f , 1.0f ) , t ) ; return v3tov4 ( gradient , 1.0f ) ; }\n\n"
 private const val DEF_CREATERAYFROMTEXCOORD = "ray createRayFromTexCoord ( vec2 texCoord ) { vec3 lowerLeft = { - 1 , - 1 , - 1 } ; vec3 origin = { 0 , 0 , 0 } ; vec3 horizontal = { 2 , 0 , 0 } ; vec3 vertical = { 0 , 2 , 0 } ; vec3 direction = normv3 ( addv3 ( lowerLeft , addv3 ( mulv3f ( horizontal , texCoord . x ) , mulv3f ( vertical , texCoord . y ) ) ) ) ; ray result = { origin , direction } ; return result ; }\n\n"
-private const val DEF_HITRAYSPHERE = "bool hitRaySphere ( ray ray , vec3 center , float radius ) { vec3 oc = subv3 ( ray . origin , center ) ; float a = dotv3 ( ray . direction , ray . direction ) ; float b = 2 * dotv3 ( oc , ray . direction ) ; float c = dotv3 ( oc , oc ) - radius * radius ; float D = b * b - 4 * a * c ; return D > 0 ; }\n\n"
-private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 texCoord ) { ray ray = createRayFromTexCoord ( texCoord ) ; if ( hitRaySphere ( ray , v3front ( ) , 0.5f ) ) { return v3tov4 ( v3red ( ) , 1.0f ) ; } else { return background ( ray ) ; } return background ( ray ) ; }\n\n"
+private const val DEF_HITRAYSPHERE = "float hitRaySphere ( ray ray , vec3 center , float radius ) { vec3 oc = subv3 ( ray . origin , center ) ; float a = dotv3 ( ray . direction , ray . direction ) ; float b = 2 * dotv3 ( oc , ray . direction ) ; float c = dotv3 ( oc , oc ) - radius * radius ; float D = b * b - 4 * a * c ; return D < 0 ? - 1.0f : ( - b - sqrt ( D ) ) / 2 * a ; }\n\n"
+private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 texCoord ) { vec3 sphereCenter = v3front ( ) ; ray ray = createRayFromTexCoord ( texCoord ) ; float t = hitRaySphere ( ray , sphereCenter , 0.5f ) ; if ( t > 0 ) { vec3 N = normv3 ( subv3 ( pointOnRay ( ray , t ) , sphereCenter ) ) ; return v3tov4 ( mulv3f ( addv3 ( N , v3one ( ) ) , 0.5f ) , 1.0f ) ; } else { return background ( ray ) ; } }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_LERPV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_CREATERAYFROMTEXCOORD+DEF_HITRAYSPHERE+DEF_SHADINGRT
+const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYFRONT+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_LERPV3+DEF_POINTONRAY+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_CREATERAYFROMTEXCOORD+DEF_HITRAYSPHERE+DEF_SHADINGRT
 
 fun itof(i: Expression<Int>) = object : Expression<Float>() {
     override fun expr() = "itof(${i.expr()})"
@@ -282,6 +284,11 @@ fun v4zero() = object : Expression<vec4>() {
 
 fun m3ident() = object : Expression<mat3>() {
     override fun expr() = "m3ident()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun rayFront() = object : Expression<ray>() {
+    override fun expr() = "rayFront()"
     override fun roots() = listOf<Expression<*>>()
 }
 
@@ -480,6 +487,11 @@ fun lerpv3(from: Expression<vec3>, to: Expression<vec3>, t: Expression<Float>) =
     override fun roots() = listOf(from, to, t)
 }
 
+fun pointOnRay(ray: Expression<ray>, t: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "pointOnRay(${ray.expr()}, ${t.expr()})"
+    override fun roots() = listOf(ray, t)
+}
+
 fun tile(texCoord: Expression<vec2>, uv: Expression<vec2i>, cnt: Expression<vec2i>) = object : Expression<vec2>() {
     override fun expr() = "tile(${texCoord.expr()}, ${uv.expr()}, ${cnt.expr()})"
     override fun roots() = listOf(texCoord, uv, cnt)
@@ -570,7 +582,7 @@ fun createRayFromTexCoord(texCoord: Expression<vec2>) = object : Expression<ray>
     override fun roots() = listOf(texCoord)
 }
 
-fun hitRaySphere(ray: Expression<ray>, center: Expression<vec3>, radius: Expression<Float>) = object : Expression<Boolean>() {
+fun hitRaySphere(ray: Expression<ray>, center: Expression<vec3>, radius: Expression<Float>) = object : Expression<Float>() {
     override fun expr() = "hitRaySphere(${ray.expr()}, ${center.expr()}, ${radius.expr()})"
     override fun roots() = listOf(ray, center, radius)
 }
