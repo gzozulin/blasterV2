@@ -4,9 +4,9 @@ import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.kotlin.KotlinParserBaseVisitor
 import com.gzozulin.minigl.api.col3
-import com.gzozulin.minigl.techniques.SpanVisibility
-import com.gzozulin.minigl.techniques.TextPage
-import com.gzozulin.minigl.techniques.TextSpan
+import com.gzozulin.minigl.tech.SpanVisibility
+import com.gzozulin.minigl.tech.TextPage
+import com.gzozulin.minigl.tech.TextSpan
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

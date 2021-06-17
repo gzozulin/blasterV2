@@ -13,10 +13,10 @@ import com.gzozulin.minigl.assets.libWavefrontGroupUse
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerScenic
 import com.gzozulin.minigl.scene.PointLight
-import com.gzozulin.minigl.techniques.SimpleSpan
-import com.gzozulin.minigl.techniques.TextPage
-import com.gzozulin.minigl.techniques.*
-import com.gzozulin.minigl.techniques.FontDescription
+import com.gzozulin.minigl.tech.SimpleSpan
+import com.gzozulin.minigl.tech.TextPage
+import com.gzozulin.minigl.tech.*
+import com.gzozulin.minigl.tech.FontDescription
 import java.lang.Float.max
 import java.lang.Float.min
 

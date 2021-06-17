@@ -1,4 +1,4 @@
-package com.gzozulin.proj
+package com.gzozulin.minigl.capture
 
 import com.gzozulin.minigl.api.GlWindow
 import org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_RAWVIDEO

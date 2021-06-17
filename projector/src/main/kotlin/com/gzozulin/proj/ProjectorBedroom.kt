@@ -8,10 +8,10 @@ import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
 import com.gzozulin.minigl.scene.PointLight
 import com.gzozulin.minigl.scene.WasdInput
-import com.gzozulin.minigl.techniques.ShadingPhong
-import com.gzozulin.minigl.techniques.glShadingPhongDraw
-import com.gzozulin.minigl.techniques.glShadingPhongInstance
-import com.gzozulin.minigl.techniques.glShadingPhongUse
+import com.gzozulin.minigl.tech.ShadingPhong
+import com.gzozulin.minigl.tech.glShadingPhongDraw
+import com.gzozulin.minigl.tech.glShadingPhongInstance
+import com.gzozulin.minigl.tech.glShadingPhongUse
 import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow(1500, 900, isFullscreen = false, isHoldingCursor = false, isMultisampling = true)

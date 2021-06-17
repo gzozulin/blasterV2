@@ -2,11 +2,11 @@ package com.gzozulin.examples
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.libTextureCreate
-import com.gzozulin.minigl.techniques.ShadingFlat
-import com.gzozulin.minigl.techniques.glShadingFlatDraw
-import com.gzozulin.minigl.techniques.glShadingFlatInstance
-import com.gzozulin.minigl.techniques.glShadingFlatUse
-import com.gzozulin.proj.Capturer
+import com.gzozulin.minigl.capture.Capturer
+import com.gzozulin.minigl.tech.ShadingFlat
+import com.gzozulin.minigl.tech.glShadingFlatDraw
+import com.gzozulin.minigl.tech.glShadingFlatInstance
+import com.gzozulin.minigl.tech.glShadingFlatUse
 
 private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)

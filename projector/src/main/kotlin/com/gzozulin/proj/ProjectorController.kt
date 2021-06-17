@@ -1,5 +1,6 @@
 package com.gzozulin.proj
 
+import com.gzozulin.minigl.capture.Capturer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -10,8 +11,8 @@ open class State(
     protected val parent: ProjectorController,
     protected val model: ProjectorModel,
     protected val view: ProjectorView,
-    protected val capturer: Capturer) {
-
+    protected val capturer: Capturer
+) {
     open fun onEnter() {}
     open fun onLeave() {}
 

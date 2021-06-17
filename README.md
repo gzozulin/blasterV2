@@ -32,7 +32,7 @@ Each project contains a set of runnables. To try them out, you need to clone the
 * For Windows users: [this tool](https://gitforwindows.org/) can simplify life without a console
 
 ### Sprites
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.SpritesKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.SpritesKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/08/ufo.png" />
 There are many ways to represent an animated character in a scene. Some of those ways are straightforward, and others are incredibly complex. For the Blaster, I chose the character sprite sheet animation. The viewpoint for my scenes will be hight above the scene, and the lack of detailed lighting will not be visible. On the other hand, sprite sheet animation has many advantages: simplicity, performance, elaborate animations. Some effects and lighting can even be baked in it. Since the main emphasis will be on simulation, this approach looks balanced enough. For a roguelike/strategy scene, it is a next step after just flat tiles and before full-blown skeletal animation. 
@@ -45,37 +45,37 @@ There are many ways to represent an animated character in a scene. Some of those
 <b>Soccer</b> was born to work out ideas of simulation of a big world. The scenes' physics is straightforward but easily scalable: I am simulating the bouncing of 30k of soccer balls on the field. I hope that some of the concepts introduced with this scene will be polished over time, and others will be just replaced. I was primarily interested in trying <href src="https://www.gamasutra.com/view/feature/3355/postmortem_thief_the_dark_project.php?print=1">composition</href> of game objects instead of rigid hierarchy to allow plugin-alike extension of mechanics.
 
 ### TileMap
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.TileMapKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.TileMapKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/tileeeees.png" />
 Since I am planning to work mostly myself, the abstraction is fundamental. I believe that the best balance between detail and the amount of effort for the environment can be achieved with <b>tilemaps</b>. I am not yet decided on the particular technique - I might try <href src="https://www.gog.com/game/fallout_2">hex tiles</href> later on. One crucial point is that each tile field - multiple tiles - should be represented by only two triangles. Therefore most of the blending and UV mapping should be handled on the GPU side.
 
 ### PBR
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.PhysicsKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.PhysicsKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/mandalorian.png" />
 This application is my take on the <b>Physically Based Rendering (PBR).</b> I am not planning to use this technique for the simulation from the start, since the approach is complex and demanding. I want to start with primitive graphics to focus mainly on the simulation aspect. Later on, when I have something already working, I might switch to PBR renderer. The approach itself can be expended to include Environment Lighting and Deferred passes.
 
 ### Deferred
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.DeferredKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.DeferredKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/runhgold1.png" />
 Pretty well known <b>Ambient Diffuse Specular (ADS)</b> shading technique with deferred lighting pass. It is not intended to be used now but can be handy to render static geometry for the scene. As with PBR, I might use this technique later on for less exciting parts of the environment. For now, it just allows me to shade 3d objects loaded with Wavefront *.obj format. Its main advantage is that it allows me to use a lot of light sources at a relatively low additional cost.
 
 
 ### Billboards
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.BillboardsKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.BillboardsKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/03/text.png" /> <b>Billboarding</b> is an effortless technique to implement. In its essence, a billboard is just a rectangle, always oriented towards the camera. In my implementation, this rectangle rendered with instancing, and all of the matrix calculations happens on the GPU. Billboards are planned to cover two use cases in my simulation: particle systems and character animations. I want to use pre-baked sprites to render characters from relatively far away. This way, the lack of real-time lighting will be less noticeable, but I will be able to handle many moving actors.
 
 ### Skyboxes
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.SkyboxKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.SkyboxKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/03/skybox.png" />
 <b>Skyboxes</b> are, so far, the most significant revelation for me in Computer Graphics. They allow me to add a great deal of depth and perspective to the environment with minimal effort. It is also the fastest way to create a context and setting for the scene. In Blaster, skyboxes are wrapped into easy to use technique class and are used all across the codebase. As the primary source of inspiration and textures, I use a pack of skyboxes from user-created Quake 3 levels.
 
 ### Simple
-```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.techniques.SimpleKt```
+```./gradlew :minigl:run -PmainClass=com.gzozulin.minigl.tech.SimpleKt```
 
 <img align="left" width="200px" src="http://gzozulin.com/wp-content/uploads/2020/07/simple.png" />
 As the name suggests, <b>Simple</b> is a straightforward scene with just a couple of triangles. I developed a liking to start any rendering framework in this manner. Despite its apparent plainness, this setup allows me to engage all of the main components of the real-time renderer: shaders, geometry, textures, and operations on matrices. When this arrangement is debugged and working, the followup becomes much more manageable.

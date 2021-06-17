@@ -3,9 +3,9 @@ package com.gzozulin.proj
 import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.api.cyan
-import com.gzozulin.minigl.techniques.SpanVisibility
-import com.gzozulin.minigl.techniques.TextPage
-import com.gzozulin.minigl.techniques.TextSpan
+import com.gzozulin.minigl.tech.SpanVisibility
+import com.gzozulin.minigl.tech.TextPage
+import com.gzozulin.minigl.tech.TextSpan
 import java.io.File
 import kotlin.math.abs
 

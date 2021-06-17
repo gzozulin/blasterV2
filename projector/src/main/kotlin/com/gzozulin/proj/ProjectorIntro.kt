@@ -5,8 +5,9 @@ import com.gzozulin.minigl.assets.libTextureCreate
 import com.gzozulin.minigl.assets.libTextureCreatePbr
 import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.assets.libWavefrontGroupUse
+import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
-import com.gzozulin.minigl.techniques.*
+import com.gzozulin.minigl.tech.*
 
 private const val TEXTURE_SIDE = 4096
 private const val HORIZONTAL_CNT = 32

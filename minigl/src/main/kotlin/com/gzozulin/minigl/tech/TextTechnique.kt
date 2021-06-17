@@ -1,4 +1,4 @@
-package com.gzozulin.minigl.techniques
+package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.api.constf
