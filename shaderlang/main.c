@@ -50,6 +50,11 @@ struct mat4 {
     float value;
 };
 
+struct ray {
+    struct vec3 origin;
+    struct vec3 direction;
+};
+
 struct Light {
     struct vec3 vector;
     struct vec3 color;
@@ -126,6 +131,11 @@ struct vec3 ftov3(const float v) {
 public
 struct vec3 v3zero() {
     return ftov3(0.0f);
+}
+
+public
+struct vec3 v3one() {
+    return ftov3(1.0f);
 }
 
 custom
@@ -354,6 +364,11 @@ struct vec3 normv3(const struct vec3 v) {
     return divv3f(v, lenv3(v));
 }
 
+public
+struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) {
+    return addv3(mulv3f(from, 1.0f - t), mulv3f(to, t));
+}
+
 // ------------------- TILE ---------------
 
 public
@@ -535,6 +550,33 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
     return v3tov4(color, 1.0f);
 }
 
+// ------------------- RAYTRACING ---------------
+
+public
+struct vec4 background(const struct ray r) {
+    const float t = (r.direction.y + 1.0f) * 0.5f;
+    const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
+    return v3tov4(gradient, 1.0f);
+}
+
+public
+struct ray createRayFromTexCoord(const struct vec2 texCoord) {
+    struct vec3 lowerLeft   = { -1, -1, -1 };
+    struct vec3 origin      = {  0,  0,  0 };
+    struct vec3 horizontal  = {  2,  0,  0 };
+    struct vec3 vertical    = {  0,  1,  0 };
+    struct vec3 direction = addv3(lowerLeft, addv3(mulv3f(horizontal, texCoord.x), mulv3f(vertical, texCoord.y)));
+    direction = normv3(direction);
+    const struct ray result = { origin, direction };
+    return result;
+}
+
+public
+struct vec4 shadingRt(const struct vec2 texCoord) {
+    struct ray r = createRayFromTexCoord(texCoord);
+    return background(r);
+}
+
 // ------------------- MAIN ---------------
 
 int main() {
@@ -566,6 +608,7 @@ int main() {
     assert(lenv3(v3(0, 1, 0)) == 1);
     assert(lenv3(v3(0, 0, 1)) == 1);
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
+    assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
     return 0;
 }
 

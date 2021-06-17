@@ -3,11 +3,6 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'application'
 
-application {
-    mainClass.set(project.hasProperty("mainClass") ?
-            (String) project.property("mainClass") : "com.gzozulin.sim.simulation.SoccerKt")
-}
-
 dependencies {
     implementation(project(":minigl"))
 
@@ -15,6 +10,10 @@ dependencies {
 
     implementation "org.antlr:antlr4:4.9.1"
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.5'
+}
+
+application {
+    mainClass = 'com.gzozulin.gen.ShaderGenKt'
 }
 
 sourceCompatibility = "7"

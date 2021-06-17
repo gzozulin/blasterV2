@@ -9,7 +9,7 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 private val window = GlWindow()
 
 private val matrix = constm4(mat4().orthoBox())
-private val color = constv4(vec4(vec3().azure(), 1f))
+private val color = shadingRt(namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()

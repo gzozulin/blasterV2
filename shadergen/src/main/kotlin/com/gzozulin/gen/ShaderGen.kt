@@ -1,4 +1,4 @@
-package com.gzozulin
+package com.gzozulin.gen
 
 import com.gzozulin.c.CBaseVisitor
 import com.gzozulin.c.CLexer
@@ -9,8 +9,8 @@ import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.ParserRuleContext
 import java.io.File
 
-private const val DEFINITIONS = "shaderlang/main.c"
-private const val ASSEMBLY = "minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
+private const val DEFINITIONS = "/home/greg/blaster/shaderlang/main.c"
+private const val ASSEMBLY = "/home/greg/blaster/minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
 
 private const val ACCESS_PUBLIC = "public"
 private const val ACCESS_CUSTOM = "custom"
@@ -81,7 +81,8 @@ private fun convertType(ctype: String) = when (ctype) {
     "mat4"      -> "mat4"
     "mat3"      -> "mat3"
     "Light"     -> "Light"
-    "PhongMaterial"     -> "PhongMaterial"
+    "ray"       -> "ray"
+    "PhongMaterial" -> "PhongMaterial"
     else        -> error("Unknown type! $ctype")
 }
 

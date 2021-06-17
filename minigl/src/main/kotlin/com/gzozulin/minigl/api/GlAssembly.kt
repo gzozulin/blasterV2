@@ -11,7 +11,7 @@ const val V_TEX_COORD = "vTexCoord"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
-private const val CONST_LIGHT_DECL = """
+private const val LIGHT_DECL = """
     struct Light {
         vec3 vector;
         vec3 color;
@@ -21,7 +21,7 @@ private const val CONST_LIGHT_DECL = """
     };
 """
 
-private const val CONST_MAT_DECL = """
+private const val MAT_DECL = """
     struct PhongMaterial {
         vec3 ambient;
         vec3 diffuse;
@@ -31,7 +31,14 @@ private const val CONST_MAT_DECL = """
     };
 """
 
-private const val CONST_LIGHTS = """
+private const val RAY_DECL = """
+    struct ray {
+        vec3 origin;
+        vec3 direction;
+    };
+"""
+
+private const val LIGHTS = """
     const int MAX_LIGHTS = 128;
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
@@ -98,7 +105,7 @@ private const val EXPR_GET_NORMAL = """
     }
 """
 
-private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$CONST_LIGHT_DECL\n$CONST_MAT_DECL\n$CONST_LIGHTS\n"
+private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$LIGHTS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
