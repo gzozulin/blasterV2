@@ -138,6 +138,119 @@ struct vec3 v3one() {
     return ftov3(1.0f);
 }
 
+public
+struct vec3 v3front() {
+    return v3(0, 0, -1);
+}
+
+public
+struct vec3 v3back() {
+    return v3(0, 0, 1);
+}
+
+public
+struct vec3 v3left() {
+    return v3(-1, 0, 0);
+}
+
+public
+struct vec3 v3right() {
+    return v3(1, 0, 0);
+}
+
+public
+struct vec3 v3up() {
+    return v3(0, 1, 0);
+}
+
+public
+struct vec3 v3down() {
+    return v3(0, -1, 0);
+}
+
+public
+struct vec3 v3white() {
+    return v3(1.0f, 1.0f, 1.0f);
+}
+
+public
+struct vec3 v3black() {
+    return v3(0.0f, 0.0f, 0.0f);
+}
+public
+struct vec3 v3ltGrey() {
+    return ftov3(0.3f);
+}
+
+public
+struct vec3 v3grey() {
+    return ftov3(0.5f);
+}
+
+public
+struct vec3 v3dkGrey() {
+    return ftov3(0.7f);
+}
+
+public
+struct vec3 v3red() {
+    return v3(1.0f, 0.0f, 0.0f);
+}
+
+public
+struct vec3 v3green() {
+    return v3(0.0f, 1.0f, 0.0f);
+}
+
+public
+struct vec3 v3blue() {
+    return v3(0.0f, 0.0f, 1.0f);
+}
+
+public
+struct vec3 v3yellow() {
+    return v3(1.0f, 1.0f, 0.0f);
+}
+
+public
+struct vec3 v3magenta() {
+    return v3(1.0f, 0.0f, 1.0f);
+}
+
+public
+struct vec3 v3cyan() {
+    return v3(0.0f, 1.0f, 1.0f);
+}
+
+public
+struct vec3 v3orange() {
+    return v3(1.0f, 0.5f, 0.0f);
+}
+public
+struct vec3 v3rose() {
+    return v3(1.0f, 0.0f, 0.5f);
+}
+
+public
+struct vec3 v3violet() {
+    return v3(0.5f, 0.0f, 1.0f);
+}
+
+public
+struct vec3 v3azure() {
+    return v3(0.0f, 0.5f, 1.0f);
+}
+
+public
+struct vec3 v3aquamarine() {
+    return v3(0.0f, 1.0f, 0.5f);
+}
+
+public
+struct vec3 v3chartreuse() {
+    return v3(0.5f, 1.0f, 0.0f);
+}
+
 custom
 struct vec4 v4(const float x, const float y, const float z, const float w) {
     return (struct vec4) {x, y, z, w};
@@ -553,28 +666,44 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
-struct vec4 background(const struct ray r) {
-    const float t = (r.direction.y + 1.0f) * 0.5f;
+struct vec4 background(const struct ray ray) {
+    const float t = (ray.direction.y + 1.0f) * 0.5f;
     const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return v3tov4(gradient, 1.0f);
 }
 
 public
 struct ray createRayFromTexCoord(const struct vec2 texCoord) {
-    struct vec3 lowerLeft   = { -1, -1, -1 };
-    struct vec3 origin      = {  0,  0,  0 };
-    struct vec3 horizontal  = {  2,  0,  0 };
-    struct vec3 vertical    = {  0,  1,  0 };
-    struct vec3 direction = addv3(lowerLeft, addv3(mulv3f(horizontal, texCoord.x), mulv3f(vertical, texCoord.y)));
-    direction = normv3(direction);
+    const struct vec3 lowerLeft   = { -1, -1, -1 };
+    const struct vec3 origin      = {  0,  0,  0 };
+    const struct vec3 horizontal  = {  2,  0,  0 };
+    const struct vec3 vertical    = {  0,  2,  0 };
+    const struct vec3 direction = normv3(
+            addv3(lowerLeft,
+                  addv3(mulv3f(horizontal, texCoord.x), mulv3f(vertical, texCoord.y))));
     const struct ray result = { origin, direction };
     return result;
 }
 
 public
+bool hitRaySphere(const struct ray ray, const struct vec3 center, const float radius) {
+    const struct vec3 oc = subv3(ray.origin, center);
+    const float a = dotv3(ray.direction, ray.direction);
+    const float b = 2 * dotv3(oc, ray.direction);
+    const float c = dotv3(oc, oc) - radius * radius;
+    const float D = b*b - 4*a*c;
+    return D > 0;
+}
+
+public
 struct vec4 shadingRt(const struct vec2 texCoord) {
-    struct ray r = createRayFromTexCoord(texCoord);
-    return background(r);
+    const struct ray ray = createRayFromTexCoord(texCoord);
+    if (hitRaySphere(ray, v3front(), 0.5f)) {
+        return v3tov4(v3red(), 1.0f);
+    } else {
+        return background(ray);
+    }
+    return background(ray);
 }
 
 // ------------------- MAIN ---------------

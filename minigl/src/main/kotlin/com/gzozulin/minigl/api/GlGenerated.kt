@@ -8,6 +8,29 @@ private const val DEF_V2ZERO = "vec2 v2zero ( ) { return ftov2 ( 0.0f ) ; }\n\n"
 private const val DEF_FTOV3 = "vec3 ftov3 ( float v ) { return v3 ( v , v , v ) ; }\n\n"
 private const val DEF_V3ZERO = "vec3 v3zero ( ) { return ftov3 ( 0.0f ) ; }\n\n"
 private const val DEF_V3ONE = "vec3 v3one ( ) { return ftov3 ( 1.0f ) ; }\n\n"
+private const val DEF_V3FRONT = "vec3 v3front ( ) { return v3 ( 0 , 0 , - 1 ) ; }\n\n"
+private const val DEF_V3BACK = "vec3 v3back ( ) { return v3 ( 0 , 0 , 1 ) ; }\n\n"
+private const val DEF_V3LEFT = "vec3 v3left ( ) { return v3 ( - 1 , 0 , 0 ) ; }\n\n"
+private const val DEF_V3RIGHT = "vec3 v3right ( ) { return v3 ( 1 , 0 , 0 ) ; }\n\n"
+private const val DEF_V3UP = "vec3 v3up ( ) { return v3 ( 0 , 1 , 0 ) ; }\n\n"
+private const val DEF_V3DOWN = "vec3 v3down ( ) { return v3 ( 0 , - 1 , 0 ) ; }\n\n"
+private const val DEF_V3WHITE = "vec3 v3white ( ) { return v3 ( 1.0f , 1.0f , 1.0f ) ; }\n\n"
+private const val DEF_V3BLACK = "vec3 v3black ( ) { return v3 ( 0.0f , 0.0f , 0.0f ) ; }\n\n"
+private const val DEF_V3LTGREY = "vec3 v3ltGrey ( ) { return ftov3 ( 0.3f ) ; }\n\n"
+private const val DEF_V3GREY = "vec3 v3grey ( ) { return ftov3 ( 0.5f ) ; }\n\n"
+private const val DEF_V3DKGREY = "vec3 v3dkGrey ( ) { return ftov3 ( 0.7f ) ; }\n\n"
+private const val DEF_V3RED = "vec3 v3red ( ) { return v3 ( 1.0f , 0.0f , 0.0f ) ; }\n\n"
+private const val DEF_V3GREEN = "vec3 v3green ( ) { return v3 ( 0.0f , 1.0f , 0.0f ) ; }\n\n"
+private const val DEF_V3BLUE = "vec3 v3blue ( ) { return v3 ( 0.0f , 0.0f , 1.0f ) ; }\n\n"
+private const val DEF_V3YELLOW = "vec3 v3yellow ( ) { return v3 ( 1.0f , 1.0f , 0.0f ) ; }\n\n"
+private const val DEF_V3MAGENTA = "vec3 v3magenta ( ) { return v3 ( 1.0f , 0.0f , 1.0f ) ; }\n\n"
+private const val DEF_V3CYAN = "vec3 v3cyan ( ) { return v3 ( 0.0f , 1.0f , 1.0f ) ; }\n\n"
+private const val DEF_V3ORANGE = "vec3 v3orange ( ) { return v3 ( 1.0f , 0.5f , 0.0f ) ; }\n\n"
+private const val DEF_V3ROSE = "vec3 v3rose ( ) { return v3 ( 1.0f , 0.0f , 0.5f ) ; }\n\n"
+private const val DEF_V3VIOLET = "vec3 v3violet ( ) { return v3 ( 0.5f , 0.0f , 1.0f ) ; }\n\n"
+private const val DEF_V3AZURE = "vec3 v3azure ( ) { return v3 ( 0.0f , 0.5f , 1.0f ) ; }\n\n"
+private const val DEF_V3AQUAMARINE = "vec3 v3aquamarine ( ) { return v3 ( 0.0f , 1.0f , 0.5f ) ; }\n\n"
+private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f , 1.0f , 0.0f ) ; }\n\n"
 private const val DEF_V3TOV4 = "vec4 v3tov4 ( vec3 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n\n"
 private const val DEF_FTOV4 = "vec4 ftov4 ( float v ) { return v4 ( v , v , v , v ) ; }\n\n"
 private const val DEF_V4ZERO = "vec4 v4zero ( ) { return ftov4 ( 0.0f ) ; }\n\n"
@@ -65,11 +88,12 @@ private const val DEF_GEOMETRYSCHLICKGGX = "float geometrySchlickGGX ( float Ndo
 private const val DEF_GEOMETRYSMITH = "float geometrySmith ( vec3 N , vec3 V , vec3 L , float roughness ) { float NdotV = max ( dotv3 ( N , V ) , 0.0f ) ; float NdotL = max ( dotv3 ( N , L ) , 0.0f ) ; float ggx2 = geometrySchlickGGX ( NdotV , roughness ) ; float ggx1 = geometrySchlickGGX ( NdotL , roughness ) ; return ggx1 * ggx2 ; }\n\n"
 private const val DEF_FRESNELSCHLICK = "vec3 fresnelSchlick ( float cosTheta , vec3 F0 ) { return addv3 ( F0 , mulv3 ( subv3 ( ftov3 ( 1.0f ) , F0 ) , ftov3 ( pow ( 1.0f - cosTheta , 5.0f ) ) ) ) ; }\n\n"
 private const val DEF_SHADINGPBR = "vec4 shadingPbr ( vec3 eye , vec3 worldPos , vec3 albedo , vec3 N , float metallic , float roughness , float ao ) { vec3 alb = powv3 ( albedo , ftov3 ( 2.2f ) ) ; vec3 V = normv3 ( subv3 ( eye , worldPos ) ) ; vec3 F0 = ftov3 ( 0.04f ) ; F0 = mixv3 ( F0 , alb , metallic ) ; vec3 Lo = v3zero ( ) ; for ( int i = 0 ; i < uLightsPointCnt ; ++ i ) { vec3 toLight = subv3 ( uLights [ i ] . vector , worldPos ) ; vec3 L = normv3 ( toLight ) ; vec3 H = normv3 ( addv3 ( V , L ) ) ; float distance = lenv3 ( toLight ) ; float lum = luminosity ( distance , uLights [ i ] ) ; vec3 radiance = mulv3 ( uLights [ i ] . color , ftov3 ( lum ) ) ; float NDF = distributionGGX ( N , H , roughness ) ; float G = geometrySmith ( N , V , L , roughness ) ; vec3 F = fresnelSchlick ( max ( dotv3 ( H , V ) , 0.0f ) , F0 ) ; vec3 nominator = mulv3 ( F , ftov3 ( NDF * G ) ) ; float denominator = 4.0f * max ( dotv3 ( N , V ) , 0.0f ) * max ( dotv3 ( N , L ) , 0.0f ) + 0.001f ; vec3 specular = divv3f ( nominator , denominator ) ; vec3 kD = subv3 ( ftov3 ( 1.0f ) , F ) ; kD = mulv3 ( kD , ftov3 ( 1.0f - metallic ) ) ; float NdotL = max ( dotv3 ( N , L ) , 0.0f ) ; Lo = addv3 ( Lo , mulv3 ( mulv3 ( addv3 ( divv3 ( mulv3 ( kD , alb ) , ftov3 ( PI ) ) , specular ) , radiance ) , ftov3 ( NdotL ) ) ) ; } vec3 ambient = mulv3 ( ftov3 ( 0.1f * ao ) , alb ) ; vec3 color = addv3 ( ambient , Lo ) ; color = divv3 ( color , addv3 ( color , ftov3 ( 1.0f ) ) ) ; color = powv3 ( color , ftov3 ( 1.0f / 2.2f ) ) ; return v3tov4 ( color , 1.0f ) ; }\n\n"
-private const val DEF_BACKGROUND = "vec4 background ( ray r ) { float t = ( r . direction . y + 1.0f ) * 0.5f ; vec3 gradient = lerpv3 ( v3one ( ) , v3 ( 0.5f , 0.7f , 1.0f ) , t ) ; return v3tov4 ( gradient , 1.0f ) ; }\n\n"
-private const val DEF_CREATERAYFROMTEXCOORD = "ray createRayFromTexCoord ( vec2 texCoord ) { vec3 lowerLeft = { - 1 , - 1 , - 1 } ; vec3 origin = { 0 , 0 , 0 } ; vec3 horizontal = { 2 , 0 , 0 } ; vec3 vertical = { 0 , 1 , 0 } ; vec3 direction = addv3 ( lowerLeft , addv3 ( mulv3f ( horizontal , texCoord . x ) , mulv3f ( vertical , texCoord . y ) ) ) ; direction = normv3 ( direction ) ; ray result = { origin , direction } ; return result ; }\n\n"
-private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 texCoord ) { ray r = createRayFromTexCoord ( texCoord ) ; return background ( r ) ; }\n\n"
+private const val DEF_BACKGROUND = "vec4 background ( ray ray ) { float t = ( ray . direction . y + 1.0f ) * 0.5f ; vec3 gradient = lerpv3 ( v3one ( ) , v3 ( 0.5f , 0.7f , 1.0f ) , t ) ; return v3tov4 ( gradient , 1.0f ) ; }\n\n"
+private const val DEF_CREATERAYFROMTEXCOORD = "ray createRayFromTexCoord ( vec2 texCoord ) { vec3 lowerLeft = { - 1 , - 1 , - 1 } ; vec3 origin = { 0 , 0 , 0 } ; vec3 horizontal = { 2 , 0 , 0 } ; vec3 vertical = { 0 , 2 , 0 } ; vec3 direction = normv3 ( addv3 ( lowerLeft , addv3 ( mulv3f ( horizontal , texCoord . x ) , mulv3f ( vertical , texCoord . y ) ) ) ) ; ray result = { origin , direction } ; return result ; }\n\n"
+private const val DEF_HITRAYSPHERE = "bool hitRaySphere ( ray ray , vec3 center , float radius ) { vec3 oc = subv3 ( ray . origin , center ) ; float a = dotv3 ( ray . direction , ray . direction ) ; float b = 2 * dotv3 ( oc , ray . direction ) ; float c = dotv3 ( oc , oc ) - radius * radius ; float D = b * b - 4 * a * c ; return D > 0 ; }\n\n"
+private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 texCoord ) { ray ray = createRayFromTexCoord ( texCoord ) ; if ( hitRaySphere ( ray , v3front ( ) , 0.5f ) ) { return v3tov4 ( v3red ( ) , 1.0f ) ; } else { return background ( ray ) ; } return background ( ray ) ; }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_LERPV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_CREATERAYFROMTEXCOORD+DEF_SHADINGRT
+const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_NORMV3+DEF_LERPV3+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_CREATERAYFROMTEXCOORD+DEF_HITRAYSPHERE+DEF_SHADINGRT
 
 fun itof(i: Expression<Int>) = object : Expression<Float>() {
     override fun expr() = "itof(${i.expr()})"
@@ -118,6 +142,121 @@ fun v3zero() = object : Expression<vec3>() {
 
 fun v3one() = object : Expression<vec3>() {
     override fun expr() = "v3one()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3front() = object : Expression<vec3>() {
+    override fun expr() = "v3front()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3back() = object : Expression<vec3>() {
+    override fun expr() = "v3back()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3left() = object : Expression<vec3>() {
+    override fun expr() = "v3left()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3right() = object : Expression<vec3>() {
+    override fun expr() = "v3right()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3up() = object : Expression<vec3>() {
+    override fun expr() = "v3up()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3down() = object : Expression<vec3>() {
+    override fun expr() = "v3down()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3white() = object : Expression<vec3>() {
+    override fun expr() = "v3white()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3black() = object : Expression<vec3>() {
+    override fun expr() = "v3black()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3ltGrey() = object : Expression<vec3>() {
+    override fun expr() = "v3ltGrey()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3grey() = object : Expression<vec3>() {
+    override fun expr() = "v3grey()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3dkGrey() = object : Expression<vec3>() {
+    override fun expr() = "v3dkGrey()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3red() = object : Expression<vec3>() {
+    override fun expr() = "v3red()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3green() = object : Expression<vec3>() {
+    override fun expr() = "v3green()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3blue() = object : Expression<vec3>() {
+    override fun expr() = "v3blue()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3yellow() = object : Expression<vec3>() {
+    override fun expr() = "v3yellow()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3magenta() = object : Expression<vec3>() {
+    override fun expr() = "v3magenta()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3cyan() = object : Expression<vec3>() {
+    override fun expr() = "v3cyan()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3orange() = object : Expression<vec3>() {
+    override fun expr() = "v3orange()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3rose() = object : Expression<vec3>() {
+    override fun expr() = "v3rose()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3violet() = object : Expression<vec3>() {
+    override fun expr() = "v3violet()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3azure() = object : Expression<vec3>() {
+    override fun expr() = "v3azure()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3aquamarine() = object : Expression<vec3>() {
+    override fun expr() = "v3aquamarine()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3chartreuse() = object : Expression<vec3>() {
+    override fun expr() = "v3chartreuse()"
     override fun roots() = listOf<Expression<*>>()
 }
 
@@ -421,14 +560,19 @@ fun shadingPbr(eye: Expression<vec3>, worldPos: Expression<vec3>, albedo: Expres
     override fun roots() = listOf(eye, worldPos, albedo, N, metallic, roughness, ao)
 }
 
-fun background(r: Expression<ray>) = object : Expression<vec4>() {
-    override fun expr() = "background(${r.expr()})"
-    override fun roots() = listOf(r)
+fun background(ray: Expression<ray>) = object : Expression<vec4>() {
+    override fun expr() = "background(${ray.expr()})"
+    override fun roots() = listOf(ray)
 }
 
 fun createRayFromTexCoord(texCoord: Expression<vec2>) = object : Expression<ray>() {
     override fun expr() = "createRayFromTexCoord(${texCoord.expr()})"
     override fun roots() = listOf(texCoord)
+}
+
+fun hitRaySphere(ray: Expression<ray>, center: Expression<vec3>, radius: Expression<Float>) = object : Expression<Boolean>() {
+    override fun expr() = "hitRaySphere(${ray.expr()}, ${center.expr()}, ${radius.expr()})"
+    override fun roots() = listOf(ray, center, radius)
 }
 
 fun shadingRt(texCoord: Expression<vec2>) = object : Expression<vec4>() {
