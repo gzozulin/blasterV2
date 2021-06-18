@@ -7,6 +7,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <float.h>
+#include <stdlib.h>
 
 #define public
 #define custom
@@ -510,6 +511,11 @@ struct vec3 pointOnRay(const struct ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
+//public
+//float randf() {
+//    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+//}
+
 // ------------------- TILE ---------------
 
 public
@@ -755,6 +761,8 @@ struct HitRecord hitRayList(const struct ray ray, const float tMin, const float 
     }
     return result;
 }
+
+// drand48(); // custom!
 
 public
 struct vec4 shadingRt(const struct vec2 texCoord) {
