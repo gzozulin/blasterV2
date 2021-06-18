@@ -751,7 +751,7 @@ struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const floa
 
 public
 struct HitRecord hitRayList(const struct ray ray, const float tMin, const float tMax, const struct HitableList list) {
-    struct HitRecord result = { -1, v3zero(), v3front() };
+    struct HitRecord result = NO_HIT;
     float closest = tMax;
     for (int i = 0; i < list.spheresCnt; i++) {
         const struct HitRecord hitRecord = hitRaySphere(ray, tMin, closest, list.spheres[i]);
