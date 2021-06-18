@@ -71,6 +71,21 @@ struct PhongMaterial {
     float transparency;
 };
 
+struct Sphere {
+    struct vec3 center;
+    float radius;
+};
+
+struct HitRecord {
+    float t;
+    struct vec3 point;
+    struct vec3 normal;
+};
+
+/*struct HitableList {
+    // spheres...
+};*/
+
 // ------------------- CONST -------------------
 
 #define PI 3.14159265359f
@@ -697,23 +712,41 @@ struct ray createRayFromTexCoord(const struct vec2 texCoord) {
 }
 
 public
-float hitRaySphere(const struct ray ray, const struct vec3 center, const float radius) {
-    const struct vec3 oc = subv3(ray.origin, center);
+struct HitRecord createRaySphereHitRecord(const struct ray ray, const float t, const struct Sphere sphere) {
+    const struct vec3 point = pointOnRay(ray, t);
+    const struct vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
+    const struct HitRecord result = { t, point, N };
+    return result;
+}
+
+public
+struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
+    const struct vec3 oc = subv3(ray.origin, sphere.center);
     const float a = dotv3(ray.direction, ray.direction);
     const float b = 2 * dotv3(oc, ray.direction);
-    const float c = dotv3(oc, oc) - radius * radius;
+    const float c = dotv3(oc, oc) - sphere.radius * sphere.radius;
     const float D = b*b - 4*a*c;
-    return D < 0 ? -1.0f : (-b - sqrt(D)) / 2 * a;
+    if (D > 0) {
+        float temp = (-b - sqrt(D)) / 2 * a;
+        if (temp < tMax && temp > tMin) {
+            return createRaySphereHitRecord(ray, temp, sphere);
+        }
+        temp = (-b + sqrt(D)) / 2 * a;
+        if (temp < tMax && temp > tMin) {
+            return createRaySphereHitRecord(ray, temp, sphere);
+        }
+    }
+    const struct HitRecord noHit = { -1, v3zero(), v3front() };
+    return noHit;
 }
 
 public
 struct vec4 shadingRt(const struct vec2 texCoord) {
-    const struct vec3 sphereCenter = v3front();
+    const struct Sphere sphere = { v3front(), 0.5f };
     const struct ray ray = createRayFromTexCoord(texCoord);
-    const float t = hitRaySphere(ray, sphereCenter, 0.5f);
-    if (t > 0) {
-        const struct vec3 N = normv3(subv3(pointOnRay(ray, t), sphereCenter));
-        return v3tov4(mulv3f(addv3(N, v3one()), 0.5f), 1.0f);
+    const struct HitRecord record = hitRaySphere(ray, 0, 10000, sphere);
+    if (record.t > 0) {
+        return v3tov4(mulv3f(addv3(record.normal, v3one()), 0.5f), 1.0f);
     } else {
         return background(ray);
     }

@@ -38,6 +38,21 @@ private const val RAY_DECL = """
     };
 """
 
+private const val SPHERE_DECL = """
+    struct Sphere {
+        vec3 center;
+        float radius;
+    };
+"""
+
+private const val HIT_RECORD_DECL = """
+    struct HitRecord {
+        float t;
+        vec3 point;
+        vec3 normal;
+    };
+"""
+
 private const val LIGHTS = """
     const int MAX_LIGHTS = 128;
     uniform int uLightsPointCnt;
@@ -105,7 +120,7 @@ private const val EXPR_GET_NORMAL = """
     }
 """
 
-private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$LIGHTS\n"
+private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$LIGHTS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 

@@ -20,7 +20,9 @@ typealias mat4 = Matrix4f
 typealias quat = Quaternionf
 typealias aabb = AABBf
 typealias ray = Rayf
-typealias sphere = Spheref
+
+data class Sphere(val center: vec3, val radius: Float)
+data class HitRecord(val t: Float, val point: vec3, val normal: vec3)
 
 private val random = Random()
 

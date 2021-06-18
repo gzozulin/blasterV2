@@ -82,6 +82,8 @@ private fun convertType(ctype: String) = when (ctype) {
     "mat3"      -> "mat3"
     "Light"     -> "Light"
     "ray"       -> "ray"
+    "Sphere"    -> "Sphere"
+    "HitRecord" -> "HitRecord"
     "PhongMaterial" -> "PhongMaterial"
     else        -> error("Unknown type! $ctype")
 }
