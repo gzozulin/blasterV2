@@ -6,6 +6,7 @@ const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
 
 const val MAX_LIGHTS = 128
+const val MAX_SPHERES = 2
 
 const val V_TEX_COORD = "vTexCoord"
 
@@ -50,6 +51,13 @@ private const val HIT_RECORD_DECL = """
         float t;
         vec3 point;
         vec3 normal;
+    };
+"""
+
+private const val HITABLE_LIST_DECL = """
+    struct HitableList {
+        int spheresCnt;
+        Sphere spheres[$MAX_SPHERES];
     };
 """
 
@@ -120,7 +128,7 @@ private const val EXPR_GET_NORMAL = """
     }
 """
 
-private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$LIGHTS\n"
+private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_LIST_DECL\n$LIGHTS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 

@@ -23,6 +23,7 @@ typealias ray = Rayf
 
 data class Sphere(val center: vec3, val radius: Float)
 data class HitRecord(val t: Float, val point: vec3, val normal: vec3)
+data class HitableList(val spheres: List<Sphere>)
 
 private val random = Random()
 

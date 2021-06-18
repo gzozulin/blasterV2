@@ -74,3 +74,4 @@ x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
 2021-06-12 Highlight string injected code +code @complex
 (B) 2021-06-12 Blurred rendered background for pictures (or even integrate it with Projector) +code @complex
 2021-06-17 Export structs from C +code @complex
+2021-06-17 GLSL inout directive can be useful +code @complex

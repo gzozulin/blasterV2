@@ -71,21 +71,22 @@ private fun renderRoots(params: List<CParam>): String {
 }
 
 private fun convertType(ctype: String) = when (ctype) {
-    "bool"      -> "Boolean"
-    "int"       -> "Int"
-    "float"     -> "Float"
-    "vec2"      -> "vec2"
-    "ivec2"     -> "vec2i"
-    "vec3"      -> "vec3"
-    "vec4"      -> "vec4"
-    "mat4"      -> "mat4"
-    "mat3"      -> "mat3"
-    "Light"     -> "Light"
-    "ray"       -> "ray"
-    "Sphere"    -> "Sphere"
-    "HitRecord" -> "HitRecord"
+    "bool"          -> "Boolean"
+    "int"           -> "Int"
+    "float"         -> "Float"
+    "vec2"          -> "vec2"
+    "ivec2"         -> "vec2i"
+    "vec3"          -> "vec3"
+    "vec4"          -> "vec4"
+    "mat4"          -> "mat4"
+    "mat3"          -> "mat3"
+    "Light"         -> "Light"
+    "ray"           -> "ray"
+    "Sphere"        -> "Sphere"
+    "HitRecord"     -> "HitRecord"
+    "HitableList"   -> "HitableList"
     "PhongMaterial" -> "PhongMaterial"
-    else        -> error("Unknown type! $ctype")
+    else            -> error("Unknown type! $ctype")
 }
 
 private fun visitCFile(cfile: CFile): List<COperation> {

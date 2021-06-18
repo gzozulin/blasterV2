@@ -16,6 +16,7 @@
 #define max fmaxf
 
 #define MAX_LIGHTS 128
+#define MAX_SPHERES 2
 
 // ------------------- TYPES -------------------
 
@@ -82,9 +83,10 @@ struct HitRecord {
     struct vec3 normal;
 };
 
-/*struct HitableList {
-    // spheres...
-};*/
+struct HitableList {
+    int spheresCnt;
+    struct Sphere spheres[MAX_SPHERES];
+};
 
 // ------------------- CONST -------------------
 
@@ -741,10 +743,24 @@ struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const floa
 }
 
 public
+struct HitRecord hitRayList(const struct ray ray, const float tMin, const float tMax, const struct HitableList list) {
+    struct HitRecord result = { -1, v3zero(), v3front() };
+    float closest = tMax;
+    for (int i = 0; i < list.spheresCnt; i++) {
+        const struct HitRecord hitRecord = hitRaySphere(ray, tMin, closest, list.spheres[i]);
+        if (hitRecord.t > 0) {
+            closest = hitRecord.t;
+            result = hitRecord;
+        }
+    }
+    return result;
+}
+
+public
 struct vec4 shadingRt(const struct vec2 texCoord) {
-    const struct Sphere sphere = { v3front(), 0.5f };
+    const struct HitableList world = { 2, { { v3front(), 0.5f }, { v3(0, -100.5f, -1.0f), 100.0f } } };
     const struct ray ray = createRayFromTexCoord(texCoord);
-    const struct HitRecord record = hitRaySphere(ray, 0, 10000, sphere);
+    const struct HitRecord record = hitRayList(ray, 0, 1000000, world);
     if (record.t > 0) {
         return v3tov4(mulv3f(addv3(record.normal, v3one()), 0.5f), 1.0f);
     } else {
