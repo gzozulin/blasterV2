@@ -84,6 +84,8 @@ struct HitRecord {
     struct vec3 normal;
 };
 
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+
 struct HitableList {
     int spheresCnt;
     struct Sphere spheres[MAX_SPHERES];
@@ -744,8 +746,7 @@ struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const floa
             return createRaySphereHitRecord(ray, temp, sphere);
         }
     }
-    const struct HitRecord noHit = { -1, v3zero(), v3front() };
-    return noHit;
+    return NO_HIT;
 }
 
 public

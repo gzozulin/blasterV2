@@ -52,6 +52,8 @@ private const val HIT_RECORD_DECL = """
         vec3 point;
         vec3 normal;
     };
+    
+    const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
 """
 
 private const val HITABLE_LIST_DECL = """
