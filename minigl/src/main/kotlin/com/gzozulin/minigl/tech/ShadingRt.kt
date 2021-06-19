@@ -16,13 +16,16 @@ private val hitables = listOf(Sphere(vec3(0f, 0f, -1f), 0.5f), Sphere(vec3(0f, -
 
 fun main() {
     window.create {
-        glShadingFlatUse(shadingFlat) {
-            glMeshUse(rect) {
-                glShadingFlatDraw(shadingFlat) {
-                    glProgramSubmitHitables(shadingFlat.program, hitables)
-                    window.show {
-                        glShadingFlatInstance(shadingFlat, rect)
-                        sleep(2000L)
+        glViewportBindPrev {
+            backend.glViewport(0, 0, 640, 480)
+            glShadingFlatUse(shadingFlat) {
+                glMeshUse(rect) {
+                    glShadingFlatDraw(shadingFlat) {
+                        glProgramSubmitHitables(shadingFlat.program, hitables)
+                        window.show {
+                            glShadingFlatInstance(shadingFlat, rect)
+                            sleep(2000L)
+                        }
                     }
                 }
             }

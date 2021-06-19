@@ -7,6 +7,8 @@
 #include <math.h>
 #include <stdbool.h>
 #include <float.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define public
 #define custom
@@ -17,8 +19,8 @@
 
 #define PI 3.14159265359f
 
-#define WIDTH           1024
-#define HEIGHT          768
+#define WIDTH           640
+#define HEIGHT          480
 #define SAMPLES         64
 
 #define MAX_LIGHTS      128
@@ -62,7 +64,7 @@ struct mat4 {
     float value;
 };
 
-struct ray {
+struct Ray {
     struct vec3 origin;
     struct vec3 direction;
 };
@@ -139,6 +141,11 @@ float itof(const int i) {
 custom
 int ftoi(const float f) {
     return (int) f;
+}
+
+custom
+float dtof(const double d) {
+    return (float) d;
 }
 
 // ------------------- CTORS -------------------
@@ -322,8 +329,8 @@ struct mat3 m3ident() {
 }
 
 public
-struct ray rayBack() {
-    const struct ray result = { v3zero(), v3back() };
+struct Ray rayBack() {
+    const struct Ray result = {v3zero(), v3back() };
     return result;
 }
 
@@ -430,6 +437,11 @@ bool eqv4(const struct vec4 left, const struct vec4 right) {
 
 // ------------------- MATH -------------------
 
+custom
+float randf() {
+    return dtof(drand48());
+}
+
 public
 struct vec3 negv3(const struct vec3 v) {
     return v3(-v.x, -v.y, -v.z);
@@ -524,6 +536,11 @@ float lenv3(const struct vec3 v) {
 }
 
 public
+float sqlenv3(const struct vec3 v) {
+    return (v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
+public
 struct vec3 normv3(const struct vec3 v) {
     return divv3f(v, lenv3(v));
 }
@@ -534,8 +551,20 @@ struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) 
 }
 
 public
-struct vec3 pointOnRay(const struct ray ray, const float t) {
+struct vec3 pointOnRay(const struct Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
+}
+
+public
+struct vec3 randomInUnitSphere() {
+    struct vec3 result;
+    do {
+        float x = randf();
+        float y = randf();
+        float z = randf();
+        result = subv3(mulv3f(v3(x, y, z), 2.0f), v3one());
+    } while (sqlenv3(result) >= 1.0f);
+    return result;
 }
 
 // ------------------- TILE ---------------
@@ -722,26 +751,26 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
-struct vec3 background(const struct ray ray) {
+struct vec3 background(const struct Ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
     const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return gradient;
 }
 
 public
-struct ray createRayFromTexCoord(const float u, const float v) {
+struct Ray createRayFromTexCoord(const float u, const float v) {
     const struct vec3 lowerLeft   = { -1, -1, -1 };
     const struct vec3 origin      = {  0,  0,  0 };
     const struct vec3 horizontal  = {  2,  0,  0 };
     const struct vec3 vertical    = {  0,  2,  0 };
     const struct vec3 direction = normv3(
             addv3(lowerLeft,addv3(mulv3f(horizontal, u), mulv3f(vertical, v))));
-    const struct ray result = { origin, direction };
+    const struct Ray result = {origin, direction };
     return result;
 }
 
 public
-struct HitRecord createRaySphereHitRecord(const struct ray ray, const float t, const struct Sphere sphere) {
+struct HitRecord createRaySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
     const struct vec3 point = pointOnRay(ray, t);
     const struct vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
     const struct HitRecord result = { t, point, N };
@@ -749,7 +778,7 @@ struct HitRecord createRaySphereHitRecord(const struct ray ray, const float t, c
 }
 
 public
-struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
+struct HitRecord hitRaySphere(const struct Ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
     const struct vec3 oc = subv3(ray.origin, sphere.center);
     const float a = dotv3(ray.direction, ray.direction);
     const float b = 2 * dotv3(oc, ray.direction);
@@ -769,7 +798,7 @@ struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const floa
 }
 
 public
-struct HitRecord hitRayHitables(const struct ray ray, const float tMin, const float tMax) {
+struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const float tMax) {
     struct HitRecord result = NO_HIT;
     float closest = tMax;
     for (int i = 0; i < uHitablesCnt; i++) {
@@ -791,10 +820,12 @@ struct HitRecord hitRayHitables(const struct ray ray, const float tMin, const fl
 }
 
 public
-struct vec3 sampleColor(const struct ray ray) {
+struct vec3 sampleColor(const struct Ray ray) {
     const struct HitRecord record = hitRayHitables(ray, 0, 1000000);
     if (record.t > 0) {
-        return mulv3f(addv3(record.normal, v3one()), 0.5f);
+        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
+        const struct Ray scattered = {record.point, subv3(target, record.point) };
+        return mulv3f(sampleColor(scattered), 0.5f);
     } else {
         return background(ray);
     }
@@ -811,12 +842,18 @@ struct vec4 shadingRt(const struct vec2 texCoord) {
         for (int v = 0; v < SAMPLES; v++) {
             const float sampleU = texCoord.x + SU * itof(u);
             const float sampleV = texCoord.y + SV * itof(v);
-            const struct ray ray = createRayFromTexCoord(sampleU, sampleV);
+            const struct Ray ray = createRayFromTexCoord(sampleU, sampleV);
             result = addv3(result, sampleColor(ray));
         }
     }
     result = divv3f(result, SAMPLES*SAMPLES);
     return v3tov4(result, 1.0f);
+}
+
+// ------------------- LOGGING ---------------
+
+void printv3(const struct vec3 v) {
+    printf("v3 = {%f, %f, %f}\n", v.x, v.y, v.z);
 }
 
 // ------------------- MAIN ---------------

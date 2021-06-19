@@ -14,9 +14,48 @@ const val MAX_HITABLES = 128
 const val MAX_SPHERES = 128
 
 private const val GENERAL_DECL = """
-    const int WIDTH = 1024;
-    const int HEIGHT = 768;
+    const int WIDTH = 640;
+    const int HEIGHT = 480;
     const int SAMPLES = 64;
+"""
+
+private const val RANDOM_DECL = """
+    // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
+    uint hash( uint x ) {
+        x += ( x << 10u );
+        x ^= ( x >>  6u );
+        x += ( x <<  3u );
+        x ^= ( x >> 11u );
+        x += ( x << 15u );
+        return x;
+    }
+
+    // Compound versions of the hashing algorithm I whipped together.
+    uint hash( uvec2 v ) { return hash( v.x ^ hash(v.y)                         ); }
+    uint hash( uvec3 v ) { return hash( v.x ^ hash(v.y) ^ hash(v.z)             ); }
+    uint hash( uvec4 v ) { return hash( v.x ^ hash(v.y) ^ hash(v.z) ^ hash(v.w) ); }
+    
+    // Construct a float with half-open range [0:1] using low 23 bits.
+    // All zeroes yields 0.0, all ones yields the next smallest representable value below 1.0.
+    float floatConstruct( uint m ) {
+        const uint ieeeMantissa = 0x007FFFFFu; // binary32 mantissa bitmask
+        const uint ieeeOne      = 0x3F800000u; // 1.0 in IEEE binary32
+        m &= ieeeMantissa;                     // Keep only mantissa bits (fractional part)
+        m |= ieeeOne;                          // Add fractional part to 1.0
+        float  f = uintBitsToFloat( m );       // Range [1:2]
+        return f - 1.0;                        // Range [0:1]
+    }
+
+    // Pseudo-random value in half-open range [0:1].
+    float random( float x ) { return floatConstruct(hash(floatBitsToUint(x))); }
+    float random( vec2  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
+    float random( vec3  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
+    float random( vec4  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
+    
+    float randomSeed = 0.01f;
+    float randf() {
+        return random(randomSeed += 0.001f);
+    }
 """
 
 private const val LIGHT_DECL = """
@@ -40,7 +79,7 @@ private const val MAT_DECL = """
 """
 
 private const val RAY_DECL = """
-    struct ray {
+    struct Ray {
         vec3 origin;
         vec3 direction;
     };
@@ -105,6 +144,12 @@ private const val EXPR_FTOI = """
     }
 """
 
+private const val EXPR_DTOF = """
+    float dtof(double d) {
+        return float(d);
+    }
+"""
+
 private const val EXPR_V2 = """
     vec2 v2(float x, float y) {
         return vec2(x, y);
@@ -148,10 +193,10 @@ private const val EXPR_GET_NORMAL = """
 """
 
 private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$GENERAL_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_DECL\n" +
+    "$EXPR_PI\n$GENERAL_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_DECL\n" +
     "$LIGHTS\n$HITABLES\n$SPHERES\n"
 
-private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
+private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_DTOF + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
 private const val MAIN_DECL = "void main() {"
 

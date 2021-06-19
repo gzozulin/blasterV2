@@ -15,4 +15,8 @@ stdbool.h
 -
 float.h
 -
+stdlib.h
+-
+stdio.h
+-
 
