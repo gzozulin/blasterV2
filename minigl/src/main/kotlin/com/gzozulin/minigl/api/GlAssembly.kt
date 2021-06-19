@@ -5,12 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger
 const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
 
-const val MAX_LIGHTS = 128
-const val MAX_SPHERES = 2
-
 const val V_TEX_COORD = "vTexCoord"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
+
+const val MAX_LIGHTS = 128
+const val MAX_HITABLES = 128
+private const val MAX_SPHERES = 16
 
 private const val LIGHT_DECL = """
     struct Light {
@@ -56,18 +57,28 @@ private const val HIT_RECORD_DECL = """
     const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
 """
 
-private const val HITABLE_LIST_DECL = """
-    struct HitableList {
-        int spheresCnt;
-        Sphere spheres[$MAX_SPHERES];
+private const val HITABLE_DECL = """
+    struct Hitable {
+        int type;
+        int index;
     };
 """
 
 private const val LIGHTS = """
-    const int MAX_LIGHTS = 128;
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
     uniform Light uLights[$MAX_LIGHTS];
+"""
+
+private const val HITABLES = """
+    const int HITABLE_SPHERE = 1;
+    uniform int uHitablesCnt;
+    uniform Hitable uHitables[$MAX_HITABLES];
+"""
+
+private const val SPHERES = """
+    uniform int uSpheresCnt;
+    uniform Sphere uSpheres[$MAX_SPHERES];
 """
 
 private const val EXPR_DISCARD =
@@ -130,7 +141,9 @@ private const val EXPR_GET_NORMAL = """
     }
 """
 
-private const val PRIVATE_DEFINITIONS = "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_LIST_DECL\n$LIGHTS\n"
+private const val PRIVATE_DEFINITIONS =
+    "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_DECL\n" +
+    "$LIGHTS\n$HITABLES\n$SPHERES\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 

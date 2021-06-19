@@ -34,6 +34,8 @@ private fun doCreateOutput(content: String, file: File) {
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
+            "import com.gzozulin.minigl.scene.HitRecord\n" +
+            "import com.gzozulin.minigl.scene.Sphere\n" +
             "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
     operations.forEach { operation ->
         if (operation.access == COperationAccess.PUBLIC) {

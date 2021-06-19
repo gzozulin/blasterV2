@@ -1,7 +1,6 @@
 package com.gzozulin.minigl.api
 
-import com.gzozulin.minigl.scene.Light
-import com.gzozulin.minigl.scene.PointLight
+import com.gzozulin.minigl.scene.*
 import org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -174,6 +173,27 @@ internal fun glProgramSubmitLights(program: GlProgram, lights: List<Light>) {
     } catch (th: Throwable) {
         // fine, only point lights are implemented
     }
+}
+
+internal fun glProgramSubmitHitables(program: GlProgram, hitables: List<Any>) {
+    check(hitables.size <= MAX_HITABLES) { "More hitables than defined in shader!" }
+    glProgramCheckBound(program)
+    var spheresCnt = 0
+    var hitablesCnt = 0
+    hitables.forEach { hitable ->
+        when (hitable) {
+            is Sphere -> {
+                glProgramArrayUniform(program, "uSpheres[%d].center", spheresCnt, hitable.center)
+                glProgramArrayUniform(program, "uSpheres[%d].radius", spheresCnt, hitable.radius)
+                glProgramArrayUniform(program, "uHitables[%d].type",  hitablesCnt, HitableType.SPHERE.ordinal)
+                glProgramArrayUniform(program, "uHitables[%d].index", hitablesCnt, spheresCnt)
+                spheresCnt++
+                hitablesCnt++
+            }
+            else -> error("Unknown Hitable!")
+        }
+    }
+    glProgramUniform(program, "uHitablesCnt", hitablesCnt)
 }
 
 internal fun glDrawTriangles(program: GlProgram, mesh: GlMesh) {

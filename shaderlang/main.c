@@ -16,8 +16,15 @@
 #define pow powf
 #define max fmaxf
 
+#define PI 3.14159265359f
+
 #define MAX_LIGHTS 128
-#define MAX_SPHERES 2
+#define MAX_HITABLES 128
+#define MAX_SPHERES 16
+
+// Corresponds to HitableType
+#define HITABLE_HITABLE 0
+#define HITABLE_SPHERE  1
 
 // ------------------- TYPES -------------------
 
@@ -84,16 +91,12 @@ struct HitRecord {
     struct vec3 normal;
 };
 
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
-
-struct HitableList {
-    int spheresCnt;
-    struct Sphere spheres[MAX_SPHERES];
+struct Hitable {
+    int type;
+    int index;
 };
 
-// ------------------- CONST -------------------
-
-#define PI 3.14159265359f
+// ------------------- LIGHTS -------------------
 
 #define LIGHT_X1 { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
 #define LIGHT_X4 LIGHT_X1, LIGHT_X1, LIGHT_X1, LIGHT_X1
@@ -103,6 +106,25 @@ struct HitableList {
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
 const struct Light uLights[MAX_LIGHTS] = { LIGHT_X64, LIGHT_X64 };
+
+// ------------------- HITABLES -------------------
+
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+
+#define HITABLE_X1 { 1, 0 }
+#define HITABLE_X4 HITABLE_X1, HITABLE_X1, HITABLE_X1, HITABLE_X1
+#define HITABLE_X16 HITABLE_X4, HITABLE_X4, HITABLE_X4, HITABLE_X4
+#define HITABLE_X64 HITABLE_X16, HITABLE_X16, HITABLE_X16, HITABLE_X16
+
+const int uHitablesCnt = 128;
+const struct Hitable uHitables[MAX_HITABLES] = { HITABLE_X64, HITABLE_X64 };
+
+// ------------------- SPHERES -------------------
+
+#define SPHERE_X1 { 1, 0 }
+#define SPHERE_X4 SPHERE_X1, SPHERE_X1, SPHERE_X1, SPHERE_X1
+#define SPHERE_X16 SPHERE_X4, SPHERE_X4, SPHERE_X4, SPHERE_X4
+const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
 
 // ------------------- CASTS -------------------
 
@@ -160,12 +182,12 @@ struct vec3 v3one() {
 
 public
 struct vec3 v3front() {
-    return v3(0, 0, -1);
+    return v3(0, 0, 1);
 }
 
 public
 struct vec3 v3back() {
-    return v3(0, 0, 1);
+    return v3(0, 0, -1);
 }
 
 public
@@ -750,11 +772,19 @@ struct HitRecord hitRaySphere(const struct ray ray, const float tMin, const floa
 }
 
 public
-struct HitRecord hitRayList(const struct ray ray, const float tMin, const float tMax, const struct HitableList list) {
+struct HitRecord hitRayHitables(const struct ray ray, const float tMin, const float tMax) {
     struct HitRecord result = NO_HIT;
     float closest = tMax;
-    for (int i = 0; i < list.spheresCnt; i++) {
-        const struct HitRecord hitRecord = hitRaySphere(ray, tMin, closest, list.spheres[i]);
+    for (int i = 0; i < uHitablesCnt; i++) {
+        const struct Hitable hitable = uHitables[i];
+        struct HitRecord hitRecord;
+        switch (hitable.type) {
+            case HITABLE_SPHERE:
+                hitRecord = hitRaySphere(ray, tMin, closest, uSpheres[hitable.index]);
+                break;
+            default:
+                hitRecord = NO_HIT;
+        }
         if (hitRecord.t > 0) {
             closest = hitRecord.t;
             result = hitRecord;
@@ -763,13 +793,10 @@ struct HitRecord hitRayList(const struct ray ray, const float tMin, const float 
     return result;
 }
 
-// drand48(); // custom!
-
 public
 struct vec4 shadingRt(const struct vec2 texCoord) {
-    const struct HitableList world = { 2, { { v3front(), 0.5f }, { v3(0, -100.5f, -1.0f), 100.0f } } };
     const struct ray ray = createRayFromTexCoord(texCoord);
-    const struct HitRecord record = hitRayList(ray, 0, 1000000, world);
+    const struct HitRecord record = hitRayHitables(ray, 0, 1000000);
     if (record.t > 0) {
         return v3tov4(mulv3f(addv3(record.normal, v3one()), 0.5f), 1.0f);
     } else {

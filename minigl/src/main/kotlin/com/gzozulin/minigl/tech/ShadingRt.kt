@@ -1,11 +1,7 @@
-package com.gzozulin.rt
+package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
-import com.gzozulin.minigl.tech.ShadingFlat
-import com.gzozulin.minigl.tech.glShadingFlatDraw
-import com.gzozulin.minigl.tech.glShadingFlatInstance
-import com.gzozulin.minigl.tech.glShadingFlatUse
 
 private val window = GlWindow()
 
@@ -15,14 +11,14 @@ private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
 
-private val hitables = listOf(Sphere(vec3().front(), 0.5f), Sphere(vec3(0f, -100.5f, -1f), 100.0f))
+private val hitables = listOf(Sphere(vec3().back(), 0.5f), Sphere(vec3(0f, -100.5f, -1f), 100.0f))
 
 fun main() {
     window.create {
         glShadingFlatUse(shadingFlat) {
             glMeshUse(rect) {
                 glShadingFlatDraw(shadingFlat) {
-                    //glProgramSubmitHitables(shadingFlat)
+                    glProgramSubmitHitables(shadingFlat.program, hitables)
                     window.show {
                         glShadingFlatInstance(shadingFlat, rect)
                     }
