@@ -11,7 +11,13 @@ private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
 const val MAX_LIGHTS = 128
 const val MAX_HITABLES = 128
-private const val MAX_SPHERES = 16
+const val MAX_SPHERES = 128
+
+private const val GENERAL_DECL = """
+    const int WIDTH = 1024;
+    const int HEIGHT = 768;
+    const int SAMPLES = 64;
+"""
 
 private const val LIGHT_DECL = """
     struct Light {
@@ -142,7 +148,7 @@ private const val EXPR_GET_NORMAL = """
 """
 
 private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_DECL\n" +
+    "$EXPR_PI\n$GENERAL_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n$HIT_RECORD_DECL\n$HITABLE_DECL\n" +
     "$LIGHTS\n$HITABLES\n$SPHERES\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4

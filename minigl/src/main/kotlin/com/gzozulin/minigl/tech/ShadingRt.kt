@@ -2,6 +2,7 @@ package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
+import java.lang.Thread.sleep
 
 private val window = GlWindow()
 
@@ -11,7 +12,7 @@ private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
 
-private val hitables = listOf(Sphere(vec3().back(), 0.5f), Sphere(vec3(0f, -100.5f, -1f), 100.0f))
+private val hitables = listOf(Sphere(vec3(0f, 0f, -1f), 0.5f), Sphere(vec3(0f, -100.5f, -1f), 100f))
 
 fun main() {
     window.create {
@@ -21,6 +22,7 @@ fun main() {
                     glProgramSubmitHitables(shadingFlat.program, hitables)
                     window.show {
                         glShadingFlatInstance(shadingFlat, rect)
+                        sleep(2000L)
                     }
                 }
             }

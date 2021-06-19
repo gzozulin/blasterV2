@@ -183,6 +183,7 @@ internal fun glProgramSubmitHitables(program: GlProgram, hitables: List<Any>) {
     hitables.forEach { hitable ->
         when (hitable) {
             is Sphere -> {
+                check(spheresCnt + 1 <= MAX_SPHERES) { "More spheres than defined in shader!" }
                 glProgramArrayUniform(program, "uSpheres[%d].center", spheresCnt, hitable.center)
                 glProgramArrayUniform(program, "uSpheres[%d].radius", spheresCnt, hitable.radius)
                 glProgramArrayUniform(program, "uHitables[%d].type",  hitablesCnt, HitableType.SPHERE.ordinal)

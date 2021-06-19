@@ -7,7 +7,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <float.h>
-#include <stdlib.h>
 
 #define public
 #define custom
@@ -18,9 +17,13 @@
 
 #define PI 3.14159265359f
 
-#define MAX_LIGHTS 128
-#define MAX_HITABLES 128
-#define MAX_SPHERES 16
+#define WIDTH           1024
+#define HEIGHT          768
+#define SAMPLES         64
+
+#define MAX_LIGHTS      128
+#define MAX_HITABLES    128
+#define MAX_SPHERES     128
 
 // Corresponds to HitableType
 #define HITABLE_HITABLE 0
@@ -319,8 +322,8 @@ struct mat3 m3ident() {
 }
 
 public
-struct ray rayFront() {
-    const struct ray result = { v3zero(), v3front() };
+struct ray rayBack() {
+    const struct ray result = { v3zero(), v3back() };
     return result;
 }
 
@@ -535,11 +538,6 @@ struct vec3 pointOnRay(const struct ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
-//public
-//float randf() {
-//    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-//}
-
 // ------------------- TILE ---------------
 
 public
@@ -724,21 +722,20 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
-struct vec4 background(const struct ray ray) {
+struct vec3 background(const struct ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
     const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
-    return v3tov4(gradient, 1.0f);
+    return gradient;
 }
 
 public
-struct ray createRayFromTexCoord(const struct vec2 texCoord) {
+struct ray createRayFromTexCoord(const float u, const float v) {
     const struct vec3 lowerLeft   = { -1, -1, -1 };
     const struct vec3 origin      = {  0,  0,  0 };
     const struct vec3 horizontal  = {  2,  0,  0 };
     const struct vec3 vertical    = {  0,  2,  0 };
     const struct vec3 direction = normv3(
-            addv3(lowerLeft,
-                  addv3(mulv3f(horizontal, texCoord.x), mulv3f(vertical, texCoord.y))));
+            addv3(lowerLeft,addv3(mulv3f(horizontal, u), mulv3f(vertical, v))));
     const struct ray result = { origin, direction };
     return result;
 }
@@ -794,14 +791,32 @@ struct HitRecord hitRayHitables(const struct ray ray, const float tMin, const fl
 }
 
 public
-struct vec4 shadingRt(const struct vec2 texCoord) {
-    const struct ray ray = createRayFromTexCoord(texCoord);
+struct vec3 sampleColor(const struct ray ray) {
     const struct HitRecord record = hitRayHitables(ray, 0, 1000000);
     if (record.t > 0) {
-        return v3tov4(mulv3f(addv3(record.normal, v3one()), 0.5f), 1.0f);
+        return mulv3f(addv3(record.normal, v3one()), 0.5f);
     } else {
         return background(ray);
     }
+}
+
+public
+struct vec4 shadingRt(const struct vec2 texCoord) {
+    struct vec3 result = v3zero();
+    const float DU = 1.0f / WIDTH;
+    const float DV = 1.0f / HEIGHT;
+    const float SU = DU / SAMPLES;
+    const float SV = DV / SAMPLES;
+    for (int u = 0; u < SAMPLES; u++) {
+        for (int v = 0; v < SAMPLES; v++) {
+            const float sampleU = texCoord.x + SU * itof(u);
+            const float sampleV = texCoord.y + SV * itof(v);
+            const struct ray ray = createRayFromTexCoord(sampleU, sampleV);
+            result = addv3(result, sampleColor(ray));
+        }
+    }
+    result = divv3f(result, SAMPLES*SAMPLES);
+    return v3tov4(result, 1.0f);
 }
 
 // ------------------- MAIN ---------------
@@ -836,7 +851,7 @@ int main() {
     assert(lenv3(v3(0, 0, 1)) == 1);
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
-    assert(eqv3(pointOnRay(rayFront(), 10.0f), v3(0, 0, -10)));
+    assert(eqv3(pointOnRay(rayBack(), 10.0f), v3(0, 0, -10)));
     return 0;
 }
 
