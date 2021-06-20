@@ -17,7 +17,6 @@ private val hitables = listOf(Sphere(vec3(0f, 0f, -1f), 0.5f), Sphere(vec3(0f, -
 fun main() {
     window.create {
         glViewportBindPrev {
-            backend.glViewport(0, 0, 640, 480)
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
                     glShadingFlatDraw(shadingFlat) {
@@ -28,7 +27,7 @@ fun main() {
                             if (drawn) {
                                 val stop = System.currentTimeMillis()
                                 println("Frame took: ${(stop - start).toFloat()/1000f} seconds")
-                                sleep(3000L)
+                                sleep(10000L)
                                 glCloseWindow(window)
                             }
                             glShadingFlatInstance(shadingFlat, rect)

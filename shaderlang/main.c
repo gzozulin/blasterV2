@@ -19,10 +19,11 @@
 
 #define PI 3.14159265359f
 
-#define WIDTH           640
-#define HEIGHT          480
-#define SAMPLES         16
-#define BOUNCES         2
+#define WIDTH           1024
+#define HEIGHT          768
+#define SAMPLES         4096
+#define BOUNCES         4
+#define BOUNCE_ERR      0.001f
 
 #define MAX_LIGHTS      128
 #define MAX_HITABLES    128
@@ -838,15 +839,15 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 public
 struct vec3 sampleColor(const float u, const float v) {
     const struct Ray ray = createRayFromTexCoord(u, v);
-    struct HitRecord record = hitRayHitables(ray, 0, FLT_MAX);
+    struct HitRecord record = hitRayHitables(ray, BOUNCE_ERR, FLT_MAX);
     float fraction = 1.0f;
     for (int i = 0; i < BOUNCES; i++) {
-        if (record.t <= 0) {
+        if (record.t < 0 || fraction < 0.01f) {
             break;
         }
         const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
         const struct Ray scattered = { record.point, subv3(target, record.point) };
-        record = hitRayHitables(scattered, 0, FLT_MAX);
+        record = hitRayHitables(scattered, BOUNCE_ERR, FLT_MAX);
         fraction *= 0.5f;
     }
     return mulv3f(background(ray), fraction);
@@ -858,16 +859,13 @@ struct vec4 shadingRt(const struct vec2 texCoord) {
     struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
-    const float SU = DU / SAMPLES;
-    const float SV = DV / SAMPLES;
-    for (int u = 0; u < SAMPLES; u++) {
-        for (int v = 0; v < SAMPLES; v++) {
-            const float sampleU = texCoord.x + SU * itof(u);
-            const float sampleV = texCoord.y + SV * itof(v);
-            result = addv3(result, sampleColor(sampleU, sampleV));
-        }
+    for (int i = 0; i < SAMPLES; i++) {
+        const float sampleU = texCoord.x - DU + 2 * DU * randf();
+        const float sampleV = texCoord.y - DV + 2 * DV * randf();
+        result = addv3(result, sampleColor(sampleU, sampleV));
     }
-    result = divv3f(result, SAMPLES*SAMPLES);
+    result = divv3f(result, SAMPLES);
+    result = v3(sqrt(result.x), sqrt(result.y), sqrt(result.z));
     return v3tov4(result, 1.0f);
 }
 
@@ -882,7 +880,7 @@ void raytracer() {
     int current = 0;
     for (int v = 0; v < HEIGHT; v++) {
         for (int u = 0; u < WIDTH; u++) {
-            const struct vec4 color = shadingRt(v2((float) u/(float)WIDTH, (float)v/(float)HEIGHT));
+            const struct vec4 color = shadingRt(v2((float) u / (float) WIDTH, (float) v / (float) HEIGHT));
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);
             const int b = (int) (255.9f * color.z);
