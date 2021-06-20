@@ -19,14 +19,10 @@
 
 #define PI 3.14159265359f
 
-#define FLT_MAX 3.402823466e+38
-#define FLT_MIN 1.175494351e-38
-#define DBL_MAX 1.7976931348623158e+308
-#define DBL_MIN 2.2250738585072014e-308
-
 #define WIDTH           640
 #define HEIGHT          480
 #define SAMPLES         64
+#define BOUNCES         16
 
 #define MAX_LIGHTS      128
 #define MAX_HITABLES    128
@@ -440,18 +436,6 @@ bool eqv4(const struct vec4 left, const struct vec4 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
 }
 
-// ------------------- RAND -------------------
-
-custom
-struct vec2 setRandomSeed(const struct vec2 seed) {
-    return seed;
-}
-
-custom
-float randf() {
-    return dtof(drand48());
-}
-
 // ------------------- MATH -------------------
 
 public
@@ -567,13 +551,26 @@ struct vec3 pointOnRay(const struct Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
+// ------------------- RAND -------------------
+
+custom
+float randf(const struct vec2 seed) {
+    return dtof(drand48());
+}
+
 public
-struct vec3 randomInUnitSphere() {
-    struct vec3 result;
-    do {
-        result = subv3(mulv3f(v3(randf(), randf(), randf()), 2.0f), v3one());
-    } while (sqlenv3(result) >= 1.0f);
-    return result;
+struct vec3 randomInUnitSphere(const struct vec2 seed) {
+    float d, x, y, z;
+    for (int i = 0; i < 20; i++) {
+        x = randf(seed) * 2.0f - 1.0f;
+        y = randf(seed) * 2.0f - 1.0f;
+        z = randf(seed) * 2.0f - 1.0f;
+        d = x*x + y*y + z*z;
+        if (d >= 1.0f) {
+            return v3(x, y, z);
+        }
+    }
+    return normv3(v3(x, y, z));
 }
 
 // ------------------- TILE ---------------
@@ -829,21 +826,24 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 }
 
 public
-struct vec3 sampleColor(const struct Ray ray) {
+struct vec3 sampleColor(const struct vec2 seed, const float u, const float v) {
+    const struct Ray ray = createRayFromTexCoord(u, v);
     struct HitRecord record = hitRayHitables(ray, 0, FLT_MAX);
     float fraction = 1.0f;
-    do {
-        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
+    for (int i = 0; i < BOUNCES; i++) {
+        if (record.t <= 0) {
+            break;
+        }
+        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere(seed));
         const struct Ray scattered = { record.point, subv3(target, record.point) };
         record = hitRayHitables(scattered, 0, FLT_MAX);
         fraction *= 0.5f;
-    } while (record.t > 0);
+    }
     return mulv3f(background(ray), fraction);
 }
 
 public
 struct vec4 shadingRt(const struct vec2 seed, const struct vec2 texCoord) {
-    setRandomSeed(seed);
     struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
@@ -853,8 +853,7 @@ struct vec4 shadingRt(const struct vec2 seed, const struct vec2 texCoord) {
         for (int v = 0; v < SAMPLES; v++) {
             const float sampleU = texCoord.x + SU * itof(u);
             const float sampleV = texCoord.y + SV * itof(v);
-            const struct Ray ray = createRayFromTexCoord(sampleU, sampleV);
-            result = addv3(result, sampleColor(ray));
+            result = addv3(result, sampleColor(seed, sampleU, sampleV));
         }
     }
     result = divv3f(result, SAMPLES*SAMPLES);

@@ -20,31 +20,18 @@ private const val GENERAL_DECL = """
     #define DBL_MAX 1.7976931348623158e+308
     #define DBL_MIN 2.2250738585072014e-308
     
-    const int WIDTH = 640;
-    const int HEIGHT = 480;
-    const int SAMPLES = 64;
+    #define WIDTH           640
+    #define HEIGHT          480
+    #define SAMPLES         64
+    #define BOUNCES         16
 """
 
 private const val RANDOM_DECL = """
-    vec2 seed = vec2(0.0f, 0.0f);
-    vec2 setRandomSeed(vec2 co) {
-        seed = co;
-        return seed;
-    }
-    
-    highp float rand(vec2 co) {
-        highp float a = 12.9898;
-        highp float b = 78.233;
-        highp float c = 43758.5453;
-        highp float dt= dot(co.xy,vec2(a,b));
-        highp float sn= mod(dt,3.14);
-        return fract(sin(sn) * c);
-    }
-    
-    float randf() {
-        seed.x += FLT_MIN;
-        seed.y += FLT_MIN;
-        return rand(seed);
+    float randf(vec2 x) {
+        int n = int(x.x * 40.0 + x.y * 6400.0);
+        n = (n << 13) ^ n;
+        return 1.0 - float( (n * (n * n * 15731 + 789221) + \
+                 1376312589) & 0x7fffffff) / 1073741824.0;
     }
 """
 

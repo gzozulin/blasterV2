@@ -3,6 +3,8 @@ package com.gzozulin.minigl.tech
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
 import java.lang.Thread.sleep
+import kotlin.system.exitProcess
+import kotlin.system.measureTimeMillis
 
 private val window = GlWindow()
 
@@ -23,9 +25,11 @@ fun main() {
                     glShadingFlatDraw(shadingFlat) {
                         glProgramSubmitHitables(shadingFlat.program, hitables)
                         window.show {
-                            glShadingFlatInstance(shadingFlat, rect)
-                            sleep(2000L)
-                            return@show
+                            val millis = measureTimeMillis {
+                                glShadingFlatInstance(shadingFlat, rect)
+                            }
+                            println(String.format("Frame time: %f", millis / 1000f))
+                            sleep(1000L)
                         }
                     }
                 }
