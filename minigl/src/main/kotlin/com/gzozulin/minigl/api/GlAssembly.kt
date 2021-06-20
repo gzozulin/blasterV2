@@ -6,6 +6,7 @@ const val VERSION = "#version 460\n"
 const val PRECISION_HIGH = "precision highp float;\n"
 
 const val V_TEX_COORD = "vTexCoord"
+const val GL_FRAG_COORD = "gl_FragCoord.xy"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
@@ -14,47 +15,26 @@ const val MAX_HITABLES = 128
 const val MAX_SPHERES = 128
 
 private const val GENERAL_DECL = """
+    #define FLT_MAX 3.402823466e+38
+    #define FLT_MIN 1.175494351e-38
+    #define DBL_MAX 1.7976931348623158e+308
+    #define DBL_MIN 2.2250738585072014e-308
+    
     const int WIDTH = 640;
     const int HEIGHT = 480;
     const int SAMPLES = 64;
+    const int BOUNCES = 64;
 """
 
 private const val RANDOM_DECL = """
-    // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
-    uint hash( uint x ) {
-        x += ( x << 10u );
-        x ^= ( x >>  6u );
-        x += ( x <<  3u );
-        x ^= ( x >> 11u );
-        x += ( x << 15u );
-        return x;
+    vec2 randomSeed = vec2(0.0f, 0.0f);
+    vec2 setRandomSeed(vec2 seed) {
+        randomSeed = seed;
+        return seed;
     }
-
-    // Compound versions of the hashing algorithm I whipped together.
-    uint hash( uvec2 v ) { return hash( v.x ^ hash(v.y)                         ); }
-    uint hash( uvec3 v ) { return hash( v.x ^ hash(v.y) ^ hash(v.z)             ); }
-    uint hash( uvec4 v ) { return hash( v.x ^ hash(v.y) ^ hash(v.z) ^ hash(v.w) ); }
-    
-    // Construct a float with half-open range [0:1] using low 23 bits.
-    // All zeroes yields 0.0, all ones yields the next smallest representable value below 1.0.
-    float floatConstruct( uint m ) {
-        const uint ieeeMantissa = 0x007FFFFFu; // binary32 mantissa bitmask
-        const uint ieeeOne      = 0x3F800000u; // 1.0 in IEEE binary32
-        m &= ieeeMantissa;                     // Keep only mantissa bits (fractional part)
-        m |= ieeeOne;                          // Add fractional part to 1.0
-        float  f = uintBitsToFloat( m );       // Range [1:2]
-        return f - 1.0;                        // Range [0:1]
-    }
-
-    // Pseudo-random value in half-open range [0:1].
-    float random( float x ) { return floatConstruct(hash(floatBitsToUint(x))); }
-    float random( vec2  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
-    float random( vec3  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
-    float random( vec4  v ) { return floatConstruct(hash(floatBitsToUint(v))); }
-    
-    float randomSeed = 0.01f;
     float randf() {
-        return random(randomSeed += 0.001f);
+        randomSeed += FLT_MIN;
+        return fract(sin(dot(randomSeed, vec2(12.9898, 78.233))) * 43758.5453);
     }
 """
 
@@ -256,6 +236,7 @@ data class Named<T>(val given: String) : Expression<T>() {
 
 fun namedTexCoordsV2() = Named<vec2>(V_TEX_COORD)
 fun namedTexCoordsV3() = Named<vec3>(V_TEX_COORD)
+fun namedGlFragCoordV2() = Named<vec2>(GL_FRAG_COORD)
 
 abstract class Uniform<T>(private val p: (() -> T)?, private var v: T?) : Expression<T>() {
 

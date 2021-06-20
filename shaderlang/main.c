@@ -19,9 +19,15 @@
 
 #define PI 3.14159265359f
 
+#define FLT_MAX 3.402823466e+38
+#define FLT_MIN 1.175494351e-38
+#define DBL_MAX 1.7976931348623158e+308
+#define DBL_MIN 2.2250738585072014e-308
+
 #define WIDTH           640
 #define HEIGHT          480
 #define SAMPLES         64
+#define BOUNCES         64
 
 #define MAX_LIGHTS      128
 #define MAX_HITABLES    128
@@ -435,12 +441,19 @@ bool eqv4(const struct vec4 left, const struct vec4 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
 }
 
-// ------------------- MATH -------------------
+// ------------------- RAND -------------------
+
+custom
+struct vec2 setRandomSeed(const struct vec2 seed) {
+    return seed;
+}
 
 custom
 float randf() {
     return dtof(drand48());
 }
+
+// ------------------- MATH -------------------
 
 public
 struct vec3 negv3(const struct vec3 v) {
@@ -821,18 +834,20 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 
 public
 struct vec3 sampleColor(const struct Ray ray) {
-    const struct HitRecord record = hitRayHitables(ray, 0, 1000000);
-    if (record.t > 0) {
+    struct HitRecord record = hitRayHitables(ray, 0, 1000000);
+    float fraction = 1.0f;
+    do {
         const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
-        const struct Ray scattered = {record.point, subv3(target, record.point) };
-        return mulv3f(sampleColor(scattered), 0.5f);
-    } else {
-        return background(ray);
-    }
+        const struct Ray scattered = { record.point, subv3(target, record.point) };
+        record = hitRayHitables(scattered, 0, FLT_MAX);
+        fraction *= 0.5f;
+    } while (record.t > 0);
+    return mulv3f(background(ray), fraction);
 }
 
 public
-struct vec4 shadingRt(const struct vec2 texCoord) {
+struct vec4 shadingRt(const struct vec2 seed, const struct vec2 texCoord) {
+    setRandomSeed(seed);
     struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;

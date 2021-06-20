@@ -7,7 +7,7 @@ import java.lang.Thread.sleep
 private val window = GlWindow()
 
 private val matrix = constm4(mat4().orthoBox())
-private val color = shadingRt(namedTexCoordsV2())
+private val color = shadingRt(namedGlFragCoordV2(), namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()

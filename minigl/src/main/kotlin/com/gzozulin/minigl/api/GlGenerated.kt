@@ -99,8 +99,8 @@ private const val DEF_CREATERAYFROMTEXCOORD = "Ray createRayFromTexCoord ( float
 private const val DEF_CREATERAYSPHEREHITRECORD = "HitRecord createRaySphereHitRecord ( Ray ray , float t , Sphere sphere ) { vec3 point = pointOnRay ( ray , t ) ; vec3 N = normv3 ( divv3f ( subv3 ( point , sphere . center ) , sphere . radius ) ) ; HitRecord result = { t , point , N } ; return result ; }\n\n"
 private const val DEF_HITRAYSPHERE = "HitRecord hitRaySphere ( Ray ray , float tMin , float tMax , Sphere sphere ) { vec3 oc = subv3 ( ray . origin , sphere . center ) ; float a = dotv3 ( ray . direction , ray . direction ) ; float b = 2 * dotv3 ( oc , ray . direction ) ; float c = dotv3 ( oc , oc ) - sphere . radius * sphere . radius ; float D = b * b - 4 * a * c ; if ( D > 0 ) { float temp = ( - b - sqrt ( D ) ) / 2 * a ; if ( temp < tMax && temp > tMin ) { return createRaySphereHitRecord ( ray , temp , sphere ) ; } temp = ( - b + sqrt ( D ) ) / 2 * a ; if ( temp < tMax && temp > tMin ) { return createRaySphereHitRecord ( ray , temp , sphere ) ; } } return NO_HIT ; }\n\n"
 private const val DEF_HITRAYHITABLES = "HitRecord hitRayHitables ( Ray ray , float tMin , float tMax ) { HitRecord result = NO_HIT ; float closest = tMax ; for ( int i = 0 ; i < uHitablesCnt ; i ++ ) { Hitable hitable = uHitables [ i ] ; HitRecord hitRecord ; switch ( hitable . type ) { case HITABLE_SPHERE : hitRecord = hitRaySphere ( ray , tMin , closest , uSpheres [ hitable . index ] ) ; break ; default : hitRecord = NO_HIT ; } if ( hitRecord . t > 0 ) { closest = hitRecord . t ; result = hitRecord ; } } return result ; }\n\n"
-private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( Ray ray ) { HitRecord record = hitRayHitables ( ray , 0 , 1000000 ) ; if ( record . t > 0 ) { vec3 target = addv3 ( addv3 ( record . point , record . normal ) , randomInUnitSphere ( ) ) ; Ray scattered = { record . point , subv3 ( target , record . point ) } ; return mulv3f ( sampleColor ( scattered ) , 0.5f ) ; } else { return background ( ray ) ; } }\n\n"
-private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 texCoord ) { vec3 result = v3zero ( ) ; float DU = 1.0f / WIDTH ; float DV = 1.0f / HEIGHT ; float SU = DU / SAMPLES ; float SV = DV / SAMPLES ; for ( int u = 0 ; u < SAMPLES ; u ++ ) { for ( int v = 0 ; v < SAMPLES ; v ++ ) { float sampleU = texCoord . x + SU * itof ( u ) ; float sampleV = texCoord . y + SV * itof ( v ) ; Ray ray = createRayFromTexCoord ( sampleU , sampleV ) ; result = addv3 ( result , sampleColor ( ray ) ) ; } } result = divv3f ( result , SAMPLES * SAMPLES ) ; return v3tov4 ( result , 1.0f ) ; }\n\n"
+private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( Ray ray ) { HitRecord record = hitRayHitables ( ray , 0 , 1000000 ) ; float fraction = 1.0f ; do { vec3 target = addv3 ( addv3 ( record . point , record . normal ) , randomInUnitSphere ( ) ) ; Ray scattered = { record . point , subv3 ( target , record . point ) } ; record = hitRayHitables ( scattered , 0 , FLT_MAX ) ; fraction *= 0.5f ; } while ( record . t > 0 ) ; return mulv3f ( background ( ray ) , fraction ) ; }\n\n"
+private const val DEF_SHADINGRT = "vec4 shadingRt ( vec2 seed , vec2 texCoord ) { setRandomSeed ( seed ) ; vec3 result = v3zero ( ) ; float DU = 1.0f / WIDTH ; float DV = 1.0f / HEIGHT ; float SU = DU / SAMPLES ; float SV = DV / SAMPLES ; for ( int u = 0 ; u < SAMPLES ; u ++ ) { for ( int v = 0 ; v < SAMPLES ; v ++ ) { float sampleU = texCoord . x + SU * itof ( u ) ; float sampleV = texCoord . y + SV * itof ( v ) ; Ray ray = createRayFromTexCoord ( sampleU , sampleV ) ; result = addv3 ( result , sampleColor ( ray ) ) ; } } result = divv3f ( result , SAMPLES * SAMPLES ) ; return v3tov4 ( result , 1.0f ) ; }\n\n"
 
 const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_SQLENV3+DEF_NORMV3+DEF_LERPV3+DEF_POINTONRAY+DEF_RANDOMINUNITSPHERE+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_CREATERAYFROMTEXCOORD+DEF_CREATERAYSPHEREHITRECORD+DEF_HITRAYSPHERE+DEF_HITRAYHITABLES+DEF_SAMPLECOLOR+DEF_SHADINGRT
 
@@ -399,6 +399,11 @@ fun eqv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<
     override fun roots() = listOf(left, right)
 }
 
+fun setRandomSeed(seed: Expression<vec2>) = object : Expression<vec2>() {
+    override fun expr() = "setRandomSeed(${seed.expr()})"
+    override fun roots() = listOf(seed)
+}
+
 fun randf() = object : Expression<Float>() {
     override fun expr() = "randf()"
     override fun roots() = listOf<Expression<*>>()
@@ -629,8 +634,8 @@ fun sampleColor(ray: Expression<ray>) = object : Expression<vec3>() {
     override fun roots() = listOf(ray)
 }
 
-fun shadingRt(texCoord: Expression<vec2>) = object : Expression<vec4>() {
-    override fun expr() = "shadingRt(${texCoord.expr()})"
-    override fun roots() = listOf(texCoord)
+fun shadingRt(seed: Expression<vec2>, texCoord: Expression<vec2>) = object : Expression<vec4>() {
+    override fun expr() = "shadingRt(${seed.expr()}, ${texCoord.expr()})"
+    override fun roots() = listOf(seed, texCoord)
 }
 
