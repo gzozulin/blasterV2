@@ -13,6 +13,7 @@
       <w>decl</w>
       <w>defn</w>
       <w>dtau</w>
+      <w>fract</w>
       <w>gzozulin</w>
       <w>highlevel</w>
       <w>highp</w>
@@ -27,6 +28,7 @@
       <w>phong</w>
       <w>postdeclare</w>
       <w>predeclare</w>
+      <w>randf</w>
       <w>resizables</w>
       <w>sfcs</w>
       <w>templ</w>

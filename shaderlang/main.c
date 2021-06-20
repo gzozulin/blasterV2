@@ -27,7 +27,6 @@
 #define WIDTH           640
 #define HEIGHT          480
 #define SAMPLES         64
-#define BOUNCES         64
 
 #define MAX_LIGHTS      128
 #define MAX_HITABLES    128
@@ -572,10 +571,7 @@ public
 struct vec3 randomInUnitSphere() {
     struct vec3 result;
     do {
-        float x = randf();
-        float y = randf();
-        float z = randf();
-        result = subv3(mulv3f(v3(x, y, z), 2.0f), v3one());
+        result = subv3(mulv3f(v3(randf(), randf(), randf()), 2.0f), v3one());
     } while (sqlenv3(result) >= 1.0f);
     return result;
 }
@@ -834,7 +830,7 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 
 public
 struct vec3 sampleColor(const struct Ray ray) {
-    struct HitRecord record = hitRayHitables(ray, 0, 1000000);
+    struct HitRecord record = hitRayHitables(ray, 0, FLT_MAX);
     float fraction = 1.0f;
     do {
         const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());

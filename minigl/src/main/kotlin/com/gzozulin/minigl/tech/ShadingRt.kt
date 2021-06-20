@@ -25,6 +25,7 @@ fun main() {
                         window.show {
                             glShadingFlatInstance(shadingFlat, rect)
                             sleep(2000L)
+                            return@show
                         }
                     }
                 }

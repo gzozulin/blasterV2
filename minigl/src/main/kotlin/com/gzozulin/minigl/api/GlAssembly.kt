@@ -23,18 +23,28 @@ private const val GENERAL_DECL = """
     const int WIDTH = 640;
     const int HEIGHT = 480;
     const int SAMPLES = 64;
-    const int BOUNCES = 64;
 """
 
 private const val RANDOM_DECL = """
-    vec2 randomSeed = vec2(0.0f, 0.0f);
-    vec2 setRandomSeed(vec2 seed) {
-        randomSeed = seed;
+    vec2 seed = vec2(0.0f, 0.0f);
+    vec2 setRandomSeed(vec2 co) {
+        seed = co;
         return seed;
     }
+    
+    highp float rand(vec2 co) {
+        highp float a = 12.9898;
+        highp float b = 78.233;
+        highp float c = 43758.5453;
+        highp float dt= dot(co.xy,vec2(a,b));
+        highp float sn= mod(dt,3.14);
+        return fract(sin(sn) * c);
+    }
+    
     float randf() {
-        randomSeed += FLT_MIN;
-        return fract(sin(dot(randomSeed, vec2(12.9898, 78.233))) * 43758.5453);
+        seed.x += FLT_MIN;
+        seed.y += FLT_MIN;
+        return rand(seed);
     }
 """
 
