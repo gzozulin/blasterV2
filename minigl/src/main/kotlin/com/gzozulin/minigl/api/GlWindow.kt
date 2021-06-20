@@ -24,6 +24,10 @@ typealias ButtonCallback = (button: MouseButton, pressed: Boolean) -> Unit
 typealias PositionCallback = (position: vec2) -> Unit
 typealias DeltaCallback = (delta: vec2) -> Unit
 
+fun glCloseWindow(window: GlWindow) {
+    glfwSetWindowShouldClose(window.handle!!, true)
+}
+
 class GlWindow(
     private val winWidth: Int = 1024, private val winHeight: Int = 768,
     private var isHoldingCursor: Boolean = false,
@@ -56,7 +60,7 @@ class GlWindow(
         override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
             if (action == GLFW_PRESS) {
                 when (key) {
-                    GLFW_KEY_ESCAPE -> glfwSetWindowShouldClose(window, true)
+                    GLFW_KEY_ESCAPE -> glCloseWindow(this@GlWindow)
                 }
             }
             keyCallback?.invoke(key, action == GLFW_PRESS || action == GLFW_REPEAT)

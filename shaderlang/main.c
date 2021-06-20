@@ -21,8 +21,8 @@
 
 #define WIDTH           640
 #define HEIGHT          480
-#define SAMPLES         64
-#define BOUNCES         16
+#define SAMPLES         16
+#define BOUNCES         2
 
 #define MAX_LIGHTS      128
 #define MAX_HITABLES    128
@@ -122,12 +122,12 @@ const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
 #define HITABLE_X16 HITABLE_X4, HITABLE_X4, HITABLE_X4, HITABLE_X4
 #define HITABLE_X64 HITABLE_X16, HITABLE_X16, HITABLE_X16, HITABLE_X16
 
-const int uHitablesCnt = 128;
+const int uHitablesCnt = 1;
 const struct Hitable uHitables[MAX_HITABLES] = { HITABLE_X64, HITABLE_X64 };
 
 // ------------------- SPHERES -------------------
 
-#define SPHERE_X1 { 1, 0 }
+#define SPHERE_X1 { { 0, 0, -1 }, 3 }
 #define SPHERE_X4 SPHERE_X1, SPHERE_X1, SPHERE_X1, SPHERE_X1
 #define SPHERE_X16 SPHERE_X4, SPHERE_X4, SPHERE_X4, SPHERE_X4
 const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
@@ -174,6 +174,11 @@ struct ivec2 iv2(const int x, const int y) {
 custom
 struct vec3 v3(const float x, const float y, const float z) {
     return (struct vec3) {x, y, z};
+}
+
+public
+struct vec3 v2tov3(struct vec2 v, const float f) {
+    return v3(v.x, v.y, f);
 }
 
 public
@@ -554,17 +559,22 @@ struct vec3 pointOnRay(const struct Ray ray, const float t) {
 // ------------------- RAND -------------------
 
 custom
-float randf(const struct vec2 seed) {
+struct vec3 seedRandom(const struct vec2 s) {
+    return v2tov3(s, 1.0f);
+}
+
+custom
+float randf() {
     return dtof(drand48());
 }
 
 public
-struct vec3 randomInUnitSphere(const struct vec2 seed) {
+struct vec3 randomInUnitSphere() {
     float d, x, y, z;
     for (int i = 0; i < 20; i++) {
-        x = randf(seed) * 2.0f - 1.0f;
-        y = randf(seed) * 2.0f - 1.0f;
-        z = randf(seed) * 2.0f - 1.0f;
+        x = randf() * 2.0f - 1.0f;
+        y = randf() * 2.0f - 1.0f;
+        z = randf() * 2.0f - 1.0f;
         d = x*x + y*y + z*z;
         if (d >= 1.0f) {
             return v3(x, y, z);
@@ -826,7 +836,7 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 }
 
 public
-struct vec3 sampleColor(const struct vec2 seed, const float u, const float v) {
+struct vec3 sampleColor(const float u, const float v) {
     const struct Ray ray = createRayFromTexCoord(u, v);
     struct HitRecord record = hitRayHitables(ray, 0, FLT_MAX);
     float fraction = 1.0f;
@@ -834,7 +844,7 @@ struct vec3 sampleColor(const struct vec2 seed, const float u, const float v) {
         if (record.t <= 0) {
             break;
         }
-        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere(seed));
+        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
         const struct Ray scattered = { record.point, subv3(target, record.point) };
         record = hitRayHitables(scattered, 0, FLT_MAX);
         fraction *= 0.5f;
@@ -843,7 +853,8 @@ struct vec3 sampleColor(const struct vec2 seed, const float u, const float v) {
 }
 
 public
-struct vec4 shadingRt(const struct vec2 seed, const struct vec2 texCoord) {
+struct vec4 shadingRt(const struct vec2 texCoord) {
+    seedRandom(texCoord);
     struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
@@ -853,11 +864,34 @@ struct vec4 shadingRt(const struct vec2 seed, const struct vec2 texCoord) {
         for (int v = 0; v < SAMPLES; v++) {
             const float sampleU = texCoord.x + SU * itof(u);
             const float sampleV = texCoord.y + SV * itof(v);
-            result = addv3(result, sampleColor(seed, sampleU, sampleV));
+            result = addv3(result, sampleColor(sampleU, sampleV));
         }
     }
     result = divv3f(result, SAMPLES*SAMPLES);
     return v3tov4(result, 1.0f);
+}
+
+void raytracer() {
+    FILE *f = fopen("out.ppm", "w");
+    if (f == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    fprintf(f, "P3\n%d %d\n255\n", WIDTH, HEIGHT);
+    const float all = WIDTH * HEIGHT;
+    int current = 0;
+    for (int v = 0; v < HEIGHT; v++) {
+        for (int u = 0; u < WIDTH; u++) {
+            const struct vec4 color = shadingRt(v2((float) u/(float)WIDTH, (float)v/(float)HEIGHT));
+            const int r = (int) (255.9f * color.x);
+            const int g = (int) (255.9f * color.y);
+            const int b = (int) (255.9f * color.z);
+            fprintf(f, "%d %d %d ", r, g, b);
+            printf("progress: %.3f\n", (float) (current++) / all);
+        }
+        fprintf(f, "\n");
+    }
+    fclose(f);
 }
 
 // ------------------- LOGGING ---------------
@@ -899,6 +933,7 @@ int main() {
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
     assert(eqv3(pointOnRay(rayBack(), 10.0f), v3(0, 0, -10)));
+    raytracer();
     return 0;
 }
 

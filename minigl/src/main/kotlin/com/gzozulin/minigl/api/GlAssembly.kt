@@ -27,11 +27,34 @@ private const val GENERAL_DECL = """
 """
 
 private const val RANDOM_DECL = """
-    float randf(vec2 x) {
-        int n = int(x.x * 40.0 + x.y * 6400.0);
-        n = (n << 13) ^ n;
-        return 1.0 - float( (n * (n * n * 15731 + 789221) + \
-                 1376312589) & 0x7fffffff) / 1073741824.0;
+    uint hash3(uint x, uint y, uint z) {
+        x += x >> 11;
+        x ^= x << 7;
+        x += y;
+        x ^= x << 3;
+        x += z ^ (x >> 14);
+        x ^= x << 6;
+        x += x >> 15;
+        x ^= x << 5;
+        x += x >> 12;
+        x ^= x << 9;
+        return x;
+    }
+    
+    vec3 seed = vec3(0.0f, 0.0f, 0.0f);
+    vec3 seedRandom(vec2 s) {
+        seed.x = s.x;
+        seed.y = s.y;
+        return seed;
+    }
+    
+    float randf() {
+        seed.z += FLT_MIN;
+        uint mantissaMask = 0x007FFFFFu;
+        uint one = 0x3F800000u;
+        uvec3 u = floatBitsToUint(seed);
+        uint h = hash3(u.x, u.y, u.z);
+        return uintBitsToFloat((h & mantissaMask) | one) - 1.0;
     }
 """
 

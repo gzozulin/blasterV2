@@ -3,13 +3,11 @@ package com.gzozulin.minigl.tech
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
 import java.lang.Thread.sleep
-import kotlin.system.exitProcess
-import kotlin.system.measureTimeMillis
 
 private val window = GlWindow()
 
 private val matrix = constm4(mat4().orthoBox())
-private val color = shadingRt(namedGlFragCoordV2(), namedTexCoordsV2())
+private val color = shadingRt(namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
@@ -24,12 +22,17 @@ fun main() {
                 glMeshUse(rect) {
                     glShadingFlatDraw(shadingFlat) {
                         glProgramSubmitHitables(shadingFlat.program, hitables)
+                        var drawn = false
+                        val start = System.currentTimeMillis()
                         window.show {
-                            val millis = measureTimeMillis {
-                                glShadingFlatInstance(shadingFlat, rect)
+                            if (drawn) {
+                                val stop = System.currentTimeMillis()
+                                println("Frame took: ${(stop - start).toFloat()/1000f} seconds")
+                                sleep(3000L)
+                                glCloseWindow(window)
                             }
-                            println(String.format("Frame time: %f", millis / 1000f))
-                            sleep(1000L)
+                            glShadingFlatInstance(shadingFlat, rect)
+                            drawn = true
                         }
                     }
                 }
