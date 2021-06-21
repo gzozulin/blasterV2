@@ -2,12 +2,11 @@ package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
-import java.lang.Thread.sleep
 
 private val window = GlWindow()
 
 private val matrix = constm4(mat4().orthoBox())
-private val color = shadingRt(namedTexCoordsV2())
+private val color = fragmentColorRt(namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()

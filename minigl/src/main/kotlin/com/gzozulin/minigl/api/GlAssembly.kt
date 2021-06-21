@@ -22,7 +22,7 @@ private const val GENERAL_DECL = """
     
     #define WIDTH           1024
     #define HEIGHT          768
-    #define SAMPLES         4096
+    #define SAMPLES         2048
     #define BOUNCES         4
     #define BOUNCE_ERR      0.001f
 """
@@ -90,6 +90,8 @@ private const val SPHERE_DECL = """
     struct Sphere {
         vec3 center;
         float radius;
+        int materialType;
+        int materialIndex;
     };
 """
 
@@ -98,9 +100,11 @@ private const val HIT_RECORD_DECL = """
         float t;
         vec3 point;
         vec3 normal;
+        int materialType;
+        int materialIndex;
     };
     
-    const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+    const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
 """
 
 private const val HITABLE_DECL = """

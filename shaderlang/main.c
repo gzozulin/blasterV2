@@ -19,19 +19,24 @@
 
 #define PI 3.14159265359f
 
-#define WIDTH           1024
-#define HEIGHT          768
-#define SAMPLES         4096
-#define BOUNCES         4
-#define BOUNCE_ERR      0.001f
+#define WIDTH                   1024
+#define HEIGHT                  768
+#define SAMPLES                 2048
+#define BOUNCES                 4
+#define BOUNCE_ERR              0.001f
 
-#define MAX_LIGHTS      128
-#define MAX_HITABLES    128
-#define MAX_SPHERES     128
+#define MAX_LIGHTS              128
+#define MAX_HITABLES            128
+#define MAX_SPHERES             128
+#define MAX_LAMBERTIANS         16
+#define MAX_METALS              16
 
 // Corresponds to HitableType
-#define HITABLE_HITABLE 0
-#define HITABLE_SPHERE  1
+#define HITABLE_HITABLE         0
+#define HITABLE_SPHERE          1
+
+#define MATERIAL_LAMBERTIAN     0
+#define MATERIAL_METAL          1
 
 // ------------------- TYPES -------------------
 
@@ -90,17 +95,29 @@ struct PhongMaterial {
 struct Sphere {
     struct vec3 center;
     float radius;
+    int materialType;
+    int materialIndex;
 };
 
 struct HitRecord {
     float t;
     struct vec3 point;
     struct vec3 normal;
+    int materialType;
+    int materialIndex;
 };
 
 struct Hitable {
     int type;
     int index;
+};
+
+struct MaterialLambertian {
+    struct vec3 albedo;
+};
+
+struct MaterialMetal {
+    float roughness;
 };
 
 // ------------------- LIGHTS -------------------
@@ -118,7 +135,7 @@ const struct Light uLights[MAX_LIGHTS] = { LIGHT_X64, LIGHT_X64 };
 
 const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
 
-#define HITABLE_X1 { 1, 0 }
+#define HITABLE_X1 { 1, 0, 0, 0 }
 #define HITABLE_X4 HITABLE_X1, HITABLE_X1, HITABLE_X1, HITABLE_X1
 #define HITABLE_X16 HITABLE_X4, HITABLE_X4, HITABLE_X4, HITABLE_X4
 #define HITABLE_X64 HITABLE_X16, HITABLE_X16, HITABLE_X16, HITABLE_X16
@@ -132,6 +149,11 @@ const struct Hitable uHitables[MAX_HITABLES] = { HITABLE_X64, HITABLE_X64 };
 #define SPHERE_X4 SPHERE_X1, SPHERE_X1, SPHERE_X1, SPHERE_X1
 #define SPHERE_X16 SPHERE_X4, SPHERE_X4, SPHERE_X4, SPHERE_X4
 const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
+
+// ------------------- MATERIALS -------------------
+
+const struct MaterialLambertian uLambertianMaterials[MAX_LAMBERTIANS];
+const struct MaterialMetal uMetalMaterials[MAX_METALS];
 
 // ------------------- CASTS -------------------
 
@@ -553,7 +575,7 @@ struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) 
 }
 
 public
-struct vec3 pointOnRay(const struct Ray ray, const float t) {
+struct vec3 rayPoint(const struct Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
@@ -775,7 +797,7 @@ struct vec3 background(const struct Ray ray) {
 }
 
 public
-struct Ray createRayFromTexCoord(const float u, const float v) {
+struct Ray rayFromTexCoord(const float u, const float v) {
     const struct vec3 lowerLeft   = { -1, -1, -1 };
     const struct vec3 origin      = {  0,  0,  0 };
     const struct vec3 horizontal  = {  2,  0,  0 };
@@ -787,15 +809,20 @@ struct Ray createRayFromTexCoord(const float u, const float v) {
 }
 
 public
-struct HitRecord createRaySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
-    const struct vec3 point = pointOnRay(ray, t);
+struct Ray rayScatter() {
+    return rayFromTexCoord(0, 0);
+}
+
+public
+struct HitRecord raySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
+    const struct vec3 point = rayPoint(ray, t);
     const struct vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
-    const struct HitRecord result = { t, point, N };
+    const struct HitRecord result = { t, point, N, sphere.materialType, sphere.materialIndex };
     return result;
 }
 
 public
-struct HitRecord hitRaySphere(const struct Ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
+struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
     const struct vec3 oc = subv3(ray.origin, sphere.center);
     const float a = dotv3(ray.direction, ray.direction);
     const float b = 2 * dotv3(oc, ray.direction);
@@ -804,18 +831,18 @@ struct HitRecord hitRaySphere(const struct Ray ray, const float tMin, const floa
     if (D > 0) {
         float temp = (-b - sqrt(D)) / 2 * a;
         if (temp < tMax && temp > tMin) {
-            return createRaySphereHitRecord(ray, temp, sphere);
+            return raySphereHitRecord(ray, temp, sphere);
         }
         temp = (-b + sqrt(D)) / 2 * a;
         if (temp < tMax && temp > tMin) {
-            return createRaySphereHitRecord(ray, temp, sphere);
+            return raySphereHitRecord(ray, temp, sphere);
         }
     }
     return NO_HIT;
 }
 
 public
-struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const float tMax) {
+struct HitRecord rayHitWorld(const struct Ray ray, const float tMin, const float tMax) {
     struct HitRecord result = NO_HIT;
     float closest = tMax;
     for (int i = 0; i < uHitablesCnt; i++) {
@@ -823,7 +850,7 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
         struct HitRecord hitRecord;
         switch (hitable.type) {
             case HITABLE_SPHERE:
-                hitRecord = hitRaySphere(ray, tMin, closest, uSpheres[hitable.index]);
+                hitRecord = rayHitSphere(ray, tMin, closest, uSpheres[hitable.index]);
                 break;
             default:
                 hitRecord = NO_HIT;
@@ -838,23 +865,25 @@ struct HitRecord hitRayHitables(const struct Ray ray, const float tMin, const fl
 
 public
 struct vec3 sampleColor(const float u, const float v) {
-    const struct Ray ray = createRayFromTexCoord(u, v);
-    struct HitRecord record = hitRayHitables(ray, BOUNCE_ERR, FLT_MAX);
+    struct Ray ray = rayFromTexCoord(u, v);
     float fraction = 1.0f;
     for (int i = 0; i < BOUNCES; i++) {
-        if (record.t < 0 || fraction < 0.01f) {
+        const struct HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
+        if (record.t < 0) {
             break;
+        } else {
+            fraction *= 0.5f;
+            const struct vec3 tangent = addv3(record.point, record.normal);
+            const struct vec3 direction = addv3(tangent, randomInUnitSphere());
+            ray.origin = record.point;
+            ray.direction = subv3(direction, record.point);
         }
-        const struct vec3 target = addv3(addv3(record.point, record.normal), randomInUnitSphere());
-        const struct Ray scattered = { record.point, subv3(target, record.point) };
-        record = hitRayHitables(scattered, BOUNCE_ERR, FLT_MAX);
-        fraction *= 0.5f;
     }
     return mulv3f(background(ray), fraction);
 }
 
 public
-struct vec4 shadingRt(const struct vec2 texCoord) {
+struct vec4 fragmentColorRt(const struct vec2 texCoord) {
     seedRandom(texCoord);
     struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
@@ -867,29 +896,6 @@ struct vec4 shadingRt(const struct vec2 texCoord) {
     result = divv3f(result, SAMPLES);
     result = v3(sqrt(result.x), sqrt(result.y), sqrt(result.z));
     return v3tov4(result, 1.0f);
-}
-
-void raytracer() {
-    FILE *f = fopen("out.ppm", "w");
-    if (f == NULL) {
-        printf("Error opening file!\n");
-        exit(1);
-    }
-    fprintf(f, "P3\n%d %d\n255\n", WIDTH, HEIGHT);
-    const float all = WIDTH * HEIGHT;
-    int current = 0;
-    for (int v = 0; v < HEIGHT; v++) {
-        for (int u = 0; u < WIDTH; u++) {
-            const struct vec4 color = shadingRt(v2((float) u / (float) WIDTH, (float) v / (float) HEIGHT));
-            const int r = (int) (255.9f * color.x);
-            const int g = (int) (255.9f * color.y);
-            const int b = (int) (255.9f * color.z);
-            fprintf(f, "%d %d %d ", r, g, b);
-            printf("progress: %.3f\n", (float) (current++) / all);
-        }
-        fprintf(f, "\n");
-    }
-    fclose(f);
 }
 
 // ------------------- LOGGING ---------------
@@ -930,8 +936,7 @@ int main() {
     assert(lenv3(v3(0, 0, 1)) == 1);
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
-    assert(eqv3(pointOnRay(rayBack(), 10.0f), v3(0, 0, -10)));
-    raytracer();
+    assert(eqv3(rayPoint(rayBack(), 10.0f), v3(0, 0, -10)));
     return 0;
 }
 
