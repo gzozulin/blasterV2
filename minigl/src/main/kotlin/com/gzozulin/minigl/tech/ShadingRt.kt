@@ -21,17 +21,13 @@ fun main() {
                 glMeshUse(rect) {
                     glShadingFlatDraw(shadingFlat) {
                         glProgramSubmitHitables(shadingFlat.program, hitables)
-                        var drawn = false
-                        val start = System.currentTimeMillis()
+                        var buffers = 0
                         window.show {
-                            if (drawn) {
-                                val stop = System.currentTimeMillis()
-                                println("Frame took: ${(stop - start).toFloat()/1000f} seconds")
-                                sleep(10000L)
-                                glCloseWindow(window)
+                            if (buffers < 2) {
+                                glShadingFlatInstance(shadingFlat, rect)
+                                println("Buffer: $buffers")
+                                buffers++
                             }
-                            glShadingFlatInstance(shadingFlat, rect)
-                            drawn = true
                         }
                     }
                 }
