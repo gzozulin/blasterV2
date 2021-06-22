@@ -5,8 +5,8 @@ import com.gzozulin.minigl.api.vec3
 enum class HitableType { HITABLE, SPHERE }
 enum class MaterialType { LAMBERTIAN, METAL }
 
-object HitRecord // placeholder
 object Hitable // placeholder
+object HitRecord // placeholder
 object ScatterResult // placeholder
 
 interface RtMaterial

@@ -34,6 +34,7 @@ private fun doCreateOutput(content: String, file: File) {
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
+            "import com.gzozulin.minigl.scene.Hitable\n" +
             "import com.gzozulin.minigl.scene.HitRecord\n" +
             "import com.gzozulin.minigl.scene.ScatterResult\n" +
             "import com.gzozulin.minigl.scene.Sphere\n" +
@@ -88,6 +89,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "Light"         -> "Light"
     "Ray"           -> "ray"
     "Sphere"        -> "Sphere"
+    "Hitable"     -> "Hitable"
     "HitRecord"     -> "HitRecord"
     "HitableList"   -> "HitableList"
     "PhongMaterial" -> "PhongMaterial"

@@ -12,8 +12,8 @@ private val shadingFlat = ShadingFlat(matrix, color)
 private val rect = glMeshCreateRect()
 
 private val hitables = listOf(
-    Sphere(vec3(0f, 0f, -1f), 0.5f, LambertianMaterial(col3().aquamarine())),
-    Sphere(vec3(0f, -100.5f, -1f), 100f, LambertianMaterial(col3().azure())))
+    Sphere(vec3(0f, 0f, -1f), 0.5f, LambertianMaterial(col3().red())),
+    Sphere(vec3(0f, -100.5f, -1f), 100f, LambertianMaterial(col3().dkGrey())))
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     is LambertianMaterial -> MaterialType.LAMBERTIAN.ordinal
