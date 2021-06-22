@@ -602,6 +602,13 @@ struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
 }
 
 public
+float schlick(float cosine, float ri) {
+    float r0 = (1 - ri) / (1 + ri);
+    r0 = r0*r0;
+    return r0 + (1 - r0) * pow((1 - cosine), 5);
+}
+
+public
 struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const float niOverNt) {
     const struct vec3 unitV = normv3(v);
     const float dt = dotv3(unitV, n);
@@ -930,20 +937,37 @@ struct ScatterResult materialScatterDielectric(const struct Ray ray, const struc
 
     struct vec3 outwardNormal;
     float niOverNt;
+    float reflectProb;
+    float cosine;
 
-    const struct vec3 reflected = reflectv3(ray.direction, record.normal);
-    if (dotv3(ray.direction, record.normal) > 0) {
+    const float rdotn = dotv3(ray.direction, record.normal);
+    const float dirlen = lenv3(ray.direction);
+
+    if (rdotn > 0) {
         outwardNormal = negv3(record.normal);
         niOverNt = material.reflectiveIndex;
+        cosine = material.reflectiveIndex * rdotn / dirlen;
     } else {
         outwardNormal = record.normal;
         niOverNt = 1.0f / material.reflectiveIndex;
+        cosine = -rdotn / dirlen;
     }
 
     const struct RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
-    const struct ScatterResult scatterResult = {
-            { 1.0f, 1.0f, 1.0f }, { record.point, refractResult.isRefracted ? refractResult.refracted : reflected }
-    };
+    if (refractResult.isRefracted) {
+        reflectProb = schlick(cosine, material.reflectiveIndex);
+    } else {
+        reflectProb = 1.0f;
+    }
+
+    struct vec3 scatteredDir;
+    if (randf() < reflectProb) {
+        scatteredDir = reflectv3(ray.direction, record.normal);
+    } else {
+        scatteredDir = refractResult.refracted;
+    }
+
+    const struct ScatterResult scatterResult = { v3one(), { record.point, scatteredDir } };
     return scatterResult;
 }
 
