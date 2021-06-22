@@ -21,8 +21,6 @@
 
 #define WIDTH                   1024
 #define HEIGHT                  768
-#define SAMPLES                 2048
-#define BOUNCES                 4
 #define BOUNCE_ERR              0.001f
 
 #define MAX_LIGHTS              128
@@ -872,11 +870,13 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
     const float b = 2 * dotv3(oc, ray.direction);
     const float c = dotv3(oc, oc) - sphere.radius * sphere.radius;
     const float D = b*b - 4*a*c;
+
     if (D > 0) {
         float temp = (-b - sqrt(D)) / 2 * a;
         if (temp < tMax && temp > tMin) {
             return raySphereHitRecord(ray, temp, sphere);
         }
+
         temp = (-b + sqrt(D)) / 2 * a;
         if (temp < tMax && temp > tMin) {
             return raySphereHitRecord(ray, temp, sphere);
@@ -934,11 +934,9 @@ struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct H
 public
 struct ScatterResult materialScatterDielectric(const struct Ray ray, const struct HitRecord record,
         const struct DielectricMaterial material) {
-
-    struct vec3 outwardNormal;
     float niOverNt;
-    float reflectProb;
     float cosine;
+    struct vec3 outwardNormal;
 
     const float rdotn = dotv3(ray.direction, record.normal);
     const float dirlen = lenv3(ray.direction);
@@ -953,15 +951,16 @@ struct ScatterResult materialScatterDielectric(const struct Ray ray, const struc
         cosine = -rdotn / dirlen;
     }
 
+    float reflectProbe;
     const struct RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
     if (refractResult.isRefracted) {
-        reflectProb = schlick(cosine, material.reflectiveIndex);
+        reflectProbe = schlick(cosine, material.reflectiveIndex);
     } else {
-        reflectProb = 1.0f;
+        reflectProbe = 1.0f;
     }
 
     struct vec3 scatteredDir;
-    if (randf() < reflectProb) {
+    if (randf() < reflectProbe) {
         scatteredDir = reflectv3(ray.direction, record.normal);
     } else {
         scatteredDir = refractResult.refracted;
@@ -986,10 +985,10 @@ struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecor
 }
 
 public
-struct vec3 sampleColor(const float u, const float v) {
+struct vec3 sampleColor(const int rayBounces, const float u, const float v) {
     struct Ray ray = rayFromTexCoord(u, v);
     struct vec3 fraction = ftov3(1.0f);
-    for (int i = 0; i < BOUNCES; i++) {
+    for (int i = 0; i < rayBounces; i++) {
         const struct HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
         if (record.t < 0) {
             break;
@@ -1006,17 +1005,19 @@ struct vec3 sampleColor(const float u, const float v) {
 }
 
 public
-struct vec4 fragmentColorRt(const struct vec2 texCoord) {
+struct vec4 fragmentColorRt(int sampleCnt, int rayBounces, const struct vec2 texCoord) {
     seedRandom(texCoord);
-    struct vec3 result = v3zero();
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
-    for (int i = 0; i < SAMPLES; i++) {
+
+    struct vec3 result = v3zero();
+    for (int i = 0; i < sampleCnt; i++) {
         const float sampleU = texCoord.x - DU + 2 * DU * randf();
         const float sampleV = texCoord.y - DV + 2 * DV * randf();
-        result = addv3(result, sampleColor(sampleU, sampleV));
+        result = addv3(result, sampleColor(rayBounces, sampleU, sampleV));
     }
-    result = divv3f(result, SAMPLES);
+
+    result = divv3f(result, itof(sampleCnt));
     result = v3(sqrt(result.x), sqrt(result.y), sqrt(result.z));
     return v3tov4(result, 1.0f);
 }

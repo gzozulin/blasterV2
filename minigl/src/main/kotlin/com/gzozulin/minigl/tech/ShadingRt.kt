@@ -5,8 +5,11 @@ import com.gzozulin.minigl.scene.*
 
 private val window = GlWindow()
 
+private val sampleCnt = consti(1024)
+private val rayBounces = consti(4)
+
 private val matrix = constm4(mat4().orthoBox())
-private val color = fragmentColorRt(namedTexCoordsV2())
+private val color = fragmentColorRt(sampleCnt, rayBounces, namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()

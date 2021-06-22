@@ -25,8 +25,6 @@ private const val GENERAL_DECL = """
     
     #define WIDTH           1024
     #define HEIGHT          768
-    #define SAMPLES         512
-    #define BOUNCES         4
     #define BOUNCE_ERR      0.001f
 """
 
@@ -403,6 +401,10 @@ fun unifsq(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
 }
 
 // ----------------------------- Constants -----------------------------
+
+fun consti(value: Int) = object : Constant<Int>(value) {
+    override fun declare() = "const int $name = $value;"
+}
 
 fun constf(value: Float) = object : Constant<Float>(value) {
     override fun declare() = "const float $name = $value;"
