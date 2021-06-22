@@ -14,7 +14,7 @@ const val MAX_LIGHTS = 128
 const val MAX_HITABLES = 128
 const val MAX_SPHERES = 128
 const val MAX_LAMBERTIANS = 16
-const val MAX_METALS = 16
+const val MAX_METALLICS = 16
 
 private const val GENERAL_DECL = """
     #define FLT_MAX 3.402823466e+38
@@ -24,7 +24,7 @@ private const val GENERAL_DECL = """
     
     #define WIDTH           1024
     #define HEIGHT          768
-    #define SAMPLES         2048
+    #define SAMPLES         512
     #define BOUNCES         4
     #define BOUNCE_ERR      0.001f
 """
@@ -129,7 +129,7 @@ private const val MATERIALS_DECL = """
     };
 
     struct MetallicMaterial {
-        float roughness;
+        vec3 albedo;
     };
 """
 
@@ -153,9 +153,9 @@ private const val SPHERES = """
 
 private const val MATERIALS = """
     #define MATERIAL_LAMBERTIAN     0
-    #define MATERIAL_METAL          1
+    #define MATERIAL_METALIIC       1
     uniform LambertianMaterial uLambertianMaterials[$MAX_LAMBERTIANS];
-    uniform MetallicMaterial uMetallicMaterials[$MAX_METALS];
+    uniform MetallicMaterial uMetallicMaterials[$MAX_METALLICS];
 """
 
 private const val EXPR_DISCARD =

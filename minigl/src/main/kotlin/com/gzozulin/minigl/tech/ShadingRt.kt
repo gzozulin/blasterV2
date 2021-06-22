@@ -12,22 +12,30 @@ private val shadingFlat = ShadingFlat(matrix, color)
 private val rect = glMeshCreateRect()
 
 private val hitables = listOf(
-    Sphere(vec3(0f, 0f, -1f), 0.5f, LambertianMaterial(col3().red())),
-    Sphere(vec3(0f, -100.5f, -1f), 100f, LambertianMaterial(col3().dkGrey())))
+    Sphere(vec3(0f, 0f, -1f), 0.5f, LambertianMaterial(col3(0.8f, 0.3f, 0.3f))),
+    Sphere(vec3(0f, -100.5f, -1f), 100f, LambertianMaterial(col3(0.8f, 0.8f, 0.0f))),
+    Sphere(vec3(1f, 0f, -1f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
+    Sphere(vec3(-1f, 0f, -1f), 0.5f, MetallicMaterial(col3(0.8f, 0.8f, 0.8f))),
+)
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     is LambertianMaterial -> MaterialType.LAMBERTIAN.ordinal
+    is MetallicMaterial -> MaterialType.METALLIC.ordinal
     else -> error("Unknown material!")
 }
 
-private data class MaterialsCollection(val lambertians: List<LambertianMaterial>, val lookup: Map<RtMaterial, Int>)
+private data class MaterialsCollection(val lambertians: List<LambertianMaterial>, val metallics: List<MetallicMaterial>,
+                                       val lookup: Map<RtMaterial, Int>)
+
 private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollection {
     val lambertians = mutableListOf<LambertianMaterial>()
+    val metallics = mutableListOf<MetallicMaterial>()
     hitables.forEach { hitable ->
         when (hitable) {
             is Sphere -> {
                 when (hitable.material) {
                     is LambertianMaterial -> lambertians.add(hitable.material)
+                    is MetallicMaterial -> metallics.add(hitable.material)
                     else -> error("Unknown material!")
                 }
             }
@@ -36,11 +44,16 @@ private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollectio
     }
     val distinctLambertians = lambertians.distinct()
     check(distinctLambertians.size <= MAX_LAMBERTIANS) { "Too many Lambertian materials" }
+    val distinctMetallics = metallics.distinct()
+    check(distinctMetallics.size <= MAX_METALLICS) { "Too many Metallic materials" }
     val lookup = mutableMapOf<RtMaterial, Int>()
     distinctLambertians.forEachIndexed { index, rtMaterial ->
         lookup[rtMaterial] = index
     }
-    return MaterialsCollection(distinctLambertians, lookup)
+    distinctMetallics.forEachIndexed { index, rtMaterial ->
+        lookup[rtMaterial] = index
+    }
+    return MaterialsCollection(distinctLambertians, distinctMetallics, lookup)
 }
 
 internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) {
@@ -68,6 +81,9 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
     glProgramUniform(program, "uHitablesCnt", hitablesCnt)
     materialsCollection.lambertians.forEachIndexed { index, lambertian ->
         glProgramArrayUniform(program, "uLambertianMaterials[%d].albedo", index, lambertian.albedo)
+    }
+    materialsCollection.metallics.forEachIndexed { index, metallic ->
+        glProgramArrayUniform(program, "uMetallicMaterials[%d].albedo", index, metallic.albedo)
     }
 }
 

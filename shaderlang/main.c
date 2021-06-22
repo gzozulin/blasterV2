@@ -37,7 +37,7 @@
 
 // Corresponds to MaterialType
 #define MATERIAL_LAMBERTIAN     0
-#define MATERIAL_METAL          1
+#define MATERIAL_METALIIC       1
 
 // ------------------- TYPES -------------------
 
@@ -120,7 +120,7 @@ struct LambertianMaterial {
 };
 
 struct MetallicMaterial {
-    float roughness;
+    struct vec3 albedo;
 };
 
 struct ScatterResult {
@@ -128,7 +128,7 @@ struct ScatterResult {
     struct Ray scattered;
 };
 
-const struct ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
 
 // ------------------- LIGHTS -------------------
 
@@ -583,6 +583,11 @@ struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) 
 }
 
 public
+struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
+    return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
+}
+
+public
 struct vec3 rayPoint(const struct Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
@@ -878,10 +883,23 @@ struct ScatterResult materialScatterLambertian(const struct HitRecord record, co
 }
 
 public
-struct ScatterResult materialScatter(const struct HitRecord record) {
+struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct HitRecord record, const struct MetallicMaterial material) {
+    const struct vec3 reflected = reflectv3(ray.direction, record.normal);
+    if (dotv3(reflected, record.normal) > 0) {
+        const struct ScatterResult result = { material.albedo, { record.point, reflected } };
+        return result;
+    } else {
+        return NO_SCATTER;
+    }
+}
+
+public
+struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecord record) {
     switch (record.materialType) {
         case MATERIAL_LAMBERTIAN:
             return materialScatterLambertian(record, uLambertianMaterials[record.materialIndex]);
+        case MATERIAL_METALIIC:
+            return materialScatterMetalic(ray, record, uMetallicMaterials[record.materialIndex]);
         default:
             return NO_SCATTER;
     }
@@ -896,7 +914,10 @@ struct vec3 sampleColor(const float u, const float v) {
         if (record.t < 0) {
             break;
         } else {
-            const struct ScatterResult scatterResult = materialScatter(record);
+            const struct ScatterResult scatterResult = materialScatter(ray, record);
+            if (scatterResult.attenuation.x < 0) {
+                return v3zero();
+            }
             fraction = mulv3(fraction, scatterResult.attenuation);
             ray = scatterResult.scattered;
         }

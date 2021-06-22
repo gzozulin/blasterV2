@@ -9,6 +9,8 @@ import com.gzozulin.minigl.scene.PhongMaterial
 
 import com.gzozulin.minigl.scene.LambertianMaterial
 
+import com.gzozulin.minigl.scene.MetallicMaterial
+
 private const val DEF_FTOV2 = "vec2 ftov2 ( float v ) { return v2 ( v , v ) ; }\n\n"
 private const val DEF_V2ZERO = "vec2 v2zero ( ) { return ftov2 ( 0.0f ) ; }\n\n"
 private const val DEF_V2TOV3 = "vec3 v2tov3 ( vec2 v , float f ) { return v3 ( v . x , v . y , f ) ; }\n\n"
@@ -82,6 +84,7 @@ private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrt ( v . x * v 
 private const val DEF_SQLENV3 = "float sqlenv3 ( vec3 v ) { return ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n\n"
 private const val DEF_LERPV3 = "vec3 lerpv3 ( vec3 from , vec3 to , float t ) { return addv3 ( mulv3f ( from , 1.0f - t ) , mulv3f ( to , t ) ) ; }\n\n"
+private const val DEF_REFLECTV3 = "vec3 reflectv3 ( vec3 v , vec3 n ) { return subv3 ( v , mulv3f ( n , 2.0f * dotv3 ( v , n ) ) ) ; }\n\n"
 private const val DEF_RAYPOINT = "vec3 rayPoint ( Ray ray , float t ) { return addv3 ( ray . origin , mulv3f ( ray . direction , t ) ) ; }\n\n"
 private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { float d , x , y , z ; for ( int i = 0 ; i < 20 ; i ++ ) { x = randf ( ) * 2.0f - 1.0f ; y = randf ( ) * 2.0f - 1.0f ; z = randf ( ) * 2.0f - 1.0f ; d = x * x + y * y + z * z ; if ( d >= 1.0f ) { return v3 ( x , y , z ) ; } } return normv3 ( v3 ( x , y , z ) ) ; }\n\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; return v2 ( tileStartX + texCoord . x * tileSideX , tileStartY + texCoord . y * tileSideY ) ; }\n\n"
@@ -106,11 +109,12 @@ private const val DEF_RAYHITSPHERE = "HitRecord rayHitSphere ( Ray ray , float t
 private const val DEF_RAYHITHITABLE = "HitRecord rayHitHitable ( Ray ray , float tMin , float tMax , Hitable hitable ) { switch ( hitable . type ) { case HITABLE_SPHERE : return rayHitSphere ( ray , tMin , tMax , uSpheres [ hitable . index ] ) ; default : return NO_HIT ; } }\n\n"
 private const val DEF_RAYHITWORLD = "HitRecord rayHitWorld ( Ray ray , float tMin , float tMax ) { HitRecord result = NO_HIT ; float closest = tMax ; for ( int i = 0 ; i < uHitablesCnt ; i ++ ) { Hitable hitable = uHitables [ i ] ; HitRecord hitRecord = rayHitHitable ( ray , tMin , closest , hitable ) ; if ( hitRecord . t > 0 ) { closest = hitRecord . t ; result = hitRecord ; } } return result ; }\n\n"
 private const val DEF_MATERIALSCATTERLAMBERTIAN = "ScatterResult materialScatterLambertian ( HitRecord record , LambertianMaterial material ) { vec3 tangent = addv3 ( record . point , record . normal ) ; vec3 direction = addv3 ( tangent , randomInUnitSphere ( ) ) ; ScatterResult result = { material . albedo , { record . point , subv3 ( direction , record . point ) } } ; return result ; }\n\n"
-private const val DEF_MATERIALSCATTER = "ScatterResult materialScatter ( HitRecord record ) { switch ( record . materialType ) { case MATERIAL_LAMBERTIAN : return materialScatterLambertian ( record , uLambertianMaterials [ record . materialIndex ] ) ; default : return NO_SCATTER ; } }\n\n"
-private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( float u , float v ) { Ray ray = rayFromTexCoord ( u , v ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < BOUNCES ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = materialScatter ( record ) ; fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n\n"
+private const val DEF_MATERIALSCATTERMETALIC = "ScatterResult materialScatterMetalic ( Ray ray , HitRecord record , MetallicMaterial material ) { vec3 reflected = reflectv3 ( ray . direction , record . normal ) ; if ( dotv3 ( reflected , record . normal ) > 0 ) { ScatterResult result = { material . albedo , { record . point , reflected } } ; return result ; } else { return NO_SCATTER ; } }\n\n"
+private const val DEF_MATERIALSCATTER = "ScatterResult materialScatter ( Ray ray , HitRecord record ) { switch ( record . materialType ) { case MATERIAL_LAMBERTIAN : return materialScatterLambertian ( record , uLambertianMaterials [ record . materialIndex ] ) ; case MATERIAL_METALIIC : return materialScatterMetalic ( ray , record , uMetallicMaterials [ record . materialIndex ] ) ; default : return NO_SCATTER ; } }\n\n"
+private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( float u , float v ) { Ray ray = rayFromTexCoord ( u , v ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < BOUNCES ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = materialScatter ( ray , record ) ; if ( scatterResult . attenuation . x < 0 ) { return v3zero ( ) ; } fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n\n"
 private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( vec2 texCoord ) { seedRandom ( texCoord ) ; vec3 result = v3zero ( ) ; float DU = 1.0f / WIDTH ; float DV = 1.0f / HEIGHT ; for ( int i = 0 ; i < SAMPLES ; i ++ ) { float sampleU = texCoord . x - DU + 2 * DU * randf ( ) ; float sampleV = texCoord . y - DV + 2 * DV * randf ( ) ; result = addv3 ( result , sampleColor ( sampleU , sampleV ) ) ; } result = divv3f ( result , SAMPLES ) ; result = v3 ( sqrt ( result . x ) , sqrt ( result . y ) , sqrt ( result . z ) ) ; return v3tov4 ( result , 1.0f ) ; }\n\n"
 
-const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_SQLENV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_RAYFROMTEXCOORD+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITHITABLE+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT
+const val PUBLIC_DEFINITIONS = DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_SQLENV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_BACKGROUND+DEF_RAYFROMTEXCOORD+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITHITABLE+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT
 
 fun itof(i: Expression<Int>) = object : Expression<Float>() {
     override fun expr() = "itof(${i.expr()})"
@@ -517,6 +521,11 @@ fun lerpv3(from: Expression<vec3>, to: Expression<vec3>, t: Expression<Float>) =
     override fun roots() = listOf(from, to, t)
 }
 
+fun reflectv3(v: Expression<vec3>, n: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "reflectv3(${v.expr()}, ${n.expr()})"
+    override fun roots() = listOf(v, n)
+}
+
 fun rayPoint(ray: Expression<ray>, t: Expression<Float>) = object : Expression<vec3>() {
     override fun expr() = "rayPoint(${ray.expr()}, ${t.expr()})"
     override fun roots() = listOf(ray, t)
@@ -652,9 +661,14 @@ fun materialScatterLambertian(record: Expression<HitRecord>, material: Expressio
     override fun roots() = listOf(record, material)
 }
 
-fun materialScatter(record: Expression<HitRecord>) = object : Expression<ScatterResult>() {
-    override fun expr() = "materialScatter(${record.expr()})"
-    override fun roots() = listOf(record)
+fun materialScatterMetalic(ray: Expression<ray>, record: Expression<HitRecord>, material: Expression<MetallicMaterial>) = object : Expression<ScatterResult>() {
+    override fun expr() = "materialScatterMetalic(${ray.expr()}, ${record.expr()}, ${material.expr()})"
+    override fun roots() = listOf(ray, record, material)
+}
+
+fun materialScatter(ray: Expression<ray>, record: Expression<HitRecord>) = object : Expression<ScatterResult>() {
+    override fun expr() = "materialScatter(${ray.expr()}, ${record.expr()})"
+    override fun roots() = listOf(ray, record)
 }
 
 fun sampleColor(u: Expression<Float>, v: Expression<Float>) = object : Expression<vec3>() {
