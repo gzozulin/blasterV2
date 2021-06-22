@@ -35,6 +35,7 @@ private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
             "import com.gzozulin.minigl.scene.Hitable\n" +
+            "import com.gzozulin.minigl.scene.RtCamera\n" +
             "import com.gzozulin.minigl.scene.HitRecord\n" +
             "import com.gzozulin.minigl.scene.ScatterResult\n" +
             "import com.gzozulin.minigl.scene.RefractResult\n" +
@@ -101,6 +102,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "DielectricMaterial"    -> "DielectricMaterial"
     "ScatterResult"         -> "ScatterResult"
     "RefractResult"         -> "RefractResult"
+    "RtCamera"              -> "RtCamera"
     else                    -> error("Unknown type! $ctype")
 }
 

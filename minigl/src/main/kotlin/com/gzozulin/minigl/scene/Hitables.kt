@@ -9,6 +9,7 @@ object Hitable // placeholder
 object HitRecord // placeholder
 object ScatterResult // placeholder
 object RefractResult // placeholder
+object RtCamera // placeholder
 
 interface RtMaterial
 data class LambertianMaterial(val albedo: vec3) : RtMaterial

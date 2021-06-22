@@ -16,6 +16,7 @@
 #define sqrt sqrtf
 #define pow powf
 #define max fmaxf
+#define tan tanf
 
 #define PI 3.14159265359f
 
@@ -75,6 +76,13 @@ struct mat4 {
 struct Ray {
     struct vec3 origin;
     struct vec3 direction;
+};
+
+struct RtCamera {
+    struct vec3 origin;
+    struct vec3 lowerLeft;
+    struct vec3 horizontal;
+    struct vec3 vertical;
 };
 
 struct Light {
@@ -837,22 +845,39 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
+struct RtCamera cameraLookAt(const struct vec3 eye, const struct vec3 center, const struct vec3 up,
+        const float vfoy, const float aspect) {
+
+    const float halfHeight = tan(vfoy/2.0f);
+    const float halfWidth = aspect * halfHeight;
+
+    const struct vec3 w = normv3(subv3(eye, center));
+    const struct vec3 u = normv3(crossv3(up, w));
+    const struct vec3 v = crossv3(w, u);
+
+    const struct vec3 hwu = mulv3f(u, halfWidth);
+    const struct vec3 hhv = mulv3f(v, halfHeight);
+    const struct vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), w);
+    const struct vec3 horizontal = mulv3f(u, halfWidth * 2.0f);
+    const struct vec3 vertical  = mulv3f(v, halfHeight * 2.0f);
+
+    const struct RtCamera result = { eye, lowerLeft, horizontal, vertical };
+    return result;
+}
+
+public
+struct Ray rayFromCamera(const struct RtCamera camera, const float u, const float v) {
+    const struct vec3 direction =
+            normv3(subv3(addv3(camera.lowerLeft,addv3(mulv3f(camera.horizontal, u), mulv3f(camera.vertical, v))), camera.origin));
+    const struct Ray result = { camera.origin, direction };
+    return result;
+}
+
+public
 struct vec3 background(const struct Ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
     const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return gradient;
-}
-
-public
-struct Ray rayFromTexCoord(const float u, const float v) {
-    const struct vec3 lowerLeft   = { -1, -1, -1 };
-    const struct vec3 origin      = {  0,  0,  0 };
-    const struct vec3 horizontal  = {  2,  0,  0 };
-    const struct vec3 vertical    = {  0,  2,  0 };
-    const struct vec3 direction = normv3(
-            addv3(lowerLeft,addv3(mulv3f(horizontal, u), mulv3f(vertical, v))));
-    const struct Ray result = {origin, direction };
-    return result;
 }
 
 public
@@ -985,8 +1010,8 @@ struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecor
 }
 
 public
-struct vec3 sampleColor(const int rayBounces, const float u, const float v) {
-    struct Ray ray = rayFromTexCoord(u, v);
+struct vec3 sampleColor(const int rayBounces, const struct RtCamera camera, const float u, const float v) {
+    struct Ray ray = rayFromCamera(camera, u, v);
     struct vec3 fraction = ftov3(1.0f);
     for (int i = 0; i < rayBounces; i++) {
         const struct HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
@@ -1005,16 +1030,22 @@ struct vec3 sampleColor(const int rayBounces, const float u, const float v) {
 }
 
 public
-struct vec4 fragmentColorRt(int sampleCnt, int rayBounces, const struct vec2 texCoord) {
+struct vec4 fragmentColorRt(int sampleCnt, int rayBounces,
+                            const struct vec3 eye, const struct vec3 center, const struct vec3 up,
+                            const float fovy, const float aspect,
+                            const struct vec2 texCoord) {
+
     seedRandom(texCoord);
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
+
+    const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect);
 
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
         const float sampleU = texCoord.x - DU + 2 * DU * randf();
         const float sampleV = texCoord.y - DV + 2 * DV * randf();
-        result = addv3(result, sampleColor(rayBounces, sampleU, sampleV));
+        result = addv3(result, sampleColor(rayBounces, camera, sampleU, sampleV));
     }
 
     result = divv3f(result, itof(sampleCnt));

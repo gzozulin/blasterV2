@@ -2,14 +2,26 @@ package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.*
+import org.lwjgl.glfw.GLFW
 
 private val window = GlWindow()
 
-private val sampleCnt = consti(1024)
+private val controller = ControllerFirstPerson(velocity = 0.1f)
+private val wasdInput = WasdInput(controller)
+private var mouseLook = false
+
+private val sampleCnt = consti(16)
 private val rayBounces = consti(4)
 
+private val eye = unifv3 { controller.position }
+private val center = unifv3 { vec3().set(controller.position).add(controller.direction) }
+private val up = constv3(vec3().up())
+
+private val fovy = constf(radf(90.0f))
+private val aspect = constf(window.width.toFloat() / window.height.toFloat())
+
 private val matrix = constm4(mat4().orthoBox())
-private val color = fragmentColorRt(sampleCnt, rayBounces, namedTexCoordsV2())
+private val color = fragmentColorRt(sampleCnt, rayBounces, eye, center, up, fovy, aspect, namedTexCoordsV2())
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
@@ -107,6 +119,19 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
 
 fun main() {
     window.create {
+        window.keyCallback = { key, pressed ->
+            wasdInput.onKeyPressed(key, pressed)
+        }
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
+                mouseLook = pressed
+            }
+        }
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }
         glViewportBindPrev {
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
@@ -114,11 +139,13 @@ fun main() {
                         glShadingRtSubmitHitables(shadingFlat.program, hitables)
                         var buffers = 0
                         window.show {
-                            if (buffers < 2) {
+                            controller.updatePosition()
+                            controller.updateDirection()
+                            //if (buffers < 2) {
                                 glShadingFlatInstance(shadingFlat, rect)
-                                println("Buffer: $buffers")
-                                buffers++
-                            }
+                                //println("Buffer: $buffers")
+                                //buffers++
+                            //}
                         }
                     }
                 }

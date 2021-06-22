@@ -60,7 +60,7 @@ data class ControllerFirstPerson(
         apply.invoke(position, direction)
     }
 
-    private fun updatePosition() {
+    fun updatePosition() {
         delta.zero()
         right.set(vecUp).cross(direction, right)
         right.normalize()
@@ -88,7 +88,7 @@ data class ControllerFirstPerson(
         position.add(delta)
     }
 
-    private fun updateDirection() {
+    fun updateDirection() {
         direction.x = cos(yaw) * cos(pitch)
         direction.y = sin(pitch)
         direction.z = sin(yaw) * cos(pitch)

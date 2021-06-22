@@ -87,6 +87,15 @@ private const val RAY_DECL = """
     };
 """
 
+private const val CAMERA_DECL = """
+    struct RtCamera {
+        vec3 origin;
+        vec3 lowerLeft;
+        vec3 horizontal;
+        vec3 vertical;
+    };
+"""
+
 private const val SPHERE_DECL = """
     struct Sphere {
         vec3 center;
@@ -239,7 +248,7 @@ private const val EXPR_GET_NORMAL = """
 """
 
 private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$GENERAL_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n" +
+    "$EXPR_PI\n$GENERAL_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$CAMERA_DECL\n$SPHERE_DECL\n" +
     "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$HITABLE_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
     "$HITABLES\n$SPHERES\n$MATERIALS\n"
 

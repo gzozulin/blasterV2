@@ -77,3 +77,4 @@ x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
 (B) 2021-06-17 GLSL inout directive can be useful: pointers in C +code @complex
 (A) 2021-06-20 Like and subscribe frame +video @simple
 2021-06-21 Presentation remote +video @simple
+(A) 2021-06-22 Do not flex your back on video +video @simple
