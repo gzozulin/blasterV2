@@ -30,6 +30,7 @@
 #define MAX_SPHERES             128
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16
+#define MAX_DIELECTRICS         16
 
 // Corresponds to HitableType
 #define HITABLE_HITABLE         0
@@ -38,6 +39,7 @@
 // Corresponds to MaterialType
 #define MATERIAL_LAMBERTIAN     0
 #define MATERIAL_METALIIC       1
+#define MATERIAL_DIELECTRIC     2
 
 // ------------------- TYPES -------------------
 
@@ -100,16 +102,6 @@ struct Sphere {
     int materialIndex;
 };
 
-struct HitRecord {
-    float t;
-    struct vec3 point;
-    struct vec3 normal;
-    int materialType;
-    int materialIndex;
-};
-
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
-
 struct Hitable {
     int type;
     int index;
@@ -123,12 +115,33 @@ struct MetallicMaterial {
     struct vec3 albedo;
 };
 
+struct DielectricMaterial {
+    float reflectiveIndex;
+};
+
+struct HitRecord {
+    float t;
+    struct vec3 point;
+    struct vec3 normal;
+    int materialType;
+    int materialIndex;
+};
+
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+
 struct ScatterResult {
     struct vec3 attenuation;
     struct Ray scattered;
 };
 
 const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+
+struct RefractResult {
+    bool isRefracted;
+    struct vec3 refracted;
+};
+
+const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 // ------------------- LIGHTS -------------------
 
@@ -160,8 +173,9 @@ const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
 
 // ------------------- MATERIALS -------------------
 
-const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS];
-const struct MetallicMaterial uMetallicMaterials[MAX_METALS];
+const struct LambertianMaterial     uLambertianMaterials[MAX_LAMBERTIANS];
+const struct MetallicMaterial       uMetallicMaterials  [MAX_METALS];
+const struct DielectricMaterial     uDielectricMaterials[MAX_DIELECTRICS];
 
 // ------------------- CASTS -------------------
 
@@ -588,6 +602,21 @@ struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
 }
 
 public
+struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const float niOverNt) {
+    const struct vec3 unitV = normv3(v);
+    const float dt = dotv3(unitV, n);
+    const float D = 1.0f - niOverNt*niOverNt*(1.0f - dt*dt);
+    if (D > 0) {
+        const struct vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
+        const struct vec3 right = mulv3f(n, sqrt(D));
+        const struct RefractResult result = { true, subv3(left, right) };
+        return result;
+    } else {
+        return NO_REFRACT;
+    }
+}
+
+public
 struct vec3 rayPoint(const struct Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
@@ -875,7 +904,8 @@ struct HitRecord rayHitWorld(const struct Ray ray, const float tMin, const float
 }
 
 public
-struct ScatterResult materialScatterLambertian(const struct HitRecord record, const struct LambertianMaterial material) {
+struct ScatterResult materialScatterLambertian(const struct HitRecord record,
+        const struct LambertianMaterial material) {
     const struct vec3 tangent = addv3(record.point, record.normal);
     const struct vec3 direction = addv3(tangent, randomInUnitSphere());
     const struct ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
@@ -883,7 +913,8 @@ struct ScatterResult materialScatterLambertian(const struct HitRecord record, co
 }
 
 public
-struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct HitRecord record, const struct MetallicMaterial material) {
+struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct HitRecord record,
+        const struct MetallicMaterial material) {
     const struct vec3 reflected = reflectv3(ray.direction, record.normal);
     if (dotv3(reflected, record.normal) > 0) {
         const struct ScatterResult result = { material.albedo, { record.point, reflected } };
@@ -894,12 +925,37 @@ struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct H
 }
 
 public
+struct ScatterResult materialScatterDielectric(const struct Ray ray, const struct HitRecord record,
+        const struct DielectricMaterial material) {
+
+    struct vec3 outwardNormal;
+    float niOverNt;
+
+    const struct vec3 reflected = reflectv3(ray.direction, record.normal);
+    if (dotv3(ray.direction, record.normal) > 0) {
+        outwardNormal = negv3(record.normal);
+        niOverNt = material.reflectiveIndex;
+    } else {
+        outwardNormal = record.normal;
+        niOverNt = 1.0f / material.reflectiveIndex;
+    }
+
+    const struct RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
+    const struct ScatterResult scatterResult = {
+            { 1.0f, 1.0f, 1.0f }, { record.point, refractResult.isRefracted ? refractResult.refracted : reflected }
+    };
+    return scatterResult;
+}
+
+public
 struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecord record) {
     switch (record.materialType) {
         case MATERIAL_LAMBERTIAN:
             return materialScatterLambertian(record, uLambertianMaterials[record.materialIndex]);
         case MATERIAL_METALIIC:
             return materialScatterMetalic(ray, record, uMetallicMaterials[record.materialIndex]);
+        case MATERIAL_DIELECTRIC:
+            return materialScatterDielectric(ray, record, uDielectricMaterials[record.materialIndex]);
         default:
             return NO_SCATTER;
     }

@@ -37,10 +37,12 @@ private fun renderAssembly(operations: List<COperation>): String {
             "import com.gzozulin.minigl.scene.Hitable\n" +
             "import com.gzozulin.minigl.scene.HitRecord\n" +
             "import com.gzozulin.minigl.scene.ScatterResult\n" +
+            "import com.gzozulin.minigl.scene.RefractResult\n" +
             "import com.gzozulin.minigl.scene.Sphere\n" +
             "import com.gzozulin.minigl.scene.PhongMaterial\n\n" +
             "import com.gzozulin.minigl.scene.LambertianMaterial\n\n" +
-            "import com.gzozulin.minigl.scene.MetallicMaterial\n\n"
+            "import com.gzozulin.minigl.scene.MetallicMaterial\n\n" +
+            "import com.gzozulin.minigl.scene.DielectricMaterial\n\n"
     operations.forEach { operation ->
         if (operation.access == COperationAccess.PUBLIC) {
             result += renderDefinition(operation) + "\n"
@@ -77,27 +79,29 @@ private fun renderRoots(params: List<CParam>): String {
 }
 
 private fun convertType(ctype: String) = when (ctype) {
-    "bool"          -> "Boolean"
-    "int"           -> "Int"
-    "float"         -> "Float"
-    "double"        -> "Double"
-    "vec2"          -> "vec2"
-    "ivec2"         -> "vec2i"
-    "vec3"          -> "vec3"
-    "vec4"          -> "vec4"
-    "mat4"          -> "mat4"
-    "mat3"          -> "mat3"
-    "Light"         -> "Light"
-    "Ray"           -> "ray"
-    "Sphere"        -> "Sphere"
-    "Hitable"     -> "Hitable"
-    "HitRecord"     -> "HitRecord"
-    "HitableList"   -> "HitableList"
-    "PhongMaterial" -> "PhongMaterial"
-    "LambertianMaterial" -> "LambertianMaterial"
-    "MetallicMaterial" -> "MetallicMaterial"
-    "ScatterResult" -> "ScatterResult"
-    else            -> error("Unknown type! $ctype")
+    "bool"                  -> "Boolean"
+    "int"                   -> "Int"
+    "float"                 -> "Float"
+    "double"                -> "Double"
+    "vec2"                  -> "vec2"
+    "ivec2"                 -> "vec2i"
+    "vec3"                  -> "vec3"
+    "vec4"                  -> "vec4"
+    "mat4"                  -> "mat4"
+    "mat3"                  -> "mat3"
+    "Light"                 -> "Light"
+    "Ray"                   -> "ray"
+    "Sphere"                -> "Sphere"
+    "Hitable"               -> "Hitable"
+    "HitRecord"             -> "HitRecord"
+    "HitableList"           -> "HitableList"
+    "PhongMaterial"         -> "PhongMaterial"
+    "LambertianMaterial"    -> "LambertianMaterial"
+    "MetallicMaterial"      -> "MetallicMaterial"
+    "DielectricMaterial"    -> "DielectricMaterial"
+    "ScatterResult"         -> "ScatterResult"
+    "RefractResult"         -> "RefractResult"
+    else                    -> error("Unknown type! $ctype")
 }
 
 private fun visitCFile(cfile: CFile): List<COperation> {

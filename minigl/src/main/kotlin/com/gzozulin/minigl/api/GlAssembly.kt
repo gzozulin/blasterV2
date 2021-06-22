@@ -10,11 +10,12 @@ const val GL_FRAG_COORD = "gl_FragCoord.xy"
 
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
-const val MAX_LIGHTS = 128
-const val MAX_HITABLES = 128
-const val MAX_SPHERES = 128
-const val MAX_LAMBERTIANS = 16
-const val MAX_METALLICS = 16
+const val MAX_LIGHTS        = 128
+const val MAX_HITABLES      = 128
+const val MAX_SPHERES       = 128
+const val MAX_LAMBERTIANS   = 16
+const val MAX_METALLICS     = 16
+const val MAX_DIELECTRICS   = 16
 
 private const val GENERAL_DECL = """
     #define FLT_MAX 3.402823466e+38
@@ -116,6 +117,15 @@ private const val SCATTER_RESULT_DECL = """
     const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
 """
 
+private const val REFRACT_RESULT_DECL = """
+    struct RefractResult {
+        bool isRefracted;
+        vec3 refracted;
+    };
+
+    const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
+"""
+
 private const val HITABLE_DECL = """
     struct Hitable {
         int type;
@@ -130,6 +140,10 @@ private const val MATERIALS_DECL = """
 
     struct MetallicMaterial {
         vec3 albedo;
+    };
+    
+    struct DielectricMaterial {
+        float reflectiveIndex;
     };
 """
 
@@ -154,8 +168,10 @@ private const val SPHERES = """
 private const val MATERIALS = """
     #define MATERIAL_LAMBERTIAN     0
     #define MATERIAL_METALIIC       1
-    uniform LambertianMaterial uLambertianMaterials[$MAX_LAMBERTIANS];
-    uniform MetallicMaterial uMetallicMaterials[$MAX_METALLICS];
+    #define MATERIAL_DIELECTRIC     2
+    uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
+    uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
+    uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
 """
 
 private const val EXPR_DISCARD =
@@ -226,7 +242,8 @@ private const val EXPR_GET_NORMAL = """
 
 private const val PRIVATE_DEFINITIONS =
     "$EXPR_PI\n$GENERAL_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$SPHERE_DECL\n" +
-    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL\n$HITABLE_DECL\n$MATERIALS_DECL\n$LIGHTS\n$HITABLES\n$SPHERES\n$MATERIALS\n"
+    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$HITABLE_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
+    "$HITABLES\n$SPHERES\n$MATERIALS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_DTOF + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
