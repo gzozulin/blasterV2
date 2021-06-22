@@ -35,6 +35,7 @@
 #define HITABLE_HITABLE         0
 #define HITABLE_SPHERE          1
 
+// Corresponds to MaterialType
 #define MATERIAL_LAMBERTIAN     0
 #define MATERIAL_METAL          1
 
@@ -107,18 +108,27 @@ struct HitRecord {
     int materialIndex;
 };
 
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+
 struct Hitable {
     int type;
     int index;
 };
 
-struct MaterialLambertian {
+struct LambertianMaterial {
     struct vec3 albedo;
 };
 
-struct MaterialMetal {
+struct MetallicMaterial {
     float roughness;
 };
+
+struct ScatterResult {
+    struct vec3 attenuation;
+    struct Ray scattered;
+};
+
+const struct ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
 
 // ------------------- LIGHTS -------------------
 
@@ -132,8 +142,6 @@ const int uLightsDirCnt = 0;
 const struct Light uLights[MAX_LIGHTS] = { LIGHT_X64, LIGHT_X64 };
 
 // ------------------- HITABLES -------------------
-
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
 
 #define HITABLE_X1 { 1, 0, 0, 0 }
 #define HITABLE_X4 HITABLE_X1, HITABLE_X1, HITABLE_X1, HITABLE_X1
@@ -152,8 +160,8 @@ const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
 
 // ------------------- MATERIALS -------------------
 
-const struct MaterialLambertian uLambertianMaterials[MAX_LAMBERTIANS];
-const struct MaterialMetal uMetalMaterials[MAX_METALS];
+const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS];
+const struct MetallicMaterial uMetallicMaterials[MAX_METALS];
 
 // ------------------- CASTS -------------------
 
@@ -809,8 +817,11 @@ struct Ray rayFromTexCoord(const float u, const float v) {
 }
 
 public
-struct Ray rayScatter() {
-    return rayFromTexCoord(0, 0);
+struct ScatterResult rayScatterLambertian(const struct HitRecord record, const struct LambertianMaterial material) {
+    const struct vec3 tangent = addv3(record.point, record.normal);
+    const struct vec3 direction = addv3(tangent, randomInUnitSphere());
+    const struct ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
+    return result;
 }
 
 public
@@ -866,20 +877,24 @@ struct HitRecord rayHitWorld(const struct Ray ray, const float tMin, const float
 public
 struct vec3 sampleColor(const float u, const float v) {
     struct Ray ray = rayFromTexCoord(u, v);
-    float fraction = 1.0f;
+    struct vec3 fraction = ftov3(1.0f);
     for (int i = 0; i < BOUNCES; i++) {
         const struct HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
         if (record.t < 0) {
             break;
         } else {
-            fraction *= 0.5f;
-            const struct vec3 tangent = addv3(record.point, record.normal);
-            const struct vec3 direction = addv3(tangent, randomInUnitSphere());
-            ray.origin = record.point;
-            ray.direction = subv3(direction, record.point);
+            switch (record.materialType) {
+                case MATERIAL_LAMBERTIAN: {
+                    const struct ScatterResult scatterResult =
+                            rayScatterLambertian(record, uLambertianMaterials[record.materialIndex]);
+                    fraction = mulv3(fraction, scatterResult.attenuation);
+                    ray = scatterResult.scattered;
+                    break;
+                }
+            }
         }
     }
-    return mulv3f(background(ray), fraction);
+    return mulv3(background(ray), fraction);
 }
 
 public

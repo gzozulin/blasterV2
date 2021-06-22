@@ -21,6 +21,8 @@
       <w>hitables</w>
       <w>identificatior</w>
       <w>ivec</w>
+      <w>lambertian</w>
+      <w>lambertians</w>
       <w>mmodel</w>
       <w>mproj</w>
       <w>multipage</w>

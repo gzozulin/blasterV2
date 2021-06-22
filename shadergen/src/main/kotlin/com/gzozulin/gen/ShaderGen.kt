@@ -35,8 +35,10 @@ private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
             "import com.gzozulin.minigl.scene.HitRecord\n" +
+            "import com.gzozulin.minigl.scene.ScatterResult\n" +
             "import com.gzozulin.minigl.scene.Sphere\n" +
-            "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
+            "import com.gzozulin.minigl.scene.PhongMaterial\n\n" +
+            "import com.gzozulin.minigl.scene.LambertianMaterial\n\n"
     operations.forEach { operation ->
         if (operation.access == COperationAccess.PUBLIC) {
             result += renderDefinition(operation) + "\n"
@@ -89,6 +91,8 @@ private fun convertType(ctype: String) = when (ctype) {
     "HitRecord"     -> "HitRecord"
     "HitableList"   -> "HitableList"
     "PhongMaterial" -> "PhongMaterial"
+    "LambertianMaterial" -> "LambertianMaterial"
+    "ScatterResult" -> "ScatterResult"
     else            -> error("Unknown type! $ctype")
 }
 

@@ -3,7 +3,13 @@ package com.gzozulin.minigl.scene
 import com.gzozulin.minigl.api.vec3
 
 enum class HitableType { HITABLE, SPHERE }
+enum class MaterialType { LAMBERTIAN, METAL }
 
-data class HitRecord(val t: Float, val point: vec3, val normal: vec3)
-data class Hitable(val type: Int, val index: Int)
-data class Sphere(val center: vec3, val radius: Float)
+object HitRecord // placeholder
+object Hitable // placeholder
+object ScatterResult // placeholder
+
+interface RtMaterial
+data class LambertianMaterial(val albedo: vec3) : RtMaterial
+
+data class Sphere(val center: vec3, val radius: Float, val material: RtMaterial)
