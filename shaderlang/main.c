@@ -83,6 +83,8 @@ struct RtCamera {
     struct vec3 lowerLeft;
     struct vec3 horizontal;
     struct vec3 vertical;
+    struct vec3 w, u, v;
+    float lensRadius;
 };
 
 struct Light {
@@ -588,7 +590,7 @@ float lenv3(const struct vec3 v) {
 }
 
 public
-float sqlenv3(const struct vec3 v) {
+float lensqv3(const struct vec3 v) {
     return (v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
@@ -648,17 +650,26 @@ float randf() {
 
 public
 struct vec3 randomInUnitSphere() {
-    float d, x, y, z;
-    for (int i = 0; i < 20; i++) {
-        x = randf() * 2.0f - 1.0f;
-        y = randf() * 2.0f - 1.0f;
-        z = randf() * 2.0f - 1.0f;
-        d = x*x + y*y + z*z;
-        if (d >= 1.0f) {
-            return v3(x, y, z);
+    struct vec3 result;
+    for (int i = 0; i < 10; i++) {
+        result = v3(randf() * 2.0f - 1.0f, randf() * 2.0f - 1.0f, randf() * 2.0f - 1.0f);
+        if (lensqv3(result) >= 1.0f) {
+            return result;
         }
     }
-    return normv3(v3(x, y, z));
+    return normv3(result);
+}
+
+public
+struct vec3 randomInUnitDisk() {
+    struct vec3 result;
+    for (int i = 0; i < 10; i++) {
+        result = subv3(mulv3f(v3(randf(), randf(), 0.0f), 2.0f), v3(1.0f, 1.0f, 0.0f));
+        if (dotv3(result, result) >= 1.0f) {
+            return result;
+        }
+    }
+    return normv3(result); // wrong, but should not happen
 }
 
 // ------------------- TILE ---------------
@@ -802,7 +813,6 @@ struct vec3 fresnelSchlick(const float cosTheta, const struct vec3 F0) {
 public
 struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
                        const struct vec3 albedo, const struct vec3 N, const float metallic, const float roughness, const float ao) {
-
     const struct vec3 alb = powv3(albedo, ftov3(2.2f));
     const struct vec3 V   = normv3(subv3(eye, worldPos));
 
@@ -846,7 +856,8 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 
 public
 struct RtCamera cameraLookAt(const struct vec3 eye, const struct vec3 center, const struct vec3 up,
-        const float vfoy, const float aspect) {
+        const float vfoy, const float aspect, const float aperture, const float focusDist) {
+    const float lensRadius = aperture / 2.0f;
 
     const float halfHeight = tan(vfoy/2.0f);
     const float halfWidth = aspect * halfHeight;
@@ -855,21 +866,34 @@ struct RtCamera cameraLookAt(const struct vec3 eye, const struct vec3 center, co
     const struct vec3 u = normv3(crossv3(up, w));
     const struct vec3 v = crossv3(w, u);
 
-    const struct vec3 hwu = mulv3f(u, halfWidth);
-    const struct vec3 hhv = mulv3f(v, halfHeight);
-    const struct vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), w);
-    const struct vec3 horizontal = mulv3f(u, halfWidth * 2.0f);
-    const struct vec3 vertical  = mulv3f(v, halfHeight * 2.0f);
+    const struct vec3 hwu = mulv3f(u, halfWidth * focusDist);
+    const struct vec3 hhv = mulv3f(v, halfHeight * focusDist);
+    const struct vec3 wf = mulv3f(w, focusDist);
+    const struct vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), wf);
 
-    const struct RtCamera result = { eye, lowerLeft, horizontal, vertical };
+    const struct vec3 horizontal = mulv3f(u, halfWidth * focusDist * 2.0f);
+    const struct vec3 vertical  = mulv3f(v, halfHeight * focusDist * 2.0f);
+
+    const struct RtCamera result = { eye, lowerLeft, horizontal, vertical, w, u, v, lensRadius};
     return result;
 }
 
 public
 struct Ray rayFromCamera(const struct RtCamera camera, const float u, const float v) {
-    const struct vec3 direction =
-            normv3(subv3(addv3(camera.lowerLeft,addv3(mulv3f(camera.horizontal, u), mulv3f(camera.vertical, v))), camera.origin));
-    const struct Ray result = { camera.origin, direction };
+    if (camera.lensRadius > 0.0f) {
+        // todo: remove the perf bottelneck
+    }
+
+    const struct vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
+    const struct vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
+
+    const struct vec3 newOrigin = addv3(camera.origin, offset);
+
+    const struct vec3 horisontal = mulv3f(camera.horizontal, u);
+    const struct vec3 vertical = mulv3f(camera.vertical, v);
+    const struct vec3 direction = normv3(subv3(subv3(addv3(camera.lowerLeft, addv3(horisontal, vertical)), camera.origin), offset));
+
+    const struct Ray result = { newOrigin, direction };
     return result;
 }
 
@@ -1033,13 +1057,14 @@ public
 struct vec4 fragmentColorRt(int sampleCnt, int rayBounces,
                             const struct vec3 eye, const struct vec3 center, const struct vec3 up,
                             const float fovy, const float aspect,
+                            const float aperture, const float focusDist,
                             const struct vec2 texCoord) {
 
     seedRandom(texCoord);
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
 
-    const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect);
+    const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
 
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {

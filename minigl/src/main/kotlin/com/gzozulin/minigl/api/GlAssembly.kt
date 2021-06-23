@@ -93,6 +93,8 @@ private const val CAMERA_DECL = """
         vec3 lowerLeft;
         vec3 horizontal;
         vec3 vertical;
+        vec3 w, u, v;
+        float lensRadius;
     };
 """
 

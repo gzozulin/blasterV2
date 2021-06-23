@@ -2,16 +2,15 @@ package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.*
-import org.lwjgl.glfw.GLFW
 
-private val window = GlWindow()
+private val window = GlWindow(isFullscreen = false)
 
-private val controller = ControllerFirstPerson(velocity = 0.1f)
+private val controller = ControllerFirstPerson(velocity = 0.1f, position = vec3(-1f, 0f, 3f))
 private val wasdInput = WasdInput(controller)
 private var mouseLook = false
 
-private val sampleCnt = consti(16)
-private val rayBounces = consti(4)
+private val sampleCnt = consti(2048)
+private val rayBounces = consti(8)
 
 private val eye = unifv3 { controller.position }
 private val center = unifv3 { vec3().set(controller.position).add(controller.direction) }
@@ -19,18 +18,25 @@ private val up = constv3(vec3().up())
 
 private val fovy = constf(radf(90.0f))
 private val aspect = constf(window.width.toFloat() / window.height.toFloat())
+private val aperture = constf(0f)
+private val focusDist = constf(3f)
 
 private val matrix = constm4(mat4().orthoBox())
-private val color = fragmentColorRt(sampleCnt, rayBounces, eye, center, up, fovy, aspect, namedTexCoordsV2())
+private val color = fragmentColorRt(
+    sampleCnt, rayBounces,
+    eye, center, up,
+    fovy, aspect, aperture, focusDist,
+    namedTexCoordsV2())
+
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
 
 private val hitables = listOf(
-    Sphere(vec3(0f, 0f, -1f), 0.5f, LambertianMaterial(col3(0.8f, 0.3f, 0.3f))),
-    Sphere(vec3(0f, -100.5f, -1f), 100f, LambertianMaterial(col3(0.8f, 0.8f, 0.0f))),
-    Sphere(vec3(1f, 0f, -1f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
-    Sphere(vec3(-1f, 0f, -1f), 0.5f, DielectricMaterial(1.5f)),
+    Sphere(vec3(0f, 0f, 0f), 0.5f, LambertianMaterial(col3(0.8f, 0.3f, 0.3f))),
+    Sphere(vec3(0f, -100.5f, 0f), 100f, LambertianMaterial(col3(0.8f, 0.8f, 0.0f))),
+    Sphere(vec3(1f, 0f, 0f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
+    Sphere(vec3(-1f, 0f, 0f), 0.5f, DielectricMaterial(1.5f)),
 )
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
@@ -141,11 +147,10 @@ fun main() {
                         window.show {
                             controller.updatePosition()
                             controller.updateDirection()
-                            //if (buffers < 2) {
+                            if (buffers < 2) {
                                 glShadingFlatInstance(shadingFlat, rect)
-                                //println("Buffer: $buffers")
-                                //buffers++
-                            //}
+                                buffers++
+                            }
                         }
                     }
                 }
