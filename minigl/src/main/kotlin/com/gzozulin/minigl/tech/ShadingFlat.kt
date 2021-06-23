@@ -7,6 +7,7 @@ import com.gzozulin.minigl.api.GlProgram
 import com.gzozulin.minigl.api.GlShader
 import com.gzozulin.minigl.api.constv4
 import com.gzozulin.minigl.api.unifm4
+import com.gzozulin.minigl.assets.WavefrontObjGroup
 import com.gzozulin.minigl.assets.libWavefrontCreate
 import com.gzozulin.minigl.scene.Camera
 import com.gzozulin.minigl.scene.ControllerFirstPerson
@@ -76,30 +77,24 @@ private val camera = Camera(window)
 private val controller = ControllerFirstPerson(position = vec3().front())
 private val wasdInput = WasdInput(controller)
 
-private val group = libWavefrontCreate("models/pcjr/pcjr")
-private val obj = group.objects.first()
+private val mesh = glMeshCreateRect()
 
-private val uniformSampler = unifs(obj.phong.mapDiffuse!!)
 private val matrix = unifm4 { camera.calculateFullM() }
-private val color = sampler(uniformSampler)
+private val color = constv4(vec4(col3().red(), 1f))
 private val shadingFlat = ShadingFlat(matrix, color)
 
 private fun useScene(callback: Callback) {
     glShadingFlatUse(shadingFlat) {
-        glMeshUse(obj.mesh) {
-            glTextureUse(obj.phong.mapDiffuse!!) {
-                callback.invoke()
-            }
+        glMeshUse(mesh) {
+           callback.invoke()
         }
     }
 }
 
 private fun drawScene() {
     glDepthTest {
-        glTextureBind(obj.phong.mapDiffuse!!) {
-            glShadingFlatDraw(shadingFlat) {
-                glShadingFlatInstance(shadingFlat, obj.mesh)
-            }
+        glShadingFlatDraw(shadingFlat) {
+            glShadingFlatInstance(shadingFlat, mesh)
         }
     }
 }

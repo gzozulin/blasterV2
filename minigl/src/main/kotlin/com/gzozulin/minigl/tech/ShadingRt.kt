@@ -4,7 +4,7 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 
-private const val FRAMES_TO_CAPTURE = 10
+private const val FRAMES_TO_CAPTURE = 5
 
 private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
@@ -18,7 +18,7 @@ private val controller = ControllerScenic(
     ),
     points = listOf(vec3()))
 
-private val sampleCnt = consti(2048)
+private val sampleCnt = consti(512)
 private val rayBounces = consti(4)
 
 private val eye = unifv3()
@@ -173,7 +173,7 @@ fun main() {
                                 } else {
                                     val stop = System.currentTimeMillis()
                                     glShadingRtDumpStats(start, stop)
-                                    glClear(col3().orange())
+                                    glClear(col3().green())
                                 }
                             }
                         }
