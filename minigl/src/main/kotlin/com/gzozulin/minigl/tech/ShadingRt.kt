@@ -9,8 +9,8 @@ private val controller = ControllerFirstPerson(velocity = 0.1f, position = vec3(
 private val wasdInput = WasdInput(controller)
 private var mouseLook = false
 
-private val sampleCnt = consti(2048)
-private val rayBounces = consti(8)
+private val sampleCnt = consti(32)
+private val rayBounces = consti(4)
 
 private val eye = unifv3 { controller.position }
 private val center = unifv3 { vec3().set(controller.position).add(controller.direction) }
@@ -149,7 +149,7 @@ fun main() {
                             controller.updateDirection()
                             if (buffers < 2) {
                                 glShadingFlatInstance(shadingFlat, rect)
-                                buffers++
+                                //buffers++
                             }
                         }
                     }

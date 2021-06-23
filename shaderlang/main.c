@@ -880,20 +880,23 @@ struct RtCamera cameraLookAt(const struct vec3 eye, const struct vec3 center, co
 
 public
 struct Ray rayFromCamera(const struct RtCamera camera, const float u, const float v) {
+    const struct vec3 horShift = mulv3f(camera.horizontal, u);
+    const struct vec3 verShift = mulv3f(camera.vertical, v);
+
+    struct vec3 origin;
+    struct vec3 direction;
+    
     if (camera.lensRadius > 0.0f) {
-        // todo: remove the perf bottelneck
+        const struct vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
+        const struct vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
+        origin = addv3(camera.origin, offset);
+        direction = normv3(subv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin), offset));
+    } else {
+        origin = camera.origin;
+        direction = normv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin));
     }
 
-    const struct vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
-    const struct vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
-
-    const struct vec3 newOrigin = addv3(camera.origin, offset);
-
-    const struct vec3 horisontal = mulv3f(camera.horizontal, u);
-    const struct vec3 vertical = mulv3f(camera.vertical, v);
-    const struct vec3 direction = normv3(subv3(subv3(addv3(camera.lowerLeft, addv3(horisontal, vertical)), camera.origin), offset));
-
-    const struct Ray result = { newOrigin, direction };
+    const struct Ray result = { origin, direction };
     return result;
 }
 
