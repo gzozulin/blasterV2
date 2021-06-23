@@ -1,4 +1,5 @@
 package com.gzozulin.rt
+/*
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.Sphere
@@ -30,4 +31,4 @@ fun main() {
             }
         }
     }
-}
+}*/

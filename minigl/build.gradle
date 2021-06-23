@@ -18,8 +18,7 @@ repositories {
 }
 
 application {
-    mainClass.set(project.hasProperty("mainClass") ?
-            (String) project.property("mainClass") : "com.gzozulin.minigl.techniques.PhysicsKt")
+    mainClass.set("com.gzozulin.minigl.tech.ShadingRtKt")
 }
 
 project.ext.lwjglVersion = "3.2.3"
