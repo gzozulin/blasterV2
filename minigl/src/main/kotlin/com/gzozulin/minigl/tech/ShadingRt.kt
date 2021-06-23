@@ -1,19 +1,28 @@
 package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 
-private val window = GlWindow(isFullscreen = false)
+private const val FRAMES_TO_CAPTURE = 10
 
-private val controller = ControllerFirstPerson(velocity = 0.1f, position = vec3(-1f, 0f, 3f))
-private val wasdInput = WasdInput(controller)
-private var mouseLook = false
+private val window = GlWindow(isFullscreen = true)
+private val capturer = Capturer(window)
 
-private val sampleCnt = consti(32)
+private val controller = ControllerScenic(
+    positions = listOf(
+        vec3(-3f, 1f, -3f),
+        vec3( 3f, 1f, -3f),
+        vec3( 3f, 1f,  3f),
+        vec3(-3f, 1f,  3f),
+    ),
+    points = listOf(vec3()))
+
+private val sampleCnt = consti(2048)
 private val rayBounces = consti(4)
 
-private val eye = unifv3 { controller.position }
-private val center = unifv3 { vec3().set(controller.position).add(controller.direction) }
+private val eye = unifv3()
+private val center = unifv3()
 private val up = constv3(vec3().up())
 
 private val fovy = constf(radf(90.0f))
@@ -37,6 +46,14 @@ private val hitables = listOf(
     Sphere(vec3(0f, -100.5f, 0f), 100f, LambertianMaterial(col3(0.8f, 0.8f, 0.0f))),
     Sphere(vec3(1f, 0f, 0f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
     Sphere(vec3(-1f, 0f, 0f), 0.5f, DielectricMaterial(1.5f)),
+
+    Sphere(vec3(0f, 0f, 1f), 0.5f, LambertianMaterial(col3(0.8f, 0.3f, 0.3f))),
+    Sphere(vec3(1f, 0f, 1f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
+    Sphere(vec3(-1f, 0f, 1f), 0.5f, DielectricMaterial(1.5f)),
+
+    Sphere(vec3(0f, 0f, 2f), 0.5f, LambertianMaterial(col3(0.8f, 0.3f, 0.3f))),
+    Sphere(vec3(1f, 0f, 2f), 0.5f, MetallicMaterial(col3(0.8f, 0.6f, 0.2f))),
+    Sphere(vec3(-1f, 0f, 2f), 0.5f, DielectricMaterial(1.5f)),
 )
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
@@ -123,33 +140,41 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
     }
 }
 
+private var statsDumped = false
+fun glShadingRtDumpStats(start: Long, stop: Long) {
+    if (!statsDumped) {
+        statsDumped = true
+        val millisTotal = stop - start
+        val millisPerFrame = millisTotal / FRAMES_TO_CAPTURE
+        println(String.format("Job took: %.2f sec, ~approx. per frame: %.2f sec",
+            millisTotal.toFloat() / 1000f, millisPerFrame.toFloat() / 1000f))
+    }
+}
+
 fun main() {
     window.create {
-        window.keyCallback = { key, pressed ->
-            wasdInput.onKeyPressed(key, pressed)
-        }
-        window.buttonCallback = { button, pressed ->
-            if (button == MouseButton.LEFT) {
-                mouseLook = pressed
-            }
-        }
-        window.deltaCallback = { delta ->
-            if (mouseLook) {
-                wasdInput.onCursorDelta(delta)
-            }
-        }
         glViewportBindPrev {
             glShadingFlatUse(shadingFlat) {
                 glMeshUse(rect) {
                     glShadingFlatDraw(shadingFlat) {
                         glShadingRtSubmitHitables(shadingFlat.program, hitables)
-                        var buffers = 0
-                        window.show {
-                            controller.updatePosition()
-                            controller.updateDirection()
-                            if (buffers < 2) {
-                                glShadingFlatInstance(shadingFlat, rect)
-                                //buffers++
+                        var frame = 0
+                        capturer.capture {
+                            val start = System.currentTimeMillis()
+                            window.show {
+                                controller.apply { position, direction ->
+                                    eye.value = position
+                                    center.value = vec3().set(position).add(direction)
+                                }
+                                if (frame < FRAMES_TO_CAPTURE) {
+                                    glShadingFlatInstance(shadingFlat, rect)
+                                    capturer.addFrame()
+                                    frame++
+                                } else {
+                                    val stop = System.currentTimeMillis()
+                                    glShadingRtDumpStats(start, stop)
+                                    glClear(col3().orange())
+                                }
                             }
                         }
                     }

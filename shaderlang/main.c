@@ -885,7 +885,7 @@ struct Ray rayFromCamera(const struct RtCamera camera, const float u, const floa
 
     struct vec3 origin;
     struct vec3 direction;
-    
+
     if (camera.lensRadius > 0.0f) {
         const struct vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
         const struct vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));

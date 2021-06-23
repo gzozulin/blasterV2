@@ -27,7 +27,7 @@ x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (
 x 2021-05-04 2021-04-28 Logo scene +code +assets @complex
 2021-04-29 Better tripod +video @simple
 2021-04-29 Better lighting +video @complex
-2021-04-29 Better camera +video @complex
+x 2021-06-22 2021-04-29 Better camera +video @complex
 x 2021-05-26 (A) 2021-04-29 Better teleprompter app +video @simple
 x 2021-05-22 2021-04-29 Screen capture for any scene +code @simple
 2021-04-29 Learn about H264 codec +code +video @complex
@@ -78,3 +78,4 @@ x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
 (A) 2021-06-20 Like and subscribe frame +video @simple
 2021-06-21 Presentation remote +video @simple
 (A) 2021-06-22 Do not flex your back on video +video @simple
+2021-06-22 Tablet for diagrams +video @complex
