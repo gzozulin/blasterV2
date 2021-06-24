@@ -2,7 +2,7 @@ package com.gzozulin.minigl.api
 
 import java.util.concurrent.atomic.AtomicInteger
 
-const val VERSION = "#version 460\n"
+const val VERSION = "#version 450\n"
 const val PRECISION_HIGH = "precision highp float;\n"
 
 const val V_TEX_COORD = "vTexCoord"
