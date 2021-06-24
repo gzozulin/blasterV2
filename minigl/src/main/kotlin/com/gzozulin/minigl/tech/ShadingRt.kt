@@ -9,16 +9,16 @@ private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
-        vec3(-6f, 1f, -6f),
-        vec3( 6f, 1f, -6f),
-        vec3( 6f, 1f,  6f),
-        vec3(-6f, 1f,  6f),
+        vec3(-5f, 0.7f, -5f),
+        vec3( 5f, 0.7f, -5f),
+        vec3( 5f, 0.7f,  5f),
+        vec3(-5f, 0.7f,  5f),
     ),
     points = listOf(vec3()))
 
-private const val FRAMES_TO_CAPTURE = 3
-private val sampleCnt = consti(32)
-private val rayBounces = consti(4)
+private const val FRAMES_TO_CAPTURE = 1200
+private val sampleCnt = consti(128)
+private val rayBounces = consti(3)
 
 private val eye = unifv3()
 private val center = unifv3()
@@ -40,23 +40,25 @@ private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
 
-private val lambertians = (0 until 14).map { LambertianMaterial(vec3().rand()) }.toList()
-private val metallics = (0 until 15).map { MetallicMaterial(vec3().rand()) }.toList()
+private val lambertians = (0 until 14).map { LambertianMaterial(vec3().rand())  }.toList()
+private val metallics =   (0 until 15).map { MetallicMaterial(vec3().rand())    }.toList()
 private val dielectrics = (0 until 15).map { DielectricMaterial(randf(1f, 10f)) }.toList()
 
-private fun sphereRandom() = Sphere(vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f, when(randi(3)) {
-    0 -> lambertians.random()
-    1 -> metallics.random()
-    2 -> dielectrics.random()
-    else -> error("wtf?!")
-})
+private fun sphereRandom() = Sphere(
+    vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f,
+    when(randi(3)) {
+        0 -> lambertians.random()
+        1 -> metallics.random()
+        2 -> dielectrics.random()
+        else -> error("wtf?!")
+    })
 
 private val hitables = listOf(
     Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(col3(0.5f))),
     Sphere(vec3(0f, 1f, 0f), 1f, DielectricMaterial(1.5f)),
     Sphere(vec3(-4f, 1f, 0f), 1f, LambertianMaterial(vec3(0.4f, 0.2f, 0.1f))),
     Sphere(vec3(4f, 1f, 0f), 1f, MetallicMaterial(vec3(0.7f, 0.6f, 0.5f))),
-    *(1..100).map { sphereRandom() }.toTypedArray()
+    *(1..80).map { sphereRandom() }.toTypedArray()
 )
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
@@ -149,8 +151,8 @@ fun glShadingRtDumpStats(start: Long, stop: Long) {
         statsDumped = true
         val millisTotal = stop - start
         val millisPerFrame = millisTotal / FRAMES_TO_CAPTURE
-        println(String.format("Job took: %.2f sec, ~approx. per frame: %.2f sec, 10 sec video will take: %.2f sec",
-            millisTotal.toFloat() / 1000f, millisPerFrame.toFloat() / 1000f, 10f * 60f * millisPerFrame.toFloat() / 1000f))
+        println(String.format("Job took: %.2f sec, ~approx. per frame: %.2f sec, 10 sec video will take: %.2f min",
+            millisTotal.toFloat() / 1000f, millisPerFrame.toFloat() / 1000f, 10f * 60f * millisPerFrame.toFloat() / 1000f /60f))
     }
 }
 
