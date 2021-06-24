@@ -497,6 +497,23 @@ bool eqv4(const struct vec4 left, const struct vec4 right) {
 // ------------------- MATH -------------------
 
 public
+float qsqrt(float number) {
+    long i;
+    float x2, y;
+    const float threehalfs = 1.5F;
+
+    x2 = number * 0.5F;
+    y  = number;
+    i  = * ( long * ) &y;                       // evil floating point bit level hacking
+    i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
+    y  = * ( float * ) &i;
+    y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+    return y;
+}
+
+public
 struct vec3 negv3(const struct vec3 v) {
     return v3(-v.x, -v.y, -v.z);
 }
@@ -1062,17 +1079,20 @@ struct vec4 fragmentColorRt(int sampleCnt, int rayBounces,
                             const float fovy, const float aspect,
                             const float aperture, const float focusDist,
                             const struct vec2 texCoord) {
-
     seedRandom(texCoord);
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
+    const float divSCnt = 1.0f / itof(sampleCnt);
 
     const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
 
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
-        const float sampleU = texCoord.x - DU + 2 * DU * randf();
-        const float sampleV = texCoord.y - DV + 2 * DV * randf();
+        const float d = itof(i) * divSCnt;
+        const float du = DU * d;
+        const float dv = DV * d;
+        const float sampleU = texCoord.x + du;
+        const float sampleV = texCoord.y + dv;
         result = addv3(result, sampleColor(rayBounces, camera, sampleU, sampleV));
     }
 

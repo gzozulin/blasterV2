@@ -36,7 +36,6 @@ private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollectio
     val lambertians = mutableListOf<LambertianMaterial>()
     val metallics = mutableListOf<MetallicMaterial>()
     val dielectrics = mutableListOf<DielectricMaterial>()
-
     hitables.forEach { hitable ->
         when (hitable) {
             is Sphere -> {
@@ -74,7 +73,18 @@ private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollectio
 internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) {
     check(hitables.size <= MAX_HITABLES) { "More hitables than defined in shader!" }
     glProgramCheckBound(program)
+
     val materialsCollection = glShadingRtCollectMaterials(hitables)
+    materialsCollection.lambertians.forEachIndexed { index, lambertian ->
+        glProgramArrayUniform(program, "uLambertianMaterials[%d].albedo", index, lambertian.albedo)
+    }
+    materialsCollection.metallics.forEachIndexed { index, metallic ->
+        glProgramArrayUniform(program, "uMetallicMaterials[%d].albedo", index, metallic.albedo)
+    }
+    materialsCollection.dielectrics.forEachIndexed { index, metallic ->
+        glProgramArrayUniform(program, "uDielectricMaterials[%d].reflectiveIndex", index, metallic.reflectiveIdx)
+    }
+
     var spheresCnt = 0
     var hitablesCnt = 0
     hitables.forEach { hitable ->
@@ -94,15 +104,6 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
         }
     }
     glProgramUniform(program, "uHitablesCnt", hitablesCnt)
-    materialsCollection.lambertians.forEachIndexed { index, lambertian ->
-        glProgramArrayUniform(program, "uLambertianMaterials[%d].albedo", index, lambertian.albedo)
-    }
-    materialsCollection.metallics.forEachIndexed { index, metallic ->
-        glProgramArrayUniform(program, "uMetallicMaterials[%d].albedo", index, metallic.albedo)
-    }
-    materialsCollection.dielectrics.forEachIndexed { index, metallic ->
-        glProgramArrayUniform(program, "uDielectricMaterials[%d].reflectiveIndex", index, metallic.reflectiveIdx)
-    }
 }
 
 fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
