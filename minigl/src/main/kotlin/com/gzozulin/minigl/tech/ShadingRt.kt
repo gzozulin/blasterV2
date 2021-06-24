@@ -4,62 +4,21 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 
-private val window = GlWindow(isFullscreen = true)
-private val capturer = Capturer(window)
+data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
+                     val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
+                     val fovy: Expression<Float>, val aspect: Expression<Float>,
+                     val aperture: Expression<Float>, val focus: Expression<Float>) {
+    internal val rect = glMeshCreateRect()
 
-private val controller = ControllerScenic(
-    positions = listOf(
-        vec3(-5f, 0.7f, -5f),
-        vec3( 5f, 0.7f, -5f),
-        vec3( 5f, 0.7f,  5f),
-        vec3(-5f, 0.7f,  5f),
-    ),
-    points = listOf(vec3()))
+    private val matrix = constm4(mat4().orthoBox())
+    private val color = fragmentColorRt(
+        sampleCnt, rayBounces,
+        eye, center, up,
+        fovy, aspect, aperture, focus,
+        namedTexCoordsV2())
 
-private const val FRAMES_TO_CAPTURE = 1200
-private val sampleCnt = consti(128)
-private val rayBounces = consti(3)
-
-private val eye = unifv3()
-private val center = unifv3()
-private val up = constv3(vec3().up())
-
-private val fovy = constf(radf(90.0f))
-private val aspect = constf(window.width.toFloat() / window.height.toFloat())
-private val aperture = constf(0f)
-private val focusDist = constf(1f)
-
-private val matrix = constm4(mat4().orthoBox())
-private val color = fragmentColorRt(
-    sampleCnt, rayBounces,
-    eye, center, up,
-    fovy, aspect, aperture, focusDist,
-    namedTexCoordsV2())
-
-private val shadingFlat = ShadingFlat(matrix, color)
-
-private val rect = glMeshCreateRect()
-
-private val lambertians = (0 until 14).map { LambertianMaterial(vec3().rand())  }.toList()
-private val metallics =   (0 until 15).map { MetallicMaterial(vec3().rand())    }.toList()
-private val dielectrics = (0 until 15).map { DielectricMaterial(randf(1f, 10f)) }.toList()
-
-private fun sphereRandom() = Sphere(
-    vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f,
-    when(randi(3)) {
-        0 -> lambertians.random()
-        1 -> metallics.random()
-        2 -> dielectrics.random()
-        else -> error("wtf?!")
-    })
-
-private val hitables = listOf(
-    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(col3(0.5f))),
-    Sphere(vec3(0f, 1f, 0f), 1f, DielectricMaterial(1.5f)),
-    Sphere(vec3(-4f, 1f, 0f), 1f, LambertianMaterial(vec3(0.4f, 0.2f, 0.1f))),
-    Sphere(vec3(4f, 1f, 0f), 1f, MetallicMaterial(vec3(0.7f, 0.6f, 0.5f))),
-    *(1..80).map { sphereRandom() }.toTypedArray()
-)
+    internal val shadingFlat = ShadingFlat(matrix, color)
+}
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     is LambertianMaterial -> MaterialType.LAMBERTIAN.ordinal
@@ -77,6 +36,7 @@ private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollectio
     val lambertians = mutableListOf<LambertianMaterial>()
     val metallics = mutableListOf<MetallicMaterial>()
     val dielectrics = mutableListOf<DielectricMaterial>()
+
     hitables.forEach { hitable ->
         when (hitable) {
             is Sphere -> {
@@ -145,8 +105,75 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
     }
 }
 
+fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
+    glShadingFlatUse(shadingRt.shadingFlat) {
+        glMeshUse(shadingRt.rect) {
+            callback.invoke()
+        }
+    }
+}
+
+fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Any>, callback: Callback) {
+    glShadingFlatDraw(shadingRt.shadingFlat) {
+        glShadingRtSubmitHitables(shadingRt.shadingFlat.program, hitables)
+        callback.invoke()
+    }
+}
+
+fun glShadingRtInstance(shadingRt: ShadingRt) {
+    glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
+}
+
+private val window = GlWindow(isFullscreen = false)
+private val capturer = Capturer(window)
+
+private val controller = ControllerScenic(
+    positions = listOf(
+        vec3(-5f, 0.7f, -5f),
+        vec3( 5f, 0.7f, -5f),
+        vec3( 5f, 0.7f,  5f),
+        vec3(-5f, 0.7f,  5f),
+    ),
+    points = listOf(vec3()))
+
+private const val FRAMES_TO_CAPTURE = 3
+private val sampleCnt = consti(32)
+private val rayBounces = consti(3)
+
+private val eye = unifv3()
+private val center = unifv3()
+private val up = constv3(vec3().up())
+
+private val fovy = constf(radf(90.0f))
+private val aspect = constf(window.width.toFloat() / window.height.toFloat())
+private val aperture = constf(0f)
+private val focus = constf(1f)
+
+private val shadingRt = ShadingRt(sampleCnt, rayBounces, eye, center, up, fovy, aspect, aperture, focus)
+
+private val lambertians = (0 until 16).map { LambertianMaterial(vec3().rand())  }.toList()
+private val metallics =   (0 until 16).map { MetallicMaterial(vec3().rand())    }.toList()
+private val dielectrics = (0 until 16).map { DielectricMaterial(randf(1f, 10f)) }.toList()
+
+private fun sphereRandom() = Sphere(
+    vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f,
+    when(randi(3)) {
+        0 -> lambertians.random()
+        1 -> metallics.random()
+        2 -> dielectrics.random()
+        else -> error("wtf?!")
+    })
+
+private val hitables = listOf(
+    Sphere(vec3(0f, -1000f, 0f), 1000f, lambertians.random()),
+    Sphere(vec3(0f, 1f, 0f), 1f, dielectrics.random()),
+    Sphere(vec3(-4f, 1f, 0f), 1f, lambertians.random()),
+    Sphere(vec3(4f, 1f, 0f), 1f, dielectrics.random()),
+    *(1..80).map { sphereRandom() }.toTypedArray()
+)
+
 private var statsDumped = false
-fun glShadingRtDumpStats(start: Long, stop: Long) {
+private fun glShadingRtDumpStats(start: Long, stop: Long) {
     if (!statsDumped) {
         statsDumped = true
         val millisTotal = stop - start
@@ -158,29 +185,24 @@ fun glShadingRtDumpStats(start: Long, stop: Long) {
 
 fun main() {
     window.create {
-        glViewportBindPrev {
-            glShadingFlatUse(shadingFlat) {
-                glMeshUse(rect) {
-                    glShadingFlatDraw(shadingFlat) {
-                        glShadingRtSubmitHitables(shadingFlat.program, hitables)
-                        var frame = 0
-                        capturer.capture {
-                            val start = System.currentTimeMillis()
-                            window.show {
-                                controller.apply { position, direction ->
-                                    eye.value = position
-                                    center.value = vec3().set(position).add(direction)
-                                }
-                                if (frame < FRAMES_TO_CAPTURE) {
-                                    glShadingFlatInstance(shadingFlat, rect)
-                                    capturer.addFrame()
-                                    frame++
-                                } else {
-                                    val stop = System.currentTimeMillis()
-                                    glShadingRtDumpStats(start, stop)
-                                    glClear(col3().green())
-                                }
-                            }
+        glShadingRtUse(shadingRt) {
+            glShadingRtDraw(shadingRt, hitables) {
+                var frame = 0
+                capturer.capture {
+                    val start = System.currentTimeMillis()
+                    window.show {
+                        controller.apply { position, direction ->
+                            eye.value = position
+                            center.value = vec3().set(position).add(direction)
+                        }
+                        if (frame < FRAMES_TO_CAPTURE) {
+                            glShadingRtInstance(shadingRt)
+                            capturer.addFrame()
+                            frame++
+                        } else {
+                            val stop = System.currentTimeMillis()
+                            glShadingRtDumpStats(start, stop)
+                            glClear(col3().green())
                         }
                     }
                 }
