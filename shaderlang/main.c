@@ -164,7 +164,7 @@ const struct Light uLights[MAX_LIGHTS] = { LIGHT_X64, LIGHT_X64 };
 
 // ------------------- HITABLES -------------------
 
-#define HITABLE_X1 { 1, 0, 0, 0 }
+#define HITABLE_X1 { 1, 0 }
 #define HITABLE_X4 HITABLE_X1, HITABLE_X1, HITABLE_X1, HITABLE_X1
 #define HITABLE_X16 HITABLE_X4, HITABLE_X4, HITABLE_X4, HITABLE_X4
 #define HITABLE_X64 HITABLE_X16, HITABLE_X16, HITABLE_X16, HITABLE_X16
@@ -1081,6 +1081,41 @@ struct vec4 fragmentColorRt(int sampleCnt, int rayBounces,
     return v3tov4(result, 1.0f);
 }
 
+void raytracer() {
+    FILE *f = fopen("out.ppm", "w");
+    if (f == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+    fprintf(f, "P3\n%d %d\n255\n", WIDTH, HEIGHT);
+
+    const float all = WIDTH * HEIGHT;
+    int current = 0;
+
+    for (int v = 0; v < HEIGHT; v++) {
+        for (int u = 0; u < WIDTH; u++) {
+            const float s = (float) u / (float) WIDTH;
+            const float t = (float) v / (float) WIDTH;
+            const struct vec4 color = fragmentColorRt(
+                    16, 4, v3(0, 0, -8.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+
+            const int r = (int) (255.9f * color.x);
+            const int g = (int) (255.9f * color.y);
+            const int b = (int) (255.9f * color.z);
+            fprintf(f, "%d %d %d ", r, g, b);
+
+            static float prevReport = 0.0f;
+            float progress = (float) (current++) / all;
+            if (progress - prevReport > 0.01f) {
+                printf("progress: %.2f\n", progress);
+                prevReport = progress;
+            }
+        }
+        fprintf(f, "\n");
+    }
+    fclose(f);
+}
+
 // ------------------- LOGGING ---------------
 
 void printv3(const struct vec3 v) {
@@ -1120,6 +1155,7 @@ int main() {
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
     assert(eqv3(rayPoint(rayBack(), 10.0f), v3(0, 0, -10)));
+    raytracer();
     return 0;
 }
 
