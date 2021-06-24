@@ -137,7 +137,7 @@ private val controller = ControllerScenic(
     ),
     points = listOf(vec3()))
 
-private const val FRAMES_TO_CAPTURE = 3
+private const val FRAMES_TO_CAPTURE = 50
 private val sampleCnt = consti(32)
 private val rayBounces = consti(3)
 
@@ -152,7 +152,7 @@ private val focus = constf(1f)
 
 private val shadingRt = ShadingRt(sampleCnt, rayBounces, eye, center, up, fovy, aspect, aperture, focus)
 
-private val lambertians = (0 until 16).map { LambertianMaterial(vec3().rand())  }.toList()
+private val lambertians = (0 until 15).map { LambertianMaterial(vec3().rand())  }.toList()
 private val metallics =   (0 until 16).map { MetallicMaterial(vec3().rand())    }.toList()
 private val dielectrics = (0 until 16).map { DielectricMaterial(randf(1f, 10f)) }.toList()
 
@@ -166,10 +166,10 @@ private fun sphereRandom() = Sphere(
     })
 
 private val hitables = listOf(
-    Sphere(vec3(0f, -1000f, 0f), 1000f, lambertians.random()),
+    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(vec3().dkGrey())),
     Sphere(vec3(0f, 1f, 0f), 1f, dielectrics.random()),
     Sphere(vec3(-4f, 1f, 0f), 1f, lambertians.random()),
-    Sphere(vec3(4f, 1f, 0f), 1f, dielectrics.random()),
+    Sphere(vec3(4f, 1f, 0f), 1f, metallics.random()),
     *(1..80).map { sphereRandom() }.toTypedArray()
 )
 
