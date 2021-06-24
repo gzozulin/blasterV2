@@ -4,8 +4,6 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 
-private const val FRAMES_TO_CAPTURE = 3
-
 private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
@@ -18,6 +16,7 @@ private val controller = ControllerScenic(
     ),
     points = listOf(vec3()))
 
+private const val FRAMES_TO_CAPTURE = 3
 private val sampleCnt = consti(32)
 private val rayBounces = consti(4)
 
@@ -41,9 +40,9 @@ private val shadingFlat = ShadingFlat(matrix, color)
 
 private val rect = glMeshCreateRect()
 
-private val lambertians = (1..10).map { LambertianMaterial(vec3().rand()) }.toList()
-private val metallics = (1..10).map { MetallicMaterial(vec3().rand()) }.toList()
-private val dielectrics = (1..10).map { DielectricMaterial(randf(1f, 3f)) }.toList()
+private val lambertians = (0 until 14).map { LambertianMaterial(vec3().rand()) }.toList()
+private val metallics = (0 until 15).map { MetallicMaterial(vec3().rand()) }.toList()
+private val dielectrics = (0 until 15).map { DielectricMaterial(randf(1f, 10f)) }.toList()
 
 private fun sphereRandom() = Sphere(vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f, when(randi(3)) {
     0 -> lambertians.random()
