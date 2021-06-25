@@ -153,37 +153,30 @@ const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 // ------------------- LIGHTS -------------------
 
-#define LIGHT_X1 { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
-#define LIGHT_X4 LIGHT_X1, LIGHT_X1, LIGHT_X1, LIGHT_X1
-#define LIGHT_X16 LIGHT_X4, LIGHT_X4, LIGHT_X4, LIGHT_X4
-#define LIGHT_X64 LIGHT_X16, LIGHT_X16, LIGHT_X16, LIGHT_X16
-
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
-const struct Light uLights[MAX_LIGHTS] = { LIGHT_X64, LIGHT_X64 };
+const struct Light uLights[MAX_LIGHTS] =
+        { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f } };
 
 // ------------------- HITABLES -------------------
 
-#define HITABLE_X1 { 1, 0 }
-#define HITABLE_X4 HITABLE_X1, HITABLE_X1, HITABLE_X1, HITABLE_X1
-#define HITABLE_X16 HITABLE_X4, HITABLE_X4, HITABLE_X4, HITABLE_X4
-#define HITABLE_X64 HITABLE_X16, HITABLE_X16, HITABLE_X16, HITABLE_X16
-
-const int uHitablesCnt = 1;
-const struct Hitable uHitables[MAX_HITABLES] = { HITABLE_X64, HITABLE_X64 };
+const int uHitablesCnt = 4;
+const struct Hitable uHitables[MAX_HITABLES] =
+        { { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 } };
 
 // ------------------- SPHERES -------------------
 
-#define SPHERE_X1 { { 0, 0, -1 }, 3 }
-#define SPHERE_X4 SPHERE_X1, SPHERE_X1, SPHERE_X1, SPHERE_X1
-#define SPHERE_X16 SPHERE_X4, SPHERE_X4, SPHERE_X4, SPHERE_X4
-const struct Sphere uSpheres[MAX_SPHERES] = { SPHERE_X16 };
+const struct Sphere uSpheres[MAX_SPHERES] =
+        { { { 0, -1000, 0 }, 1000, 0, 0 }, { { 0, 1, 0 }, 1, 0, 1 }, { { -4, 1, 0 }, 1, 1, 0 }, { { 4, 1, 0 }, 1, 2, 0 } };
 
 // ------------------- MATERIALS -------------------
 
-const struct LambertianMaterial     uLambertianMaterials[MAX_LAMBERTIANS];
-const struct MetallicMaterial       uMetallicMaterials  [MAX_METALS];
-const struct DielectricMaterial     uDielectricMaterials[MAX_DIELECTRICS];
+const struct LambertianMaterial     uLambertianMaterials[MAX_LAMBERTIANS] =
+        { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
+const struct MetallicMaterial       uMetallicMaterials  [MAX_METALS] =
+        { { { 0, 1, 0 } } };
+const struct DielectricMaterial     uDielectricMaterials[MAX_DIELECTRICS] =
+        { { 2 } };
 
 // ------------------- CASTS -------------------
 
@@ -1100,7 +1093,7 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
             const struct vec4 color = fragmentColorRt(
-                    16, 4, v3(0, 0, -8.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+                    2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);
