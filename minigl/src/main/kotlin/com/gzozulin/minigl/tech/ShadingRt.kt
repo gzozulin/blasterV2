@@ -3,6 +3,7 @@ package com.gzozulin.minigl.tech
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
+import org.lwjgl.glfw.GLFW
 
 data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
@@ -127,8 +128,12 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
 }
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
+
+/*private var mouseLook = false
+private val controller = ControllerFirstPerson(position = vec3(2f))
+private val wasdInput = WasdInput(controller)*/
 
 private val controller = ControllerScenic(
     positions = listOf(
@@ -139,8 +144,8 @@ private val controller = ControllerScenic(
     ),
     points = listOf(vec3()))
 
-private const val FRAMES_TO_CAPTURE = 50
-private val sampleCnt = consti(32)
+private const val FRAMES_TO_CAPTURE = Int.MAX_VALUE
+private val sampleCnt = consti(2)
 private val rayBounces = consti(3)
 
 private val eye = unifv3()
@@ -190,6 +195,19 @@ private fun glShadingRtDumpStats(start: Long, stop: Long) {
 
 fun main() {
     window.create {
+        /*window.keyCallback = { key, pressed ->
+            wasdInput.onKeyPressed(key, pressed)
+        }
+        window.buttonCallback = { button, pressed ->
+            if (button == MouseButton.LEFT) {
+                mouseLook = pressed
+            }
+        }
+        window.deltaCallback = { delta ->
+            if (mouseLook) {
+                wasdInput.onCursorDelta(delta)
+            }
+        }*/
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0
