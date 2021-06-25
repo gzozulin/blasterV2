@@ -194,7 +194,7 @@ float dtof(const double d) {
     return (float) d;
 }
 
-// ------------------- CTORS -------------------
+// ------------------- VEC2 -------------------
 
 custom
 struct vec2 v2(const float x, const float y) {
@@ -211,10 +211,14 @@ struct vec2 v2zero() {
     return ftov2(0.0f);
 }
 
+// ------------------- IVEC2 -------------------
+
 custom
 struct ivec2 iv2(const int x, const int y) {
     return (struct ivec2) { x, y };
 }
+
+// ------------------- VEC3 -------------------
 
 custom
 struct vec3 v3(const float x, const float y, const float z) {
@@ -354,6 +358,8 @@ struct vec3 v3chartreuse() {
     return v3(0.5f, 1.0f, 0.0f);
 }
 
+// ------------------- VEC4 -------------------
+
 custom
 struct vec4 v4(const float x, const float y, const float z, const float w) {
     return (struct vec4) { x, y, z, w };
@@ -374,6 +380,8 @@ struct vec4 v4zero() {
     return ftov4(0.0f);
 }
 
+// ------------------- MAT4, RAY -------------------
+
 custom
 struct mat3 m3ident() {
     return (struct mat3) { 0.0f };
@@ -385,7 +393,7 @@ struct Ray rayBack() {
     return result;
 }
 
-// ------------------- GET ---------------
+// ------------------- GETRS ---------------
 
 public
 float getxv4(const struct vec4 v) {
@@ -427,7 +435,7 @@ float getav4(const struct vec4 v) {
     return v.w;
 }
 
-// ------------------- SET ---------------
+// ------------------- SETRS ---------------
 
 public
 struct vec4 setxv4(const struct vec4 v, const float f) {
@@ -597,8 +605,8 @@ struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) 
 }
 
 public
-struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
-    return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
+struct vec3 rayPoint(const struct Ray ray, const float t) {
+    return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
 public
@@ -606,6 +614,11 @@ float schlick(float cosine, float ri) {
     float r0 = (1 - ri) / (1 + ri);
     r0 = r0*r0;
     return r0 + (1 - r0) * pow((1 - cosine), 5);
+}
+
+public
+struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
+    return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
 }
 
 public
@@ -621,11 +634,6 @@ struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const f
     } else {
         return NO_REFRACT;
     }
-}
-
-public
-struct vec3 rayPoint(const struct Ray ray, const float t) {
-    return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
 // ------------------- RAND -------------------
