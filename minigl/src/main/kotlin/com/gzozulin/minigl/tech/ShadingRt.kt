@@ -20,17 +20,17 @@ data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<
     internal val shadingFlat = ShadingFlat(matrix, color)
 }
 
+private data class MaterialsCollection(val lambertians: List<LambertianMaterial>,
+                                       val metallics: List<MetallicMaterial>,
+                                       val dielectrics: List<DielectricMaterial>,
+                                       val lookup: Map<RtMaterial, Int>)
+
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     is LambertianMaterial -> MaterialType.LAMBERTIAN.ordinal
     is MetallicMaterial -> MaterialType.METALLIC.ordinal
     is DielectricMaterial -> MaterialType.DIELECTRIC.ordinal
     else -> error("Unknown material!")
 }
-
-private data class MaterialsCollection(val lambertians: List<LambertianMaterial>,
-                                       val metallics: List<MetallicMaterial>,
-                                       val dielectrics: List<DielectricMaterial>,
-                                       val lookup: Map<RtMaterial, Int>)
 
 private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollection {
     val lambertians = mutableListOf<LambertianMaterial>()
@@ -93,8 +93,10 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
                 check(spheresCnt + 1 <= MAX_SPHERES) { "More spheres than defined in shader!" }
                 glProgramArrayUniform(program, "uSpheres[%d].center", spheresCnt, hitable.center)
                 glProgramArrayUniform(program, "uSpheres[%d].radius", spheresCnt, hitable.radius)
-                glProgramArrayUniform(program, "uSpheres[%d].materialType", spheresCnt, glShadingRtMaterialType(hitable.material))
-                glProgramArrayUniform(program, "uSpheres[%d].materialIndex", spheresCnt, materialsCollection.lookup[hitable.material]!!)
+                glProgramArrayUniform(program, "uSpheres[%d].materialType", spheresCnt,
+                    glShadingRtMaterialType(hitable.material))
+                glProgramArrayUniform(program, "uSpheres[%d].materialIndex", spheresCnt,
+                    materialsCollection.lookup[hitable.material]!!)
                 glProgramArrayUniform(program, "uHitables[%d].type",  hitablesCnt, HitableType.SPHERE.ordinal)
                 glProgramArrayUniform(program, "uHitables[%d].index", hitablesCnt, spheresCnt)
                 spheresCnt++
@@ -179,8 +181,10 @@ private fun glShadingRtDumpStats(start: Long, stop: Long) {
         statsDumped = true
         val millisTotal = stop - start
         val millisPerFrame = millisTotal / FRAMES_TO_CAPTURE
-        println(String.format("Job took: %.2f sec, ~approx. per frame: %.2f sec, 10 sec video will take: %.2f min",
-            millisTotal.toFloat() / 1000f, millisPerFrame.toFloat() / 1000f, 10f * 60f * millisPerFrame.toFloat() / 1000f /60f))
+        println(String.format("Job took: %.2f sec, per frame: %.2f sec, 10 sec video will take: ~%.2f min",
+            millisTotal.toFloat() / 1000f,
+            millisPerFrame.toFloat() / 1000f,
+            10f * 60f * millisPerFrame.toFloat() / 1000f / 60f))
     }
 }
 

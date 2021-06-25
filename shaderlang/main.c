@@ -135,7 +135,7 @@ struct HitRecord {
     int materialIndex;
 };
 
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 } };
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
 
 struct ScatterResult {
     struct vec3 attenuation;
@@ -155,28 +155,27 @@ const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
-const struct Light uLights[MAX_LIGHTS] =
-        { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f } };
+const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f } };
 
 // ------------------- HITABLES -------------------
 
 const int uHitablesCnt = 4;
-const struct Hitable uHitables[MAX_HITABLES] =
-        { { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 } };
+const struct Hitable uHitables[MAX_HITABLES] = { { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 } };
 
 // ------------------- SPHERES -------------------
 
-const struct Sphere uSpheres[MAX_SPHERES] =
-        { { { 0, -1000, 0 }, 1000, 0, 0 }, { { 0, 1, 0 }, 1, 0, 1 }, { { -4, 1, 0 }, 1, 1, 0 }, { { 4, 1, 0 }, 1, 2, 0 } };
+const struct Sphere uSpheres[MAX_SPHERES] = {
+        { { 0, -1000, 0 }, 1000, 0, 0 },
+        { { 0, 1, 0 }, 1, 0, 1 },
+        { { -4, 1, 0 }, 1, 1, 0 },
+        { { 4, 1, 0 }, 1, 2, 0 }
+};
 
 // ------------------- MATERIALS -------------------
 
-const struct LambertianMaterial     uLambertianMaterials[MAX_LAMBERTIANS] =
-        { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
-const struct MetallicMaterial       uMetallicMaterials  [MAX_METALS] =
-        { { { 0, 1, 0 } } };
-const struct DielectricMaterial     uDielectricMaterials[MAX_DIELECTRICS] =
-        { { 2 } };
+const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
+const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
+const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
 
 // ------------------- CASTS -------------------
 
@@ -199,7 +198,7 @@ float dtof(const double d) {
 
 custom
 struct vec2 v2(const float x, const float y) {
-    return (struct vec2) {x, y};
+    return (struct vec2) { x, y };
 }
 
 public
@@ -214,12 +213,12 @@ struct vec2 v2zero() {
 
 custom
 struct ivec2 iv2(const int x, const int y) {
-    return (struct ivec2) {x, y};
+    return (struct ivec2) { x, y };
 }
 
 custom
 struct vec3 v3(const float x, const float y, const float z) {
-    return (struct vec3) {x, y, z};
+    return (struct vec3) { x, y, z };
 }
 
 public
@@ -357,7 +356,7 @@ struct vec3 v3chartreuse() {
 
 custom
 struct vec4 v4(const float x, const float y, const float z, const float w) {
-    return (struct vec4) {x, y, z, w};
+    return (struct vec4) { x, y, z, w };
 }
 
 public
@@ -382,7 +381,7 @@ struct mat3 m3ident() {
 
 public
 struct Ray rayBack() {
-    const struct Ray result = {v3zero(), v3back() };
+    const struct Ray result = { v3zero(), v3back() };
     return result;
 }
 

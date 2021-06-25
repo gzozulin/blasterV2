@@ -21,8 +21,8 @@ data class OrderedSpan(override var text: String, val order: Int, override var c
 enum class AnimationState {
     FIND_KEY, SYNC_UP, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
-class ProjectorModel {
-    private val projectScenario by lazy { ScenarioFile(text = File("/home/greg/Dropbox/episodes/ep3-shadergen/scenario").readText()) }
+class ProjectorModel(scenario: File) {
+    private val projectScenario by lazy { ScenarioFile(text = scenario.readText()) }
     private val scenarioRenderer by lazy { ScenarioRenderer(scenarioFile = projectScenario) }
 
     private lateinit var pages: List<ProjectorTextPage<OrderedSpan>>
