@@ -55,11 +55,11 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
                            claimedNodes: MutableList<ScenarioNode>): ProjectorTextPage<OrderedSpan> {
         val kotlinFile = parseKotlinFile(file)
         val orderedTokens = mutableListOf<OrderedToken>()
-        val visitor = DeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
+        val visitor = KotlinDeclVisitor(0, nodes, claimedNodes, kotlinFile.tokens) { increment ->
             orderedTokens += increment
         }
         visitor.visitKotlinFile(kotlinFile.parser.kotlinFile())
-        return highlightPage(file, orderedTokens)
+        return highlightKotlinPage(file, orderedTokens)
     }
 
     private fun enforceAllNodesClaimed(claimedNodes: List<ScenarioNode>) {
@@ -79,7 +79,7 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
         return@computeIfAbsent KotlinFile(chars, lexer, tokens, parser)
     }
 
-    private fun highlightPage(file: File, orderedTokens: List<OrderedToken>): ProjectorTextPage<OrderedSpan> {
+    private fun highlightKotlinPage(file: File, orderedTokens: List<OrderedToken>): ProjectorTextPage<OrderedSpan> {
         val result = mutableListOf<OrderedSpan>()
         val orderMap = mutableMapOf<Token, Int>()
         val colorMap = mutableMapOf<Token, col3>()
@@ -88,7 +88,7 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
             orderMap[orderedToken.token] = orderedToken.order
             tokens.add(orderedToken.token)
         }
-        val highlightVisitor = HighlightVisitor(tokens, colorMap)
+        val highlightVisitor = KotlinHighlightVisitor(tokens, colorMap)
         val parser = KotlinParser(CommonTokenStream(ListTokenSource(tokens))).apply { reset() }
         highlightVisitor.visitKotlinFile(parser.kotlinFile())
         for (token in tokens) {
@@ -98,11 +98,11 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
     }
 }
 
-private class DeclVisitor(private val depth: Int,
-                          private val nodes: List<ScenarioNode>,
-                          private val claimed: MutableList<ScenarioNode>,
-                          private val tokens: CommonTokenStream,
-                          private val result: (increment: List<OrderedToken>) -> Unit)
+private class KotlinDeclVisitor(private val depth: Int,
+                                private val nodes: List<ScenarioNode>,
+                                private val claimed: MutableList<ScenarioNode>,
+                                private val tokens: CommonTokenStream,
+                                private val result: (increment: List<OrderedToken>) -> Unit)
     : KotlinParserBaseVisitor<Unit>() {
 
     override fun visitDeclaration(decl: DeclCtx) {
@@ -188,7 +188,7 @@ private fun Int.withRightNL(tokens: CommonTokenStream): Int {
 
 private fun DeclCtx.visitNext(depth: Int, nodes: List<ScenarioNode>, claimed: MutableList<ScenarioNode>,
                               tokens: CommonTokenStream, result: (increment: List<OrderedToken>) -> Unit) {
-    val visitor = DeclVisitor(depth, nodes, claimed, tokens, result)
+    val visitor = KotlinDeclVisitor(depth, nodes, claimed, tokens, result)
     when {
         classDeclaration() != null -> visitor.visitClassDeclaration(classDeclaration())
         functionDeclaration() != null -> visitor.visitFunctionDeclaration(functionDeclaration())
@@ -211,7 +211,7 @@ private val kotlin_yellow       = col3(0.937f, 0.675f, 0.306f)
 private val kotlin_purple       = col3(0.596f, 0.463f, 0.667f)
 private val kotlin_red          = col3(0.780f, 0.329f, 0.314f)
 
-private class HighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
+private class KotlinHighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
     :  KotlinParserBaseVisitor<Unit>() {
 
     override fun visitFunctionDeclaration(ctx: KotlinParser.FunctionDeclarationContext) {
