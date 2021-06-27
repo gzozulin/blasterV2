@@ -208,6 +208,7 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }*/
+
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0

@@ -80,3 +80,4 @@ x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
 (A) 2021-06-22 Do not flex your back on video +video @simple
 2021-06-22 Tablet for diagrams +video @complex
 2021-06-24 Move all techniques test code into SFCs (main functions): will remove the load and facilitate testing area +code @simple
+(A) 2021-06-26 LIke and subscribe pop-up inside the video +video @complex
