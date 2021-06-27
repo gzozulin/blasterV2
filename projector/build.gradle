@@ -1,19 +1,11 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'application'
-
-application {
-    mainClass.set(project.hasProperty("mainClass") ?
-            (String) project.property("mainClass") : "com.gzozulin.sim.simulation.SoccerKt")
-}
 
 dependencies {
-    implementation(project(":minigl"))
+    implementation(project(":antlr"))
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation "org.antlr:antlr4:4.9.1"
 }
 
 sourceCompatibility = "7"

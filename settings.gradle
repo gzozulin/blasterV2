@@ -1,8 +1,9 @@
 rootProject.name = 'blaster'
 include ':minigl'
 include ':miniui'
-include ':sfcs'
+include ':challenges'
 include ':projector'
 include ':shadergen'
 include ':raytracer'
+include 'antlr'
 
