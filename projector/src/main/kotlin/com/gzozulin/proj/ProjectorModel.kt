@@ -1,6 +1,5 @@
 package com.gzozulin.proj
 
-import com.gzozulin.kotlin.KotlinParser
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.api.cyan
 import com.gzozulin.minigl.tech.SpanVisibility
@@ -12,8 +11,6 @@ import kotlin.math.abs
 const val LINES_TO_SHOW = 21
 const val FRAMES_PER_UPDATE = 2
 const val FRAMES_TO_FINALIZE = 20000 / 16
-
-typealias DeclCtx = KotlinParser.DeclarationContext
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
                        override var visibility: SpanVisibility) : TextSpan

@@ -4,7 +4,7 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.capture.Capturer
 import java.io.File
 
-private val scenario = File("/home/greg/Dropbox/episodes/ep4-raytracer/scenario")
+private val scenario = File("/home/greg/Dropbox/episodes/ep5-triangles/scenario")
 
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 private val capturer = Capturer(window, "code")

@@ -924,14 +924,14 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
     const float D = b*b - 4*a*c;
 
     if (D > 0) {
-        float temp = (-b - sqrt(D)) / 2 * a;
-        if (temp < tMax && temp > tMin) {
-            return raySphereHitRecord(ray, temp, sphere);
+        float t = (-b - sqrt(D)) / 2 * a;
+        if (t < tMax && t > tMin) {
+            return raySphereHitRecord(ray, t, sphere);
         }
 
-        temp = (-b + sqrt(D)) / 2 * a;
-        if (temp < tMax && temp > tMin) {
-            return raySphereHitRecord(ray, temp, sphere);
+        t = (-b + sqrt(D)) / 2 * a;
+        if (t < tMax && t > tMin) {
+            return raySphereHitRecord(ray, t, sphere);
         }
     }
     return NO_HIT;
