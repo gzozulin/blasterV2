@@ -3,7 +3,6 @@ package com.gzozulin.minigl.tech
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
-import org.lwjgl.glfw.GLFW
 
 data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
@@ -208,7 +207,6 @@ fun main() {
                 wasdInput.onCursorDelta(delta)
             }
         }*/
-
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0

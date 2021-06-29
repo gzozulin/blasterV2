@@ -3,10 +3,7 @@ package com.gzozulin.gen
 import com.gzozulin.c.CBaseVisitor
 import com.gzozulin.c.CLexer
 import com.gzozulin.c.CParser
-import org.antlr.v4.runtime.CharStream
-import org.antlr.v4.runtime.CharStreams
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.ParserRuleContext
+import org.antlr.v4.runtime.*
 import java.io.File
 
 private const val DEFINITIONS = "/home/greg/blaster/shaderlang/main.c"
@@ -40,9 +37,9 @@ private fun renderAssembly(operations: List<COperation>): String {
             "import com.gzozulin.minigl.scene.ScatterResult\n" +
             "import com.gzozulin.minigl.scene.RefractResult\n" +
             "import com.gzozulin.minigl.scene.Sphere\n" +
-            "import com.gzozulin.minigl.scene.PhongMaterial\n\n" +
-            "import com.gzozulin.minigl.scene.LambertianMaterial\n\n" +
-            "import com.gzozulin.minigl.scene.MetallicMaterial\n\n" +
+            "import com.gzozulin.minigl.scene.PhongMaterial\n" +
+            "import com.gzozulin.minigl.scene.LambertianMaterial\n" +
+            "import com.gzozulin.minigl.scene.MetallicMaterial\n" +
             "import com.gzozulin.minigl.scene.DielectricMaterial\n\n"
     operations.forEach { operation ->
         if (operation.access == COperationAccess.PUBLIC) {
@@ -165,6 +162,8 @@ private class FunctionVisitor(val callback: (ctx: FunctionCtx) -> Unit) : CBaseV
 
 private fun CommonTokenStream.filterAndExtract(ctx: ParserRuleContext, separator: String = " ") =
     get(ctx.start.tokenIndex, ctx.stop.tokenIndex)
+        .asSequence()
+        .filter { it.channel == Token.DEFAULT_CHANNEL  }
         .filterNot { it.text == "const" }
         .filterNot { it.text == "struct" }
         .filterNot { it.text == ACCESS_PUBLIC }
