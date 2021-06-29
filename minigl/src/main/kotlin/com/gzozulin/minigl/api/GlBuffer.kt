@@ -39,13 +39,13 @@ internal fun glBufferDelete(buffer: GlBuffer) {
     buffer.handle = null
 }
 
-fun glBufferCreate(target: Int, usage: Int, floats: FloatArray): GlBuffer {
+fun glBufferCreateFloats(target: Int = backend.GL_ARRAY_BUFFER, usage: Int = backend.GL_STATIC_DRAW, floats: FloatArray): GlBuffer {
     val data = ByteBuffer.allocateDirect(floats.size * 4).order(ByteOrder.nativeOrder())
     data.asFloatBuffer().put(floats).position(0)
     return GlBuffer(target, usage, data)
 }
 
-fun glBufferCreate(target: Int, usage: Int, ints: IntArray): GlBuffer {
+fun glBufferCreateInts(target: Int = backend.GL_ELEMENT_ARRAY_BUFFER, usage: Int = backend.GL_STATIC_DRAW, ints: IntArray): GlBuffer {
     val data = ByteBuffer.allocateDirect(ints.size * 4).order(ByteOrder.nativeOrder())
     data.asIntBuffer().put(ints).position(0)
     return GlBuffer(target, usage, data)

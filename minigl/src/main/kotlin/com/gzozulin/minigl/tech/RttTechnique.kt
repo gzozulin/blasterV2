@@ -12,7 +12,7 @@ data class TechniqueRtt(val width: Int, val height: Int) {
 
     internal val frameBuffer = GlFrameBuffer()
 
-    val color = GlTexture("RttOutput", data = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height)))
+    val color = GlTexture(data = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height)))
     val depth = GlRenderBuffer(width, height)
 }
 

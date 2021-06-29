@@ -43,7 +43,7 @@ private val resultingColor = mulv4(tiledFontSampler, tintedGrassColor)
 
 private val shadingFlat = ShadingFlat(uniformMatrix, resultingColor)
 
-fun use(callback: Callback) {
+private fun use(callback: Callback) {
     glShadingFlatUse(shadingFlat) {
         glTextureUse(textureGrass) {
             glTextureUse(textureFont) {
@@ -55,7 +55,7 @@ fun use(callback: Callback) {
     }
 }
 
-fun bind(callback: Callback) {
+private fun bind(callback: Callback) {
     glTextureBind(textureFont) {
         glTextureBind(textureGrass) {
             glShadingFlatDraw(shadingFlat) {
@@ -65,7 +65,7 @@ fun bind(callback: Callback) {
     }
 }
 
-fun update() {
+private fun update() {
     tintedGrassTick += 0.01f
     tintedGrassRUniform.value = sinf(tintedGrassTick)
 }

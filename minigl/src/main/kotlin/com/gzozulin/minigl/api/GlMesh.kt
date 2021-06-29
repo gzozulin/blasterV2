@@ -91,10 +91,10 @@ fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, 
         0f, 0f, 1f)
     val indices = intArrayOf(0, 1, 2, 1, 3, 2)
     return GlMesh(
-        glBufferCreate(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, vertices),
-        glBufferCreate(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, texCoords),
-        glBufferCreate(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, normals),
-        glBufferCreate(backend.GL_ELEMENT_ARRAY_BUFFER, backend.GL_STATIC_DRAW, indices), 6)
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, vertices),
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, texCoords),
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, normals),
+        glBufferCreateInts(backend.GL_ELEMENT_ARRAY_BUFFER, backend.GL_STATIC_DRAW, indices), 6)
 }
 
 fun glMeshCreateRect(width: Float, height: Float): GlMesh {

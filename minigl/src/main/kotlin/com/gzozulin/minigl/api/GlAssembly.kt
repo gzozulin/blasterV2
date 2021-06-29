@@ -401,6 +401,11 @@ fun unifs(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun unifs1(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+    override fun declare() = "uniform sampler1D $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
     override fun declare() = "uniform sampler2D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
@@ -419,6 +424,10 @@ fun consti(value: Int) = object : Constant<Int>(value) {
 
 fun constf(value: Float) = object : Constant<Float>(value) {
     override fun declare() = "const float $name = $value;"
+}
+
+fun constv2(value: vec2) = object : Constant<vec2>(value) {
+    override fun declare() = "const vec2 $name = vec2(${value.x}, ${value.y});"
 }
 
 fun constv2i(value: vec2i) = object : Constant<vec2i>(value) {
@@ -453,6 +462,11 @@ fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
 }
 
 // ----------------------------- Sampler -----------------------------
+
+fun texel(sampler: Expression<GlTexture>, index: Expression<Int>) = object : Expression<vec4>() {
+    override fun expr() = "texelFetch(${sampler.expr()}, ${index.expr()}, 0)" // 0 - lod
+    override fun roots() = listOf(index, sampler)
+}
 
 fun sampler(sampler: Expression<GlTexture>, texCoord: Expression<vec2> = namedTexCoordsV2()) = object : Expression<vec4>() {
     override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
