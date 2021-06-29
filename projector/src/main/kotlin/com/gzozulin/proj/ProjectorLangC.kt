@@ -3,6 +3,7 @@ package com.gzozulin.proj
 import com.gzozulin.c.CBaseVisitor
 import com.gzozulin.c.CLexer
 import com.gzozulin.c.CParser
+import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.tech.SpanVisibility
 import org.antlr.v4.runtime.*
@@ -121,9 +122,17 @@ private fun highlightCPage(file: File, orderedTokens: List<OrderedToken>): Proje
 private class CHighlightVisitor(val tokens: List<Token>, val colorMap: MutableMap<Token, col3>)
     :  CBaseVisitor<Unit>() {
 
-    override fun visitCompilationUnit(ctx: CParser.CompilationUnitContext?) {
+    override fun visitCompilationUnit(ctx: CParser.CompilationUnitContext) {
         tokens.forEach { updateColor(it, it.color()) }
         super.visitCompilationUnit(ctx)
+    }
+
+    override fun visitFunctionDefinition(ctx: CParser.FunctionDefinitionContext) {
+        updateColor(ctx.declarator()
+            .directDeclarator()
+            .directDeclarator()
+            .Identifier().symbol, darkula_yellow)
+        super.visitFunctionDefinition(ctx)
     }
 
     private fun updateColor(token: Token, color: col3) {
@@ -137,5 +146,7 @@ private class CHighlightVisitor(val tokens: List<Token>, val colorMap: MutableMa
 private fun Token.color(): col3 = when (type) {
     CLexer.Int, CLexer.Float, CLexer.Struct, CLexer.Const, CLexer.Return, CLexer.For, CLexer.While, CLexer.If,
     CLexer.Else, CLexer.Switch, CLexer.Case, CLexer.Default, CLexer.Break, CLexer.Void -> darkula_orange
+    CLexer.Constant -> darkula_light_blue
+    CLexer.StringLiteral -> darkula_green
     else -> darkula_white
 }

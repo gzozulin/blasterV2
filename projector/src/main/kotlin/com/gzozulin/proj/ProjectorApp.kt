@@ -6,7 +6,7 @@ import java.io.File
 
 private val scenario = File("/home/greg/Dropbox/episodes/ep5-triangles/scenario")
 
-private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
+private val window = GlWindow(isFullscreen = false, isHoldingCursor = false, isMultisampling = true)
 private val capturer = Capturer(window, "code")
 
 private val projectorModel = ProjectorModel(scenario)
