@@ -50,6 +50,7 @@ class GlBackend {
     val GL_RGB:                Int get() = GL11.GL_RGB
     val GL_RGBA:               Int get() = GL11.GL_RGBA
     val GL_TEXTURE_2D:         Int get() = GL11.GL_TEXTURE_2D
+    val GL_TEXTURE_BUFFER:     Int get() = GL31.GL_TEXTURE_BUFFER
     val GL_TEXTURE_CUBE_MAP:   Int get() = GL13.GL_TEXTURE_CUBE_MAP
     val GL_TEXTURE_CUBE_MAP_POSITIVE_X:   Int get() = GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X
     val GL_TEXTURE0:           Int get() = GL13.GL_TEXTURE0
@@ -159,6 +160,7 @@ class GlBackend {
     fun glDeleteTextures(handle: Int) = glCheck { GL11.glDeleteTextures(handle) }
     fun glBindTexture(target: Int, texture: Int) = glCheck { GL11.glBindTexture(target, texture) }
     fun glTexImage2D(target: Int, level: Int, internalformat: Int, width: Int, height: Int, border: Int, format: Int, type: Int, pixels: ByteBuffer?) = glCheck { GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) }
+    fun glTexBuffer(target: Int, internalformat: Int, buffer: Int) = glCheck { GL31C.glTexBuffer(target, internalformat, buffer) }
     fun glGenerateMipmap(target: Int) = glCheck { GL30.glGenerateMipmap(target) }
     fun glTexSubImage2D(target: Int, level: Int, xoffset: Int, yoffset: Int, width: Int, height: Int, format: Int, type: Int, pixels: ByteBuffer) =
         glCheck { GL11.glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels) }

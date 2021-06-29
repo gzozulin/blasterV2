@@ -25,7 +25,7 @@ private val shadingFlat = ShadingFlat(uniformMatrix, uniformColor)
 
 fun main() {
     window.create {
-        capturer.capture {
+       // capturer.capture {
             glShadingFlatUse(shadingFlat) {
                 glTextureUse(texture) {
                     glMeshUse(mesh) {
@@ -36,11 +36,11 @@ fun main() {
                                     glShadingFlatInstance(shadingFlat, mesh)
                                 }
                             }
-                            capturer.addFrame()
+                            //capturer.addFrame()
                         }
                     }
                 }
             }
-        }
+        //}
     }
 }

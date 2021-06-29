@@ -58,7 +58,7 @@ fun libTextureCreateCubeMap(filename: String): GlTexture {
         label = filename,
         target = backend.GL_TEXTURE_CUBE_MAP,
         wrapS = backend.GL_CLAMP_TO_EDGE, wrapT = backend.GL_CLAMP_TO_EDGE, wrapR = backend.GL_CLAMP_TO_EDGE,
-        images = listOf(
+        data = listOf(
             GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 0, width = right.width,    height = right.height,  pixels = right.pixels),
             GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1, width = left.width,     height = left.height,   pixels = left.pixels),
             GlTextureImage(target = backend.GL_TEXTURE_CUBE_MAP_POSITIVE_X + 2, width = top.width,      height = top.height,    pixels = top.pixels),

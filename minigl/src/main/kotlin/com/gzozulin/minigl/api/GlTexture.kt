@@ -2,6 +2,7 @@ package com.gzozulin.minigl.api
 
 import org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D
 import org.lwjgl.opengl.GL13.GL_TEXTURE_BINDING_CUBE_MAP
+import org.lwjgl.opengl.GL31.GL_TEXTURE_BINDING_BUFFER
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -10,14 +11,19 @@ private const val MAX_ACTIVE_TEXTURES = 80
 private val availableActiveTextures = (0 until MAX_ACTIVE_TEXTURES).toMutableList()
 
 data class GlTexture(val label: String,
-                     val target: Int = backend.GL_TEXTURE_2D, val images: List<GlTextureImage> = emptyList(),
+                     val target: Int = backend.GL_TEXTURE_2D, val data: List<GlTextureData> = emptyList(),
                      val minFilter: Int = backend.GL_NEAREST_MIPMAP_LINEAR, val magFilter: Int = backend.GL_LINEAR,
                      val wrapS: Int = backend.GL_REPEAT, val wrapT: Int = backend.GL_REPEAT, val wrapR: Int = backend.GL_REPEAT,
                      internal var handle: Int? = null, internal var unit: Int? = null)
 
+interface GlTextureData
+
 data class GlTextureImage(val target: Int, val width: Int, val height: Int, val pixels: ByteBuffer? = null,
                           val internalFormat: Int = backend.GL_RGBA, val pixelFormat: Int = backend.GL_RGBA,
-                          val pixelType: Int = backend.GL_UNSIGNED_BYTE)
+                          val pixelType: Int = backend.GL_UNSIGNED_BYTE) : GlTextureData
+
+data class GlTextureBuffer(val target: Int = backend.GL_TEXTURE_BUFFER, val internalFormat: Int = backend.GL_RGBA,
+                           val buffer: GlBuffer): GlTextureData
 
 private fun glTextureUnitHold(): Int {
     synchronized(availableActiveTextures) {
@@ -41,6 +47,7 @@ private fun glTextureGetBound(texture: GlTexture): Int {
     glTextureSwitchToUnit(texture)
     when (texture.target) {
         backend.GL_TEXTURE_2D -> backend.glGetIntegerv(GL_TEXTURE_BINDING_2D, binding)
+        backend.GL_TEXTURE_BUFFER -> backend.glGetIntegerv(GL_TEXTURE_BINDING_BUFFER, binding)
         backend.GL_TEXTURE_CUBE_MAP -> backend.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, binding)
         else -> error("Unknown GlTexture type! ${texture.label}")
     }
@@ -61,20 +68,38 @@ private fun glTextureUpload(texture: GlTexture) {
     glTextureBindPrev(texture) {
         backend.glActiveTexture(backend.GL_TEXTURE0 + texture.unit!!)
         backend.glBindTexture(texture.target, texture.handle!!)
-        texture.images.forEach { image ->
-            backend.glTexImage2D(image.target, 0, image.internalFormat,
-                image.width, image.height, 0, image.pixelFormat, image.pixelType, image.pixels)
+        texture.data.forEach { glTextureDataUpload(texture, it) }
+    }
+}
+
+private fun glTextureDataUpload(texture: GlTexture, data: GlTextureData) {
+    when (data) {
+        is GlTextureImage -> {
+            backend.glTexImage2D(data.target, 0, data.internalFormat,
+                data.width, data.height, 0, data.pixelFormat, data.pixelType, data.pixels)
+            backend.glGenerateMipmap(texture.target)
+            backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
+            backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
+            backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
+            backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
+            backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
         }
-        backend.glGenerateMipmap(texture.target)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MIN_FILTER, texture.minFilter)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_MAG_FILTER, texture.magFilter)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_S, texture.wrapS)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_T, texture.wrapT)
-        backend.glTexParameteri(texture.target, backend.GL_TEXTURE_WRAP_R, texture.wrapR)
+        is GlTextureBuffer -> {
+            glBufferUpload(data.buffer)
+            backend.glTexBuffer(data.target, data.internalFormat, data.buffer.handle!!)
+        }
+        else -> error("Unknown GlTexture data type! ${texture.label}")
+    }
+}
+
+private fun glTextureDataDelete(data: GlTextureData) {
+    if (data is GlTextureBuffer) {
+        glBufferDelete(data.buffer)
     }
 }
 
 private fun glTextureDelete(texture: GlTexture) {
+    texture.data.forEach { glTextureDataDelete(it) }
     backend.glDeleteTextures(texture.handle!!)
     glTextureUnitRelease(texture.unit!!)
     texture.handle = null
@@ -109,7 +134,7 @@ fun glTextureCheckBound(texture: GlTexture) {
 
 internal fun glTextureCreate2D(label: String, width: Int, height: Int, pixels: ByteBuffer): GlTexture {
     return GlTexture(label, backend.GL_TEXTURE_2D,
-        images = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height, pixels)))
+        data = listOf(GlTextureImage(backend.GL_TEXTURE_2D, width, height, pixels)))
 }
 
 internal fun glTextureCreate2D(label: String, width: Int, height: Int, pixels: ByteArray): GlTexture {
