@@ -401,13 +401,18 @@ fun unifs(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
+fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
+    override fun declare() = "uniform sampler2D $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unifs1(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform sampler1D $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
-    override fun declare() = "uniform sampler2D $name;"
+fun unifsb(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
+    override fun declare() = "uniform samplerBuffer $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
@@ -464,7 +469,7 @@ fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
 // ----------------------------- Sampler -----------------------------
 
 fun texel(sampler: Expression<GlTexture>, index: Expression<Int>) = object : Expression<vec4>() {
-    override fun expr() = "texelFetch(${sampler.expr()}, ${index.expr()}, 0)" // 0 - lod
+    override fun expr() = "texelFetch(${sampler.expr()}, ${index.expr()})"
     override fun roots() = listOf(index, sampler)
 }
 

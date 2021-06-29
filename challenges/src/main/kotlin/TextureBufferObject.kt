@@ -10,16 +10,22 @@ private val window = GlWindow()
 
 private val buffer = glBufferCreateFloats(
     floats = floatArrayOf(
-        1f, 0.5f, 0.25f, 1f
+        1f, 0.5f, 0f
     ))
 
 private val textureBuffer = GlTextureBuffer(
     target = backend.GL_TEXTURE_BUFFER, internalFormat = backend.GL_R32F, buffer = buffer)
-private val texture = GlTexture(target = backend.GL_TEXTURE_1D, data = listOf(textureBuffer))
+private val texture = GlTexture(target = backend.GL_TEXTURE_BUFFER, data = listOf(textureBuffer))
 
 private val constMatrix = constm4(mat4().identity().orthoBox(2f))
-private val uniformSampler = unifs1(texture)
-private val color = texel(uniformSampler, consti(0))
+private val uniformSampler = unifsb(texture)
+private val color = v3tov4(
+    v3(
+        getrv4(texel(uniformSampler, consti(0))),
+        getrv4(texel(uniformSampler, consti(1))),
+        getrv4(texel(uniformSampler, consti(2)))),
+    constf(1f)
+)
 
 private val shadingFlat = ShadingFlat(constMatrix, color)
 private val rect = glMeshCreateRect()
