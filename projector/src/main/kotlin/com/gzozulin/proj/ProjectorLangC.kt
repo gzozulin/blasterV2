@@ -55,7 +55,7 @@ private class CDeclVisitor(private val nodes: List<ScenarioNode>,
         nodes.filter { it.path[0] == decl.identifier() } // no inlays
 
     private fun define(decl: CDeclCtx, matching: List<ScenarioNode>) {
-        result.invoke(decl.define(tokens).withOrder(matching.first().order))
+        result.invoke(decl.define(tokens, CParser.Whitespace, CParser.Newline).withOrder(matching.first().order))
         claimed.add(matching.first())
     }
 }
@@ -136,6 +136,6 @@ private class CHighlightVisitor(val tokens: List<Token>, val colorMap: MutableMa
 
 private fun Token.color(): col3 = when (type) {
     CLexer.Int, CLexer.Float, CLexer.Struct, CLexer.Const, CLexer.Return, CLexer.For, CLexer.While, CLexer.If,
-    CLexer.Else, CLexer.Switch, CLexer.Case, CLexer.Default, CLexer.Break -> darkula_orange
+    CLexer.Else, CLexer.Switch, CLexer.Case, CLexer.Default, CLexer.Break, CLexer.Void -> darkula_orange
     else -> darkula_white
 }

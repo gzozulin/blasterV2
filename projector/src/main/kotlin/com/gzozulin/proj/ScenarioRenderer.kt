@@ -72,23 +72,23 @@ class ScenarioRenderer(private val scenarioFile: ScenarioFile) {
     }
 }
 
-internal fun ParserRuleContext.define(tokens: CommonTokenStream): List<Token> {
-    val start = start.tokenIndex.withLeftWS(tokens)
-    val stop = stop.tokenIndex.withRightNL(tokens)
+internal fun ParserRuleContext.define(tokens: CommonTokenStream, ws: Int, nl: Int): List<Token> {
+    val start = start.tokenIndex.withLeftWS(tokens, ws)
+    val stop = stop.tokenIndex.withRightNL(tokens, nl)
     return tokens.get(start, stop)
 }
 
-internal fun Int.withLeftWS(tokens: CommonTokenStream): Int {
+internal fun Int.withLeftWS(tokens: CommonTokenStream, ws: Int): Int {
     var result = this
-    while (result > 0 && tokens.get(result - 1).type == KotlinLexer.WS) {
+    while (result > 0 && tokens.get(result - 1).type == ws) {
         result--
     }
     return result
 }
 
-internal fun Int.withRightNL(tokens: CommonTokenStream): Int {
+internal fun Int.withRightNL(tokens: CommonTokenStream, nl: Int): Int {
     var result = this
-    while (result <= tokens.size() && tokens.get(result + 1).type == KotlinLexer.NL) {
+    while (result <= tokens.size() && tokens.get(result + 1).type == nl) {
         result++
     }
     return result

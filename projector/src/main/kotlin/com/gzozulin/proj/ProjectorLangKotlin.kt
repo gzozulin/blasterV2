@@ -55,7 +55,7 @@ private class KotlinDeclVisitor(private val depth: Int,
         nodes.filter { it.path[depth] == decl.identifier() }
 
     private fun define(decl: KotlinDeclCtx, matching: List<ScenarioNode>) {
-        result.invoke(decl.define(tokens).withOrder(matching.first().order))
+        result.invoke(decl.define(tokens, KotlinLexer.WS, KotlinLexer.NL).withOrder(matching.first().order))
         claimed.add(matching.first())
     }
 
@@ -89,15 +89,15 @@ private fun KotlinDeclCtx.identifier() = when {
 }
 
 private fun KotlinDeclCtx.predeclare(tokens: CommonTokenStream): List<Token> {
-    val start = start.tokenIndex.withLeftWS(tokens)
+    val start = start.tokenIndex.withLeftWS(tokens, KotlinLexer.WS)
     val classDecl = classDeclaration()!! // TODO: others: objects, etc
-    val stop = classDecl.classBody().start.tokenIndex.withRightNL(tokens)
+    val stop = classDecl.classBody().start.tokenIndex.withRightNL(tokens, KotlinLexer.NL)
     return tokens.get(start, stop)
 }
 
 private fun KotlinDeclCtx.postdeclare(tokens: CommonTokenStream): List<Token> {
-    val start = stop.tokenIndex.withLeftWS(tokens)
-    val stop = stop.tokenIndex.withRightNL(tokens)
+    val start = stop.tokenIndex.withLeftWS(tokens, KotlinLexer.WS)
+    val stop = stop.tokenIndex.withRightNL(tokens, KotlinLexer.NL)
     return tokens.get(start, stop)
 }
 
