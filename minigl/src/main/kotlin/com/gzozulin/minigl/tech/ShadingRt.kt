@@ -5,20 +5,17 @@ import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val BATCH_CNT = 20
+private const val FRAMES_CNT = 1
+private const val SAMPLES_CNT = 128
+private const val SAMPLES_PER_BATCH = 128
+private const val BOUNCES_CNT = 3
 
-private const val FRAMES_TO_CAPTURE = 5
-private val sampleCnt = consti(32)
-private val rayBounces = consti(3)
-
-private val window = GlWindow(isFullscreen = true, isHeadless = true)
-private val capturer = Capturer(window)
-
-data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
+data class ShadingRt(val window: GlWindow,
+                     val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
                      val fovy: Expression<Float>, val aspect: Expression<Float>,
                      val aperture: Expression<Float>, val focus: Expression<Float>) {
-    internal val rects = glShadingRtCreateRects()
+    internal val rect = glMeshCreateRect()
 
     private val matrix = constm4(mat4().orthoBox())
     private val color = fragmentColorRt(
@@ -28,54 +25,18 @@ data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<
         namedTexCoordsV2())
 
     internal val shadingFlat = ShadingFlat(matrix, color)
+    internal val techniqueRtt = TechniqueRtt(window)
+    internal val techniquePP = TechniquePostProcessing(window) { screen: GlTexture ->
+        val current = sampler(unifs(screen))
+        val delta = sampler(unifs(techniqueRtt.color))
+        return@TechniquePostProcessing divv4f(addv4(current, delta), constf(2f))
+    }
 }
 
 private data class MaterialsCollection(val lambertians: List<LambertianMaterial>,
                                        val metallics: List<MetallicMaterial>,
                                        val dielectrics: List<DielectricMaterial>,
                                        val lookup: Map<RtMaterial, Int>)
-
-private fun glShadingRtCreateRects(): List<GlMesh> {
-    val result = mutableListOf<GlMesh>()
-
-    val dx = 2f / BATCH_CNT
-    val dy = 2f / BATCH_CNT
-    val du = 1f / BATCH_CNT
-    val dv = 1f / BATCH_CNT
-
-    for (x in 0 until BATCH_CNT) {
-        for (y in 0 until BATCH_CNT) {
-
-            val left    = -1f + dx * x
-            val bottom  = -1f + dy * y
-            val right   = left + dx
-            val top     = bottom + dy
-            val uStart  = du * x
-            val vStart  = dv * y
-            val uEnd    = uStart + du
-            val vEnd    = vStart + dv
-
-            val vertices = floatArrayOf(
-                left,    top,     0f,
-                left,    bottom,  0f,
-                right,   top,     0f,
-                right,   bottom,  0f)
-            val texCoords = floatArrayOf(
-                uStart,  vEnd,
-                uStart,  vStart,
-                uEnd,    vEnd,
-                uEnd,    vStart)
-            val normals = floatArrayOf(
-                0f, 0f, 1f,
-                0f, 0f, 1f,
-                0f, 0f, 1f,
-                0f, 0f, 1f)
-            val indices = intArrayOf(0, 1, 2, 1, 3, 2)
-            result.add(glMeshCreateRect(vertices, texCoords, normals, indices))
-        }
-    }
-    return result
-}
 
 private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     is LambertianMaterial -> MaterialType.LAMBERTIAN.ordinal
@@ -162,8 +123,12 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
 
 fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
     glShadingFlatUse(shadingRt.shadingFlat) {
-        glMeshUse(shadingRt.rects) {
-            callback.invoke()
+        glRttUse(shadingRt.techniqueRtt) {
+            glPostProcessingUse(shadingRt.techniquePP) {
+                glMeshUse(shadingRt.rect) {
+                    callback.invoke()
+                }
+            }
         }
     }
 }
@@ -176,14 +141,21 @@ fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Any>, callback: Callbac
 }
 
 fun glShadingRtInstance(shadingRt: ShadingRt) {
-    for (rect in shadingRt.rects) {
-        glShadingFlatInstance(shadingRt.shadingFlat, rect)
+    val iterations = SAMPLES_CNT / SAMPLES_PER_BATCH
+    for (i in 0 until iterations) {
+        glRttDraw(shadingRt.techniqueRtt) {
+            glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
+        }
+        glTextureBind(shadingRt.techniqueRtt.color) {
+            glPostProcessingDraw(shadingRt.techniquePP) {
+                glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
+            }
+        }
     }
 }
 
-/*private var mouseLook = false
-private val controller = ControllerFirstPerson(position = vec3(2f))
-private val wasdInput = WasdInput(controller)*/
+private val window = GlWindow(isFullscreen = false)
+private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
@@ -194,6 +166,9 @@ private val controller = ControllerScenic(
     ),
     points = listOf(vec3()))
 
+private val sampleCnt = consti(SAMPLES_PER_BATCH)
+private val rayBounces = consti(BOUNCES_CNT)
+
 private val eye = unifv3()
 private val center = unifv3()
 private val up = constv3(vec3().up())
@@ -203,7 +178,7 @@ private val aspect = constf(window.width.toFloat() / window.height.toFloat())
 private val aperture = constf(0f)
 private val focus = constf(1f)
 
-private val shadingRt = ShadingRt(sampleCnt, rayBounces, eye, center, up, fovy, aspect, aperture, focus)
+private val shadingRt = ShadingRt(window, sampleCnt, rayBounces, eye, center, up, fovy, aspect, aperture, focus)
 
 private val lambertians = (0 until 15).map { LambertianMaterial(vec3().rand())  }.toList()
 private val metallics =   (0 until 16).map { MetallicMaterial(vec3().rand())    }.toList()
@@ -231,7 +206,7 @@ private fun glShadingRtDumpStats(start: Long, stop: Long) {
     if (!statsDumped) {
         statsDumped = true
         val millisTotal = stop - start
-        val millisPerFrame = millisTotal / FRAMES_TO_CAPTURE
+        val millisPerFrame = millisTotal / FRAMES_CNT
         println(String.format("Job took: %.2f sec, per frame: %.2f sec, 10 sec video will take: ~%.2f min",
             millisTotal.toFloat() / 1000f,
             millisPerFrame.toFloat() / 1000f,
@@ -241,32 +216,19 @@ private fun glShadingRtDumpStats(start: Long, stop: Long) {
 
 fun main() {
     window.create {
-        /*window.keyCallback = { key, pressed ->
-            wasdInput.onKeyPressed(key, pressed)
-        }
-        window.buttonCallback = { button, pressed ->
-            if (button == MouseButton.LEFT) {
-                mouseLook = pressed
-            }
-        }
-        window.deltaCallback = { delta ->
-            if (mouseLook) {
-                wasdInput.onCursorDelta(delta)
-            }
-        }*/
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0
-                //capturer.capture {
+                capturer.capture {
                     val start = System.currentTimeMillis()
                     window.show {
                         controller.apply { position, direction ->
                             eye.value = position
                             center.value = vec3().set(position).add(direction)
                         }
-                        if (frame < FRAMES_TO_CAPTURE) {
+                        if (frame < FRAMES_CNT) {
                             glShadingRtInstance(shadingRt)
-                            //capturer.addFrame()
+                            capturer.addFrame()
                             frame++
                         } else {
                             val stop = System.currentTimeMillis()
@@ -275,7 +237,7 @@ fun main() {
                             exitProcess(0)
                         }
                     }
-                //}
+                }
             }
         }
     }
