@@ -73,6 +73,14 @@ internal fun glMeshCheckBound(mesh: GlMesh) {
     check(glMeshGetBound() == mesh.handle) { "GlMesh is not bound!" }
 }
 
+fun glMeshCreateRect(vertices: FloatArray, texCoords: FloatArray, normals: FloatArray, indices: IntArray): GlMesh {
+    return GlMesh(
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, vertices),
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, texCoords),
+        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, normals),
+        glBufferCreateInts(backend.GL_ELEMENT_ARRAY_BUFFER, backend.GL_STATIC_DRAW, indices), indices.size)
+}
+
 fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, top: Float = 1f): GlMesh {
     val vertices = floatArrayOf(
         left,  top,     0f,
@@ -90,11 +98,7 @@ fun glMeshCreateRect(left: Float = -1f, right: Float = 1f, bottom: Float = -1f, 
         0f, 0f, 1f,
         0f, 0f, 1f)
     val indices = intArrayOf(0, 1, 2, 1, 3, 2)
-    return GlMesh(
-        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, vertices),
-        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, texCoords),
-        glBufferCreateFloats(backend.GL_ARRAY_BUFFER, backend.GL_STATIC_DRAW, normals),
-        glBufferCreateInts(backend.GL_ELEMENT_ARRAY_BUFFER, backend.GL_STATIC_DRAW, indices), 6)
+    return glMeshCreateRect(vertices, texCoords, normals, indices)
 }
 
 fun glMeshCreateRect(width: Float, height: Float): GlMesh {

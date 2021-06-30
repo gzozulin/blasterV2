@@ -37,9 +37,12 @@
       <w>postdeclare</w>
       <w>predeclare</w>
       <w>randf</w>
+      <w>rects</w>
       <w>resizables</w>
+      <w>samplerq</w>
       <w>sfcs</w>
       <w>templ</w>
+      <w>texelf</w>
       <w>tmodel</w>
       <w>tproj</w>
       <w>transp</w>

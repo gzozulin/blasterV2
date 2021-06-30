@@ -67,12 +67,9 @@ fun col3.azure()        = set(0f, .5f, 1f)
 fun col3.aquamarine()   = set(0f, 1f, .5f)
 fun col3.chartreuse()   = set(.5f, 1f, 0f)
 
-val col3.r
-    get() = x
-val col3.g
-    get() = y
-val col3.b
-    get() = z
+val col3.r get() = x
+val col3.g get() = y
+val col3.b get() = z
 
 fun col3.parseColor(hex: String): col3 {
     val integerHex = Integer.parseInt(hex, 16)

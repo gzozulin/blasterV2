@@ -8,11 +8,7 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 
 private val window = GlWindow()
 
-private val buffer = glBufferCreateFloats(
-    floats = floatArrayOf(
-        1f, 0.5f, 0f
-    ))
-
+private val buffer = glBufferCreateFloats(floats = floatArrayOf(1f, 0.5f, 0f)) // orange
 private val textureBuffer = GlTextureBuffer(
     target = backend.GL_TEXTURE_BUFFER, internalFormat = backend.GL_R32F, buffer = buffer)
 private val texture = GlTexture(target = backend.GL_TEXTURE_BUFFER, data = listOf(textureBuffer))
