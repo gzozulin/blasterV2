@@ -11,7 +11,7 @@ private const val FRAMES_TO_CAPTURE = 5
 private val sampleCnt = consti(32)
 private val rayBounces = consti(3)
 
-private val window = GlWindow(isFullscreen = false, isHeadless = true)
+private val window = GlWindow(isFullscreen = true, isHeadless = true)
 private val capturer = Capturer(window)
 
 data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,

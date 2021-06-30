@@ -80,12 +80,39 @@ class GlWindow(
     }
 
     fun create(onCreated: () -> Unit) {
-        glfwSetErrorCallback { error, description -> error("$error, $description") }
         check(glfwInit())
-        recreateWindow()
+        glfwSetErrorCallback { error, description -> error("$error, $description") }
+        createWindow()
         glCheck { backend.glViewport(0, 0, width, height) }
         onCreated.invoke()
         glfwDestroyWindow(handle!!)
+    }
+
+    private fun createWindow() {
+        if (isMultisampling) {
+            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
+        }
+        if (isHeadless) {
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
+            handle = glfwCreateWindow(width, height, "Blaster!", NULL, NULL)
+        } else {
+            handle = glfwCreateWindow(width, height, "Blaster!",
+                if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)
+        }
+        if (!isFullscreen) {
+            glfwSetWindowPos(handle!!, (FULL_WIDTH - width)/2, (FULL_HEIGHT - height)/2)
+        }
+        if (isHoldingCursor) {
+            glfwSetInputMode(handle!!, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+        }
+        glfwSetMouseButtonCallback(handle!!, buttonCallbackInternal)
+        glfwSetKeyCallback(handle!!, keyCallbackInternal)
+        glfwMakeContextCurrent(handle!!)
+        GL.createCapabilities()
+        glfwSwapInterval(1)
+        if (!isHeadless) {
+            glfwShowWindow(handle!!)
+        }
     }
 
     fun show(onFrame: () -> Unit) {
@@ -102,29 +129,6 @@ class GlWindow(
             glfwPollEvents()
             updateFps()
         }
-    }
-
-    private fun recreateWindow() {
-        if (isMultisampling) {
-            glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
-        }
-        if (isHeadless) {
-            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
-        }
-        handle = glfwCreateWindow(width, height, "Blaster!",
-            if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)
-        if (!isFullscreen) {
-            glfwSetWindowPos(handle!!, (FULL_WIDTH - width)/2, (FULL_HEIGHT - height)/2)
-        }
-        if (isHoldingCursor) {
-            glfwSetInputMode(handle!!, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
-        }
-        glfwSetMouseButtonCallback(handle!!, buttonCallbackInternal)
-        glfwSetKeyCallback(handle!!, keyCallbackInternal)
-        glfwMakeContextCurrent(handle!!)
-        GL.createCapabilities()
-        glfwSwapInterval(1)
-        glfwShowWindow(handle!!)
     }
 
     private fun updateCursor(window: Long) {
