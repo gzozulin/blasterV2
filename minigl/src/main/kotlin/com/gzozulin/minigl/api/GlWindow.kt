@@ -30,9 +30,10 @@ fun glCloseWindow(window: GlWindow) {
 
 class GlWindow(
     private val winWidth: Int = 1024, private val winHeight: Int = 768,
-    private var isHoldingCursor: Boolean = false,
-    private var isFullscreen: Boolean = false,
-    private var isMultisampling: Boolean = false) {
+    private val isHoldingCursor: Boolean = false,
+    private val isFullscreen: Boolean = false,
+    private val isMultisampling: Boolean = false,
+    private val isHeadless: Boolean = false) {
 
     var handle: Long? = null
 
@@ -106,6 +107,9 @@ class GlWindow(
     private fun recreateWindow() {
         if (isMultisampling) {
             glfwWindowHint(GLFW_SAMPLES, MULTISAMPLING_HINT)
+        }
+        if (isHeadless) {
+            glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
         }
         handle = glfwCreateWindow(width, height, "Blaster!",
             if (isFullscreen) glfwGetPrimaryMonitor() else NULL, handle ?: NULL)

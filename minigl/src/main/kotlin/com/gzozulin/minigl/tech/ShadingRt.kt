@@ -3,12 +3,16 @@ package com.gzozulin.minigl.tech
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
+import kotlin.system.exitProcess
 
 private const val BATCH_CNT = 20
 
 private const val FRAMES_TO_CAPTURE = 5
 private val sampleCnt = consti(32)
 private val rayBounces = consti(3)
+
+private val window = GlWindow(isFullscreen = false, isHeadless = true)
+private val capturer = Capturer(window)
 
 data class ShadingRt(val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
@@ -177,9 +181,6 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = true)
-private val capturer = Capturer(window)
-
 /*private var mouseLook = false
 private val controller = ControllerFirstPerson(position = vec3(2f))
 private val wasdInput = WasdInput(controller)*/
@@ -271,6 +272,7 @@ fun main() {
                             val stop = System.currentTimeMillis()
                             glShadingRtDumpStats(start, stop)
                             glClear(col3().green())
+                            exitProcess(0)
                         }
                     }
                 //}
