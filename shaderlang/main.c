@@ -639,8 +639,8 @@ struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const f
 // ------------------- RAND -------------------
 
 custom
-struct vec3 seedRandom(const struct vec2 s) {
-    return v2tov3(s, 1.0f);
+struct vec3 seedRandom(const struct vec3 s) {
+    return s;
 }
 
 custom
@@ -1057,12 +1057,12 @@ struct vec3 sampleColor(const int rayBounces, const struct RtCamera camera, cons
 }
 
 public
-struct vec4 fragmentColorRt(int sampleCnt, int rayBounces,
+struct vec4 fragmentColorRt(const int time, int sampleCnt, int rayBounces,
                             const struct vec3 eye, const struct vec3 center, const struct vec3 up,
                             const float fovy, const float aspect,
                             const float aperture, const float focusDist,
                             const struct vec2 texCoord) {
-    seedRandom(texCoord);
+    seedRandom(v2tov3(texCoord, itof(time)));
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
     const float divSCnt = 1.0f / itof(sampleCnt);
@@ -1100,7 +1100,7 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
             const struct vec4 color = fragmentColorRt(
-                    2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+                    2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t), 123);
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);

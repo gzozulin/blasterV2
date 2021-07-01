@@ -44,9 +44,10 @@ private const val RANDOM_DECL = """
     }
     
     vec3 seed = vec3(0.0f, 0.0f, 0.0f);
-    vec3 seedRandom(vec2 s) {
+    vec3 seedRandom(vec3 s) {
         seed.x = s.x;
         seed.y = s.y;
+        seed.z = s.z;
         return seed;
     }
     
@@ -340,6 +341,11 @@ abstract class Cache<T> : Expression<T>() {
 }
 
 // ----------------------------- Uniforms -----------------------------
+
+fun unifi(p: () -> Int) = object : Uniform<Int>(p, null) {
+    override fun declare() = "uniform int $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
 
 fun uniff(v: Float? = null) = object : Uniform<Float>(null, v) {
     override fun declare() = "uniform float $name;"

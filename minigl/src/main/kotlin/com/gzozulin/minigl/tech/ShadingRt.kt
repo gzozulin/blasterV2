@@ -1,14 +1,15 @@
 package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val FRAMES_CNT = 100
-private const val SAMPLES_CNT = 32
-private const val SAMPLES_PER_BATCH = 32
+private const val FRAMES_CNT = Int.MAX_VALUE
+private const val SAMPLES_CNT = 128
+private const val SAMPLES_PER_BATCH = 1
 private const val BOUNCES_CNT = 3
+
+private val unifTime = unifi { System.currentTimeMillis().toInt() }
 
 data class ShadingRt(val window: GlWindow,
                      val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
@@ -16,21 +17,24 @@ data class ShadingRt(val window: GlWindow,
                      val fovy: Expression<Float>, val aspect: Expression<Float>,
                      val aperture: Expression<Float>, val focus: Expression<Float>) {
     internal val rect = glMeshCreateRect()
-
     private val matrix = constm4(mat4().orthoBox())
-    private val color = fragmentColorRt(
+
+    private val colorSampled = fragmentColorRt(
+        unifTime,
         sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
         namedTexCoordsV2())
 
-    internal val shadingFlat = ShadingFlat(matrix, color)
-    internal val techniqueRtt = TechniqueRtt(window)
-    internal val techniquePP = TechniquePostProcessing(window) { screen: GlTexture ->
-        val current = sampler(unifs(screen))
-        val delta = sampler(unifs(techniqueRtt.color))
-        return@TechniquePostProcessing divv4f(addv4(current, delta), constf(2f))
-    }
+    internal var currentBuffer = 0
+    internal val buffer0 = TechniqueRtt(window)
+    internal val buffer1 = TechniqueRtt(window)
+    internal val fromBuffer = unifs()
+    private val colorAdded = divv4f(addv4(sampler(fromBuffer), colorSampled), constf(2f)) // do not div if empty
+    internal val shadingSamples = ShadingFlat(matrix, colorAdded)
+
+    internal val unifPresent = unifs()
+    internal val shadingPresent = ShadingFlat(matrix, sampler(unifPresent))
 }
 
 private data class MaterialsCollection(val lambertians: List<LambertianMaterial>,
@@ -122,11 +126,13 @@ internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) 
 }
 
 fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
-    glShadingFlatUse(shadingRt.shadingFlat) {
-        glRttUse(shadingRt.techniqueRtt) {
-            glPostProcessingUse(shadingRt.techniquePP) {
-                glMeshUse(shadingRt.rect) {
-                    callback.invoke()
+    glShadingFlatUse(shadingRt.shadingSamples) {
+        glShadingFlatUse(shadingRt.shadingPresent) {
+            glRttUse(shadingRt.buffer0) {
+                glRttUse(shadingRt.buffer1) {
+                    glMeshUse(shadingRt.rect) {
+                        callback.invoke()
+                    }
                 }
             }
         }
@@ -134,29 +140,44 @@ fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
 }
 
 fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Any>, callback: Callback) {
-    glShadingFlatDraw(shadingRt.shadingFlat) {
-        glShadingRtSubmitHitables(shadingRt.shadingFlat.program, hitables)
+    glShadingFlatDraw(shadingRt.shadingSamples) {
+        glShadingRtSubmitHitables(shadingRt.shadingSamples.program, hitables)
         callback.invoke()
     }
 }
 
-fun glShadingRtInstance(shadingRt: ShadingRt) {
-    val iterations = SAMPLES_CNT / SAMPLES_PER_BATCH
-    for (i in 0 until iterations) {
-        glRttDraw(shadingRt.techniqueRtt) {
-            glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
+fun glShadingRtSamples(shadingRt: ShadingRt) {
+    val to: TechniqueRtt
+    val from: TechniqueRtt
+    when (shadingRt.currentBuffer) {
+        0 -> {
+            to = shadingRt.buffer0
+            from = shadingRt.buffer1
+            shadingRt.currentBuffer = 1
         }
-        glTextureBind(shadingRt.techniqueRtt.color) {
-            glPostProcessingDraw(shadingRt.techniquePP) {
-                glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
-            }
+        1 -> {
+            to = shadingRt.buffer1
+            from = shadingRt.buffer0
+            shadingRt.currentBuffer = 0
         }
-        window.throttle()
+        else -> error("Wtf!?")
+    }
+    glRttDraw(to) {
+        glTextureBind(from.color) {
+            shadingRt.fromBuffer.value = from.color
+            glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
+        }
+    }
+    glShadingFlatDraw(shadingRt.shadingPresent) {
+        glTextureBind(to.color) {
+            shadingRt.unifPresent.value = to.color
+            glShadingFlatInstance(shadingRt.shadingPresent, shadingRt.rect)
+        }
     }
 }
 
-private val window = GlWindow(isFullscreen = true)
-private val capturer = Capturer(window)
+private val window = GlWindow(isFullscreen = false)
+//private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
@@ -170,8 +191,8 @@ private val controller = ControllerScenic(
 private val sampleCnt = consti(SAMPLES_PER_BATCH)
 private val rayBounces = consti(BOUNCES_CNT)
 
-private val eye = unifv3()
-private val center = unifv3()
+private val eye = unifv3(vec3(-5f, 0.7f, -5f))
+private val center = unifv3(vec3())
 private val up = constv3(vec3().up())
 
 private val fovy = constf(radf(90.0f))
@@ -220,16 +241,16 @@ fun main() {
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0
-                capturer.capture {
+                //capturer.capture {
                     val start = System.currentTimeMillis()
                     window.show {
-                        controller.apply { position, direction ->
+                        /*controller.apply { position, direction ->
                             eye.value = position
                             center.value = vec3().set(position).add(direction)
-                        }
+                        }*/
                         if (frame < FRAMES_CNT) {
-                            glShadingRtInstance(shadingRt)
-                            capturer.addFrame()
+                            glShadingRtSamples(shadingRt)
+                            //capturer.addFrame()
                             frame++
                         } else {
                             val stop = System.currentTimeMillis()
@@ -237,7 +258,7 @@ fun main() {
                             exitProcess(0)
                         }
                     }
-                }
+                //}
             }
         }
     }
