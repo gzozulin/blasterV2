@@ -18,7 +18,7 @@ data class ShadingRt(val window: GlWindow,
     internal val rect = glMeshCreateRect()
     private val matrix = constm4(mat4().orthoBox())
 
-    private val unifRandom = uniff { Math.random().toFloat() }
+    internal val unifRandom = uniff()
     private val colorSampled = fragmentColorRt(
         unifRandom, sampleCnt, rayBounces,
         eye, center, up,
@@ -170,12 +170,11 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
             }
             else -> error("Wtf!?")
         }
-        glShadingFlatDraw(shadingRt.shadingSamples) {
-            glRttDraw(to) {
-                glTextureBind(from.color) {
-                    shadingRt.fromBuffer.value = from.color
-                    glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
-                }
+        shadingRt.unifRandom.value = Math.random().toFloat()
+        glRttDraw(to) {
+            glTextureBind(from.color) {
+                shadingRt.fromBuffer.value = from.color
+                glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
             }
         }
         glShadingFlatDraw(shadingRt.shadingPresent) {
@@ -188,7 +187,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = true)
+private val window = GlWindow(isFullscreen = false)
 //private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
