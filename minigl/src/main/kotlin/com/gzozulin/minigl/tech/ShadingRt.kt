@@ -6,7 +6,8 @@ import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = Int.MAX_VALUE
 private const val SAMPLES_PER_BATCH = 16
-private const val SAMPLES_CNT = 512
+private const val SAMPLES_CNT = 128
+private const val ITERATIONS = SAMPLES_CNT / SAMPLES_PER_BATCH
 private const val BOUNCES_CNT = 3
 
 data class ShadingRt(val window: GlWindow,
@@ -28,7 +29,7 @@ data class ShadingRt(val window: GlWindow,
     internal val buffer0 = TechniqueRtt(window)
     internal val buffer1 = TechniqueRtt(window)
     internal val fromBuffer = unifs()
-    private val contribution = constf(SAMPLES_PER_BATCH.toFloat() / SAMPLES_CNT.toFloat())
+    private val contribution = constf(1f / ITERATIONS)
     private val colorAdded = addv4(sampler(fromBuffer), mulv4f(colorSampled, contribution))
     internal val shadingSamples = ShadingFlat(matrix, colorAdded)
 
@@ -187,7 +188,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 //private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(

@@ -47,8 +47,10 @@
       <w>tproj</w>
       <w>transp</w>
       <w>tview</w>
+      <w>uint</w>
       <w>unif</w>
       <w>usampler</w>
+      <w>uvec</w>
       <w>vrbl</w>
     </words>
   </dictionary>
