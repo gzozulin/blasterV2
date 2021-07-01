@@ -5,11 +5,13 @@ import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = Int.MAX_VALUE
-private const val SAMPLES_CNT = 128
-private const val SAMPLES_PER_BATCH = 1
+private const val SAMPLES_PER_BATCH = 16
+private const val SAMPLES_CNT = 512
 private const val BOUNCES_CNT = 3
 
-private val unifTime = unifi { System.currentTimeMillis().toInt() }
+private val started = System.currentTimeMillis()
+
+private val unifTime = uniff { (System.currentTimeMillis() - started).toFloat() / 1000f }
 
 data class ShadingRt(val window: GlWindow,
                      val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
@@ -20,8 +22,7 @@ data class ShadingRt(val window: GlWindow,
     private val matrix = constm4(mat4().orthoBox())
 
     private val colorSampled = fragmentColorRt(
-        unifTime,
-        sampleCnt, rayBounces,
+        unifTime, sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
         namedTexCoordsV2())
@@ -30,7 +31,8 @@ data class ShadingRt(val window: GlWindow,
     internal val buffer0 = TechniqueRtt(window)
     internal val buffer1 = TechniqueRtt(window)
     internal val fromBuffer = unifs()
-    private val colorAdded = divv4f(addv4(sampler(fromBuffer), colorSampled), constf(2f)) // do not div if empty
+    private val contribution = constf(SAMPLES_PER_BATCH.toFloat() / SAMPLES_CNT.toFloat())
+    private val colorAdded = addv4(sampler(fromBuffer), mulv4f(colorSampled, contribution))
     internal val shadingSamples = ShadingFlat(matrix, colorAdded)
 
     internal val unifPresent = unifs()
@@ -146,33 +148,43 @@ fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Any>, callback: Callbac
     }
 }
 
-fun glShadingRtSamples(shadingRt: ShadingRt) {
-    val to: TechniqueRtt
-    val from: TechniqueRtt
-    when (shadingRt.currentBuffer) {
-        0 -> {
-            to = shadingRt.buffer0
-            from = shadingRt.buffer1
-            shadingRt.currentBuffer = 1
-        }
-        1 -> {
-            to = shadingRt.buffer1
-            from = shadingRt.buffer0
-            shadingRt.currentBuffer = 0
-        }
-        else -> error("Wtf!?")
+fun glShadingRtInstance(shadingRt: ShadingRt) {
+    glRttDraw(shadingRt.buffer0) {
+        glClear(col3().black())
     }
-    glRttDraw(to) {
-        glTextureBind(from.color) {
-            shadingRt.fromBuffer.value = from.color
-            glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
-        }
+    glRttDraw(shadingRt.buffer1) {
+        glClear(col3().black())
     }
-    glShadingFlatDraw(shadingRt.shadingPresent) {
-        glTextureBind(to.color) {
-            shadingRt.unifPresent.value = to.color
-            glShadingFlatInstance(shadingRt.shadingPresent, shadingRt.rect)
+    val iterations = SAMPLES_CNT / SAMPLES_PER_BATCH
+    for (i in 0 until iterations) {
+        val to: TechniqueRtt
+        val from: TechniqueRtt
+        when (shadingRt.currentBuffer) {
+            0 -> {
+                to = shadingRt.buffer0
+                from = shadingRt.buffer1
+                shadingRt.currentBuffer = 1
+            }
+            1 -> {
+                to = shadingRt.buffer1
+                from = shadingRt.buffer0
+                shadingRt.currentBuffer = 0
+            }
+            else -> error("Wtf!?")
         }
+        glRttDraw(to) {
+            glTextureBind(from.color) {
+                shadingRt.fromBuffer.value = from.color
+                glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
+            }
+        }
+        glShadingFlatDraw(shadingRt.shadingPresent) {
+            glTextureBind(to.color) {
+                shadingRt.unifPresent.value = to.color
+                glShadingFlatInstance(shadingRt.shadingPresent, shadingRt.rect)
+            }
+        }
+        window.throttle()
     }
 }
 
@@ -191,8 +203,8 @@ private val controller = ControllerScenic(
 private val sampleCnt = consti(SAMPLES_PER_BATCH)
 private val rayBounces = consti(BOUNCES_CNT)
 
-private val eye = unifv3(vec3(-5f, 0.7f, -5f))
-private val center = unifv3(vec3())
+private val eye = unifv3()
+private val center = unifv3()
 private val up = constv3(vec3().up())
 
 private val fovy = constf(radf(90.0f))
@@ -244,12 +256,12 @@ fun main() {
                 //capturer.capture {
                     val start = System.currentTimeMillis()
                     window.show {
-                        /*controller.apply { position, direction ->
+                        controller.apply { position, direction ->
                             eye.value = position
                             center.value = vec3().set(position).add(direction)
-                        }*/
+                        }
                         if (frame < FRAMES_CNT) {
-                            glShadingRtSamples(shadingRt)
+                            glShadingRtInstance(shadingRt)
                             //capturer.addFrame()
                             frame++
                         } else {

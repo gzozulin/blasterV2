@@ -1057,12 +1057,12 @@ struct vec3 sampleColor(const int rayBounces, const struct RtCamera camera, cons
 }
 
 public
-struct vec4 fragmentColorRt(const int time, int sampleCnt, int rayBounces,
+struct vec4 fragmentColorRt(const float time, int sampleCnt, int rayBounces,
                             const struct vec3 eye, const struct vec3 center, const struct vec3 up,
                             const float fovy, const float aspect,
                             const float aperture, const float focusDist,
                             const struct vec2 texCoord) {
-    seedRandom(v2tov3(texCoord, itof(time)));
+    seedRandom(v2tov3(texCoord, time));
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
     const float divSCnt = 1.0f / itof(sampleCnt);
