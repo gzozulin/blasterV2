@@ -5,8 +5,8 @@ import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val FRAMES_CNT = 1
-private const val SAMPLES_CNT = 4096
+private const val FRAMES_CNT = 100
+private const val SAMPLES_CNT = 32
 private const val SAMPLES_PER_BATCH = 32
 private const val BOUNCES_CNT = 3
 
