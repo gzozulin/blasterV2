@@ -125,10 +125,14 @@ class GlWindow(
         while (!glfwWindowShouldClose(handle!!)) {
             updateCursor(handle!!)
             onFrame.invoke()
-            glfwSwapBuffers(handle!!)
-            glfwPollEvents()
+            throttle()
             updateFps()
         }
+    }
+
+    fun throttle() {
+        glfwSwapBuffers(handle!!)
+        glfwPollEvents()
     }
 
     private fun updateCursor(window: Long) {

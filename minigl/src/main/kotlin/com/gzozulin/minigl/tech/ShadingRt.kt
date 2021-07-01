@@ -6,7 +6,7 @@ import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = 1
-private const val SAMPLES_CNT = 256
+private const val SAMPLES_CNT = 4096
 private const val SAMPLES_PER_BATCH = 32
 private const val BOUNCES_CNT = 3
 
@@ -151,6 +151,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
                 glShadingFlatInstance(shadingRt.shadingFlat, shadingRt.rect)
             }
         }
+        window.throttle()
     }
 }
 
