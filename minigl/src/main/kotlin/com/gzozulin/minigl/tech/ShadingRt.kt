@@ -6,8 +6,8 @@ import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = 1
-private const val SAMPLES_CNT = 128
-private const val SAMPLES_PER_BATCH = 128
+private const val SAMPLES_CNT = 256
+private const val SAMPLES_PER_BATCH = 32
 private const val BOUNCES_CNT = 3
 
 data class ShadingRt(val window: GlWindow,
@@ -154,7 +154,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
@@ -233,7 +233,6 @@ fun main() {
                         } else {
                             val stop = System.currentTimeMillis()
                             glShadingRtDumpStats(start, stop)
-                            glClear(col3().green())
                             exitProcess(0)
                         }
                     }
