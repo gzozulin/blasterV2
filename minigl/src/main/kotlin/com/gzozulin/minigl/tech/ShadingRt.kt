@@ -9,10 +9,6 @@ private const val SAMPLES_PER_BATCH = 16
 private const val SAMPLES_CNT = 512
 private const val BOUNCES_CNT = 3
 
-private val started = System.currentTimeMillis()
-
-private val unifTime = uniff { (System.currentTimeMillis() - started).toFloat() / 1000f }
-
 data class ShadingRt(val window: GlWindow,
                      val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
@@ -21,8 +17,9 @@ data class ShadingRt(val window: GlWindow,
     internal val rect = glMeshCreateRect()
     private val matrix = constm4(mat4().orthoBox())
 
+    private val unifRandom = uniff { Math.random().toFloat() }
     private val colorSampled = fragmentColorRt(
-        unifTime, sampleCnt, rayBounces,
+        unifRandom, sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
         namedTexCoordsV2())
@@ -172,10 +169,12 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
             }
             else -> error("Wtf!?")
         }
-        glRttDraw(to) {
-            glTextureBind(from.color) {
-                shadingRt.fromBuffer.value = from.color
-                glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
+        glShadingFlatDraw(shadingRt.shadingSamples) {
+            glRttDraw(to) {
+                glTextureBind(from.color) {
+                    shadingRt.fromBuffer.value = from.color
+                    glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
+                }
             }
         }
         glShadingFlatDraw(shadingRt.shadingPresent) {

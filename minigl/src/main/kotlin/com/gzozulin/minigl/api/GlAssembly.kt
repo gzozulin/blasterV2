@@ -53,6 +53,9 @@ private const val RANDOM_DECL = """
     
     float randf() {
         seed.z += FLT_MIN;
+        if (seed.z >= 1.0f) {
+            seed.z = 0.0f;
+        }
         uint mantissaMask = 0x007FFFFFu;
         uint one = 0x3F800000u;
         uvec3 u = floatBitsToUint(seed);
