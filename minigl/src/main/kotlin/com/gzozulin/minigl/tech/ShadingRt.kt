@@ -153,8 +153,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     glRttDraw(shadingRt.buffer1) {
         glClear(col3().black())
     }
-    val iterations = SAMPLES_CNT / SAMPLES_PER_BATCH
-    for (i in 0 until iterations) {
+    for (i in 0 until ITERATIONS) {
         val to: TechniqueRtt
         val from: TechniqueRtt
         when (shadingRt.currentBuffer) {
@@ -170,10 +169,11 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
             }
             else -> error("Wtf!?")
         }
-        shadingRt.unifRandom.value = Math.random().toFloat()
+
         glRttDraw(to) {
             glTextureBind(from.color) {
                 shadingRt.fromBuffer.value = from.color
+                shadingRt.unifRandom.value = Math.random().toFloat()
                 glShadingFlatInstance(shadingRt.shadingSamples, shadingRt.rect)
             }
         }
