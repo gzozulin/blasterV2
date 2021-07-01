@@ -29,8 +29,7 @@ data class ShadingRt(val window: GlWindow,
     internal val buffer0 = TechniqueRtt(window)
     internal val buffer1 = TechniqueRtt(window)
     internal val fromBuffer = unifs()
-    private val contribution = constf(1f / ITERATIONS)
-    private val colorAdded = addv4(sampler(fromBuffer), mulv4f(colorSampled, contribution))
+    private val colorAdded = mulv4f(addv4(colorSampled, sampler(fromBuffer)), constf(1f/2f))
     internal val shadingSamples = ShadingFlat(matrix, colorAdded)
 
     internal val unifPresent = unifs()
