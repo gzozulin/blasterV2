@@ -1062,7 +1062,9 @@ struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
                             const float fovy, const float aspect,
                             const float aperture, const float focusDist,
                             const struct vec2 texCoord) {
+
     seedRandom(v2tov3(texCoord, random));
+
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
     const float divSCnt = 1.0f / itof(sampleCnt);
@@ -1071,7 +1073,6 @@ struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
         const float d = itof(i) * divSCnt;
-
         const float du = DU * d;
         const float dv = DV * d;
         const float sampleU = texCoord.x + du;
