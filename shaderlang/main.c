@@ -1067,22 +1067,22 @@ struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
 
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
-    const float divSCnt = 1.0f / itof(sampleCnt);
 
     const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
-        const float d = itof(i) * divSCnt;
-        const float du = DU * d;
-        const float dv = DV * d;
+        const float du = DU * randf();
+        const float dv = DV * randf();
         const float sampleU = texCoord.x + du;
         const float sampleV = texCoord.y + dv;
         result = addv3(result, sampleColor(rayBounces, camera, sampleU, sampleV));
     }
-
-    result = divv3f(result, itof(sampleCnt));
-    result = v3(sqrt(result.x), sqrt(result.y), sqrt(result.z));
     return v3tov4(result, 1.0f);
+}
+
+public
+struct vec4 gammaSqrt(const struct vec4 result) {
+    return v4(sqrt(result.x), sqrt(result.y), sqrt(result.z), 1.0f);
 }
 
 void raytracer() {
@@ -1101,7 +1101,7 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
             const struct vec4 color = fragmentColorRt(
-                    2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t), 123);
+                    123, 2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);

@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryUtil.NULL
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlin.system.exitProcess
 
 private const val FULL_WIDTH: Int = 1920
 private const val FULL_HEIGHT: Int = 1080
@@ -59,11 +60,6 @@ class GlWindow(
 
     private val keyCallbackInternal = object : GLFWKeyCallback() {
         override fun invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
-            if (action == GLFW_PRESS) {
-                when (key) {
-                    GLFW_KEY_ESCAPE -> glCloseWindow(this@GlWindow)
-                }
-            }
             keyCallback?.invoke(key, action == GLFW_PRESS || action == GLFW_REPEAT)
         }
     }
@@ -130,9 +126,14 @@ class GlWindow(
         }
     }
 
-    fun throttle() {
+    fun throttle(): Boolean {
+        if (glfwGetKey(handle!!, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glCloseWindow(this@GlWindow)
+            return true
+        }
         glfwSwapBuffers(handle!!)
         glfwPollEvents()
+        return false
     }
 
     private fun updateCursor(window: Long) {

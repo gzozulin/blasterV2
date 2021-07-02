@@ -357,6 +357,11 @@ abstract class Cache<T> : Expression<T>() {
 
 // ----------------------------- Uniforms -----------------------------
 
+fun unifi(v: Int? = null) = object : Uniform<Int>(null, v) {
+    override fun declare() = "uniform int $name;"
+    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
+}
+
 fun unifi(p: () -> Int) = object : Uniform<Int>(p, null) {
     override fun declare() = "uniform int $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
