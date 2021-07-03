@@ -28,6 +28,10 @@ private const val GENERAL_DECL = """
     #define BOUNCE_ERR      0.001f
 """
 
+private const val ERR_DECL = """
+    bool errorFlag = false;
+"""
+
 private const val RANDOM_DECL = """
     // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
     // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
@@ -266,7 +270,7 @@ private const val EXPR_GET_NORMAL = """
 """
 
 private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$GENERAL_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$CAMERA_DECL\n$SPHERE_DECL\n" +
+    "$EXPR_PI\n$GENERAL_DECL\n$ERR_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$CAMERA_DECL\n$SPHERE_DECL\n" +
     "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$HITABLE_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
     "$HITABLES\n$SPHERES\n$MATERIALS\n"
 

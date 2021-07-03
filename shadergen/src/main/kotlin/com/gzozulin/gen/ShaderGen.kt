@@ -100,6 +100,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "ScatterResult"         -> "ScatterResult"
     "RefractResult"         -> "RefractResult"
     "RtCamera"              -> "RtCamera"
+    "AABB"                  -> "aabb"
     else                    -> error("Unknown type! $ctype")
 }
 

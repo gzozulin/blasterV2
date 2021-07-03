@@ -5,9 +5,9 @@ import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val FRAMES_CNT = 1
-private const val SAMPLES_PER_BATCH = 8
-private const val SAMPLES_CNT = 4096
+private const val FRAMES_CNT = Int.MAX_VALUE
+private const val SAMPLES_PER_BATCH = 1
+private const val SAMPLES_CNT = 16
 private const val BOUNCES_CNT = 3
 
 data class ShadingRt(val window: GlWindow,
@@ -19,11 +19,11 @@ data class ShadingRt(val window: GlWindow,
     private val matrix = constm4(mat4().orthoBox())
 
     internal val unifRandom = uniff()
-    private val colorSampled = fragmentColorRt(
+    private val colorSampled = errorHandler(fragmentColorRt(
         unifRandom, sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
-        namedTexCoordsV2())
+        namedTexCoordsV2()))
 
     internal var currentBuffer = 0
     internal val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
@@ -192,8 +192,8 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = true)
-private val capturer = Capturer(window)
+private val window = GlWindow(isFullscreen = false)
+//private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
@@ -257,7 +257,7 @@ fun main() {
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0
-                capturer.capture {
+                //capturer.capture {
                     val start = System.currentTimeMillis()
                     window.show {
                         controller.apply { position, direction ->
@@ -266,7 +266,7 @@ fun main() {
                         }
                         if (frame < FRAMES_CNT) {
                             glShadingRtInstance(shadingRt)
-                            capturer.addFrame()
+                            //capturer.addFrame()
                             frame++
                         } else {
                             val stop = System.currentTimeMillis()
@@ -274,7 +274,7 @@ fun main() {
                             exitProcess(0)
                         }
                     }
-                }
+                //}
             }
         }
     }

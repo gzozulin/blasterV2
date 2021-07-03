@@ -15,8 +15,9 @@
 
 #define sqrt sqrtf
 #define pow powf
-#define max fmaxf
 #define tan tanf
+#define min fminf
+#define max fmaxf
 
 #define PI 3.14159265359f
 
@@ -30,15 +31,6 @@
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16
 #define MAX_DIELECTRICS         16
-
-// Corresponds to HitableType
-#define HITABLE_HITABLE         0
-#define HITABLE_SPHERE          1
-
-// Corresponds to MaterialType
-#define MATERIAL_LAMBERTIAN     0
-#define MATERIAL_METALIIC       1
-#define MATERIAL_DIELECTRIC     2
 
 // ------------------- TYPES -------------------
 
@@ -103,16 +95,21 @@ struct PhongMaterial {
     float transparency;
 };
 
+struct Hitable {
+    int type;
+    int index;
+};
+
+struct AABB {
+    struct vec3 pointMin;
+    struct vec3 pointMax;
+};
+
 struct Sphere {
     struct vec3 center;
     float radius;
     int materialType;
     int materialIndex;
-};
-
-struct Hitable {
-    int type;
-    int index;
 };
 
 struct LambertianMaterial {
@@ -159,6 +156,10 @@ const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f,
 
 // ------------------- HITABLES -------------------
 
+// Corresponds to HitableType
+#define HITABLE_HITABLE         0
+#define HITABLE_SPHERE          1
+
 const int uHitablesCnt = 4;
 const struct Hitable uHitables[MAX_HITABLES] = { { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 } };
 
@@ -173,9 +174,24 @@ const struct Sphere uSpheres[MAX_SPHERES] = {
 
 // ------------------- MATERIALS -------------------
 
+// Corresponds to MaterialType
+#define MATERIAL_LAMBERTIAN     0
+#define MATERIAL_METALIIC       1
+#define MATERIAL_DIELECTRIC     2
+
 const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
 const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
 const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
+
+// ------------------- ERROR -------------------
+
+bool errorFlag = false;
+
+public
+int error() {
+    errorFlag = true;
+    return 1;
+}
 
 // ------------------- CASTS -------------------
 
@@ -394,6 +410,16 @@ struct Ray rayBack() {
 }
 
 // ------------------- GETRS ---------------
+
+public
+float indexv3(const struct vec3 v, const int index) {
+    switch (index) {
+        case 0: return v.x;
+        case 1: return v.y;
+        case 2: return v.z;
+        default: error(); return v.x;
+    }
+}
 
 public
 float getxv4(const struct vec4 v) {
@@ -672,6 +698,26 @@ struct vec3 randomInUnitDisk() {
     return normv3(result); // wrong, but should not happen
 }
 
+// ------------------- ERR_HANDLER ---------------
+
+public
+struct vec4 errorHandler(struct vec4 color) {
+    if (errorFlag) {
+        struct vec3 signal;
+        float check = randf();
+        if (check > 0.6f) {
+            signal = v3red();
+        } else if (check > 0.3f) {
+            signal = v3blue();
+        } else {
+            signal = v3green();
+        }
+        return v3tov4(signal, 1.0f);
+    } else {
+        return color;
+    }
+}
+
 // ------------------- TILE ---------------
 
 public
@@ -906,6 +952,11 @@ struct vec3 background(const struct Ray ray) {
     const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return gradient;
 }
+
+/*public
+bool rayHitAabb(const struct Ray ray, const struct AABB aabb, const float tMin, const float tMax) {
+    return true;
+}*/
 
 public
 struct HitRecord raySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
