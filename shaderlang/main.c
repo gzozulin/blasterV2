@@ -1152,7 +1152,7 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
             const struct vec4 color = fragmentColorRt(
-                    123, 2048, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+                    123, 16, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);

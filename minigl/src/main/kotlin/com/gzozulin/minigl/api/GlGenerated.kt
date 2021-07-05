@@ -1,16 +1,16 @@
 package com.gzozulin.minigl.api
 
 import com.gzozulin.minigl.scene.Light
-import com.gzozulin.minigl.scene.Hitable
-import com.gzozulin.minigl.scene.RtCamera
-import com.gzozulin.minigl.scene.HitRecord
-import com.gzozulin.minigl.scene.ScatterResult
-import com.gzozulin.minigl.scene.RefractResult
-import com.gzozulin.minigl.scene.Sphere
+import com.gzozulin.minigl.tech.Hitable
+import com.gzozulin.minigl.tech.RtCamera
+import com.gzozulin.minigl.tech.HitRecord
+import com.gzozulin.minigl.tech.ScatterResult
+import com.gzozulin.minigl.tech.RefractResult
+import com.gzozulin.minigl.tech.Sphere
 import com.gzozulin.minigl.scene.PhongMaterial
-import com.gzozulin.minigl.scene.LambertianMaterial
-import com.gzozulin.minigl.scene.MetallicMaterial
-import com.gzozulin.minigl.scene.DielectricMaterial
+import com.gzozulin.minigl.tech.LambertianMaterial
+import com.gzozulin.minigl.tech.MetallicMaterial
+import com.gzozulin.minigl.tech.DielectricMaterial
 
 private const val DEF_ERROR = "int error ( ) { errorFlag = true ; return 1 ; }\n\n"
 private const val DEF_FTOV2 = "vec2 ftov2 ( float v ) { return v2 ( v , v ) ; }\n\n"
@@ -118,7 +118,7 @@ private const val DEF_RAYHITHITABLE = "HitRecord rayHitHitable ( Ray ray , float
 private const val DEF_RAYHITWORLD = "HitRecord rayHitWorld ( Ray ray , float tMin , float tMax ) { HitRecord result = NO_HIT ; float closest = tMax ; for ( int i = 0 ; i < uHitablesCnt ; i ++ ) { Hitable hitable = uHitables [ i ] ; HitRecord hitRecord = rayHitHitable ( ray , tMin , closest , hitable ) ; if ( hitRecord . t > 0 ) { closest = hitRecord . t ; result = hitRecord ; } } return result ; }\n\n"
 private const val DEF_MATERIALSCATTERLAMBERTIAN = "ScatterResult materialScatterLambertian ( HitRecord record , LambertianMaterial material ) { vec3 tangent = addv3 ( record . point , record . normal ) ; vec3 direction = addv3 ( tangent , randomInUnitSphere ( ) ) ; ScatterResult result = { material . albedo , { record . point , subv3 ( direction , record . point ) } } ; return result ; }\n\n"
 private const val DEF_MATERIALSCATTERMETALIC = "ScatterResult materialScatterMetalic ( Ray ray , HitRecord record , MetallicMaterial material ) { vec3 reflected = reflectv3 ( ray . direction , record . normal ) ; if ( dotv3 ( reflected , record . normal ) > 0 ) { ScatterResult result = { material . albedo , { record . point , reflected } } ; return result ; } else { return NO_SCATTER ; } }\n\n"
-private const val DEF_MATERIALSCATTERDIELECTRIC = "ScatterResult materialScatterDielectric ( Ray ray , HitRecord record , DielectricMaterial material ) { float niOverNt ; float cosine ; vec3 outwardNormal ; float rdotn = dotv3 ( ray . direction , record . normal ) ; float dirlen = lenv3 ( ray . direction ) ; if ( rdotn > 0 ) { outwardNormal = negv3 ( record . normal ) ; niOverNt = material . reflectiveIndex ; cosine = material . reflectiveIndex * rdotn / dirlen ; } else { outwardNormal = record . normal ; niOverNt = 1.0f / material . reflectiveIndex ; cosine = - rdotn / dirlen ; } float reflectProbe ; RefractResult refractResult = refractv3 ( ray . direction , outwardNormal , niOverNt ) ; if ( refractResult . isRefracted ) { reflectProbe = schlick ( cosine , material . reflectiveIndex ) ; error ( ) ; } else { reflectProbe = 1.0f ; } vec3 scatteredDir ; if ( randf ( ) < reflectProbe ) { scatteredDir = reflectv3 ( ray . direction , record . normal ) ; } else { scatteredDir = refractResult . refracted ; } ScatterResult scatterResult = { v3one ( ) , { record . point , scatteredDir } } ; return scatterResult ; }\n\n"
+private const val DEF_MATERIALSCATTERDIELECTRIC = "ScatterResult materialScatterDielectric ( Ray ray , HitRecord record , DielectricMaterial material ) { float niOverNt ; float cosine ; vec3 outwardNormal ; float rdotn = dotv3 ( ray . direction , record . normal ) ; float dirlen = lenv3 ( ray . direction ) ; if ( rdotn > 0 ) { outwardNormal = negv3 ( record . normal ) ; niOverNt = material . reflectiveIndex ; cosine = material . reflectiveIndex * rdotn / dirlen ; } else { outwardNormal = record . normal ; niOverNt = 1.0f / material . reflectiveIndex ; cosine = - rdotn / dirlen ; } float reflectProbe ; RefractResult refractResult = refractv3 ( ray . direction , outwardNormal , niOverNt ) ; if ( refractResult . isRefracted ) { reflectProbe = schlick ( cosine , material . reflectiveIndex ) ; } else { reflectProbe = 1.0f ; } vec3 scatteredDir ; if ( randf ( ) < reflectProbe ) { scatteredDir = reflectv3 ( ray . direction , record . normal ) ; } else { scatteredDir = refractResult . refracted ; } ScatterResult scatterResult = { v3one ( ) , { record . point , scatteredDir } } ; return scatterResult ; }\n\n"
 private const val DEF_MATERIALSCATTER = "ScatterResult materialScatter ( Ray ray , HitRecord record ) { switch ( record . materialType ) { case MATERIAL_LAMBERTIAN : return materialScatterLambertian ( record , uLambertianMaterials [ record . materialIndex ] ) ; case MATERIAL_METALIIC : return materialScatterMetalic ( ray , record , uMetallicMaterials [ record . materialIndex ] ) ; case MATERIAL_DIELECTRIC : return materialScatterDielectric ( ray , record , uDielectricMaterials [ record . materialIndex ] ) ; default : return NO_SCATTER ; } }\n\n"
 private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( int rayBounces , RtCamera camera , float u , float v ) { Ray ray = rayFromCamera ( camera , u , v ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < rayBounces ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = materialScatter ( ray , record ) ; if ( scatterResult . attenuation . x < 0 ) { return v3zero ( ) ; } fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n\n"
 private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / WIDTH ; float DV = 1.0f / HEIGHT ; RtCamera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * randf ( ) ; float dv = DV * randf ( ) ; float sampleU = texCoord . x + du ; float sampleV = texCoord . y + dv ; result = addv3 ( result , sampleColor ( rayBounces , camera , sampleU , sampleV ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n\n"

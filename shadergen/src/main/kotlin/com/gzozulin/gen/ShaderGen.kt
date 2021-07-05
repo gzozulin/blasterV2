@@ -31,16 +31,16 @@ private fun doCreateOutput(content: String, file: File) {
 private fun renderAssembly(operations: List<COperation>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
-            "import com.gzozulin.minigl.scene.Hitable\n" +
-            "import com.gzozulin.minigl.scene.RtCamera\n" +
-            "import com.gzozulin.minigl.scene.HitRecord\n" +
-            "import com.gzozulin.minigl.scene.ScatterResult\n" +
-            "import com.gzozulin.minigl.scene.RefractResult\n" +
-            "import com.gzozulin.minigl.scene.Sphere\n" +
+            "import com.gzozulin.minigl.tech.Hitable\n" +
+            "import com.gzozulin.minigl.tech.RtCamera\n" +
+            "import com.gzozulin.minigl.tech.HitRecord\n" +
+            "import com.gzozulin.minigl.tech.ScatterResult\n" +
+            "import com.gzozulin.minigl.tech.RefractResult\n" +
+            "import com.gzozulin.minigl.tech.Sphere\n" +
             "import com.gzozulin.minigl.scene.PhongMaterial\n" +
-            "import com.gzozulin.minigl.scene.LambertianMaterial\n" +
-            "import com.gzozulin.minigl.scene.MetallicMaterial\n" +
-            "import com.gzozulin.minigl.scene.DielectricMaterial\n\n"
+            "import com.gzozulin.minigl.tech.LambertianMaterial\n" +
+            "import com.gzozulin.minigl.tech.MetallicMaterial\n" +
+            "import com.gzozulin.minigl.tech.DielectricMaterial\n\n"
     operations.forEach { operation ->
         if (operation.access == COperationAccess.PUBLIC) {
             result += renderDefinition(operation) + "\n"

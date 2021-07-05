@@ -10,6 +10,22 @@ private const val SAMPLES_PER_BATCH = 1
 private const val SAMPLES_CNT = 16
 private const val BOUNCES_CNT = 3
 
+enum class HitableType { HITABLE, SPHERE }
+enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
+
+object HitRecord // placeholder
+object ScatterResult // placeholder
+object RefractResult // placeholder
+object RtCamera // placeholder
+
+interface RtMaterial
+data class LambertianMaterial(val albedo: vec3) : RtMaterial
+data class MetallicMaterial(val albedo: vec3) : RtMaterial
+data class DielectricMaterial(val reflectiveIdx: Float) : RtMaterial
+
+interface Hitable
+data class Sphere(val center: vec3, val radius: Float, val material: RtMaterial): Hitable
+
 data class ShadingRt(val window: GlWindow,
                      val sampleCnt: Expression<Int>, val rayBounces: Expression<Int>,
                      val eye: Expression<vec3>, val center: Expression<vec3>, val up: Expression<vec3>,
@@ -51,7 +67,7 @@ private fun glShadingRtMaterialType(material: RtMaterial) = when (material) {
     else -> error("Unknown material!")
 }
 
-private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollection {
+private fun glShadingRtCollectMaterials(hitables: List<Hitable>): MaterialsCollection {
     val lambertians = mutableListOf<LambertianMaterial>()
     val metallics = mutableListOf<MetallicMaterial>()
     val dielectrics = mutableListOf<DielectricMaterial>()
@@ -89,7 +105,7 @@ private fun glShadingRtCollectMaterials(hitables: List<Any>): MaterialsCollectio
     return MaterialsCollection(distinctLambertians, distinctMetallics, distinctDielectrics, lookup)
 }
 
-internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Any>) {
+internal fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Hitable>) {
     check(hitables.size <= MAX_HITABLES) { "More hitables than defined in shader!" }
     glProgramCheckBound(program)
 
@@ -141,7 +157,7 @@ fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
     }
 }
 
-fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Any>, callback: Callback) {
+fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Hitable>, callback: Callback) {
     glShadingFlatDraw(shadingRt.shadingSamples) {
         glShadingRtSubmitHitables(shadingRt.shadingSamples.program, hitables)
         callback.invoke()
