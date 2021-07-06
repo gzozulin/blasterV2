@@ -160,25 +160,20 @@ const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f,
 // ------------------- HITABLES -------------------
 
 // Corresponds to HitableType
-#define HITABLE_NONE             0
-#define HITABLE_BVH              1
-#define HITABLE_SPHERE           2
+#define HITABLE_BVH              0
+#define HITABLE_SPHERE           1
 
-const struct BvhNode uBvhNodes[MAX_BVH] = { { { {-1, -1, -1 }, { 1, 1, 1 } }, 0, 0, 0, 0 } };
-
-/*struct BvhNode testBvh[3] = {
+const struct BvhNode uBvhNodes[MAX_BVH] = {
         { { { -100, -100, -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
-        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0, HITABLE_NONE, -1 },
-        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1, HITABLE_NONE, -1 },
-};*/
+        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0, -1, -1 },
+        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1, -1, -1 }
+};
 
 // ------------------- SPHERES -------------------
 
 const struct Sphere uSpheres[MAX_SPHERES] = {
-        { { 0, -1000, 0 }, 1000, 0, 0 },
-        { { 0, 1, 0 }, 1, 0, 1 },
-        { { -4, 1, 0 }, 1, 1, 0 },
-        { { 4, 1, 0 }, 1, 2, 0 }
+        { { -50, -50, -50 }, 50, 0, 0 },
+        { {  50,  50,  50 }, 50, 1, 0 }
 };
 
 // ------------------- MATERIALS -------------------
@@ -1034,8 +1029,8 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
     int top = 0;
     int curr = index;
 
-    while (curr != HITABLE_NONE || top > 0) {
-        while (curr != HITABLE_NONE && rayHitAabb(ray, uBvhNodes[curr].aabb, tMin, closest)) {
+    while (curr >= 0) {
+        while (curr >= 0 && rayHitAabb(ray, uBvhNodes[curr].aabb, tMin, closest)) {
             if (uBvhNodes[curr].leftType == HITABLE_BVH) {
                 stack[top] = curr;
                 top++;
@@ -1051,6 +1046,10 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
         }
 
         top--;
+        if (top < 0) {
+            break;
+        }
+
         curr = stack[top];
         curr = uBvhNodes[curr].rightIndex;
     }
@@ -1202,7 +1201,7 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
             const struct vec4 color = fragmentColorRt(
-                    123, 16, 4, v3(0, 1.0f, -5.0f), v3zero(), v3down(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+                    1, 1, 4, v3(0, 0, 250.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);
@@ -1219,13 +1218,6 @@ void raytracer() {
         fprintf(f, "\n");
     }
     fclose(f);
-}
-
-void testBvh() {
-    struct vec3 origin = { 100, 100, 100 };
-    struct vec3 center = { -100, -100, -100 };
-    struct Ray ray = { origin, subv3(center, origin) };
-    rayHitBvh(ray, 0, 10000, 0);
 }
 
 // ------------------- LOGGING ---------------
@@ -1267,8 +1259,7 @@ int main() {
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
     assert(eqv3(rayPoint(rayBack(), 10.0f), v3(0, 0, -10)));
-    testBvh();
-    //raytracer();
+    raytracer();
     return 0;
 }
 

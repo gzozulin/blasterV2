@@ -9,7 +9,7 @@ private const val SAMPLES_PER_BATCH = 1
 private const val SAMPLES_CNT = 16
 private const val BOUNCES_CNT = 3
 
-enum class HitableType { NONE, BVH, SPHERE }
+enum class HitableType { BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
 
 object HitRecord // placeholder
@@ -208,7 +208,7 @@ private fun glShadingRtSubmitBvh(program: GlProgram, node: BvhNode, hitablesColl
             else -> error("Unknown hitable!")
         }
     } else {
-        HitableType.NONE.ordinal to -1
+        -1 to -1
     }
     
     glProgramArrayUniform(program, "uBvhNodes[%d].leftType", index, leftType)
@@ -225,7 +225,7 @@ private fun glShadingRtSubmitBvh(program: GlProgram, node: BvhNode, hitablesColl
             else -> error("Unknown hitable!")
         }
     } else {
-        HitableType.NONE.ordinal to -1
+        -1 to -1
     }
 
     glProgramArrayUniform(program, "uBvhNodes[%d].rightType", index, rightType)
