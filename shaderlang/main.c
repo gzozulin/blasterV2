@@ -1049,7 +1049,6 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
         if (top < 0) {
             break;
         }
-
         curr = stack[top];
         curr = uBvhNodes[curr].rightIndex;
     }
@@ -1200,8 +1199,10 @@ void raytracer() {
         for (int u = 0; u < WIDTH; u++) {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
-            const struct vec4 color = fragmentColorRt(
-                    1, 1, 4, v3(0, 0, 250.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+
+            struct vec4 color = fragmentColorRt(
+                    randf(), 8, 4, v3(0, 0, 250.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
+            color = divv4f(color, 8);
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);

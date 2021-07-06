@@ -4,7 +4,7 @@ import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val FRAMES_CNT = Int.MAX_VALUE
+private const val FRAMES_CNT = 50
 private const val SAMPLES_PER_BATCH = 1
 private const val SAMPLES_CNT = 16
 private const val BOUNCES_CNT = 3
