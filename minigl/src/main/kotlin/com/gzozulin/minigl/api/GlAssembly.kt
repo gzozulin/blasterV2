@@ -191,9 +191,10 @@ private const val LIGHTS = """
 """
 
 private const val HITABLES = """
-    #define HITABLE_NONE            (-1)
-    #define HITABLE_BVH              0
-    #define HITABLE_SPHERE           1
+    #define HITABLE_NONE             0
+    #define HITABLE_BVH              1
+    #define HITABLE_SPHERE           2
+    #define MAX_BVH                 128
     
     uniform BvhNode uBvhNodes[$MAX_BVH];
 """

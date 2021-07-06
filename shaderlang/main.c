@@ -1034,16 +1034,14 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
     int top = 0;
     int curr = index;
 
-    #define node uBvhNodes[curr]
-
     while (curr != HITABLE_NONE || top > 0) {
-        while (curr != HITABLE_NONE && rayHitAabb(ray, node.aabb, tMin, closest)) {
-            if (node.leftType == HITABLE_BVH) {
+        while (curr != HITABLE_NONE && rayHitAabb(ray, uBvhNodes[curr].aabb, tMin, closest)) {
+            if (uBvhNodes[curr].leftType == HITABLE_BVH) {
                 stack[top] = curr;
                 top++;
-                curr = node.leftIndex;
+                curr = uBvhNodes[curr].leftIndex;
             } else {
-                struct HitRecord hit = rayHitObject(ray, tMin, closest, node.leftType, node.leftIndex);
+                struct HitRecord hit = rayHitObject(ray, tMin, closest, uBvhNodes[curr].leftType, uBvhNodes[curr].leftIndex);
                 if (hit.t > 0 && hit.t < closest) {
                     result = hit;
                     closest = hit.t;
@@ -1054,10 +1052,9 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
 
         top--;
         curr = stack[top];
-        curr = node.rightIndex;
+        curr = uBvhNodes[curr].rightIndex;
     }
 
-    #undef node
     return result;
 }
 

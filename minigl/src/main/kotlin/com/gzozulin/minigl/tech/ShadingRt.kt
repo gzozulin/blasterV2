@@ -236,10 +236,14 @@ private fun glShadingRtSubmitBvh(program: GlProgram, node: BvhNode, hitablesColl
 
 private fun glShadingRtSubmitAll(program: GlProgram, hitables: List<Hitable>) {
     glProgramCheckBound(program)
+
     val materialsCollection = glShadingRtCollectMaterials(hitables)
     glShadingRtSubmitMaterials(program, materialsCollection)
+
     val hitablesCollection = glShadingRtCollectHitables(hitables)
     glShadingRtSubmitHitables(program, hitablesCollection, materialsCollection)
+
+    bvhIndex = 0
     val root = glShadingRtCreateBvh(hitables)
     glShadingRtSubmitBvh(program, root, hitablesCollection)
 }
