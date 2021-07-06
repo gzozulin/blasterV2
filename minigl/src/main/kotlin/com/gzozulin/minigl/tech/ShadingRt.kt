@@ -182,7 +182,7 @@ private fun glShadingRtCreateBvh(hitables: List<Hitable>): BvhNode {
 
     val threshold = sorted.size / 2
     val left = sorted.subList(0, threshold)
-    val right = sorted.subList(threshold + 1, sorted.size)
+    val right = sorted.subList(threshold, sorted.size)
     return BvhNode(aabb, glShadingRtCreateBvh(left), glShadingRtCreateBvh(right))
 }
 
