@@ -160,12 +160,17 @@ const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f,
 // ------------------- HITABLES -------------------
 
 // Corresponds to HitableType
-#define HITABLE_NONE            (-1)
-#define HITABLE_HITABLE          0
-#define HITABLE_SPHERE           1
+#define HITABLE_NONE             0
+#define HITABLE_BVH              1
+#define HITABLE_SPHERE           2
 
-const int uBvhNodesCnt = 1;
 const struct BvhNode uBvhNodes[MAX_BVH] = { { { {-1, -1, -1 }, { 1, 1, 1 } }, 0, 0, 0, 0 } };
+
+/*struct BvhNode testBvh[3] = {
+        { { { -100, -100, -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
+        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0, HITABLE_NONE, -1 },
+        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1, HITABLE_NONE, -1 },
+};*/
 
 // ------------------- SPHERES -------------------
 
@@ -1010,29 +1015,50 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
 }
 
 public
+struct HitRecord rayHitObject(const struct Ray ray, const float tMin, const float tMax, const int type, const int index) {
+    switch (type) {
+        case HITABLE_SPHERE:
+            return rayHitSphere(ray, tMin, tMax, uSpheres[index]);
+        default:
+            error();
+            return NO_HIT;
+    }
+}
+
+public
 struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float tMax, const int index) {
+    float closest = tMax;
+    struct HitRecord result = NO_HIT;
 
-    // TODO: Traverse with Stack
-
-
+    int stack[MAX_BVH];
+    int top = 0;
     int curr = index;
 
-    while (true) {
+    #define node uBvhNodes[curr]
 
-        const struct BvhNode node = uBvhNodes[curr];
-
-        if (!rayHitAabb(ray, node.aabb, tMin, tMax)) {
-            return NO_HIT;
+    while (curr != HITABLE_NONE || top > 0) {
+        while (curr != HITABLE_NONE && rayHitAabb(ray, node.aabb, tMin, closest)) {
+            if (node.leftType == HITABLE_BVH) {
+                stack[top] = curr;
+                top++;
+                curr = node.leftIndex;
+            } else {
+                struct HitRecord hit = rayHitObject(ray, tMin, closest, node.leftType, node.leftIndex);
+                if (hit.t > 0 && hit.t < closest) {
+                    result = hit;
+                    closest = hit.t;
+                }
+                break;
+            }
         }
 
+        top--;
+        curr = stack[top];
+        curr = node.rightIndex;
     }
 
-    switch (hitable.type) {
-        case HITABLE_SPHERE:
-            return rayHitSphere(ray, tMin, tMax, uSpheres[hitable.index]);
-        default:
-            return NO_HIT;
-    }
+    #undef node
+    return result;
 }
 
 public
@@ -1198,6 +1224,13 @@ void raytracer() {
     fclose(f);
 }
 
+void testBvh() {
+    struct vec3 origin = { 100, 100, 100 };
+    struct vec3 center = { -100, -100, -100 };
+    struct Ray ray = { origin, subv3(center, origin) };
+    rayHitBvh(ray, 0, 10000, 0);
+}
+
 // ------------------- LOGGING ---------------
 
 void printv3(const struct vec3 v) {
@@ -1237,7 +1270,8 @@ int main() {
     assert(lenv3(normv3(v3(10, 10, 10))) - 1.0f < FLT_EPSILON);
     assert(eqv3(lerpv3(v3zero(), v3one(), 0.5f), ftov3(0.5f)));
     assert(eqv3(rayPoint(rayBack(), 10.0f), v3(0, 0, -10)));
-    raytracer();
+    testBvh();
+    //raytracer();
     return 0;
 }
 

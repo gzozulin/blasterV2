@@ -9,7 +9,7 @@ private const val SAMPLES_PER_BATCH = 1
 private const val SAMPLES_CNT = 16
 private const val BOUNCES_CNT = 3
 
-enum class HitableType { HITABLE, SPHERE }
+enum class HitableType { NONE, BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
 
 object HitRecord // placeholder
@@ -117,6 +117,31 @@ private fun glShadingRtSubmitMaterials(program: GlProgram, materialsCollection: 
     }
 }
 
+private data class HitablesCollection(val spheres: List<Sphere>, val lookup: Map<Hitable, Int>)
+
+private fun glShadingRtCollectHitables(hitables: List<Hitable>): HitablesCollection {
+    val spheres = mutableListOf<Sphere>()
+    val lookup = mutableMapOf<Hitable, Int>()
+    hitables.forEach { 
+        spheres.add(it as Sphere) // only spheres currently
+    }
+    check(spheres.size <= MAX_SPHERES) { "More spheres than defined in shader!" }
+    spheres.forEachIndexed { index, sphere ->
+        lookup[sphere] = index
+    }
+    return HitablesCollection(spheres, lookup)
+}
+
+private fun glShadingRtSubmitHitables(program: GlProgram, hitablesCollection: HitablesCollection, 
+                                      materialsCollection: MaterialsCollection) {
+    hitablesCollection.spheres.forEachIndexed { index, sphere ->
+        glProgramArrayUniform(program, "uSpheres[%d].center", index, sphere.center)
+        glProgramArrayUniform(program, "uSpheres[%d].radius", index, sphere.radius)
+        glProgramArrayUniform(program, "uSpheres[%d].materialType", index, glShadingRtMaterialType(sphere.material))
+        glProgramArrayUniform(program, "uSpheres[%d].materialIndex", index, materialsCollection.lookup[sphere.material]!!)
+    }
+}
+
 private fun glShadingRtCreateAabb(hitable: Hitable): aabb {
     when (hitable) {
         is Sphere -> return aabb(
@@ -161,49 +186,62 @@ private fun glShadingRtCreateBvh(hitables: List<Hitable>): BvhNode {
     return BvhNode(aabb, glShadingRtCreateBvh(left), glShadingRtCreateBvh(right))
 }
 
+private var bvhIndex = 0
+private fun glShadingRtSubmitBvh(program: GlProgram, node: BvhNode, hitablesCollection: HitablesCollection): Int {
+    val index = bvhIndex
+    bvhIndex++
 
+    check(index < MAX_BVH) { "More bvh nodes than defined in shader!" }
+    glProgramArrayUniform(program, "uBvhNodes[%d].aabb.pointMin", index,
+        vec3(node.aabb.minX, node.aabb.minY, node.aabb.minZ))
+    glProgramArrayUniform(program, "uBvhNodes[%d].aabb.pointMax", index,
+        vec3(node.aabb.maxX, node.aabb.maxY, node.aabb.maxZ))
 
-private fun glShadingRtSubmitHitables(program: GlProgram, hitables: List<Hitable>) {
-    check(hitables.size <= MAX_HITABLES) { "More hitables than defined in shader!" }
-    glProgramCheckBound(program)
-
-    val materialsCollection = glShadingRtCollectMaterials(hitables)
-    glShadingRtSubmitMaterials(program, materialsCollection)
-
-    var spheresCnt = 0
-    var hitablesCnt = 0
-    val bvh = glShadingRtCreateBvh(hitables)
-
-    fun glShadingRtSubmitHitable(program: GlProgram, hitable: Hitable) {
-        when (hitable) {
+    val (leftType, leftIndex) = if (node.left != null) {
+        when (node.left) {
             is BvhNode -> {
-                check(spheresCnt + 1 <= MAX_SPHERES) { "More spheres than defined in shader!" } // bvh node
-                glProgramArrayUniform(program, "uBvhNodes[%d].aabb", hitablesCnt, hitable.aabb.minX)
-                glProgramArrayUniform(program, "uBvhNodes[%d].left", hitablesCnt, 0)
-                glProgramArrayUniform(program, "uBvhNodes[%d].right", hitablesCnt, 1)
-                hitable.left?.let { glShadingRtSubmitHitable(program, it) }
-                hitable.right?.let { glShadingRtSubmitHitable(program, it) }
+                HitableType.BVH.ordinal to glShadingRtSubmitBvh(program, node.left, hitablesCollection)
             }
             is Sphere -> {
-                check(spheresCnt + 1 <= MAX_SPHERES) { "More spheres than defined in shader!" }
-                glProgramArrayUniform(program, "uSpheres[%d].center", spheresCnt, hitable.center)
-                glProgramArrayUniform(program, "uSpheres[%d].radius", spheresCnt, hitable.radius)
-                glProgramArrayUniform(program, "uSpheres[%d].materialType", spheresCnt,
-                    glShadingRtMaterialType(hitable.material))
-                glProgramArrayUniform(program, "uSpheres[%d].materialIndex", spheresCnt,
-                    materialsCollection.lookup[hitable.material]!!)
-                glProgramArrayUniform(program, "uHitables[%d].type",  hitablesCnt, HitableType.SPHERE.ordinal)
-                glProgramArrayUniform(program, "uHitables[%d].index", hitablesCnt, spheresCnt)
-                spheresCnt++
-                hitablesCnt++
+                HitableType.SPHERE.ordinal to hitablesCollection.lookup[node.left]!!
             }
-            else -> error("Unknown Hitable!")
+            else -> error("Unknown hitable!")
         }
+    } else {
+        HitableType.NONE.ordinal to -1
+    }
+    
+    glProgramArrayUniform(program, "uBvhNodes[%d].leftType", index, leftType)
+    glProgramArrayUniform(program, "uBvhNodes[%d].leftIndex", index, leftIndex)
+
+    val (rightType, rightIndex) = if (node.right != null) {
+        when (node.right) {
+            is BvhNode -> {
+                HitableType.BVH.ordinal to glShadingRtSubmitBvh(program, node.right, hitablesCollection)
+            }
+            is Sphere -> {
+                HitableType.SPHERE.ordinal to hitablesCollection.lookup[node.right]!!
+            }
+            else -> error("Unknown hitable!")
+        }
+    } else {
+        HitableType.NONE.ordinal to -1
     }
 
-    glShadingRtSubmitHitable(program, bvh)
+    glProgramArrayUniform(program, "uBvhNodes[%d].rightType", index, rightType)
+    glProgramArrayUniform(program, "uBvhNodes[%d].rightIndex", index, rightIndex)
 
-    glProgramUniform(program, "uHitablesCnt", hitablesCnt)
+    return index
+}
+
+private fun glShadingRtSubmitAll(program: GlProgram, hitables: List<Hitable>) {
+    glProgramCheckBound(program)
+    val materialsCollection = glShadingRtCollectMaterials(hitables)
+    glShadingRtSubmitMaterials(program, materialsCollection)
+    val hitablesCollection = glShadingRtCollectHitables(hitables)
+    glShadingRtSubmitHitables(program, hitablesCollection, materialsCollection)
+    val root = glShadingRtCreateBvh(hitables)
+    glShadingRtSubmitBvh(program, root, hitablesCollection)
 }
 
 fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
@@ -222,7 +260,7 @@ fun glShadingRtUse(shadingRt: ShadingRt, callback: Callback) {
 
 fun glShadingRtDraw(shadingRt: ShadingRt, hitables: List<Hitable>, callback: Callback) {
     glShadingFlatDraw(shadingRt.shadingSamples) {
-        glShadingRtSubmitHitables(shadingRt.shadingSamples.program, hitables)
+        glShadingRtSubmitAll(shadingRt.shadingSamples.program, hitables)
         callback.invoke()
     }
 }

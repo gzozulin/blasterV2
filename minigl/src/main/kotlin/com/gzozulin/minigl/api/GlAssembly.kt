@@ -11,7 +11,7 @@ const val GL_FRAG_COORD = "gl_FragCoord.xy"
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
 const val MAX_LIGHTS        = 128
-const val MAX_HITABLES      = 128
+const val MAX_BVH           = 128
 const val MAX_SPHERES       = 128
 const val MAX_LAMBERTIANS   = 16
 const val MAX_METALLICS     = 16
@@ -155,10 +155,18 @@ private const val REFRACT_RESULT_DECL = """
     const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 """
 
-private const val HITABLE_DECL = """
-    struct Hitable {
-        int type;
-        int index;
+private const val BVH_DECL = """
+    struct AABB {
+        vec3 pointMin;
+        vec3 pointMax;
+    };
+
+    struct BvhNode {
+        AABB aabb;
+        int leftType;
+        int leftIndex;
+        int rightType;
+        int rightIndex;
     };
 """
 
@@ -183,10 +191,11 @@ private const val LIGHTS = """
 """
 
 private const val HITABLES = """
-    #define HITABLE_HITABLE         0
-    #define HITABLE_SPHERE          1
-    uniform int uHitablesCnt;
-    uniform Hitable uHitables[$MAX_HITABLES];
+    #define HITABLE_NONE            (-1)
+    #define HITABLE_BVH              0
+    #define HITABLE_SPHERE           1
+    
+    uniform BvhNode uBvhNodes[$MAX_BVH];
 """
 
 private const val SPHERES = """
@@ -271,7 +280,7 @@ private const val EXPR_GET_NORMAL = """
 
 private const val PRIVATE_DEFINITIONS =
     "$EXPR_PI\n$GENERAL_DECL\n$ERR_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$CAMERA_DECL\n$SPHERE_DECL\n" +
-    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$HITABLE_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
+    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$BVH_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
     "$HITABLES\n$SPHERES\n$MATERIALS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_DTOF + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
