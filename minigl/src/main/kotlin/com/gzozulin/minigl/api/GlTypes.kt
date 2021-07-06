@@ -20,6 +20,7 @@ typealias mat4 = Matrix4f
 typealias quat = Quaternionf
 typealias aabb = AABBf
 typealias ray = Rayf
+typealias sphere = Spheref
 
 private val random = Random()
 

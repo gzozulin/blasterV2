@@ -26,7 +26,7 @@
 #define BOUNCE_ERR              0.001f
 
 #define MAX_LIGHTS              128
-#define MAX_HITABLES            128
+#define MAX_BVH                 128
 #define MAX_SPHERES             128
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16
@@ -70,6 +70,11 @@ struct Ray {
     struct vec3 direction;
 };
 
+struct AABB {
+    struct vec3 pointMin;
+    struct vec3 pointMax;
+};
+
 struct RtCamera {
     struct vec3 origin;
     struct vec3 lowerLeft;
@@ -95,14 +100,12 @@ struct PhongMaterial {
     float transparency;
 };
 
-struct Hitable {
-    int type;
-    int index;
-};
-
-struct AABB {
-    struct vec3 pointMin;
-    struct vec3 pointMax;
+struct BvhNode {
+    struct AABB aabb;
+    int leftType;
+    int leftIndex;
+    int rightType;
+    int rightIndex;
 };
 
 struct Sphere {
@@ -157,11 +160,12 @@ const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f,
 // ------------------- HITABLES -------------------
 
 // Corresponds to HitableType
-#define HITABLE_HITABLE         0
-#define HITABLE_SPHERE          1
+#define HITABLE_NONE            (-1)
+#define HITABLE_HITABLE          0
+#define HITABLE_SPHERE           1
 
-const int uHitablesCnt = 4;
-const struct Hitable uHitables[MAX_HITABLES] = { { 1, 0 }, { 1, 1 }, { 1, 2 }, { 1, 3 } };
+const int uBvhNodesCnt = 1;
+const struct BvhNode uBvhNodes[MAX_BVH] = { { { {-1, -1, -1 }, { 1, 1, 1 } }, 0, 0, 0, 0 } };
 
 // ------------------- SPHERES -------------------
 
@@ -953,10 +957,27 @@ struct vec3 background(const struct Ray ray) {
     return gradient;
 }
 
-/*public
+public
 bool rayHitAabb(const struct Ray ray, const struct AABB aabb, const float tMin, const float tMax) {
+    for (int i = 0; i < 3; i++) {
+        const float invD = 1.0f / indexv3(ray.direction, i);
+        float t0 = (indexv3(aabb.pointMin, i) - indexv3(ray.origin, i)) * invD;
+        float t1 = (indexv3(aabb.pointMax, i) - indexv3(ray.origin, i)) * invD;
+
+        if (invD < 0.0f) {
+            float temp = t0;
+            t0 = t1;
+            t1 = temp;
+        }
+
+        const float tmin = t0 > tMin ? t0 : tMin;
+        const float tmax = t1 < tMax ? t1 : tMax;
+        if (tmax <= tmin) {
+            return false;
+        }
+    }
     return true;
-}*/
+}
 
 public
 struct HitRecord raySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
@@ -989,7 +1010,23 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
 }
 
 public
-struct HitRecord rayHitHitable(const struct Ray ray, const float tMin, const float tMax, const struct Hitable hitable) {
+struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float tMax, const int index) {
+
+    // TODO: Traverse with Stack
+
+
+    int curr = index;
+
+    while (true) {
+
+        const struct BvhNode node = uBvhNodes[curr];
+
+        if (!rayHitAabb(ray, node.aabb, tMin, tMax)) {
+            return NO_HIT;
+        }
+
+    }
+
     switch (hitable.type) {
         case HITABLE_SPHERE:
             return rayHitSphere(ray, tMin, tMax, uSpheres[hitable.index]);
@@ -1000,17 +1037,7 @@ struct HitRecord rayHitHitable(const struct Ray ray, const float tMin, const flo
 
 public
 struct HitRecord rayHitWorld(const struct Ray ray, const float tMin, const float tMax) {
-    struct HitRecord result = NO_HIT;
-    float closest = tMax;
-    for (int i = 0; i < uHitablesCnt; i++) {
-        const struct Hitable hitable = uHitables[i];
-        const struct HitRecord hitRecord = rayHitHitable(ray, tMin, closest, hitable);
-        if (hitRecord.t > 0) {
-            closest = hitRecord.t;
-            result = hitRecord;
-        }
-    }
-    return result;
+    return rayHitBvh(ray, tMin, tMax, 0);
 }
 
 public
