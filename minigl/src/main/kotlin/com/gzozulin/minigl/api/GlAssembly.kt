@@ -196,6 +196,9 @@ private const val HITABLES = """
     #define MAX_BVH                 $MAX_BVH
     
     uniform BvhNode uBvhNodes[$MAX_BVH];
+    
+    int bvhStack[$MAX_BVH];
+    int bvhTop = 0;
 """
 
 private const val SPHERES = """

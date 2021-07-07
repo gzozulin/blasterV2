@@ -168,6 +168,9 @@ const struct BvhNode uBvhNodes[MAX_BVH] = {
         { { {    0,    0,     0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1,   -1,         -1 }
 };
 
+int bvhStack[MAX_BVH];
+int bvhTop = 0;
+
 const struct Sphere uSpheres[MAX_SPHERES] = {
         { { -50, -50, -50 }, 50, 0, 0 },
         { {  50,  50,  50 }, 50, 0, 1 }
@@ -1018,18 +1021,16 @@ struct HitRecord rayHitObject(const struct Ray ray,const float tMin, const float
 
 public
 struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float tMax, const int index) {
+    bvhTop = 0;
     float closest = tMax;
     struct HitRecord result = NO_HIT;
-
-    int stack[MAX_BVH];
-    int top = 0;
     int curr = index;
 
     while (curr >= 0) {
         while (curr >= 0 && rayHitAabb(ray, uBvhNodes[curr].aabb, tMin, closest)) {
             if (uBvhNodes[curr].leftType == HITABLE_BVH) {
-                stack[top] = curr;
-                top++;
+                bvhStack[bvhTop] = curr;
+                bvhTop++;
                 curr = uBvhNodes[curr].leftIndex;
             } else {
                 const struct HitRecord hit = rayHitObject(
@@ -1042,11 +1043,11 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
             }
         }
 
-        top--;
-        if (top < 0) {
+        bvhTop--;
+        if (bvhTop < 0) {
             break;
         }
-        curr = stack[top];
+        curr = bvhStack[bvhTop];
         curr = uBvhNodes[curr].rightIndex;
     }
 
