@@ -22,7 +22,7 @@
 #define BOUNCE_ERR              0.001f
 
 #define MAX_LIGHTS              128
-#define MAX_BVH                 128
+#define MAX_BVH                 256
 #define MAX_SPHERES             128
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16

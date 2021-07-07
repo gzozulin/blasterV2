@@ -11,7 +11,7 @@ const val GL_FRAG_COORD = "gl_FragCoord.xy"
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
 const val MAX_LIGHTS        = 128
-const val MAX_BVH           = 128
+const val MAX_BVH           = 256
 const val MAX_SPHERES       = 128
 const val MAX_LAMBERTIANS   = 16
 const val MAX_METALLICS     = 16
@@ -193,7 +193,7 @@ private const val LIGHTS = """
 private const val HITABLES = """
     #define HITABLE_BVH              0
     #define HITABLE_SPHERE           1
-    #define MAX_BVH                 128
+    #define MAX_BVH                 $MAX_BVH
     
     uniform BvhNode uBvhNodes[$MAX_BVH];
 """

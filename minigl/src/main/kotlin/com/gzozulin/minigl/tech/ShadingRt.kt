@@ -177,10 +177,6 @@ private fun glShadingRtCreateBvh(hitables: List<Hitable>): BvhNode {
         return@sortedWith if (diff < 0f) -1 else 1
     }
 
-    if (hitables.size == 2) {
-        return BvhNode(aabb, hitables[0], hitables[1])
-    }
-
     val threshold = sorted.size / 2
     val left = sorted.subList(0, threshold)
     val right = sorted.subList(threshold, sorted.size)
@@ -358,7 +354,7 @@ private val hitables = listOf(
     Sphere(vec3(0f, 1f, 0f), 1f, dielectrics.random()),
     Sphere(vec3(-4f, 1f, 0f), 1f, lambertians.random()),
     Sphere(vec3(4f, 1f, 0f), 1f, metallics.random()),
-    //*(1..80).map { sphereRandom() }.toTypedArray()
+    *(1..80).map { sphereRandom() }.toTypedArray()
 )
 
 private var statsDumped = false
