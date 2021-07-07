@@ -4,7 +4,7 @@ project(shadergen C)
 set(CMAKE_C_STANDARD 11)
 
 # add_compile_options(-Wall -Wextra -pedantic)
-# add_compile_options(-Wall -Wextra -pedantic -Werror)
+add_compile_options(-Wall -Wextra -pedantic -Werror)
 
 add_executable(shadergen main.c)
 target_link_libraries(shadergen m)

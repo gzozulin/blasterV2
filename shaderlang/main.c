@@ -1,8 +1,3 @@
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-#pragma ide diagnostic ignored "readability-non-const-parameter"
-
 #include <assert.h>
 #include <math.h>
 #include <stdbool.h>
@@ -178,7 +173,10 @@ const struct Sphere uSpheres[MAX_SPHERES] = {
         { {  50,  50,  50 }, 50, 1, 0 }
 };
 
-const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
+const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = {
+        { { 0.5f, 0.5f, 0.5f } },
+        { { 1, 0, 0 } }
+};
 const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
 const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
 
@@ -188,6 +186,7 @@ bool errorFlag = false;
 
 public
 int error() {
+    // assert(1);
     errorFlag = true;
     return 1;
 }
@@ -808,7 +807,9 @@ struct vec4 shadingPhong(const struct vec3 fragPosition, const struct vec3 eye, 
 custom
 struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPos, const struct vec2 texCoord,
                              const struct vec3 vnormal) {
-    assert(0 && "Some chicken shit happens here..");
+
+    const struct vec3 result = addv3(addv3(addv3(normal, worldPos), vnormal), v2tov3(texCoord, 1));
+    assert(dotv3(result, worldPos) && "Some chicken shit happens here..");
     /*vec3 tangentNormal = fromMap * 2.0 - 1.0;
     vec3 Q1  = dFdx(vWorldPos);
     vec3 Q2  = dFdy(vWorldPos);
@@ -1005,14 +1006,13 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
 }
 
 public
-struct HitRecord rayHitObject(const struct Ray ray, const float tMin, const float tMax, const int type, const int index) {
-    switch (type) {
-        case HITABLE_SPHERE:
-            return rayHitSphere(ray, tMin, tMax, uSpheres[index]);
-        default:
-            error();
-            return NO_HIT;
+struct HitRecord rayHitObject(const struct Ray ray,const float tMin, const float tMax,
+                              const int type, const int index) {
+    if (type != HITABLE_SPHERE) {
+        error(); // spheres only
+        return NO_HIT;
     }
+    return rayHitSphere(ray, tMin, tMax, uSpheres[index]);
 }
 
 public
@@ -1262,5 +1262,3 @@ int main() {
     raytracer();
     return 0;
 }
-
-#pragma clang diagnostic pop
