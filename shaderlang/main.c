@@ -23,6 +23,7 @@
 
 #define WIDTH                   1024
 #define HEIGHT                  768
+#define SAMPLES                 8
 #define BOUNCE_ERR              0.001f
 
 #define MAX_LIGHTS              128
@@ -31,6 +32,15 @@
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16
 #define MAX_DIELECTRICS         16
+
+// Corresponds to HitableType
+#define HITABLE_BVH              0
+#define HITABLE_SPHERE           1
+
+// Corresponds to MaterialType
+#define MATERIAL_LAMBERTIAN     0
+#define MATERIAL_METALIIC       1
+#define MATERIAL_DIELECTRIC     2
 
 // ------------------- TYPES -------------------
 
@@ -135,53 +145,38 @@ struct HitRecord {
     int materialIndex;
 };
 
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
-
 struct ScatterResult {
     struct vec3 attenuation;
     struct Ray scattered;
 };
-
-const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
 
 struct RefractResult {
     bool isRefracted;
     struct vec3 refracted;
 };
 
-const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
-
-// ------------------- LIGHTS -------------------
+// ------------------- CONST -------------------
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
-const struct Light uLights[MAX_LIGHTS] = { { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f } };
+const struct Light uLights[MAX_LIGHTS] = {
+        { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
+};
 
-// ------------------- HITABLES -------------------
-
-// Corresponds to HitableType
-#define HITABLE_BVH              0
-#define HITABLE_SPHERE           1
+const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
+const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 const struct BvhNode uBvhNodes[MAX_BVH] = {
         { { { -100, -100, -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
-        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0, -1, -1 },
-        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1, -1, -1 }
+        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0,   -1,         -1 },
+        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1,   -1,         -1 }
 };
-
-// ------------------- SPHERES -------------------
 
 const struct Sphere uSpheres[MAX_SPHERES] = {
         { { -50, -50, -50 }, 50, 0, 0 },
         { {  50,  50,  50 }, 50, 1, 0 }
 };
-
-// ------------------- MATERIALS -------------------
-
-// Corresponds to MaterialType
-#define MATERIAL_LAMBERTIAN     0
-#define MATERIAL_METALIIC       1
-#define MATERIAL_DIELECTRIC     2
 
 const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = { { 0.5f, 0.5f, 0.5f }, { 1, 0, 0 } };
 const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
@@ -1036,7 +1031,8 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
                 top++;
                 curr = uBvhNodes[curr].leftIndex;
             } else {
-                struct HitRecord hit = rayHitObject(ray, tMin, closest, uBvhNodes[curr].leftType, uBvhNodes[curr].leftIndex);
+                const struct HitRecord hit = rayHitObject(
+                        ray, tMin, closest, uBvhNodes[curr].leftType, uBvhNodes[curr].leftIndex);
                 if (hit.t > 0 && hit.t < closest) {
                     result = hit;
                     closest = hit.t;
@@ -1200,9 +1196,12 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
 
-            struct vec4 color = fragmentColorRt(
-                    randf(), 8, 4, v3(0, 0, 250.0f), v3zero(), v3up(), 90.0f*PI/180.0f, 4.0f/3.0f, 0, 1, v2(s, t));
-            color = divv4f(color, 8);
+            const struct vec4 added = fragmentColorRt(
+                    randf(), SAMPLES, 4,
+                    v3(0, 0, 250.0f), v3zero(), v3up(),
+                    90.0f * PI / 180.0f, 4.0f / 3.0f, 0, 1,
+                    v2(s, t));
+            const struct vec4 color = divv4f(added, SAMPLES);
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);
