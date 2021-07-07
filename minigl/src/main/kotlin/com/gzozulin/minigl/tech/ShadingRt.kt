@@ -168,16 +168,17 @@ private fun glShadingRtCreateBvh(hitables: List<Hitable>): BvhNode {
     val sorted = hitables.sortedWith { left, right ->
         val leftAabb = glShadingRtCreateAabb(left)
         val rightAabb = glShadingRtCreateAabb(right)
-        when (selectedAxis) {
-            0 -> return@sortedWith (leftAabb.minX - rightAabb.minX).toInt()
-            1 -> return@sortedWith (leftAabb.minY - rightAabb.minY).toInt()
-            2 -> return@sortedWith (leftAabb.minZ - rightAabb.minZ).toInt()
+        val diff = when (selectedAxis) {
+            0 -> leftAabb.minX - rightAabb.minX
+            1 -> leftAabb.minY - rightAabb.minY
+            2 -> leftAabb.minZ - rightAabb.minZ
             else -> error("wtf?!")
         }
+        return@sortedWith if (diff < 0f) -1 else 1
     }
 
     if (hitables.size == 2) {
-        return BvhNode(aabb, sorted[0], sorted[1])
+        return BvhNode(aabb, hitables[0], hitables[1])
     }
 
     val threshold = sorted.size / 2
@@ -357,7 +358,7 @@ private val hitables = listOf(
     Sphere(vec3(0f, 1f, 0f), 1f, dielectrics.random()),
     Sphere(vec3(-4f, 1f, 0f), 1f, lambertians.random()),
     Sphere(vec3(4f, 1f, 0f), 1f, metallics.random()),
-    *(1..80).map { sphereRandom() }.toTypedArray()
+    //*(1..80).map { sphereRandom() }.toTypedArray()
 )
 
 private var statsDumped = false

@@ -163,19 +163,19 @@ const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0,
 const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 const struct BvhNode uBvhNodes[MAX_BVH] = {
-        { { { -100, -100, -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
-        { { { -100, -100, -100 }, {   0,   0,   0 } }, HITABLE_SPHERE,  0,   -1,         -1 },
-        { { {    0,    0,    0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1,   -1,         -1 }
+        { { { -100, -100,  -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
+        { { { -100, -100,  -100 }, {  0,   0,    0 } }, HITABLE_SPHERE,  0,   -1,         -1 },
+        { { {    0,    0,     0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1,   -1,         -1 }
 };
 
 const struct Sphere uSpheres[MAX_SPHERES] = {
         { { -50, -50, -50 }, 50, 0, 0 },
-        { {  50,  50,  50 }, 50, 1, 0 }
+        { {  50,  50,  50 }, 50, 0, 1 }
 };
 
 const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = {
-        { { 0.5f, 0.5f, 0.5f } },
-        { { 1, 0, 0 } }
+        { { 1, 0, 0 } },
+        { { 0, 1, 0 } }
 };
 const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
 const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
@@ -820,6 +820,7 @@ struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPo
     vec3 B  = -normalize(cross(N, T));
     mat3 TBN = mat3(T, B, N);
     return normalize(TBN * tangentNormal);*/
+    return result;
 }
 
 public
@@ -1191,7 +1192,7 @@ void raytracer() {
     const float all = WIDTH * HEIGHT;
     int current = 0;
 
-    for (int v = 0; v < HEIGHT; v++) {
+    for (int v = HEIGHT - 1; v >= 0; v--) {
         for (int u = 0; u < WIDTH; u++) {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
