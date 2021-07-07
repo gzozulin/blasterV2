@@ -1,12 +1,13 @@
 package com.gzozulin.minigl.tech
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = 50
-private const val SAMPLES_PER_BATCH = 1
-private const val SAMPLES_CNT = 16
+private const val SAMPLES_PER_BATCH = 8
+private const val SAMPLES_CNT = 32
 private const val BOUNCES_CNT = 3
 
 enum class HitableType { BVH, SPHERE }
@@ -311,7 +312,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
 }
 
 private val window = GlWindow(isFullscreen = false)
-//private val capturer = Capturer(window)
+private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
@@ -375,7 +376,7 @@ fun main() {
         glShadingRtUse(shadingRt) {
             glShadingRtDraw(shadingRt, hitables) {
                 var frame = 0
-                //capturer.capture {
+                capturer.capture {
                     val start = System.currentTimeMillis()
                     window.show {
                         controller.apply { position, direction ->
@@ -384,7 +385,7 @@ fun main() {
                         }
                         if (frame < FRAMES_CNT) {
                             glShadingRtInstance(shadingRt)
-                            //capturer.addFrame()
+                            capturer.addFrame()
                             frame++
                         } else {
                             val stop = System.currentTimeMillis()
@@ -392,7 +393,7 @@ fun main() {
                             exitProcess(0)
                         }
                     }
-                //}
+                }
             }
         }
     }
