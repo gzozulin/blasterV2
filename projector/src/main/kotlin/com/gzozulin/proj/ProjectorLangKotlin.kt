@@ -208,12 +208,13 @@ private fun Token.color(): col3 = when (type) {
     KotlinLexer.ELSE, KotlinLexer.NullLiteral, KotlinLexer.PRIVATE, KotlinLexer.PROTECTED,
     KotlinLexer.RETURN, KotlinLexer.FOR, KotlinLexer.WHILE, KotlinLexer.CONST, KotlinLexer.DATA,
     KotlinLexer.TYPE_ALIAS, KotlinLexer.AS, KotlinLexer.BY, KotlinLexer.VAR, KotlinLexer.OVERRIDE,
-    KotlinLexer.LATEINIT, KotlinLexer.ENUM, KotlinLexer.ABSTRACT, KotlinLexer.OPEN, KotlinLexer.INTERNAL
-    -> darkula_orange
+    KotlinLexer.LATEINIT, KotlinLexer.ENUM, KotlinLexer.ABSTRACT, KotlinLexer.OPEN, KotlinLexer.INTERNAL,
+    KotlinLexer.OBJECT, KotlinLexer.INTERFACE
+        -> darkula_orange
     KotlinLexer.LongLiteral, KotlinLexer.IntegerLiteral, KotlinLexer.DoubleLiteral, KotlinLexer.FloatLiteral,
     KotlinLexer.RealLiteral, KotlinLexer.HexLiteral, KotlinLexer.BinLiteral
-    -> darkula_light_blue
+        -> darkula_light_blue
     KotlinLexer.LineStrText
-    -> darkula_green
+        -> darkula_green
     else -> if (text != "error") darkula_white else darkula_red
 }

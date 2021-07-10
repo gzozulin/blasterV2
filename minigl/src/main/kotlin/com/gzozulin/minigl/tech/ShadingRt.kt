@@ -5,18 +5,19 @@ import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.scene.*
 import kotlin.system.exitProcess
 
-private const val FRAMES_CNT = 50
-private const val SAMPLES_PER_BATCH = 8
-private const val SAMPLES_CNT = 32
-private const val BOUNCES_CNT = 3
+private const val FRAMES_CNT = Int.MAX_VALUE
+private const val SAMPLES_PER_BATCH = 1
+private const val SAMPLES_CNT = 1
+private const val BOUNCES_CNT = 16
 
 enum class HitableType { BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
 
-object HitRecord // placeholder
-object ScatterResult // placeholder
-object RefractResult // placeholder
-object RtCamera // placeholder
+// placeholders
+object HitRecord
+object ScatterResult
+object RefractResult
+object RtCamera
 
 interface Hitable
 data class BvhNode(val aabb: aabb, val left: Hitable?, val right: Hitable?): Hitable
@@ -316,12 +317,12 @@ private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
-        vec3(-5f, 0.7f, -5f),
-        vec3( 5f, 0.7f, -5f),
-        vec3( 5f, 0.7f,  5f),
-        vec3(-5f, 0.7f,  5f),
+        vec3(-8f, 5f, -8f),
+        vec3( 8f, 5f, -8f),
+        vec3( 8f, 5f,  8f),
+        vec3(-8f, 5f,  8f),
     ),
-    points = listOf(vec3()))
+    points = listOf(vec3(1f)))
 
 private val sampleCnt = consti(SAMPLES_PER_BATCH)
 private val rayBounces = consti(BOUNCES_CNT)
@@ -341,22 +342,30 @@ private val lambertians = (0 until 15).map { LambertianMaterial(vec3().rand())  
 private val metallics =   (0 until 16).map { MetallicMaterial(vec3().rand())    }.toList()
 private val dielectrics = (0 until 16).map { DielectricMaterial(randf(1f, 10f)) }.toList()
 
-private fun sphereRandom() = Sphere(
-    vec3().rand(vec3(-5f, 0.2f, -5f), vec3(5f, 0.2f, 5f)), 0.2f,
-    when(randi(3)) {
-        0 -> lambertians.random()
-        1 -> metallics.random()
-        2 -> dielectrics.random()
-        else -> error("wtf?!")
-    })
-
-private val hitables = listOf(
-    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(vec3().dkGrey())),
-    Sphere(vec3(0f, 1f, 0f), 1f, dielectrics.random()),
-    Sphere(vec3(-4f, 1f, 0f), 1f, lambertians.random()),
-    Sphere(vec3(4f, 1f, 0f), 1f, metallics.random()),
-    *(1..80).map { sphereRandom() }.toTypedArray()
-)
+private val hitables = mutableListOf(
+    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(vec3().dkGrey())))
+private val once = Any().also {
+    for (x in 0 until 8) {
+        for (z in 0 until 8) {
+            hitables.add(Sphere(vec3(x.toFloat(), 0.5f, z.toFloat()), 0.5f, dielectrics.random()))
+        }
+    }
+    for (x in 1 until 7) {
+        for (z in 1 until 7) {
+            hitables.add(Sphere(vec3(x.toFloat(), 1.5f, z.toFloat()), 0.5f, dielectrics.random()))
+        }
+    }
+    for (x in 2 until 6) {
+        for (z in 2 until 6) {
+            hitables.add(Sphere(vec3(x.toFloat(), 2.5f, z.toFloat()), 0.5f, dielectrics.random()))
+        }
+    }
+    for (x in 3 until 5) {
+        for (z in 3 until 5) {
+            hitables.add(Sphere(vec3(x.toFloat(), 3.5f, z.toFloat()), 0.5f, dielectrics.random()))
+        }
+    }
+}
 
 private var statsDumped = false
 private fun glShadingRtDumpStats(start: Long, stop: Long) {

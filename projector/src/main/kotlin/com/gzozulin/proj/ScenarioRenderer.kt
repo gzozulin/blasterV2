@@ -1,6 +1,5 @@
 package com.gzozulin.proj
 
-import com.gzozulin.kotlin.KotlinLexer
 import com.gzozulin.minigl.api.col3
 import com.gzozulin.minigl.tech.TextPage
 import com.gzozulin.minigl.tech.TextSpan
