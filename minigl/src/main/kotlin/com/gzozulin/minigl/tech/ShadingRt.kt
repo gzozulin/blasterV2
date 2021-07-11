@@ -7,8 +7,8 @@ import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = Int.MAX_VALUE
 private const val SAMPLES_PER_BATCH = 1
-private const val SAMPLES_CNT = 1
-private const val BOUNCES_CNT = 16
+private const val SAMPLES_CNT = 2
+private const val BOUNCES_CNT = 5
 
 enum class HitableType { BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
@@ -176,7 +176,11 @@ private fun glShadingRtCreateBvh(hitables: List<Hitable>): BvhNode {
             2 -> leftAabb.minZ - rightAabb.minZ
             else -> error("wtf?!")
         }
-        return@sortedWith if (diff < 0f) -1 else 1
+        return@sortedWith when {
+            (diff < 0f) -> -1
+            (diff > 0f) ->  1
+            else        ->  0
+        }
     }
 
     val threshold = sorted.size / 2
@@ -317,12 +321,12 @@ private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
     positions = listOf(
-        vec3(-8f, 5f, -8f),
-        vec3( 8f, 5f, -8f),
-        vec3( 8f, 5f,  8f),
-        vec3(-8f, 5f,  8f),
+        vec3(-5f, 5f, -5f),
+        vec3( 5f, 5f, -5f),
+        vec3( 5f, 5f,  5f),
+        vec3(-5f, 5f,  5f),
     ),
-    points = listOf(vec3(1f)))
+    points = listOf(vec3(0f, 2f, 0f)))
 
 private val sampleCnt = consti(SAMPLES_PER_BATCH)
 private val rayBounces = consti(BOUNCES_CNT)
@@ -343,26 +347,25 @@ private val metallics =   (0 until 16).map { MetallicMaterial(vec3().rand())    
 private val dielectrics = (0 until 16).map { DielectricMaterial(randf(1f, 10f)) }.toList()
 
 private val hitables = mutableListOf(
-    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(vec3().dkGrey())))
-private val once = Any().also {
-    for (x in 0 until 8) {
-        for (z in 0 until 8) {
-            hitables.add(Sphere(vec3(x.toFloat(), 0.5f, z.toFloat()), 0.5f, dielectrics.random()))
-        }
-    }
-    for (x in 1 until 7) {
-        for (z in 1 until 7) {
-            hitables.add(Sphere(vec3(x.toFloat(), 1.5f, z.toFloat()), 0.5f, dielectrics.random()))
-        }
-    }
-    for (x in 2 until 6) {
-        for (z in 2 until 6) {
-            hitables.add(Sphere(vec3(x.toFloat(), 2.5f, z.toFloat()), 0.5f, dielectrics.random()))
-        }
-    }
-    for (x in 3 until 5) {
-        for (z in 3 until 5) {
-            hitables.add(Sphere(vec3(x.toFloat(), 3.5f, z.toFloat()), 0.5f, dielectrics.random()))
+    Sphere(vec3(0f, -1000f, 0f), 1000f, LambertianMaterial(vec3().dkGrey()))).also {
+        glShadingRtCreateLayer(it, 10, 0.5f)
+        glShadingRtCreateLayer(it, 8, 1.5f)
+        glShadingRtCreateLayer(it, 6, 2.5f)
+        glShadingRtCreateLayer(it, 4, 3.5f)
+        glShadingRtCreateLayer(it, 2, 4.5f)
+}
+
+private fun glShadingRtCreateLayer(hitables: MutableList<Sphere>, side: Int, height: Float) {
+    val half = (side / 2f).toInt()
+    for (x in -half until half) {
+        for (y in -half until half) {
+            val material = when (randi(3)) {
+                0 -> dielectrics.random()
+                1 -> metallics.random()
+                2 -> lambertians.random()
+                else -> error("wtf?!")
+            }
+            hitables.add(Sphere(vec3(x.toFloat(), height, y.toFloat()), 0.5f, material))
         }
     }
 }

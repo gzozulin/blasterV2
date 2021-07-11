@@ -22,8 +22,8 @@
 #define BOUNCE_ERR              0.001f
 
 #define MAX_LIGHTS              128
-#define MAX_BVH                 256
-#define MAX_SPHERES             128
+#define MAX_BVH                 512
+#define MAX_SPHERES             256
 #define MAX_LAMBERTIANS         16
 #define MAX_METALS              16
 #define MAX_DIELECTRICS         16
@@ -188,7 +188,7 @@ const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } 
 bool errorFlag = false;
 
 public
-int error() {
+int flagError() {
     // assert(1);
     errorFlag = true;
     return 1;
@@ -418,7 +418,8 @@ float indexv3(const struct vec3 v, const int index) {
         case 0: return v.x;
         case 1: return v.y;
         case 2: return v.z;
-        default: error(); return v.x;
+        default:
+            flagError(); return v.x;
     }
 }
 
@@ -671,7 +672,7 @@ struct vec3 seedRandom(const struct vec3 s) {
 }
 
 custom
-float randf() {
+float randomFloat() {
     return dtof(drand48());
 }
 
@@ -679,7 +680,7 @@ public
 struct vec3 randomInUnitSphere() {
     struct vec3 result;
     for (int i = 0; i < 10; i++) {
-        result = v3(randf() * 2.0f - 1.0f, randf() * 2.0f - 1.0f, randf() * 2.0f - 1.0f);
+        result = v3(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f);
         if (lensqv3(result) >= 1.0f) {
             return result;
         }
@@ -691,7 +692,7 @@ public
 struct vec3 randomInUnitDisk() {
     struct vec3 result;
     for (int i = 0; i < 10; i++) {
-        result = subv3(mulv3f(v3(randf(), randf(), 0.0f), 2.0f), v3(1.0f, 1.0f, 0.0f));
+        result = subv3(mulv3f(v3(randomFloat(), randomFloat(), 0.0f), 2.0f), v3(1.0f, 1.0f, 0.0f));
         if (dotv3(result, result) >= 1.0f) {
             return result;
         }
@@ -705,7 +706,7 @@ public
 struct vec4 errorHandler(struct vec4 color) {
     if (errorFlag) {
         struct vec3 signal;
-        float check = randf();
+        float check = randomFloat();
         if (check > 0.6f) {
             signal = v3red();
         } else if (check > 0.3f) {
@@ -1013,7 +1014,7 @@ public
 struct HitRecord rayHitObject(const struct Ray ray,const float tMin, const float tMax,
                               const int type, const int index) {
     if (type != HITABLE_SPHERE) {
-        error(); // spheres only
+        flagError(); // spheres only
         return NO_HIT;
     }
     return rayHitSphere(ray, tMin, tMax, uSpheres[index]);
@@ -1109,7 +1110,7 @@ struct ScatterResult materialScatterDielectric(const struct Ray ray, const struc
     }
 
     struct vec3 scatteredDir;
-    if (randf() < reflectProbe) {
+    if (randomFloat() < reflectProbe) {
         scatteredDir = reflectv3(ray.direction, record.normal);
     } else {
         scatteredDir = refractResult.refracted;
@@ -1168,8 +1169,8 @@ struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
     const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
     struct vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
-        const float du = DU * randf();
-        const float dv = DV * randf();
+        const float du = DU * randomFloat();
+        const float dv = DV * randomFloat();
         const float sampleU = texCoord.x + du;
         const float sampleV = texCoord.y + dv;
         result = addv3(result, sampleColor(rayBounces, camera, sampleU, sampleV));
@@ -1199,7 +1200,7 @@ void raytracer() {
             const float t = (float) v / (float) WIDTH;
 
             const struct vec4 added = fragmentColorRt(
-                    randf(), SAMPLES, 4,
+                    randomFloat(), SAMPLES, 4,
                     v3(0, 0, 250.0f), v3zero(), v3up(),
                     90.0f * PI / 180.0f, 4.0f / 3.0f, 0, 1,
                     v2(s, t));

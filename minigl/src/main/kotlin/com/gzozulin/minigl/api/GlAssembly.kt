@@ -11,8 +11,8 @@ const val GL_FRAG_COORD = "gl_FragCoord.xy"
 private const val EXPR_PI = "const float PI = 3.14159265359;\n"
 
 const val MAX_LIGHTS        = 128
-const val MAX_BVH           = 256
-const val MAX_SPHERES       = 128
+const val MAX_BVH           = 512
+const val MAX_SPHERES       = 256
 const val MAX_LAMBERTIANS   = 16
 const val MAX_METALLICS     = 16
 const val MAX_DIELECTRICS   = 16
@@ -74,7 +74,7 @@ private const val RANDOM_DECL = """
         return s;
     }
     
-    float randf() {
+    float randomFloat() {
         seed.w += FLT_MIN;
         return random(seed);
     }
