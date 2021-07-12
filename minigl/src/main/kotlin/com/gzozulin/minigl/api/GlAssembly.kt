@@ -80,108 +80,16 @@ private const val RANDOM_DECL = """
     }
 """
 
-private const val LIGHT_DECL = """
-    struct Light {
-        vec3 vector;
-        vec3 color;
-        float attenConstant;
-        float attenLinear;
-        float attenQuadratic;
-    };
-"""
-
-private const val MAT_DECL = """
-    struct PhongMaterial {
-        vec3 ambient;
-        vec3 diffuse;
-        vec3 specular;
-        float shine;
-        float transparency;
-    };
-"""
-
-private const val RAY_DECL = """
-    struct Ray {
-        vec3 origin;
-        vec3 direction;
-    };
-"""
-
-private const val CAMERA_DECL = """
-    struct RtCamera {
-        vec3 origin;
-        vec3 lowerLeft;
-        vec3 horizontal;
-        vec3 vertical;
-        vec3 w, u, v;
-        float lensRadius;
-    };
-"""
-
-private const val SPHERE_DECL = """
-    struct Sphere {
-        vec3 center;
-        float radius;
-        int materialType;
-        int materialIndex;
-    };
-"""
-
 private const val HIT_RECORD_DECL = """
-    struct HitRecord {
-        float t;
-        vec3 point;
-        vec3 normal;
-        int materialType;
-        int materialIndex;
-    };
     const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
 """
 
 private const val SCATTER_RESULT_DECL = """
-    struct ScatterResult {
-        vec3 attenuation;
-        Ray scattered;
-    };
-    const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+   const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
 """
 
 private const val REFRACT_RESULT_DECL = """
-    struct RefractResult {
-        bool isRefracted;
-        vec3 refracted;
-    };
-
     const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
-"""
-
-private const val BVH_DECL = """
-    struct AABB {
-        vec3 pointMin;
-        vec3 pointMax;
-    };
-
-    struct BvhNode {
-        AABB aabb;
-        int leftType;
-        int leftIndex;
-        int rightType;
-        int rightIndex;
-    };
-"""
-
-private const val MATERIALS_DECL = """
-    struct LambertianMaterial {
-        vec3 albedo;
-    };
-
-    struct MetallicMaterial {
-        vec3 albedo;
-    };
-    
-    struct DielectricMaterial {
-        float reflectiveIndex;
-    };
 """
 
 private const val LIGHTS = """
@@ -281,17 +189,16 @@ private const val EXPR_GET_NORMAL = """
     }
 """
 
+private const val MAIN_DECL = "void main() {"
+
 private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$GENERAL_DECL\n$ERR_DECL\n$RANDOM_DECL\n$LIGHT_DECL\n$MAT_DECL\n$RAY_DECL\n$CAMERA_DECL\n$SPHERE_DECL\n" +
-    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$BVH_DECL\n$MATERIALS_DECL\n$LIGHTS\n" +
-    "$HITABLES\n$SPHERES\n$MATERIALS\n"
+    "$EXPR_PI\n$GENERAL_DECL\n$ERR_DECL\n$RANDOM_DECL\n" +
+    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$LIGHTS\n$HITABLES\n$SPHERES\n$MATERIALS\n"
 
 private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_DTOF + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
 
-private const val MAIN_DECL = "void main() {"
-
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n" +
-        "$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_DEFINITIONS\n"
+        "$PUBLIC_TYPES\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_OPS\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$EXPR_GET_NORMAL\n$EXPR_DISCARD\n"
 
 private var next = AtomicInteger()

@@ -18,7 +18,6 @@
 
 // ------------------- TYPES -------------------
 
-public
 typedef struct {
     float x;
     float y;
@@ -50,16 +49,19 @@ typedef struct {
     float value;
 } mat4;
 
+public
 typedef struct {
     vec3 origin;
     vec3 direction;
 } Ray;
 
+public
 typedef struct {
     vec3 pointMin;
     vec3 pointMax;
 } AABB;
 
+public
 typedef struct {
     vec3 origin;
     vec3 lowerLeft;
@@ -69,6 +71,7 @@ typedef struct {
     float lensRadius;
 } RtCamera;
 
+public
 typedef struct {
     vec3 vector;
     vec3 color;
@@ -77,6 +80,7 @@ typedef struct {
     float attenQuadratic;
 } Light;
 
+public
 typedef struct {
     vec3 ambient;
     vec3 diffuse;
@@ -85,6 +89,7 @@ typedef struct {
     float transparency;
 } PhongMaterial;
 
+public
 typedef struct {
     AABB aabb;
     int leftType;
@@ -93,6 +98,7 @@ typedef struct {
     int rightIndex;
 } BvhNode;
 
+public
 typedef struct {
     vec3 center;
     float radius;
@@ -100,18 +106,22 @@ typedef struct {
     int materialIndex;
 } Sphere;
 
+public
 typedef struct {
     vec3 albedo;
 } LambertianMaterial;
 
+public
 typedef struct {
     vec3 albedo;
 } MetallicMaterial;
 
+public
 typedef struct {
     float reflectiveIndex;
 } DielectricMaterial;
 
+public
 typedef struct {
     float t;
     vec3 point;
@@ -120,11 +130,13 @@ typedef struct {
     int materialIndex;
 } HitRecord;
 
+public
 typedef struct {
     vec3 attenuation;
     Ray scattered;
 } ScatterResult;
 
+public
 typedef struct {
     bool isRefracted;
     vec3 refracted;

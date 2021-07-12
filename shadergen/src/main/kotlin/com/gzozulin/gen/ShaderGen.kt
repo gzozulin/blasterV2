@@ -56,7 +56,9 @@ private fun renderDeclarations(declarations: List<CDeclaration>): String {
         }
     }
     result += "\n"
-    result += "const val PUBLIC_DEFINITIONS = ${declarations.filter { it.access == CAccess.PUBLIC }
+    result += "const val PUBLIC_TYPES = ${declarations.filter { it.access == CAccess.PUBLIC }.filter { it is CTypedef }
+        .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    result += "const val PUBLIC_OPS = ${declarations.filter { it.access == CAccess.PUBLIC }.filter { it is COperation }
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     declarations.forEach { declaration ->
         if (declaration is COperation) {
@@ -67,7 +69,7 @@ private fun renderDeclarations(declarations: List<CDeclaration>): String {
 }
 
 private fun renderDeclaration(declaration: CDeclaration) =
-    "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\\n\""
+    "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\""
 
 private fun renderKotlinHandle(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
