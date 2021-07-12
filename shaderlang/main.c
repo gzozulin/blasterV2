@@ -766,7 +766,7 @@ public vec3 halfVector(const vec3 left, const vec3 right) {
 
 public
 vec3 specularContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNormal,
-                            const PhongMaterial material) {
+                     const PhongMaterial material) {
     vec3 hv = halfVector(viewDir, lightDir);
     float specularTerm = dotv3(hv, fragNormal);
     return specularTerm > 0.0f ? mulv3f(material.specular, pow(specularTerm, material.shine)) : v3zero();
@@ -774,7 +774,7 @@ vec3 specularContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNor
 
 public
 vec3 lightContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNormal,
-                         const float attenuation, const Light light, const PhongMaterial material) {
+                  const float attenuation, const Light light, const PhongMaterial material) {
     vec3 lighting = v3zero();
     lighting = addv3(lighting, diffuseContrib(lightDir, fragNormal, material));
     lighting = addv3(lighting, specularContrib(viewDir, lightDir, fragNormal, material));
@@ -783,7 +783,7 @@ vec3 lightContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNormal
 
 public
 vec3 pointLightContrib(const vec3 viewDir, const vec3 fragPosition, const vec3 fragNormal,
-                              const Light light, const PhongMaterial material) {
+                       const Light light, const PhongMaterial material) {
     vec3 direction = subv3(light.vector, fragPosition);
     vec3 lightDir = normv3(direction);
     if (dotv3(lightDir, fragNormal) < 0.0f) {
@@ -795,8 +795,7 @@ vec3 pointLightContrib(const vec3 viewDir, const vec3 fragPosition, const vec3 f
 }
 
 public
-vec3 dirLightContrib(const vec3 viewDir, const vec3 fragNormal, const Light light,
-                            const PhongMaterial material) {
+vec3 dirLightContrib(const vec3 viewDir, const vec3 fragNormal, const Light light, const PhongMaterial material) {
     vec3 lightDir = negv3(normv3(light.vector));
     return lightContrib(viewDir, lightDir, fragNormal, 1.0f, light, material);
 }
@@ -807,8 +806,8 @@ vec4 shadingFlat(vec4 color) {
 }
 
 public
-vec4 shadingPhong(const vec3 fragPosition, const vec3 eye, const vec3 fragNormal,
-                         const vec3 fragAlbedo, const PhongMaterial material) {
+vec4 shadingPhong(const vec3 fragPosition, const vec3 eye, const vec3 fragNormal, const vec3 fragAlbedo,
+                  const PhongMaterial material) {
     vec3 viewDir = normv3(subv3(eye, fragPosition));
     vec3 color = material.ambient;
     for (int i = 0; i < uLightsPointCnt; ++i) {
@@ -822,8 +821,7 @@ vec4 shadingPhong(const vec3 fragPosition, const vec3 eye, const vec3 fragNormal
 }
 
 custom
-vec3 getNormalFromMap(const vec3 normal, const vec3 worldPos, const vec2 texCoord,
-                             const vec3 vnormal) {
+vec3 getNormalFromMap(const vec3 normal, const vec3 worldPos, const vec2 texCoord, const vec3 vnormal) {
 
     const vec3 result = addv3(addv3(addv3(normal, worldPos), vnormal), v2tov3(texCoord, 1));
     assert(dotv3(result, worldPos) && "Some chicken shit happens here..");
@@ -875,8 +873,9 @@ vec3 fresnelSchlick(const float cosTheta, const vec3 F0) {
 }
 
 public
-vec4 shadingPbr(const vec3 eye, const vec3 worldPos,
-                       const vec3 albedo, const vec3 N, const float metallic, const float roughness, const float ao) {
+vec4 shadingPbr(const vec3 eye, const vec3 worldPos, const vec3 albedo, const vec3 N,
+                const float metallic, const float roughness, const float ao) {
+
     const vec3 alb = powv3(albedo, ftov3(2.2f));
     const vec3 V   = normv3(subv3(eye, worldPos));
 
@@ -919,8 +918,8 @@ vec4 shadingPbr(const vec3 eye, const vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
-RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,
-        const float vfoy, const float aspect, const float aperture, const float focusDist) {
+RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const float vfoy, const float aspect,
+                      const float aperture, const float focusDist) {
     const float lensRadius = aperture / 2.0f;
 
     const float halfHeight = tan(vfoy/2.0f);
@@ -1024,8 +1023,7 @@ HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const 
 }
 
 public
-HitRecord rayHitObject(const Ray ray,const float tMin, const float tMax,
-                              const int type, const int index) {
+HitRecord rayHitObject(const Ray ray,const float tMin, const float tMax, const int type, const int index) {
     if (type != HITABLE_SPHERE) {
         flagError(); // spheres only
         return NO_HIT;
@@ -1074,8 +1072,7 @@ HitRecord rayHitWorld(const Ray ray, const float tMin, const float tMax) {
 }
 
 public
-ScatterResult materialScatterLambertian(const HitRecord record,
-        const LambertianMaterial material) {
+ScatterResult materialScatterLambertian(const HitRecord record, const LambertianMaterial material) {
     const vec3 tangent = addv3(record.point, record.normal);
     const vec3 direction = addv3(tangent, randomInUnitSphere());
     const ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
@@ -1083,8 +1080,7 @@ ScatterResult materialScatterLambertian(const HitRecord record,
 }
 
 public
-ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record,
-        const MetallicMaterial material) {
+ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record, const MetallicMaterial material) {
     const vec3 reflected = reflectv3(ray.direction, record.normal);
     if (dotv3(reflected, record.normal) > 0) {
         const ScatterResult result = { material.albedo, { record.point, reflected } };
@@ -1095,8 +1091,7 @@ ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record,
 }
 
 public
-ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record,
-        const DielectricMaterial material) {
+ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record, const DielectricMaterial material) {
     float niOverNt;
     float cosine;
     vec3 outwardNormal;
@@ -1169,10 +1164,10 @@ vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, con
 
 public
 vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
-                            const vec3 eye, const vec3 center, const vec3 up,
-                            const float fovy, const float aspect,
-                            const float aperture, const float focusDist,
-                            const vec2 texCoord) {
+                     const vec3 eye, const vec3 center, const vec3 up,
+                     const float fovy, const float aspect,
+                     const float aperture, const float focusDist,
+                     const vec2 texCoord) {
 
     seedRandom(v2tov3(texCoord, random));
 
