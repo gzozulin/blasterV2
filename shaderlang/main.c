@@ -16,27 +16,6 @@
 
 #define PI 3.14159265359f
 
-#define WIDTH                   1024
-#define HEIGHT                  768
-#define SAMPLES                 8
-#define BOUNCE_ERR              0.001f
-
-#define MAX_LIGHTS              128
-#define MAX_BVH                 512
-#define MAX_SPHERES             256
-#define MAX_LAMBERTIANS         16
-#define MAX_METALS              16
-#define MAX_DIELECTRICS         16
-
-// Corresponds to HitableType
-#define HITABLE_BVH              0
-#define HITABLE_SPHERE           1
-
-// Corresponds to MaterialType
-#define MATERIAL_LAMBERTIAN     0
-#define MATERIAL_METALIIC       1
-#define MATERIAL_DIELECTRIC     2
-
 // ------------------- TYPES -------------------
 
 typedef struct {
@@ -151,6 +130,27 @@ typedef struct {
 } RefractResult;
 
 // ------------------- CONST -------------------
+
+#define WIDTH                   1024
+#define HEIGHT                  768
+#define SAMPLES                 8
+#define BOUNCE_ERR              0.001f
+
+#define MAX_LIGHTS              128
+#define MAX_BVH                 512
+#define MAX_SPHERES             256
+#define MAX_LAMBERTIANS         16
+#define MAX_METALS              16
+#define MAX_DIELECTRICS         16
+
+// Corresponds to HitableType
+#define HITABLE_BVH              0
+#define HITABLE_SPHERE           1
+
+// Corresponds to MaterialType
+#define MATERIAL_LAMBERTIAN     0
+#define MATERIAL_METALIIC       1
+#define MATERIAL_DIELECTRIC     2
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
