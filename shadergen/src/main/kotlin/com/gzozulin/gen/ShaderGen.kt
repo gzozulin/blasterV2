@@ -56,9 +56,9 @@ private fun renderDeclarations(declarations: List<CDeclaration>): String {
         }
     }
     result += "\n"
-    result += "const val PUBLIC_TYPES = ${declarations.filter { it.access == CAccess.PUBLIC }.filter { it is CTypedef }
+    result += "const val PUBLIC_TYPES = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<CTypedef>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    result += "const val PUBLIC_OPS = ${declarations.filter { it.access == CAccess.PUBLIC }.filter { it is COperation }
+    result += "const val PUBLIC_OPS = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<COperation>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     declarations.forEach { declaration ->
         if (declaration is COperation) {

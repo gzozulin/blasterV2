@@ -8,8 +8,6 @@ const val PRECISION_HIGH = "precision highp float;\n"
 const val V_TEX_COORD = "vTexCoord"
 const val GL_FRAG_COORD = "gl_FragCoord.xy"
 
-private const val EXPR_PI = "const float PI = 3.14159265359;\n"
-
 const val MAX_LIGHTS        = 128
 const val MAX_BVH           = 512
 const val MAX_SPHERES       = 256
@@ -17,7 +15,8 @@ const val MAX_LAMBERTIANS   = 16
 const val MAX_METALLICS     = 16
 const val MAX_DIELECTRICS   = 16
 
-private const val GENERAL_DECL = """
+private const val CUSTOM_DEFINITIONS = """
+    const float PI = 3.14159265359;
     #define FLT_MAX 3.402823466e+38
     #define FLT_MIN 1.175494351e-38
     #define DBL_MAX 1.7976931348623158e+308
@@ -26,13 +25,9 @@ private const val GENERAL_DECL = """
     #define WIDTH           1024
     #define HEIGHT          768
     #define BOUNCE_ERR      0.001f
-"""
-
-private const val ERR_DECL = """
+    
     bool errorFlag = false;
-"""
-
-private const val RANDOM_DECL = """
+    
     // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
     // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
     uint hash(uint x) {
@@ -78,27 +73,15 @@ private const val RANDOM_DECL = """
         seed.w += FLT_MIN;
         return random(seed);
     }
-"""
-
-private const val HIT_RECORD_DECL = """
+    
     const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
-"""
-
-private const val SCATTER_RESULT_DECL = """
-   const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
-"""
-
-private const val REFRACT_RESULT_DECL = """
+    const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
     const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
-"""
-
-private const val LIGHTS = """
+    
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
     uniform Light uLights[$MAX_LIGHTS];
-"""
-
-private const val HITABLES = """
+    
     #define HITABLE_BVH              0
     #define HITABLE_SPHERE           1
     #define MAX_BVH                 $MAX_BVH
@@ -107,71 +90,47 @@ private const val HITABLES = """
     
     int bvhStack[$MAX_BVH];
     int bvhTop = 0;
-"""
-
-private const val SPHERES = """
+    
     uniform int uSpheresCnt;
     uniform Sphere uSpheres[$MAX_SPHERES];
-"""
-
-private const val MATERIALS = """
+    
     #define MATERIAL_LAMBERTIAN     0
     #define MATERIAL_METALIIC       1
     #define MATERIAL_DIELECTRIC     2
     uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
     uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
     uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
-"""
-
-private const val EXPR_DISCARD =
-    "vec4 expr_discard() {\n" +
-            "    discard;\n" +
-            "    return vec4(1.0);\n" +
-            "}\n"
-
-private const val EXPR_ITOF = """
+    
     float itof(int i) {
         return float(i);
     }
-"""
-
-private const val EXPR_FTOI = """
+    
     float ftoi(float f) {
         return int(f);
     }
-"""
-
-private const val EXPR_DTOF = """
+    
     float dtof(double d) {
         return float(d);
     }
-"""
-
-private const val EXPR_V2 = """
+    
     vec2 v2(float x, float y) {
         return vec2(x, y);
     }
-"""
-
-private const val EXPR_V2I = """
+    
     ivec2 v2i(int x, int y) {
         return ivec2(x, y);
     }
-"""
-
-private const val EXPR_V3 = """
+    
     vec3 v3(float x, float y, float z) {
         return vec3(x, y, z);
     }
-"""
-
-private const val EXPR_V4 = """
+    
     vec4 v4(float x, float y, float z, float w) {
         return vec4(x, y, z, w);
     }
 """
 
-private const val EXPR_GET_NORMAL = """
+private const val CUSTOM_FRAG_DEFINITIONS = """
     vec3 getNormalFromMap(vec3 normal, vec3 worldPos, vec2 texCoord, vec3 vnormal) {
         vec3 tangentNormal = normal * 2.0 - 1.0;
 
@@ -187,19 +146,16 @@ private const val EXPR_GET_NORMAL = """
 
         return normalize(TBN * tangentNormal);
     }
+    
+    vec4 expr_discard() { 
+        discard; return vec4(1.0); 
+    }
 """
 
 private const val MAIN_DECL = "void main() {"
 
-private const val PRIVATE_DEFINITIONS =
-    "$EXPR_PI\n$GENERAL_DECL\n$ERR_DECL\n$RANDOM_DECL\n" +
-    "$HIT_RECORD_DECL\n$SCATTER_RESULT_DECL$REFRACT_RESULT_DECL\n\n$LIGHTS\n$HITABLES\n$SPHERES\n$MATERIALS\n"
-
-private const val CUSTOM_DEFINITIONS = EXPR_ITOF + EXPR_FTOI + EXPR_DTOF + EXPR_V2 + EXPR_V2I + EXPR_V3 + EXPR_V4
-
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n" +
-        "$PUBLIC_TYPES\n$PRIVATE_DEFINITIONS\n$CUSTOM_DEFINITIONS\n$PUBLIC_OPS\n"
-const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$EXPR_GET_NORMAL\n$EXPR_DISCARD\n"
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PUBLIC_TYPES\n$CUSTOM_DEFINITIONS\n$PUBLIC_OPS\n"
+const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEFINITIONS\n"
 
 private var next = AtomicInteger()
 private fun nextName() = "_v${next.incrementAndGet()}"
