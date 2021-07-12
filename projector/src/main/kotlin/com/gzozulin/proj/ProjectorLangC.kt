@@ -66,10 +66,7 @@ private fun CDeclCtx.identifier(): String {
     try {
         return declaration()
             .declarationSpecifiers()
-            .declarationSpecifier()[0]
-            .typeSpecifier()
-            .structOrUnionSpecifier()
-            .Identifier()
+            .declarationSpecifier()[2]
             .text
     } catch (th: Throwable) { }
 
@@ -145,7 +142,7 @@ private class CHighlightVisitor(val tokens: List<Token>, val colorMap: MutableMa
 
 private fun Token.color(): col3 = when (type) {
     CLexer.Int, CLexer.Float, CLexer.Struct, CLexer.Const, CLexer.Return, CLexer.For, CLexer.While, CLexer.If,
-    CLexer.Else, CLexer.Switch, CLexer.Case, CLexer.Default, CLexer.Break, CLexer.Void -> darkula_orange
+    CLexer.Else, CLexer.Switch, CLexer.Case, CLexer.Default, CLexer.Break, CLexer.Void, CLexer.Typedef -> darkula_orange
     CLexer.Constant -> darkula_light_blue
     CLexer.StringLiteral -> darkula_green
     else -> darkula_white
