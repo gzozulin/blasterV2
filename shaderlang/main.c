@@ -18,6 +18,7 @@
 
 // ------------------- TYPES -------------------
 
+public
 typedef struct {
     float x;
     float y;

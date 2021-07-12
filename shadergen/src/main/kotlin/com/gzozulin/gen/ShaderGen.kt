@@ -18,13 +18,18 @@ private typealias FunctionCtx = CParser.FunctionDefinitionContext
 private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: CommonTokenStream, val parser: CParser)
 private data class CParam(val type: String, val name: String)
 
-interface CDeclaration
 private enum class CAccess { PRIVATE, CUSTOM, PUBLIC }
-private data class COperation(val type: String, val name: String, val params: List<CParam>, val def: String,
-                              val access: CAccess): CDeclaration
-private data class CStructure(val name: String, val def: String, val access: CAccess): CDeclaration
+private interface CDeclaration {
+    val access: CAccess
+    val name: String
+    val def: String
+}
+private data class COperation(val type: String, override val name: String, val params: List<CParam>,
+                              override val def: String, override val access: CAccess): CDeclaration
+private data class CTypedef(override val name: String, override val def: String,
+                            override val access: CAccess): CDeclaration
 
-fun main(): Unit = doCreateOutput(
+fun main() = doCreateOutput(
     renderDeclarations(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
 )
 
@@ -32,7 +37,7 @@ private fun doCreateOutput(content: String, file: File) {
     file.writeText(content)
 }
 
-private fun renderDeclarations(operations: List<COperation>): String {
+private fun renderDeclarations(declarations: List<CDeclaration>): String {
     var result = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
             "import com.gzozulin.minigl.tech.Hitable\n" +
@@ -45,24 +50,26 @@ private fun renderDeclarations(operations: List<COperation>): String {
             "import com.gzozulin.minigl.tech.LambertianMaterial\n" +
             "import com.gzozulin.minigl.tech.MetallicMaterial\n" +
             "import com.gzozulin.minigl.tech.DielectricMaterial\n\n"
-    operations.forEach { operation ->
+    declarations.forEach { operation ->
         if (operation.access == CAccess.PUBLIC) {
             result += renderDeclaration(operation) + "\n"
         }
     }
     result += "\n"
-    result += "const val PUBLIC_DEFINITIONS = ${operations.filter { it.access == CAccess.PUBLIC }
+    result += "const val PUBLIC_DEFINITIONS = ${declarations.filter { it.access == CAccess.PUBLIC }
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    operations.forEach { operation ->
-        result += renderOperation(operation) + "\n\n"
+    declarations.forEach { declaration ->
+        if (declaration is COperation) {
+            result += renderKotlinHandle(declaration) + "\n\n"
+        }
     }
     return result
 }
 
-private fun renderDeclaration(operation: COperation) =
-    "private const val DEF_${operation.name.toUpperCase()} = \"${operation.def}\\n\\n\""
+private fun renderDeclaration(declaration: CDeclaration) =
+    "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\\n\""
 
-private fun renderOperation(operation: COperation) = """
+private fun renderKotlinHandle(operation: COperation) = """
     fun ${operation.name}(${renderParams(operation.params)}) = object : Expression<${convertType(operation.type)}>() {
         override fun expr() = "${operation.name}(${renderExpressions(operation.params)})"
         ${renderRoots(operation.params)}
@@ -108,27 +115,37 @@ private fun convertType(ctype: String) = when (ctype) {
     else                    -> error("Unknown type! $ctype")
 }
 
-private fun visitCFile(cfile: CFile): List<COperation> {
-    val result = mutableListOf<COperation>()
+private fun visitCFile(cfile: CFile): List<CDeclaration> {
+    val result = mutableListOf<CDeclaration>()
     val visitor = ExternalDeclarationVisitor { ctx ->
-
-
-
-        if (ctx.functionDefinition() != null) {
+        if (ctx.isFunction()) {
             parseCFunction(ctx.functionDefinition(), cfile.tokens)?.let {
                 result.add(it)
             }
+        } else if (ctx.isTypedef()) {
+            parseTypedef(ctx.declaration(), cfile.tokens)?.let {
+                result.add(it)
+            }
         }
-
-        
     }
     visitor.visit(cfile.parser.compilationUnit())
     return result
 }
 
-private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation? {
-    val name = ctx.declarator().directDeclarator().directDeclarator().text
-    val declSpecifiers = ctx.declarationSpecifiers()
+private fun DeclCtx.isTypedef(): Boolean {
+    for (declarationSpecifierContext in declaration().declarationSpecifiers().declarationSpecifier()) {
+        if (declarationSpecifierContext.text == "typedef") {
+            return true
+        }
+    }
+    return false
+}
+
+private fun DeclCtx.isFunction(): Boolean {
+    return functionDefinition() != null
+}
+
+private fun parseAccess(declSpecifiers: CParser.DeclarationSpecifiersContext): CAccess {
     var access = CAccess.PRIVATE
     for (i in 0 until declSpecifiers.childCount) {
         val specifier = declSpecifiers.getChild(i)
@@ -138,6 +155,29 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
             access = CAccess.PUBLIC
         }
     }
+    return access
+}
+
+private fun parseTypedef(ctx: CParser.DeclarationContext, tokens: CommonTokenStream): CTypedef? {
+    val declSpecifiers = ctx.declarationSpecifiers()
+    val access = parseAccess(declSpecifiers)
+    if (access == CAccess.PRIVATE) {
+        return null
+    }
+
+    val name = ctx.declarationSpecifiers().declarationSpecifier()[ctx.declarationSpecifiers().childCount - 1].text
+    val body = tokens.filterAndExtract(ctx)
+    val start = body.indexOfFirst { it == '{' } + 1
+    val stop = body.indexOfFirst { it == '}' }
+
+    val definition = "struct $name { ${body.substring(start, stop)} };"
+    return CTypedef(name, definition, access)
+}
+
+private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperation? {
+    val name = ctx.declarator().directDeclarator().directDeclarator().text
+    val declSpecifiers = ctx.declarationSpecifiers()
+    val access = parseAccess(declSpecifiers)
     if (access == CAccess.PRIVATE) {
         return null
     }
