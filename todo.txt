@@ -1,4 +1,4 @@
-(A) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
+x 2021-07-12 (A) 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
 x 2021-05-02 (A) 2021-04-23 Ambient jazzy music in video from youtube +video @complex
 x 2021-05-02 (A) 2021-04-23 Create avatar for a channel, rename channel to Greg's Journal +video @simple
 x 2021-04-25 (A) 2021-04-23 Fix texture for the bedroom scene +assets @simple
@@ -14,7 +14,7 @@ x 2021-05-02 (A) 2021-04-23 New thumbnail, new backgrounds +video @simple
 x 2021-05-07 (A) 2021-04-23 Off-screen MSAA for Deferred Technique +code @complex
 x 2021-04-25 (A) 2021-04-23 Remove assets from project +assets @complex
 x 2021-04-23 2021-04-23 Show packages in left panel +code @complex
-2021-04-23 Support for C and GLSL +code @complex
+x 2021-07-12 2021-04-23 Support for C and GLSL +code @complex
 x 2021-05-19 2021-04-23 Switching to fullscreen +code @complex
 x 2021-04-29 (A) 2021-04-23 Video arrangement: me completely in the frame +video @simple
 x 2021-04-23 2021-04-23 Current file pop-up +code @complex
@@ -37,18 +37,18 @@ x 2021-05-03 2021-04-29 Find a way to directly incode H264 lossless in code +cod
 x 2021-05-02 (A) 2021-04-29 THE MODEL - Greg's Journal 1 +video @simple
 x 2021-05-15 (A) 2021-04-30 Show whitespace only before typing, not before scrolling +code @simple
 x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
-2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
+x 2021-07-12 2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
 x 2021-06-09 (B) 2021-04-30 Generate typing sounds with video +code @complex
 x 2021-06-12 (A) 2021-05-02 Ask questions from audience +video @simple
 2021-05-02 Create avatar for a channel +video @complex
-(A) 2021-05-03 Create a header strip for the channel page +video @simple
+2021-05-03 Create a header strip for the channel page +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
 x 2021-05-26 (A) 2021-05-04 Blender file template +video @simple
 x 2021-05-07 (A) 2021-05-05 Remove dynamic resizing from the codebase +code @complex
 x 2021-06-15 (B) 2021-05-08 MSAA for RttTechnique (code rendering) +code @complex
 x 2021-05-12 (A) 2021-05-09 api2: Transforms, Textures, Uniforms +code @simple
 x 2021-05-14 2021-05-12 Inject substitutions before and after main() for shaders +code @complex
-(B) 2021-05-13 Learn about licenses for creative use +video @complex
+x 2021-07-12 2021-05-13 Learn about licenses for creative use +video @complex
 2021-05-14 Remove GlBackend +code @complex
 x 2021-05-15 (A) 2021-05-14 Fix fonts for ProjectorView +code @simple
 2021-05-14 Light shines even from the opposite side of the surface +code @complex
@@ -63,21 +63,22 @@ x 2021-06-09 (B) 2021-05-22 Multiple shots per one capture of code +code @comple
 2021-05-22 Anisotropic Filtering for GlTexture +code @simple
 x 2021-06-16 (B) 2021-05-26 Random camera start positions/shots +code @simple
 x 2021-06-05 (A) 2021-05-26 Establishing shot +video @simple
-(B) 2021-05-31 Basic support for C and interop +code @complex
+x 2021-07-12 (B) 2021-05-31 Basic support for C and interop +code @complex
 2021-06-01 Channel watermarks, especially for captures +video @simple
 2021-06-02 Channel preview video on main page +video @complex
-2021-06-03 Cron job to copy the current video once a day +video @simple
+x 2021-07-12 2021-06-03 Cron job to copy the current video once a day +video @simple
 x 2021-06-09 2021-06-05 Chart as overlay on top of video +video @simple
 x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
-(A) 2021-06-09 Journal cleanup: playlists and hashtags +video @simple
+2021-06-09 Journal cleanup: playlists and hashtags +video @simple
 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
 2021-06-12 Highlight string injected code +code @complex
-(B) 2021-06-12 Blurred rendered background for pictures (or even integrate it with Projector) +code @complex
-2021-06-17 Export structs from C +code @complex
-(B) 2021-06-17 GLSL inout directive can be useful: pointers in C +code @complex
-(A) 2021-06-20 Like and subscribe frame +video @simple
-2021-06-21 Presentation remote +video @simple
-(A) 2021-06-22 Do not flex your back on video +video @simple
-2021-06-22 Tablet for diagrams +video @complex
-2021-06-24 Move all techniques test code into SFCs (main functions): will remove the load and facilitate testing area +code @simple
-(A) 2021-06-26 LIke and subscribe pop-up inside the video +video @complex
+x 2021-07-12 (B) 2021-06-12 Blurred rendered background for pictures (or even integrate it with Projector) +code @complex
+x 2021-07-12 2021-06-17 Export structs from C +code @complex
+2021-06-17 GLSL inout directive can be useful: pointers in C +code @complex
+2021-06-20 Like and subscribe custom frame +video @simple
+x 2021-07-12 2021-06-21 Presentation remote +video @simple
+x 2021-07-12 2021-06-22 Do not flex your back on video +video @simple
+x 2021-07-12 2021-06-22 Tablet for diagrams +video @complex
+x 2021-07-12 2021-06-24 Move all techniques test code into SFCs (main functions): will remove the load and facilitate testing area +code @simple
+x 2021-07-12 2021-06-26 LIke and subscribe pop-up inside the video +video @complex
+2021-07-12 Split the raytracer C code into multiple files +code @complex
