@@ -21,9 +21,6 @@ private const val CUSTOM_DEFINITIONS = """
     #define FLT_MIN 1.175494351e-38
     #define DBL_MAX 1.7976931348623158e+308
     #define DBL_MIN 2.2250738585072014e-308
-    
-    #define WIDTH           1024
-    #define HEIGHT          768
     #define BOUNCE_ERR      0.001f
     
     bool errorFlag = false;

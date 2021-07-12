@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define public
-#define custom
+#define public // define and add handle
+#define custom // handle only, definition is custom
 
 #define sqrt sqrtf
 #define pow powf
@@ -144,8 +144,6 @@ typedef struct {
 
 // ------------------- CONST -------------------
 
-#define WIDTH                   1024
-#define HEIGHT                  768
 #define SAMPLES                 8
 #define BOUNCE_ERR              0.001f
 
@@ -1163,7 +1161,8 @@ vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, con
 }
 
 public
-vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
+vec4 fragmentColorRt(const int width, const int height,
+                     const float random, int sampleCnt, int rayBounces,
                      const vec3 eye, const vec3 center, const vec3 up,
                      const float fovy, const float aspect,
                      const float aperture, const float focusDist,
@@ -1171,8 +1170,8 @@ vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
 
     seedRandom(v2tov3(texCoord, random));
 
-    const float DU = 1.0f / WIDTH;
-    const float DV = 1.0f / HEIGHT;
+    const float DU = 1.0f / itof(width);
+    const float DV = 1.0f / itof(height);
 
     const RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
     vec3 result = v3zero();
@@ -1192,6 +1191,9 @@ vec4 gammaSqrt(const vec4 result) {
 }
 
 void raytracer() {
+    const int WIDTH = 1024;
+    const int HEIGHT = 768;
+
     FILE *f = fopen("out.ppm", "w");
     if (f == NULL) {
         printf("Error opening file!\n");
@@ -1199,7 +1201,7 @@ void raytracer() {
     }
     fprintf(f, "P3\n%d %d\n255\n", WIDTH, HEIGHT);
 
-    const float all = WIDTH * HEIGHT;
+    const float all = itof(WIDTH) * itof(HEIGHT);
     int current = 0;
 
     for (int v = HEIGHT - 1; v >= 0; v--) {
@@ -1208,6 +1210,7 @@ void raytracer() {
             const float t = (float) v / (float) WIDTH;
 
             const vec4 added = fragmentColorRt(
+                    WIDTH, HEIGHT,
                     randomFloat(), SAMPLES, 4,
                     v3(0, 0, 250.0f), v3zero(), v3up(),
                     90.0f * PI / 180.0f, 4.0f / 3.0f, 0, 1,

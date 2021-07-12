@@ -38,6 +38,7 @@ data class ShadingRt(val window: GlWindow,
 
     internal val unifRandom = uniff()
     private val colorSampled = errorHandler(fragmentColorRt(
+        consti(window.width), consti(window.height),
         unifRandom, sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
@@ -316,7 +317,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
