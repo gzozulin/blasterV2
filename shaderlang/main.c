@@ -39,130 +39,130 @@
 
 // ------------------- TYPES -------------------
 
-struct vec2 {
+typedef struct {
     float x;
     float y;
-};
+} vec2;
 
-struct ivec2 {
+typedef struct {
     int x;
     int y;
-};
+} ivec2;
 
-struct vec3 {
+typedef struct {
     float x;
     float y;
     float z;
-};
+} vec3;
 
-struct vec4 {
+typedef struct {
     float x;
     float y;
     float z;
     float w;
-};
+} vec4;
 
-struct mat3 {
+typedef struct {
     float value;
-};
+} mat3;
 
-struct mat4 {
+typedef struct {
     float value;
-};
+} mat4;
 
-struct Ray {
-    struct vec3 origin;
-    struct vec3 direction;
-};
+typedef struct {
+    vec3 origin;
+    vec3 direction;
+} Ray;
 
-struct AABB {
-    struct vec3 pointMin;
-    struct vec3 pointMax;
-};
+typedef struct {
+    vec3 pointMin;
+    vec3 pointMax;
+} AABB;
 
-struct RtCamera {
-    struct vec3 origin;
-    struct vec3 lowerLeft;
-    struct vec3 horizontal;
-    struct vec3 vertical;
-    struct vec3 w, u, v;
+typedef struct {
+    vec3 origin;
+    vec3 lowerLeft;
+    vec3 horizontal;
+    vec3 vertical;
+    vec3 w, u, v;
     float lensRadius;
-};
+} RtCamera;
 
-struct Light {
-    struct vec3 vector;
-    struct vec3 color;
+typedef struct {
+    vec3 vector;
+    vec3 color;
     float attenConstant;
     float attenLinear;
     float attenQuadratic;
-};
+} Light;
 
-struct PhongMaterial {
-    struct vec3 ambient;
-    struct vec3 diffuse;
-    struct vec3 specular;
+typedef struct {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
     float shine;
     float transparency;
-};
+} PhongMaterial;
 
-struct BvhNode {
-    struct AABB aabb;
+typedef struct {
+    AABB aabb;
     int leftType;
     int leftIndex;
     int rightType;
     int rightIndex;
-};
+} BvhNode;
 
-struct Sphere {
-    struct vec3 center;
+typedef struct {
+    vec3 center;
     float radius;
     int materialType;
     int materialIndex;
-};
+} Sphere;
 
-struct LambertianMaterial {
-    struct vec3 albedo;
-};
+typedef struct {
+    vec3 albedo;
+} LambertianMaterial;
 
-struct MetallicMaterial {
-    struct vec3 albedo;
-};
+typedef struct {
+    vec3 albedo;
+} MetallicMaterial;
 
-struct DielectricMaterial {
+typedef struct {
     float reflectiveIndex;
-};
+} DielectricMaterial;
 
-struct HitRecord {
+typedef struct {
     float t;
-    struct vec3 point;
-    struct vec3 normal;
+    vec3 point;
+    vec3 normal;
     int materialType;
     int materialIndex;
-};
+} HitRecord;
 
-struct ScatterResult {
-    struct vec3 attenuation;
-    struct Ray scattered;
-};
+typedef struct {
+    vec3 attenuation;
+    Ray scattered;
+} ScatterResult;
 
-struct RefractResult {
+typedef struct {
     bool isRefracted;
-    struct vec3 refracted;
-};
+    vec3 refracted;
+} RefractResult;
 
 // ------------------- CONST -------------------
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
-const struct Light uLights[MAX_LIGHTS] = {
+const Light uLights[MAX_LIGHTS] = {
         { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
 };
 
-const struct HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
-const struct ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
-const struct RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
+const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
+const ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
-const struct BvhNode uBvhNodes[MAX_BVH] = {
+const BvhNode uBvhNodes[MAX_BVH] = {
         { { { -100, -100,  -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
         { { { -100, -100,  -100 }, {  0,   0,    0 } }, HITABLE_SPHERE,  0,   -1,         -1 },
         { { {    0,    0,     0 }, { 100, 100, 100 } }, HITABLE_SPHERE,  1,   -1,         -1 }
@@ -171,17 +171,17 @@ const struct BvhNode uBvhNodes[MAX_BVH] = {
 int bvhStack[MAX_BVH];
 int bvhTop = 0;
 
-const struct Sphere uSpheres[MAX_SPHERES] = {
+const Sphere uSpheres[MAX_SPHERES] = {
         { { -50, -50, -50 }, 50, 0, 0 },
         { {  50,  50,  50 }, 50, 0, 1 }
 };
 
-const struct LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = {
+const LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = {
         { { 1, 0, 0 } },
         { { 0, 1, 0 } }
 };
-const struct MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
-const struct DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
+const MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
+const DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
 
 // ------------------- ERROR -------------------
 
@@ -214,206 +214,206 @@ float dtof(const double d) {
 // ------------------- VEC2 -------------------
 
 custom
-struct vec2 v2(const float x, const float y) {
-    return (struct vec2) { x, y };
+vec2 v2(const float x, const float y) {
+    return (vec2) { x, y };
 }
 
 public
-struct vec2 ftov2(const float v) {
+vec2 ftov2(const float v) {
     return v2(v, v);
 }
 
 public
-struct vec2 v2zero() {
+vec2 v2zero() {
     return ftov2(0.0f);
 }
 
 // ------------------- IVEC2 -------------------
 
 custom
-struct ivec2 iv2(const int x, const int y) {
-    return (struct ivec2) { x, y };
+ivec2 iv2(const int x, const int y) {
+    return (ivec2) { x, y };
 }
 
 // ------------------- VEC3 -------------------
 
 custom
-struct vec3 v3(const float x, const float y, const float z) {
-    return (struct vec3) { x, y, z };
+vec3 v3(const float x, const float y, const float z) {
+    return (vec3) { x, y, z };
 }
 
 public
-struct vec3 v2tov3(struct vec2 v, const float f) {
+vec3 v2tov3(vec2 v, const float f) {
     return v3(v.x, v.y, f);
 }
 
 public
-struct vec3 ftov3(const float v) {
+vec3 ftov3(const float v) {
     return v3(v, v, v);
 }
 
 public
-struct vec3 v3zero() {
+vec3 v3zero() {
     return ftov3(0.0f);
 }
 
 public
-struct vec3 v3one() {
+vec3 v3one() {
     return ftov3(1.0f);
 }
 
 public
-struct vec3 v3front() {
+vec3 v3front() {
     return v3(0, 0, 1);
 }
 
 public
-struct vec3 v3back() {
+vec3 v3back() {
     return v3(0, 0, -1);
 }
 
 public
-struct vec3 v3left() {
+vec3 v3left() {
     return v3(-1, 0, 0);
 }
 
 public
-struct vec3 v3right() {
+vec3 v3right() {
     return v3(1, 0, 0);
 }
 
 public
-struct vec3 v3up() {
+vec3 v3up() {
     return v3(0, 1, 0);
 }
 
 public
-struct vec3 v3down() {
+vec3 v3down() {
     return v3(0, -1, 0);
 }
 
 public
-struct vec3 v3white() {
+vec3 v3white() {
     return v3(1.0f, 1.0f, 1.0f);
 }
 
 public
-struct vec3 v3black() {
+vec3 v3black() {
     return v3(0.0f, 0.0f, 0.0f);
 }
 public
-struct vec3 v3ltGrey() {
+vec3 v3ltGrey() {
     return ftov3(0.3f);
 }
 
 public
-struct vec3 v3grey() {
+vec3 v3grey() {
     return ftov3(0.5f);
 }
 
 public
-struct vec3 v3dkGrey() {
+vec3 v3dkGrey() {
     return ftov3(0.7f);
 }
 
 public
-struct vec3 v3red() {
+vec3 v3red() {
     return v3(1.0f, 0.0f, 0.0f);
 }
 
 public
-struct vec3 v3green() {
+vec3 v3green() {
     return v3(0.0f, 1.0f, 0.0f);
 }
 
 public
-struct vec3 v3blue() {
+vec3 v3blue() {
     return v3(0.0f, 0.0f, 1.0f);
 }
 
 public
-struct vec3 v3yellow() {
+vec3 v3yellow() {
     return v3(1.0f, 1.0f, 0.0f);
 }
 
 public
-struct vec3 v3magenta() {
+vec3 v3magenta() {
     return v3(1.0f, 0.0f, 1.0f);
 }
 
 public
-struct vec3 v3cyan() {
+vec3 v3cyan() {
     return v3(0.0f, 1.0f, 1.0f);
 }
 
 public
-struct vec3 v3orange() {
+vec3 v3orange() {
     return v3(1.0f, 0.5f, 0.0f);
 }
 public
-struct vec3 v3rose() {
+vec3 v3rose() {
     return v3(1.0f, 0.0f, 0.5f);
 }
 
 public
-struct vec3 v3violet() {
+vec3 v3violet() {
     return v3(0.5f, 0.0f, 1.0f);
 }
 
 public
-struct vec3 v3azure() {
+vec3 v3azure() {
     return v3(0.0f, 0.5f, 1.0f);
 }
 
 public
-struct vec3 v3aquamarine() {
+vec3 v3aquamarine() {
     return v3(0.0f, 1.0f, 0.5f);
 }
 
 public
-struct vec3 v3chartreuse() {
+vec3 v3chartreuse() {
     return v3(0.5f, 1.0f, 0.0f);
 }
 
 // ------------------- VEC4 -------------------
 
 custom
-struct vec4 v4(const float x, const float y, const float z, const float w) {
-    return (struct vec4) { x, y, z, w };
+vec4 v4(const float x, const float y, const float z, const float w) {
+    return (vec4) { x, y, z, w };
 }
 
 public
-struct vec4 v3tov4(const struct vec3 v, const float f) {
+vec4 v3tov4(const vec3 v, const float f) {
     return v4(v.x, v.y, v.z, f);
 }
 
 public
-struct vec4 ftov4(const float v) {
+vec4 ftov4(const float v) {
     return v4(v, v, v, v);
 }
 
 public
-struct vec4 v4zero() {
+vec4 v4zero() {
     return ftov4(0.0f);
 }
 
 // ------------------- MAT4, RAY -------------------
 
 custom
-struct mat3 m3ident() {
-    return (struct mat3) { 0.0f };
+mat3 m3ident() {
+    return (mat3) { 0.0f };
 }
 
 public
-struct Ray rayBack() {
-    const struct Ray result = { v3zero(), v3back() };
+Ray rayBack() {
+    const Ray result = { v3zero(), v3back() };
     return result;
 }
 
 // ------------------- GETRS ---------------
 
 public
-float indexv3(const struct vec3 v, const int index) {
+float indexv3(const vec3 v, const int index) {
     switch (index) {
         case 0: return v.x;
         case 1: return v.y;
@@ -424,118 +424,118 @@ float indexv3(const struct vec3 v, const int index) {
 }
 
 public
-float getxv4(const struct vec4 v) {
+float getxv4(const vec4 v) {
     return v.x;
 }
 
 public
-float getyv4(const struct vec4 v) {
+float getyv4(const vec4 v) {
     return v.y;
 }
 
 public
-float getzv4(const struct vec4 v) {
+float getzv4(const vec4 v) {
     return v.z;
 }
 
 public
-float getwv4(const struct vec4 v) {
+float getwv4(const vec4 v) {
     return v.w;
 }
 
 public
-float getrv4(const struct vec4 v) {
+float getrv4(const vec4 v) {
     return v.x;
 }
 
 public
-float getgv4(const struct vec4 v) {
+float getgv4(const vec4 v) {
     return v.y;
 }
 
 public
-float getbv4(const struct vec4 v) {
+float getbv4(const vec4 v) {
     return v.z;
 }
 
 public
-float getav4(const struct vec4 v) {
+float getav4(const vec4 v) {
     return v.w;
 }
 
 // ------------------- SETRS ---------------
 
 public
-struct vec4 setxv4(const struct vec4 v, const float f) {
+vec4 setxv4(const vec4 v, const float f) {
     return v4(f, v.y, v.z, v.w);
 }
 
 public
-struct vec4 setyv4(const struct vec4 v, const float f) {
+vec4 setyv4(const vec4 v, const float f) {
     return v4(v.x, f, v.z, v.w);
 }
 
 public
-struct vec4 setzv4(const struct vec4 v, const float f) {
+vec4 setzv4(const vec4 v, const float f) {
     return v4(v.x, v.y, f, v.w);
 }
 
 public
-struct vec4 setwv4(const struct vec4 v, const float f) {
+vec4 setwv4(const vec4 v, const float f) {
     return v4(v.x, v.y, v.z, f);
 }
 
 public
-struct vec4 setrv4(const struct vec4 v, const float f) {
+vec4 setrv4(const vec4 v, const float f) {
     return v4(f, v.y, v.z, v.w);
 }
 
 public
-struct vec4 setgv4(const struct vec4 v, const float f) {
+vec4 setgv4(const vec4 v, const float f) {
     return v4(v.x, f, v.z, v.w);
 }
 
 public
-struct vec4 setbv4(const struct vec4 v, const float f) {
+vec4 setbv4(const vec4 v, const float f) {
     return v4(v.x, v.y, f, v.w);
 }
 
 public
-struct vec4 setav4(const struct vec4 v, const float f) {
+vec4 setav4(const vec4 v, const float f) {
     return v4(v.x, v.y, v.z, f);
 }
 
 // ------------------- BOOL -------------------
 
 public
-bool eqv2(const struct vec2 left, const struct vec2 right) {
+bool eqv2(const vec2 left, const vec2 right) {
     return left.x == right.x && left.y == right.y;
 }
 
 public
-bool eqv3(const struct vec3 left, const struct vec3 right) {
+bool eqv3(const vec3 left, const vec3 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z;
 }
 
 public
-bool eqv4(const struct vec4 left, const struct vec4 right) {
+bool eqv4(const vec4 left, const vec4 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
 }
 
 // ------------------- MATH -------------------
 
 public
-struct vec3 negv3(const struct vec3 v) {
+vec3 negv3(const vec3 v) {
     return v3(-v.x, -v.y, -v.z);
 }
 
 public
-float dotv3(const struct vec3 left, const struct vec3 right) {
+float dotv3(const vec3 left, const vec3 right) {
     return left.x * right.x + left.y * right.y + left.z * right.z;
 }
 
 public
-struct vec3 crossv3(const struct vec3 left, const struct vec3 right) {
+vec3 crossv3(const vec3 left, const vec3 right) {
     return v3(
             left.y * right.z - left.z * right.y,
             left.z * right.x - left.x * right.z,
@@ -543,97 +543,97 @@ struct vec3 crossv3(const struct vec3 left, const struct vec3 right) {
 }
 
 public
-struct vec3 addv3(const struct vec3 left, const struct vec3 right) {
+vec3 addv3(const vec3 left, const vec3 right) {
     return v3(left.x + right.x, left.y + right.y, left.z + right.z);
 }
 
 public
-struct vec3 subv3(const struct vec3 left, const struct vec3 right) {
+vec3 subv3(const vec3 left, const vec3 right) {
     return v3(left.x - right.x, left.y - right.y, left.z - right.z);
 }
 
 public
-struct vec3 mulv3(const struct vec3 left, const struct vec3 right) {
+vec3 mulv3(const vec3 left, const vec3 right) {
     return v3(left.x * right.x, left.y * right.y, left.z * right.z);
 }
 
 public
-struct vec3 mulv3f(const struct vec3 left, const float right) {
+vec3 mulv3f(const vec3 left, const float right) {
     return v3(left.x * right, left.y * right, left.z * right);
 }
 
 public
-struct vec3 powv3(const struct vec3 left, const struct vec3 right) {
+vec3 powv3(const vec3 left, const vec3 right) {
     return v3(pow(left.x, right.x), pow(left.y, right.y), pow(left.z, right.z));
 }
 
 public
-struct vec3 divv3f(const struct vec3 left, const float right) {
+vec3 divv3f(const vec3 left, const float right) {
     return v3(left.x / right, left.y / right, left.z / right);
 }
 
 public
-struct vec3 divv3(const struct vec3 left, const struct vec3 right) {
+vec3 divv3(const vec3 left, const vec3 right) {
     return v3(left.x / right.x, left.y / right.y, left.z / right.z);
 }
 
 public
-struct vec3 mixv3(const struct vec3 left, const struct vec3 right, const float proportion) {
+vec3 mixv3(const vec3 left, const vec3 right, const float proportion) {
     return addv3(mulv3(left, ftov3(1.0f - proportion)), mulv3(right, ftov3(proportion)));
 }
 
 public
-struct vec4 addv4(const struct vec4 left, const struct vec4 right) {
+vec4 addv4(const vec4 left, const vec4 right) {
     return v4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
 }
 
 public
-struct vec4 subv4(const struct vec4 left, const struct vec4 right) {
+vec4 subv4(const vec4 left, const vec4 right) {
     return v4(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w);
 }
 
 public
-struct vec4 mulv4(const struct vec4 left, const struct vec4 right) {
+vec4 mulv4(const vec4 left, const vec4 right) {
     return v4(left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w);
 }
 
 public
-struct vec4 mulv4f(const struct vec4 left, const float right) {
+vec4 mulv4f(const vec4 left, const float right) {
     return v4(left.x * right, left.y * right, left.z * right, left.w * right);
 }
 
 public
-struct vec4 divv4(const struct vec4 left, const struct vec4 right) {
+vec4 divv4(const vec4 left, const vec4 right) {
     return v4(left.x / right.x, left.y / right.y, left.z / right.z, left.w / right.w);
 }
 
 public
-struct vec4 divv4f(const struct vec4 left, const float right) {
+vec4 divv4f(const vec4 left, const float right) {
     return v4(left.x / right, left.y / right, left.z / right, left.z / right);
 }
 
 public
-float lenv3(const struct vec3 v) {
+float lenv3(const vec3 v) {
     return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
 public
-float lensqv3(const struct vec3 v) {
+float lensqv3(const vec3 v) {
     return (v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
 public
-struct vec3 normv3(const struct vec3 v) {
+vec3 normv3(const vec3 v) {
     return divv3f(v, lenv3(v));
 }
 
 public
-struct vec3 lerpv3(const struct vec3 from, const struct vec3 to, const float t) {
+vec3 lerpv3(const vec3 from, const vec3 to, const float t) {
     return addv3(mulv3f(from, 1.0f - t), mulv3f(to, t));
 }
 
 public
-struct vec3 rayPoint(const struct Ray ray, const float t) {
+vec3 rayPoint(const Ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
@@ -645,19 +645,19 @@ float schlick(float cosine, float ri) {
 }
 
 public
-struct vec3 reflectv3(const struct vec3 v, const struct vec3 n) {
+vec3 reflectv3(const vec3 v, const vec3 n) {
     return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
 }
 
 public
-struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const float niOverNt) {
-    const struct vec3 unitV = normv3(v);
+RefractResult refractv3(const vec3 v, const vec3 n, const float niOverNt) {
+    const vec3 unitV = normv3(v);
     const float dt = dotv3(unitV, n);
     const float D = 1.0f - niOverNt*niOverNt*(1.0f - dt*dt);
     if (D > 0) {
-        const struct vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
-        const struct vec3 right = mulv3f(n, sqrt(D));
-        const struct RefractResult result = { true, subv3(left, right) };
+        const vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
+        const vec3 right = mulv3f(n, sqrt(D));
+        const RefractResult result = { true, subv3(left, right) };
         return result;
     } else {
         return NO_REFRACT;
@@ -667,7 +667,7 @@ struct RefractResult refractv3(const struct vec3 v, const struct vec3 n, const f
 // ------------------- RAND -------------------
 
 custom
-struct vec3 seedRandom(const struct vec3 s) {
+vec3 seedRandom(const vec3 s) {
     return s;
 }
 
@@ -677,8 +677,8 @@ float randomFloat() {
 }
 
 public
-struct vec3 randomInUnitSphere() {
-    struct vec3 result;
+vec3 randomInUnitSphere() {
+    vec3 result;
     for (int i = 0; i < 10; i++) {
         result = v3(randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f, randomFloat() * 2.0f - 1.0f);
         if (lensqv3(result) >= 1.0f) {
@@ -689,8 +689,8 @@ struct vec3 randomInUnitSphere() {
 }
 
 public
-struct vec3 randomInUnitDisk() {
-    struct vec3 result;
+vec3 randomInUnitDisk() {
+    vec3 result;
     for (int i = 0; i < 10; i++) {
         result = subv3(mulv3f(v3(randomFloat(), randomFloat(), 0.0f), 2.0f), v3(1.0f, 1.0f, 0.0f));
         if (dotv3(result, result) >= 1.0f) {
@@ -703,9 +703,9 @@ struct vec3 randomInUnitDisk() {
 // ------------------- ERR_HANDLER ---------------
 
 public
-struct vec4 errorHandler(struct vec4 color) {
+vec4 errorHandler(vec4 color) {
     if (errorFlag) {
-        struct vec3 signal;
+        vec3 signal;
         float check = randomFloat();
         if (check > 0.6f) {
             signal = v3red();
@@ -723,7 +723,7 @@ struct vec4 errorHandler(struct vec4 color) {
 // ------------------- TILE ---------------
 
 public
-struct vec2 tile(const struct vec2 texCoord, const struct ivec2 uv, const struct ivec2 cnt) {
+vec2 tile(const vec2 texCoord, const ivec2 uv, const ivec2 cnt) {
     float tileSideX = 1.0f / itof(cnt.x);
     float tileStartX = itof(uv.x) * tileSideX;
     float tileSideY = 1.0f / itof(cnt.y);
@@ -737,42 +737,42 @@ struct vec2 tile(const struct vec2 texCoord, const struct ivec2 uv, const struct
 // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
 
 public
-float luminosity(const float distance, const struct Light light) {
+float luminosity(const float distance, const Light light) {
     return 1.0f / (light.attenConstant + light.attenLinear * distance + light.attenQuadratic * distance * distance);
 }
 
 public
-struct vec3 diffuseContrib(const struct vec3 lightDir, const struct vec3 fragNormal, const struct PhongMaterial material) {
+vec3 diffuseContrib(const vec3 lightDir, const vec3 fragNormal, const PhongMaterial material) {
     float diffuseTerm = dotv3(fragNormal, lightDir);
     return diffuseTerm > 0.0f ? mulv3f(material.diffuse, diffuseTerm) : v3zero();
 }
 
-public struct vec3 halfVector(const struct vec3 left, const struct vec3 right) {
+public vec3 halfVector(const vec3 left, const vec3 right) {
     return normv3(addv3(left, right));
 }
 
 public
-struct vec3 specularContrib(const struct vec3 viewDir, const struct vec3 lightDir, const struct vec3 fragNormal,
-                            const struct PhongMaterial material) {
-    struct vec3 hv = halfVector(viewDir, lightDir);
+vec3 specularContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNormal,
+                            const PhongMaterial material) {
+    vec3 hv = halfVector(viewDir, lightDir);
     float specularTerm = dotv3(hv, fragNormal);
     return specularTerm > 0.0f ? mulv3f(material.specular, pow(specularTerm, material.shine)) : v3zero();
 }
 
 public
-struct vec3 lightContrib(const struct vec3 viewDir, const struct vec3 lightDir, const struct vec3 fragNormal,
-                         const float attenuation, const struct Light light, const struct PhongMaterial material) {
-    struct vec3 lighting = v3zero();
+vec3 lightContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNormal,
+                         const float attenuation, const Light light, const PhongMaterial material) {
+    vec3 lighting = v3zero();
     lighting = addv3(lighting, diffuseContrib(lightDir, fragNormal, material));
     lighting = addv3(lighting, specularContrib(viewDir, lightDir, fragNormal, material));
     return mulv3(mulv3f(light.color, attenuation), lighting);
 }
 
 public
-struct vec3 pointLightContrib(const struct vec3 viewDir, const struct vec3 fragPosition, const struct vec3 fragNormal,
-                              const struct Light light, const struct PhongMaterial material) {
-    struct vec3 direction = subv3(light.vector, fragPosition);
-    struct vec3 lightDir = normv3(direction);
+vec3 pointLightContrib(const vec3 viewDir, const vec3 fragPosition, const vec3 fragNormal,
+                              const Light light, const PhongMaterial material) {
+    vec3 direction = subv3(light.vector, fragPosition);
+    vec3 lightDir = normv3(direction);
     if (dotv3(lightDir, fragNormal) < 0.0f) {
         return v3zero();
     }
@@ -782,22 +782,22 @@ struct vec3 pointLightContrib(const struct vec3 viewDir, const struct vec3 fragP
 }
 
 public
-struct vec3 dirLightContrib(const struct vec3 viewDir, const struct vec3 fragNormal, const struct Light light,
-                            const struct PhongMaterial material) {
-    struct vec3 lightDir = negv3(normv3(light.vector));
+vec3 dirLightContrib(const vec3 viewDir, const vec3 fragNormal, const Light light,
+                            const PhongMaterial material) {
+    vec3 lightDir = negv3(normv3(light.vector));
     return lightContrib(viewDir, lightDir, fragNormal, 1.0f, light, material);
 }
 
 public
-struct vec4 shadingFlat(struct vec4 color) {
+vec4 shadingFlat(vec4 color) {
     return color;
 }
 
 public
-struct vec4 shadingPhong(const struct vec3 fragPosition, const struct vec3 eye, const struct vec3 fragNormal,
-                         const struct vec3 fragAlbedo, const struct PhongMaterial material) {
-    struct vec3 viewDir = normv3(subv3(eye, fragPosition));
-    struct vec3 color = material.ambient;
+vec4 shadingPhong(const vec3 fragPosition, const vec3 eye, const vec3 fragNormal,
+                         const vec3 fragAlbedo, const PhongMaterial material) {
+    vec3 viewDir = normv3(subv3(eye, fragPosition));
+    vec3 color = material.ambient;
     for (int i = 0; i < uLightsPointCnt; ++i) {
         color = addv3(color, pointLightContrib(viewDir, fragPosition, fragNormal, uLights[i], material));
     }
@@ -809,10 +809,10 @@ struct vec4 shadingPhong(const struct vec3 fragPosition, const struct vec3 eye, 
 }
 
 custom
-struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPos, const struct vec2 texCoord,
-                             const struct vec3 vnormal) {
+vec3 getNormalFromMap(const vec3 normal, const vec3 worldPos, const vec2 texCoord,
+                             const vec3 vnormal) {
 
-    const struct vec3 result = addv3(addv3(addv3(normal, worldPos), vnormal), v2tov3(texCoord, 1));
+    const vec3 result = addv3(addv3(addv3(normal, worldPos), vnormal), v2tov3(texCoord, 1));
     assert(dotv3(result, worldPos) && "Some chicken shit happens here..");
     /*vec3 tangentNormal = fromMap * 2.0 - 1.0;
     vec3 Q1  = dFdx(vWorldPos);
@@ -828,7 +828,7 @@ struct vec3 getNormalFromMap(const struct vec3 normal, const struct vec3 worldPo
 }
 
 public
-float distributionGGX(const struct vec3 N, const struct vec3 H, const float a) {
+float distributionGGX(const vec3 N, const vec3 H, const float a) {
     float a2        = a * a;
     float NdotH     = max(dotv3(N, H), 0.0f);
     float NdotH2    = NdotH*NdotH;
@@ -848,7 +848,7 @@ float geometrySchlickGGX(const float NdotV, const float roughness) {
 }
 
 public
-float geometrySmith(const struct vec3 N, const struct vec3 V, const struct vec3 L, const float roughness) {
+float geometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughness) {
     float NdotV     = max(dotv3(N, V), 0.0f);
     float NdotL     = max(dotv3(N, L), 0.0f);
     float ggx2      = geometrySchlickGGX(NdotV, roughness);
@@ -857,47 +857,47 @@ float geometrySmith(const struct vec3 N, const struct vec3 V, const struct vec3 
 }
 
 public
-struct vec3 fresnelSchlick(const float cosTheta, const struct vec3 F0) {
+vec3 fresnelSchlick(const float cosTheta, const vec3 F0) {
     return addv3(F0, mulv3(subv3(ftov3(1.0f), F0), ftov3(pow(1.0f - cosTheta, 5.0f))));
 }
 
 public
-struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
-                       const struct vec3 albedo, const struct vec3 N, const float metallic, const float roughness, const float ao) {
-    const struct vec3 alb = powv3(albedo, ftov3(2.2f));
-    const struct vec3 V   = normv3(subv3(eye, worldPos));
+vec4 shadingPbr(const vec3 eye, const vec3 worldPos,
+                       const vec3 albedo, const vec3 N, const float metallic, const float roughness, const float ao) {
+    const vec3 alb = powv3(albedo, ftov3(2.2f));
+    const vec3 V   = normv3(subv3(eye, worldPos));
 
-    struct vec3 F0  = ftov3(0.04f);
+    vec3 F0  = ftov3(0.04f);
     F0 = mixv3(F0, alb, metallic);
 
-    struct vec3 Lo = v3zero();
+    vec3 Lo = v3zero();
 
     for(int i = 0; i < uLightsPointCnt; ++i) {
-        const struct vec3 toLight = subv3(uLights[i].vector, worldPos);
-        const struct vec3 L = normv3(toLight);
-        const struct vec3 H = normv3(addv3(V, L));
+        const vec3 toLight = subv3(uLights[i].vector, worldPos);
+        const vec3 L = normv3(toLight);
+        const vec3 H = normv3(addv3(V, L));
 
         const float distance          = lenv3(toLight);
         const float lum               = luminosity(distance, uLights[i]);
-        const struct vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
+        const vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
 
         const float NDF       = distributionGGX(N, H, roughness);
         const float G         = geometrySmith(N, V, L, roughness);
-        const struct vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
+        const vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
 
-        const struct vec3 nominator = mulv3(F, ftov3(NDF * G));
+        const vec3 nominator = mulv3(F, ftov3(NDF * G));
         const float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
 
-        const struct vec3 specular = divv3f(nominator, denominator);
+        const vec3 specular = divv3f(nominator, denominator);
 
-        struct vec3 kD = subv3(ftov3(1.0f), F);
+        vec3 kD = subv3(ftov3(1.0f), F);
         kD = mulv3(kD, ftov3(1.0f - metallic));
         const float NdotL = max(dotv3(N, L), 0.0f);
         Lo = addv3(Lo, mulv3(mulv3(addv3(divv3(mulv3(kD, alb), ftov3(PI)), specular), radiance), ftov3(NdotL)));
     }
 
-    const struct vec3 ambient = mulv3(ftov3(0.1f * ao), alb);
-    struct vec3 color = addv3(ambient, Lo);
+    const vec3 ambient = mulv3(ftov3(0.1f * ao), alb);
+    vec3 color = addv3(ambient, Lo);
     color = divv3(color, addv3(color, ftov3(1.0f)));
     color = powv3(color, ftov3(1.0f/2.2f));
     return v3tov4(color, 1.0f);
@@ -906,40 +906,40 @@ struct vec4 shadingPbr(const struct vec3 eye, const struct vec3 worldPos,
 // ------------------- RAYTRACING ---------------
 
 public
-struct RtCamera cameraLookAt(const struct vec3 eye, const struct vec3 center, const struct vec3 up,
+RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,
         const float vfoy, const float aspect, const float aperture, const float focusDist) {
     const float lensRadius = aperture / 2.0f;
 
     const float halfHeight = tan(vfoy/2.0f);
     const float halfWidth = aspect * halfHeight;
 
-    const struct vec3 w = normv3(subv3(eye, center));
-    const struct vec3 u = normv3(crossv3(up, w));
-    const struct vec3 v = crossv3(w, u);
+    const vec3 w = normv3(subv3(eye, center));
+    const vec3 u = normv3(crossv3(up, w));
+    const vec3 v = crossv3(w, u);
 
-    const struct vec3 hwu = mulv3f(u, halfWidth * focusDist);
-    const struct vec3 hhv = mulv3f(v, halfHeight * focusDist);
-    const struct vec3 wf = mulv3f(w, focusDist);
-    const struct vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), wf);
+    const vec3 hwu = mulv3f(u, halfWidth * focusDist);
+    const vec3 hhv = mulv3f(v, halfHeight * focusDist);
+    const vec3 wf = mulv3f(w, focusDist);
+    const vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), wf);
 
-    const struct vec3 horizontal = mulv3f(u, halfWidth * focusDist * 2.0f);
-    const struct vec3 vertical  = mulv3f(v, halfHeight * focusDist * 2.0f);
+    const vec3 horizontal = mulv3f(u, halfWidth * focusDist * 2.0f);
+    const vec3 vertical  = mulv3f(v, halfHeight * focusDist * 2.0f);
 
-    const struct RtCamera result = { eye, lowerLeft, horizontal, vertical, w, u, v, lensRadius};
+    const RtCamera result = { eye, lowerLeft, horizontal, vertical, w, u, v, lensRadius};
     return result;
 }
 
 public
-struct Ray rayFromCamera(const struct RtCamera camera, const float u, const float v) {
-    const struct vec3 horShift = mulv3f(camera.horizontal, u);
-    const struct vec3 verShift = mulv3f(camera.vertical, v);
+Ray rayFromCamera(const RtCamera camera, const float u, const float v) {
+    const vec3 horShift = mulv3f(camera.horizontal, u);
+    const vec3 verShift = mulv3f(camera.vertical, v);
 
-    struct vec3 origin;
-    struct vec3 direction;
+    vec3 origin;
+    vec3 direction;
 
     if (camera.lensRadius > 0.0f) {
-        const struct vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
-        const struct vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
+        const vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
+        const vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
         origin = addv3(camera.origin, offset);
         direction = normv3(subv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin), offset));
     } else {
@@ -947,19 +947,19 @@ struct Ray rayFromCamera(const struct RtCamera camera, const float u, const floa
         direction = normv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin));
     }
 
-    const struct Ray result = { origin, direction };
+    const Ray result = { origin, direction };
     return result;
 }
 
 public
-struct vec3 background(const struct Ray ray) {
+vec3 background(const Ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
-    const struct vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
+    const vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return gradient;
 }
 
 public
-bool rayHitAabb(const struct Ray ray, const struct AABB aabb, const float tMin, const float tMax) {
+bool rayHitAabb(const Ray ray, const AABB aabb, const float tMin, const float tMax) {
     for (int i = 0; i < 3; i++) {
         const float invD = 1.0f / indexv3(ray.direction, i);
         float t0 = (indexv3(aabb.pointMin, i) - indexv3(ray.origin, i)) * invD;
@@ -981,16 +981,16 @@ bool rayHitAabb(const struct Ray ray, const struct AABB aabb, const float tMin, 
 }
 
 public
-struct HitRecord raySphereHitRecord(const struct Ray ray, const float t, const struct Sphere sphere) {
-    const struct vec3 point = rayPoint(ray, t);
-    const struct vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
-    const struct HitRecord result = { t, point, N, sphere.materialType, sphere.materialIndex };
+HitRecord raySphereHitRecord(const Ray ray, const float t, const Sphere sphere) {
+    const vec3 point = rayPoint(ray, t);
+    const vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
+    const HitRecord result = { t, point, N, sphere.materialType, sphere.materialIndex };
     return result;
 }
 
 public
-struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const float tMax, const struct Sphere sphere) {
-    const struct vec3 oc = subv3(ray.origin, sphere.center);
+HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const Sphere sphere) {
+    const vec3 oc = subv3(ray.origin, sphere.center);
     const float a = dotv3(ray.direction, ray.direction);
     const float b = 2 * dotv3(oc, ray.direction);
     const float c = dotv3(oc, oc) - sphere.radius * sphere.radius;
@@ -1011,7 +1011,7 @@ struct HitRecord rayHitSphere(const struct Ray ray, const float tMin, const floa
 }
 
 public
-struct HitRecord rayHitObject(const struct Ray ray,const float tMin, const float tMax,
+HitRecord rayHitObject(const Ray ray,const float tMin, const float tMax,
                               const int type, const int index) {
     if (type != HITABLE_SPHERE) {
         flagError(); // spheres only
@@ -1021,10 +1021,10 @@ struct HitRecord rayHitObject(const struct Ray ray,const float tMin, const float
 }
 
 public
-struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float tMax, const int index) {
+HitRecord rayHitBvh(const Ray ray, const float tMin, const float tMax, const int index) {
     bvhTop = 0;
     float closest = tMax;
-    struct HitRecord result = NO_HIT;
+    HitRecord result = NO_HIT;
     int curr = index;
 
     while (curr >= 0) {
@@ -1034,7 +1034,7 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
                 bvhTop++;
                 curr = uBvhNodes[curr].leftIndex;
             } else {
-                const struct HitRecord hit = rayHitObject(
+                const HitRecord hit = rayHitObject(
                         ray, tMin, closest, uBvhNodes[curr].leftType, uBvhNodes[curr].leftIndex);
                 if (hit.t > 0 && hit.t < closest) {
                     result = hit;
@@ -1056,25 +1056,25 @@ struct HitRecord rayHitBvh(const struct Ray ray, const float tMin, const float t
 }
 
 public
-struct HitRecord rayHitWorld(const struct Ray ray, const float tMin, const float tMax) {
+HitRecord rayHitWorld(const Ray ray, const float tMin, const float tMax) {
     return rayHitBvh(ray, tMin, tMax, 0);
 }
 
 public
-struct ScatterResult materialScatterLambertian(const struct HitRecord record,
-        const struct LambertianMaterial material) {
-    const struct vec3 tangent = addv3(record.point, record.normal);
-    const struct vec3 direction = addv3(tangent, randomInUnitSphere());
-    const struct ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
+ScatterResult materialScatterLambertian(const HitRecord record,
+        const LambertianMaterial material) {
+    const vec3 tangent = addv3(record.point, record.normal);
+    const vec3 direction = addv3(tangent, randomInUnitSphere());
+    const ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
     return result;
 }
 
 public
-struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct HitRecord record,
-        const struct MetallicMaterial material) {
-    const struct vec3 reflected = reflectv3(ray.direction, record.normal);
+ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record,
+        const MetallicMaterial material) {
+    const vec3 reflected = reflectv3(ray.direction, record.normal);
     if (dotv3(reflected, record.normal) > 0) {
-        const struct ScatterResult result = { material.albedo, { record.point, reflected } };
+        const ScatterResult result = { material.albedo, { record.point, reflected } };
         return result;
     } else {
         return NO_SCATTER;
@@ -1082,11 +1082,11 @@ struct ScatterResult materialScatterMetalic(const struct Ray ray, const struct H
 }
 
 public
-struct ScatterResult materialScatterDielectric(const struct Ray ray, const struct HitRecord record,
-        const struct DielectricMaterial material) {
+ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record,
+        const DielectricMaterial material) {
     float niOverNt;
     float cosine;
-    struct vec3 outwardNormal;
+    vec3 outwardNormal;
 
     const float rdotn = dotv3(ray.direction, record.normal);
     const float dirlen = lenv3(ray.direction);
@@ -1102,26 +1102,26 @@ struct ScatterResult materialScatterDielectric(const struct Ray ray, const struc
     }
 
     float reflectProbe;
-    const struct RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
+    const RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
     if (refractResult.isRefracted) {
         reflectProbe = schlick(cosine, material.reflectiveIndex);
     } else {
         reflectProbe = 1.0f;
     }
 
-    struct vec3 scatteredDir;
+    vec3 scatteredDir;
     if (randomFloat() < reflectProbe) {
         scatteredDir = reflectv3(ray.direction, record.normal);
     } else {
         scatteredDir = refractResult.refracted;
     }
 
-    const struct ScatterResult scatterResult = { v3one(), { record.point, scatteredDir } };
+    const ScatterResult scatterResult = { v3one(), { record.point, scatteredDir } };
     return scatterResult;
 }
 
 public
-struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecord record) {
+ScatterResult materialScatter(const Ray ray, const HitRecord record) {
     switch (record.materialType) {
         case MATERIAL_LAMBERTIAN:
             return materialScatterLambertian(record, uLambertianMaterials[record.materialIndex]);
@@ -1135,15 +1135,15 @@ struct ScatterResult materialScatter(const struct Ray ray, const struct HitRecor
 }
 
 public
-struct vec3 sampleColor(const int rayBounces, const struct RtCamera camera, const float u, const float v) {
-    struct Ray ray = rayFromCamera(camera, u, v);
-    struct vec3 fraction = ftov3(1.0f);
+vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, const float v) {
+    Ray ray = rayFromCamera(camera, u, v);
+    vec3 fraction = ftov3(1.0f);
     for (int i = 0; i < rayBounces; i++) {
-        const struct HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
+        const HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
         if (record.t < 0) {
             break;
         } else {
-            const struct ScatterResult scatterResult = materialScatter(ray, record);
+            const ScatterResult scatterResult = materialScatter(ray, record);
             if (scatterResult.attenuation.x < 0) {
                 return v3zero();
             }
@@ -1155,19 +1155,19 @@ struct vec3 sampleColor(const int rayBounces, const struct RtCamera camera, cons
 }
 
 public
-struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
-                            const struct vec3 eye, const struct vec3 center, const struct vec3 up,
+vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
+                            const vec3 eye, const vec3 center, const vec3 up,
                             const float fovy, const float aspect,
                             const float aperture, const float focusDist,
-                            const struct vec2 texCoord) {
+                            const vec2 texCoord) {
 
     seedRandom(v2tov3(texCoord, random));
 
     const float DU = 1.0f / WIDTH;
     const float DV = 1.0f / HEIGHT;
 
-    const struct RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
-    struct vec3 result = v3zero();
+    const RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
+    vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
         const float du = DU * randomFloat();
         const float dv = DV * randomFloat();
@@ -1179,7 +1179,7 @@ struct vec4 fragmentColorRt(const float random, int sampleCnt, int rayBounces,
 }
 
 public
-struct vec4 gammaSqrt(const struct vec4 result) {
+vec4 gammaSqrt(const vec4 result) {
     return v4(sqrt(result.x), sqrt(result.y), sqrt(result.z), 1.0f);
 }
 
@@ -1199,12 +1199,12 @@ void raytracer() {
             const float s = (float) u / (float) WIDTH;
             const float t = (float) v / (float) WIDTH;
 
-            const struct vec4 added = fragmentColorRt(
+            const vec4 added = fragmentColorRt(
                     randomFloat(), SAMPLES, 4,
                     v3(0, 0, 250.0f), v3zero(), v3up(),
                     90.0f * PI / 180.0f, 4.0f / 3.0f, 0, 1,
                     v2(s, t));
-            const struct vec4 color = divv4f(added, SAMPLES);
+            const vec4 color = divv4f(added, SAMPLES);
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);
@@ -1225,7 +1225,7 @@ void raytracer() {
 
 // ------------------- LOGGING ---------------
 
-void printv3(const struct vec3 v) {
+void printv3(const vec3 v) {
     printf("v3 = {%f, %f, %f}\n", v.x, v.y, v.z);
 }
 
