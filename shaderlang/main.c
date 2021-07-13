@@ -14,8 +14,6 @@
 #define min fminf
 #define max fmaxf
 
-#define PI 3.14159265359f
-
 // ------------------- TYPES -------------------
 
 typedef struct {
@@ -142,10 +140,7 @@ typedef struct {
     vec3 refracted;
 } RefractResult;
 
-// ------------------- CONST -------------------
-
-#define SAMPLES                 8
-#define BOUNCE_ERR              0.001f
+// ------------------- DEFINE -------------------
 
 #define MAX_LIGHTS              128
 #define MAX_BVH                 512
@@ -155,23 +150,38 @@ typedef struct {
 #define MAX_DIELECTRICS         16
 
 // Corresponds to HitableType
-#define HITABLE_BVH              0
-#define HITABLE_SPHERE           1
+#define HITABLE_BVH 0
+#define HITABLE_SPHERE 1
 
 // Corresponds to MaterialType
-#define MATERIAL_LAMBERTIAN     0
-#define MATERIAL_METALIIC       1
-#define MATERIAL_DIELECTRIC     2
+#define MATERIAL_LAMBERTIAN 0
+#define MATERIAL_METALIIC 1
+#define MATERIAL_DIELECTRIC 2
+
+// ------------------- PUBLIC CONST -------------------
+
+public
+const float PI = 3.14159265359f;
+
+public
+const float BOUNCE_ERR = 0.001f;
+
+public
+const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
+
+public
+const ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
+
+public
+const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
+
+// ------------------- PRIVATE CONST -------------------
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
 const Light uLights[MAX_LIGHTS] = {
         { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
 };
-
-const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
-const ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
-const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
 const BvhNode uBvhNodes[MAX_BVH] = {
         { { { -100, -100,  -100 }, { 100, 100, 100 } }, HITABLE_BVH,     1, HITABLE_BVH,   2 },
@@ -891,9 +901,9 @@ vec4 shadingPbr(const vec3 eye, const vec3 worldPos, const vec3 albedo, const ve
         const float lum               = luminosity(distance, uLights[i]);
         const vec3 radiance    = mulv3(uLights[i].color, ftov3(lum));
 
-        const float NDF       = distributionGGX(N, H, roughness);
-        const float G         = geometrySmith(N, V, L, roughness);
-        const vec3 F   = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
+        const float NDF = distributionGGX(N, H, roughness);
+        const float G   = geometrySmith(N, V, L, roughness);
+        const vec3 F    = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
 
         const vec3 nominator = mulv3(F, ftov3(NDF * G));
         const float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
@@ -1193,6 +1203,7 @@ vec4 gammaSqrt(const vec4 result) {
 void raytracer() {
     const int WIDTH = 1024;
     const int HEIGHT = 768;
+    const int SAMPLES = 8;
 
     FILE *f = fopen("out.ppm", "w");
     if (f == NULL) {
@@ -1215,7 +1226,7 @@ void raytracer() {
                     v3(0, 0, 250.0f), v3zero(), v3up(),
                     90.0f * PI / 180.0f, 4.0f / 3.0f, 0, 1,
                     v2(s, t));
-            const vec4 color = divv4f(added, SAMPLES);
+            const vec4 color = divv4f(added, itof(SAMPLES));
 
             const int r = (int) (255.9f * color.x);
             const int g = (int) (255.9f * color.y);

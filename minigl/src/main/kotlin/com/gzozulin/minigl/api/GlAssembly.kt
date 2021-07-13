@@ -16,12 +16,19 @@ const val MAX_METALLICS     = 16
 const val MAX_DIELECTRICS   = 16
 
 private const val CUSTOM_DEFINITIONS = """
-    const float PI = 3.14159265359;
     #define FLT_MAX 3.402823466e+38
     #define FLT_MIN 1.175494351e-38
+    
     #define DBL_MAX 1.7976931348623158e+308
     #define DBL_MIN 2.2250738585072014e-308
-    #define BOUNCE_ERR      0.001f
+
+    #define HITABLE_BVH              0
+    #define HITABLE_SPHERE           1
+    #define MAX_BVH                 $MAX_BVH
+    
+    #define MATERIAL_LAMBERTIAN     0
+    #define MATERIAL_METALIIC       1
+    #define MATERIAL_DIELECTRIC     2
     
     bool errorFlag = false;
     
@@ -71,17 +78,9 @@ private const val CUSTOM_DEFINITIONS = """
         return random(seed);
     }
     
-    const HitRecord NO_HIT = { -1, { 0, 0, 0 }, { 1, 0, 0 }, 0, 0 };
-    const ScatterResult NO_SCATTER = { { -1, 0, 0 }, { { 0, 0, 0 }, { 0, 0, 0 } } };
-    const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
-    
     uniform int uLightsPointCnt;
     uniform int uLightsDirCnt;
     uniform Light uLights[$MAX_LIGHTS];
-    
-    #define HITABLE_BVH              0
-    #define HITABLE_SPHERE           1
-    #define MAX_BVH                 $MAX_BVH
     
     uniform BvhNode uBvhNodes[$MAX_BVH];
     
@@ -91,9 +90,6 @@ private const val CUSTOM_DEFINITIONS = """
     uniform int uSpheresCnt;
     uniform Sphere uSpheres[$MAX_SPHERES];
     
-    #define MATERIAL_LAMBERTIAN     0
-    #define MATERIAL_METALIIC       1
-    #define MATERIAL_DIELECTRIC     2
     uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
     uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
     uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
@@ -151,7 +147,7 @@ private const val CUSTOM_FRAG_DEFINITIONS = """
 
 private const val MAIN_DECL = "void main() {"
 
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PUBLIC_TYPES\n$CUSTOM_DEFINITIONS\n$PUBLIC_OPS\n"
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PUBLIC_TYPES\n$CUSTOM_DEFINITIONS\n$PUBLIC_CONST\n$PUBLIC_OPS\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEFINITIONS\n"
 
 private var next = AtomicInteger()

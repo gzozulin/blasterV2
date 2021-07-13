@@ -28,6 +28,8 @@ private data class COperation(val type: String, override val name: String, val p
                               override val def: String, override val access: CAccess): CDeclaration
 private data class CTypedef(override val name: String, override val def: String,
                             override val access: CAccess): CDeclaration
+private data class CConstant(override val name: String, override val access: CAccess,
+                             override val def: String): CDeclaration
 
 fun main() = doCreateOutput(
     renderDeclarations(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
@@ -59,6 +61,8 @@ private fun renderDeclarations(declarations: List<CDeclaration>): String {
     result += "const val PUBLIC_TYPES = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<CTypedef>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     result += "const val PUBLIC_OPS = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<COperation>()
+        .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
+    result += "const val PUBLIC_CONST = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<CConstant>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
     declarations.forEach { declaration ->
         if (declaration is COperation) {
@@ -120,13 +124,21 @@ private fun convertType(ctype: String) = when (ctype) {
 private fun visitCFile(cfile: CFile): List<CDeclaration> {
     val result = mutableListOf<CDeclaration>()
     val visitor = ExternalDeclarationVisitor { ctx ->
-        if (ctx.isFunction()) {
-            parseCFunction(ctx.functionDefinition(), cfile.tokens)?.let {
-                result.add(it)
+        when {
+            ctx.isFunction() -> {
+                parseCFunction(ctx.functionDefinition(), cfile.tokens)?.let {
+                    result.add(it)
+                }
             }
-        } else if (ctx.isTypedef()) {
-            parseTypedef(ctx.declaration(), cfile.tokens)?.let {
-                result.add(it)
+            ctx.isTypedef() -> {
+                parseTypedef(ctx.declaration(), cfile.tokens)?.let {
+                    result.add(it)
+                }
+            }
+            ctx.isConstant() -> {
+                parseCConstant(ctx.declaration(), cfile.tokens)?.let {
+                    result.add(it)
+                }
             }
         }
     }
@@ -147,17 +159,25 @@ private fun DeclCtx.isFunction(): Boolean {
     return functionDefinition() != null
 }
 
+private fun DeclCtx.isConstant(): Boolean {
+    for (declarationSpecifierContext in declaration().declarationSpecifiers().declarationSpecifier()) {
+        if (declarationSpecifierContext.text == "const") {
+            return true
+        }
+    }
+    return false
+}
+
 private fun parseAccess(declSpecifiers: CParser.DeclarationSpecifiersContext): CAccess {
-    var access = CAccess.PRIVATE
     for (i in 0 until declSpecifiers.childCount) {
         val specifier = declSpecifiers.getChild(i)
         if (specifier.text == ACCESS_CUSTOM) {
-            access = CAccess.CUSTOM
+            return CAccess.CUSTOM
         } else if (specifier.text == ACCESS_PUBLIC) {
-            access = CAccess.PUBLIC
+            return CAccess.PUBLIC
         }
     }
-    return access
+    return CAccess.PRIVATE
 }
 
 private fun parseTypedef(ctx: CParser.DeclarationContext, tokens: CommonTokenStream): CTypedef? {
@@ -197,6 +217,17 @@ private fun parseCFunction(ctx: FunctionCtx, tokens: CommonTokenStream): COperat
         }
     }
     return COperation(type, name, params, definition, access)
+}
+
+private fun parseCConstant(ctx: CParser.DeclarationContext, tokens: CommonTokenStream): CConstant? {
+    val declSpecifiers = ctx.declarationSpecifiers()
+    val access = parseAccess(declSpecifiers)
+    if (access == CAccess.PRIVATE) {
+        return null
+    }
+    val name = ctx.initDeclaratorList().initDeclarator()[0].declarator().text
+    val def = tokens.filterAndExtract(ctx)
+    return CConstant(name, access, def)
 }
 
 private fun parseCFile(file: File): CFile {
