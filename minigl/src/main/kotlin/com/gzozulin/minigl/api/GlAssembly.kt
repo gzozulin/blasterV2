@@ -21,17 +21,63 @@ private const val CUSTOM_DEFINITIONS = """
     
     #define DBL_MAX 1.7976931348623158e+308
     #define DBL_MIN 2.2250738585072014e-308
-
+    
     #define HITABLE_BVH              0
     #define HITABLE_SPHERE           1
-    #define MAX_BVH                 $MAX_BVH
     
-    #define MATERIAL_LAMBERTIAN     0
-    #define MATERIAL_METALIIC       1
-    #define MATERIAL_DIELECTRIC     2
+    #define MATERIAL_LAMBERTIAN      0
+    #define MATERIAL_METALIIC        1
+    #define MATERIAL_DIELECTRIC      2
     
     bool errorFlag = false;
     
+    uniform int uLightsPointCnt;
+    uniform int uLightsDirCnt;
+    uniform Light uLights[$MAX_LIGHTS];
+    
+    #define MAX_BVH $MAX_BVH
+    uniform BvhNode uBvhNodes[$MAX_BVH];
+    int bvhStack[$MAX_BVH];
+    int bvhTop = 0;
+    
+    uniform Sphere                 uSpheres[$MAX_SPHERES];
+    
+    uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
+    uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
+    uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
+"""
+
+private const val CUSTOM_CTORS_DEFINITIONS = """
+    float itof(int i) {
+        return float(i);
+    }
+    
+    float ftoi(float f) {
+        return int(f);
+    }
+    
+    float dtof(double d) {
+        return float(d);
+    }
+    
+    vec2 v2(float x, float y) {
+        return vec2(x, y);
+    }
+    
+    ivec2 v2i(int x, int y) {
+        return ivec2(x, y);
+    }
+    
+    vec3 v3(float x, float y, float z) {
+        return vec3(x, y, z);
+    }
+    
+    vec4 v4(float x, float y, float z, float w) {
+        return vec4(x, y, z, w);
+    }
+"""
+
+private const val CUSTOM_RANDOM_DEFINITIONS = """
     // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
     // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
     uint hash(uint x) {
@@ -77,50 +123,6 @@ private const val CUSTOM_DEFINITIONS = """
         seed.w += FLT_MIN;
         return random(seed);
     }
-    
-    uniform int uLightsPointCnt;
-    uniform int uLightsDirCnt;
-    uniform Light uLights[$MAX_LIGHTS];
-    
-    uniform BvhNode uBvhNodes[$MAX_BVH];
-    
-    int bvhStack[$MAX_BVH];
-    int bvhTop = 0;
-    
-    uniform int uSpheresCnt;
-    uniform Sphere uSpheres[$MAX_SPHERES];
-    
-    uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
-    uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
-    uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
-    
-    float itof(int i) {
-        return float(i);
-    }
-    
-    float ftoi(float f) {
-        return int(f);
-    }
-    
-    float dtof(double d) {
-        return float(d);
-    }
-    
-    vec2 v2(float x, float y) {
-        return vec2(x, y);
-    }
-    
-    ivec2 v2i(int x, int y) {
-        return ivec2(x, y);
-    }
-    
-    vec3 v3(float x, float y, float z) {
-        return vec3(x, y, z);
-    }
-    
-    vec4 v4(float x, float y, float z, float w) {
-        return vec4(x, y, z, w);
-    }
 """
 
 private const val CUSTOM_FRAG_DEFINITIONS = """
@@ -147,7 +149,8 @@ private const val CUSTOM_FRAG_DEFINITIONS = """
 
 private const val MAIN_DECL = "void main() {"
 
-const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PUBLIC_TYPES\n$CUSTOM_DEFINITIONS\n$PUBLIC_CONST\n$PUBLIC_OPS\n"
+const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$PUBLIC_TYPES\n" +
+        "$CUSTOM_DEFINITIONS\n$CUSTOM_CTORS_DEFINITIONS\n$CUSTOM_RANDOM_DEFINITIONS\n$PUBLIC_CONST\n$PUBLIC_OPS\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEFINITIONS\n"
 
 private var next = AtomicInteger()
