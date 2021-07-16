@@ -29,10 +29,22 @@ private fun <T> edParseReciepe(recipe: String): Expression<T> {
 
 private fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): Expression<T> {
     @Suppress("UNCHECKED_CAST")
-    if (heap.containsKey(param)) {
-        return heap[param]!! as Expression<T>
-    } else {
-        return constf(param.toFloat()) as Expression<T>
+    when {
+        heap.containsKey(param) -> {
+            return heap[param]!! as Expression<T>
+        }
+        param.contains(',') -> {
+            val split = param.split(',').toMutableList()
+            return when (split.size) {
+                2 -> constv2(vec2(split.removeFirst().toFloat(), split.removeFirst().toFloat()))  as Expression<T>
+                3 -> constv3(vec3(split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat()))  as Expression<T>
+                4 -> constv4(vec4(split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat()))  as Expression<T>
+                else -> error("Unknown type of vector! $param")
+            }
+        }
+        else -> {
+            return constf(param.toFloat()) as Expression<T>
+        }
     }
 }
 
@@ -40,16 +52,20 @@ private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<St
     val separatorIndex = line.indexOf(':')
     val label = line.substring(0, separatorIndex)
     val body = line.substring(separatorIndex + 1, line.length)
-    val split = body.split(PATTERN_WHITESPACE).filter { it.isNotBlank() }
+    val split = body.split(PATTERN_WHITESPACE).filter { it.isNotBlank() }.toMutableList()
 
-    val reference = split[0]
+    val reference = split.removeFirst()
     if (heap.containsKey(reference)) {
-        check(split.size == 1) { "Reference cannot has any parameters!" }
+        check(split.size == 0) { "Reference cannot has any parameters!" }
         return label to heap[reference]!!
     }
 
     val expression = when (reference) {
-        "v3"            -> v3(edParseParam(split[1], heap), edParseParam(split[2], heap), edParseParam(split[3], heap))
+        "v3"            -> v3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
+        "addv3"         -> addv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
+        "subv3"         -> subv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
+        "mulv3"         -> mulv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
+        "divv3"         -> divv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
         "v3chartreuse"  -> v3chartreuse()
         "v3aquamarine"  -> v3aquamarine()
         else -> error("Unknown operation! $reference")
