@@ -18,12 +18,22 @@ private var lastModified = FILE_RECIPE.lastModified()
 
 private fun <T> edParseReciepe(recipe: String): Expression<T> {
     val heap = mutableMapOf<String, Expression<*>>()
-    for (line in recipe.lines()) {
+    val lines = recipe.lines().filter { it.isNotBlank() }.filter { !it.startsWith("//") }
+    for (line in lines) {
         val (label, expression) = edParseLine(line, heap)
         heap[label] = expression
     }
     @Suppress("UNCHECKED_CAST")
     return heap["out"]!! as Expression<T>
+}
+
+private fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): Expression<T> {
+    @Suppress("UNCHECKED_CAST")
+    if (heap.containsKey(param)) {
+        return heap[param]!! as Expression<T>
+    } else {
+        return constf(param.toFloat()) as Expression<T>
+    }
 }
 
 private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<String, Expression<*>> {
@@ -34,12 +44,14 @@ private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<St
 
     val reference = split[0]
     if (heap.containsKey(reference)) {
+        check(split.size == 1) { "Reference cannot has any parameters!" }
         return label to heap[reference]!!
     }
 
     val expression = when (reference) {
-        "v3chartreuse" -> v3chartreuse()
-        "v3aquamarine" -> v3aquamarine()
+        "v3"            -> v3(edParseParam(split[1], heap), edParseParam(split[2], heap), edParseParam(split[3], heap))
+        "v3chartreuse"  -> v3chartreuse()
+        "v3aquamarine"  -> v3aquamarine()
         else -> error("Unknown operation! $reference")
     }
     return label to expression
@@ -60,6 +72,7 @@ private fun edReloadTechnique() {
 private fun edCheckNeedReload() {
     if (lastModified != FILE_RECIPE.lastModified()) {
         window.isLooping = false
+        lastModified = FILE_RECIPE.lastModified()
     }
 }
 
