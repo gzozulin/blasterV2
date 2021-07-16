@@ -29,6 +29,8 @@ fun glCloseWindow(window: GlWindow) {
     glfwSetWindowShouldClose(window.handle!!, true)
 }
 
+fun glWindowShouldClose(window: GlWindow) = glfwWindowShouldClose(window.handle!!)
+
 class GlWindow(
     private val winWidth: Int = 1024, private val winHeight: Int = 768,
     private val isHoldingCursor: Boolean = false,
@@ -37,6 +39,8 @@ class GlWindow(
     private val isHeadless: Boolean = false) {
 
     var handle: Long? = null
+
+    var isLooping = true
 
     var keyCallback: KeyCallback? = null
     var buttonCallback: ButtonCallback? = null
@@ -118,7 +122,7 @@ class GlWindow(
         } else {
             backend.glDisable(backend.GL_MULTISAMPLE)
         }
-        while (!glfwWindowShouldClose(handle!!)) {
+        while (isLooping && !glfwWindowShouldClose(handle!!)) {
             updateCursor(handle!!)
             onFrame.invoke()
             throttle()

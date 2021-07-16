@@ -17,6 +17,7 @@
             <option value="$PROJECT_DIR$/minigl" />
             <option value="$PROJECT_DIR$/miniui" />
             <option value="$PROJECT_DIR$/projector" />
+            <option value="$PROJECT_DIR$/shadered" />
             <option value="$PROJECT_DIR$/shadergen" />
           </set>
         </option>

@@ -4,5 +4,6 @@ include ':miniui'
 include ':challenges'
 include ':projector'
 include ':shadergen'
+include ':shadered'
 include 'antlr'
 
