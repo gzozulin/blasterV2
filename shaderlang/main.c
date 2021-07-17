@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define public // define and add handle
-#define custom // handle only, definition is custom
+#define public      // define and add handle
+#define custom      // ops: handle only, definition is custom
+#define protected   // ops: definiton only, no handle
 
 #define sqrt sqrtf
 #define pow powf
@@ -670,7 +671,7 @@ vec3 reflectv3(const vec3 v, const vec3 n) {
     return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
 }
 
-public
+protected
 RefractResult refractv3(const vec3 v, const vec3 n, const float niOverNt) {
     const vec3 unitV = normv3(v);
     const float dt = dotv3(unitV, n);
@@ -925,7 +926,7 @@ vec4 shadingPbr(const vec3 eye, const vec3 worldPos, const vec3 albedo, const ve
 
 // ------------------- RAYTRACING ---------------
 
-public
+protected
 RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const float vfoy, const float aspect,
                       const float aperture, const float focusDist) {
     const float lensRadius = aperture / 2.0f;
@@ -949,7 +950,7 @@ RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const flo
     return result;
 }
 
-public
+protected
 Ray rayFromCamera(const RtCamera camera, const float u, const float v) {
     const vec3 horShift = mulv3f(camera.horizontal, u);
     const vec3 verShift = mulv3f(camera.vertical, v);
@@ -971,14 +972,14 @@ Ray rayFromCamera(const RtCamera camera, const float u, const float v) {
     return result;
 }
 
-public
+protected
 vec3 background(const Ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
     const vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
     return gradient;
 }
 
-public
+protected
 bool rayHitAabb(const Ray ray, const AABB aabb, const float tMin, const float tMax) {
     for (int i = 0; i < 3; i++) {
         const float invD = 1.0f / indexv3(ray.direction, i);
@@ -1000,7 +1001,7 @@ bool rayHitAabb(const Ray ray, const AABB aabb, const float tMin, const float tM
     return true;
 }
 
-public
+protected
 HitRecord raySphereHitRecord(const Ray ray, const float t, const Sphere sphere) {
     const vec3 point = rayPoint(ray, t);
     const vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
@@ -1008,7 +1009,7 @@ HitRecord raySphereHitRecord(const Ray ray, const float t, const Sphere sphere) 
     return result;
 }
 
-public
+protected
 HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const Sphere sphere) {
     const vec3 oc = subv3(ray.origin, sphere.center);
     const float a = dotv3(ray.direction, ray.direction);
@@ -1030,7 +1031,7 @@ HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const 
     return NO_HIT;
 }
 
-public
+protected
 HitRecord rayHitObject(const Ray ray,const float tMin, const float tMax, const int type, const int index) {
     if (type != HITABLE_SPHERE) {
         flagError(); // spheres only
@@ -1039,7 +1040,7 @@ HitRecord rayHitObject(const Ray ray,const float tMin, const float tMax, const i
     return rayHitSphere(ray, tMin, tMax, uSpheres[index]);
 }
 
-public
+protected
 HitRecord rayHitBvh(const Ray ray, const float tMin, const float tMax, const int index) {
     bvhTop = 0;
     float closest = tMax;
@@ -1074,12 +1075,12 @@ HitRecord rayHitBvh(const Ray ray, const float tMin, const float tMax, const int
     return result;
 }
 
-public
+protected
 HitRecord rayHitWorld(const Ray ray, const float tMin, const float tMax) {
     return rayHitBvh(ray, tMin, tMax, 0);
 }
 
-public
+protected
 ScatterResult materialScatterLambertian(const HitRecord record, const LambertianMaterial material) {
     const vec3 tangent = addv3(record.point, record.normal);
     const vec3 direction = addv3(tangent, randomInUnitSphere());
@@ -1087,7 +1088,7 @@ ScatterResult materialScatterLambertian(const HitRecord record, const Lambertian
     return result;
 }
 
-public
+protected
 ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record, const MetallicMaterial material) {
     const vec3 reflected = reflectv3(ray.direction, record.normal);
     if (dotv3(reflected, record.normal) > 0) {
@@ -1098,7 +1099,7 @@ ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record, cons
     }
 }
 
-public
+protected
 ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record, const DielectricMaterial material) {
     float niOverNt;
     float cosine;
@@ -1136,7 +1137,7 @@ ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record, c
     return scatterResult;
 }
 
-public
+protected
 ScatterResult materialScatter(const Ray ray, const HitRecord record) {
     switch (record.materialType) {
         case MATERIAL_LAMBERTIAN:
@@ -1150,7 +1151,7 @@ ScatterResult materialScatter(const Ray ray, const HitRecord record) {
     }
 }
 
-public
+protected
 vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, const float v) {
     Ray ray = rayFromCamera(camera, u, v);
     vec3 fraction = ftov3(1.0f);

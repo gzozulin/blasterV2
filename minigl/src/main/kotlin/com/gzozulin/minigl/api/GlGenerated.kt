@@ -1,16 +1,7 @@
 package com.gzozulin.minigl.api
 
 import com.gzozulin.minigl.scene.Light
-import com.gzozulin.minigl.tech.Hitable
-import com.gzozulin.minigl.tech.RtCamera
-import com.gzozulin.minigl.tech.HitRecord
-import com.gzozulin.minigl.tech.ScatterResult
-import com.gzozulin.minigl.tech.RefractResult
-import com.gzozulin.minigl.tech.Sphere
 import com.gzozulin.minigl.scene.PhongMaterial
-import com.gzozulin.minigl.tech.LambertianMaterial
-import com.gzozulin.minigl.tech.MetallicMaterial
-import com.gzozulin.minigl.tech.DielectricMaterial
 
 private const val DEF_RAY = "struct Ray {  vec3 origin ; vec3 direction ;  };\n"
 private const val DEF_AABB = "struct AABB {  vec3 pointMin ; vec3 pointMax ;  };\n"
@@ -144,11 +135,11 @@ private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( int rayBounces , RtCamer
 private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( int width , int height , float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / itof ( width ) ; float DV = 1.0f / itof ( height ) ; RtCamera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * randomFloat ( ) ; float dv = DV * randomFloat ( ) ; float sampleU = texCoord . x + du ; float sampleV = texCoord . y + dv ; result = addv3 ( result , sampleColor ( rayBounces , camera , sampleU , sampleV ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n"
 private const val DEF_GAMMASQRT = "vec4 gammaSqrt ( vec4 result ) { return v4 ( sqrt ( result . x ) , sqrt ( result . y ) , sqrt ( result . z ) , 1.0f ) ; }\n"
 
-const val PUBLIC_TYPES = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
+const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val PUBLIC_OPS = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_INDEXV3+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
+const val OPS_DEF = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_INDEXV3+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
 
-const val PUBLIC_CONST = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT
+const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT
 
 fun flagError() = object : Expression<Int>() {
     override fun expr() = "flagError()"
@@ -580,11 +571,6 @@ fun reflectv3(v: Expression<vec3>, n: Expression<vec3>) = object : Expression<ve
     override fun roots() = listOf(v, n)
 }
 
-fun refractv3(v: Expression<vec3>, n: Expression<vec3>, niOverNt: Expression<Float>) = object : Expression<RefractResult>() {
-    override fun expr() = "refractv3(${v.expr()}, ${n.expr()}, ${niOverNt.expr()})"
-    override fun roots() = listOf(v, n, niOverNt)
-}
-
 fun seedRandom(s: Expression<vec3>) = object : Expression<vec3>() {
     override fun expr() = "seedRandom(${s.expr()})"
     override fun roots() = listOf(s)
@@ -688,76 +674,6 @@ fun fresnelSchlick(cosTheta: Expression<Float>, F0: Expression<vec3>) = object :
 fun shadingPbr(eye: Expression<vec3>, worldPos: Expression<vec3>, albedo: Expression<vec3>, N: Expression<vec3>, metallic: Expression<Float>, roughness: Expression<Float>, ao: Expression<Float>) = object : Expression<vec4>() {
     override fun expr() = "shadingPbr(${eye.expr()}, ${worldPos.expr()}, ${albedo.expr()}, ${N.expr()}, ${metallic.expr()}, ${roughness.expr()}, ${ao.expr()})"
     override fun roots() = listOf(eye, worldPos, albedo, N, metallic, roughness, ao)
-}
-
-fun cameraLookAt(eye: Expression<vec3>, center: Expression<vec3>, up: Expression<vec3>, vfoy: Expression<Float>, aspect: Expression<Float>, aperture: Expression<Float>, focusDist: Expression<Float>) = object : Expression<RtCamera>() {
-    override fun expr() = "cameraLookAt(${eye.expr()}, ${center.expr()}, ${up.expr()}, ${vfoy.expr()}, ${aspect.expr()}, ${aperture.expr()}, ${focusDist.expr()})"
-    override fun roots() = listOf(eye, center, up, vfoy, aspect, aperture, focusDist)
-}
-
-fun rayFromCamera(camera: Expression<RtCamera>, u: Expression<Float>, v: Expression<Float>) = object : Expression<ray>() {
-    override fun expr() = "rayFromCamera(${camera.expr()}, ${u.expr()}, ${v.expr()})"
-    override fun roots() = listOf(camera, u, v)
-}
-
-fun background(ray: Expression<ray>) = object : Expression<vec3>() {
-    override fun expr() = "background(${ray.expr()})"
-    override fun roots() = listOf(ray)
-}
-
-fun rayHitAabb(ray: Expression<ray>, aabb: Expression<aabb>, tMin: Expression<Float>, tMax: Expression<Float>) = object : Expression<Boolean>() {
-    override fun expr() = "rayHitAabb(${ray.expr()}, ${aabb.expr()}, ${tMin.expr()}, ${tMax.expr()})"
-    override fun roots() = listOf(ray, aabb, tMin, tMax)
-}
-
-fun raySphereHitRecord(ray: Expression<ray>, t: Expression<Float>, sphere: Expression<Sphere>) = object : Expression<HitRecord>() {
-    override fun expr() = "raySphereHitRecord(${ray.expr()}, ${t.expr()}, ${sphere.expr()})"
-    override fun roots() = listOf(ray, t, sphere)
-}
-
-fun rayHitSphere(ray: Expression<ray>, tMin: Expression<Float>, tMax: Expression<Float>, sphere: Expression<Sphere>) = object : Expression<HitRecord>() {
-    override fun expr() = "rayHitSphere(${ray.expr()}, ${tMin.expr()}, ${tMax.expr()}, ${sphere.expr()})"
-    override fun roots() = listOf(ray, tMin, tMax, sphere)
-}
-
-fun rayHitObject(ray: Expression<ray>, tMin: Expression<Float>, tMax: Expression<Float>, type: Expression<Int>, index: Expression<Int>) = object : Expression<HitRecord>() {
-    override fun expr() = "rayHitObject(${ray.expr()}, ${tMin.expr()}, ${tMax.expr()}, ${type.expr()}, ${index.expr()})"
-    override fun roots() = listOf(ray, tMin, tMax, type, index)
-}
-
-fun rayHitBvh(ray: Expression<ray>, tMin: Expression<Float>, tMax: Expression<Float>, index: Expression<Int>) = object : Expression<HitRecord>() {
-    override fun expr() = "rayHitBvh(${ray.expr()}, ${tMin.expr()}, ${tMax.expr()}, ${index.expr()})"
-    override fun roots() = listOf(ray, tMin, tMax, index)
-}
-
-fun rayHitWorld(ray: Expression<ray>, tMin: Expression<Float>, tMax: Expression<Float>) = object : Expression<HitRecord>() {
-    override fun expr() = "rayHitWorld(${ray.expr()}, ${tMin.expr()}, ${tMax.expr()})"
-    override fun roots() = listOf(ray, tMin, tMax)
-}
-
-fun materialScatterLambertian(record: Expression<HitRecord>, material: Expression<LambertianMaterial>) = object : Expression<ScatterResult>() {
-    override fun expr() = "materialScatterLambertian(${record.expr()}, ${material.expr()})"
-    override fun roots() = listOf(record, material)
-}
-
-fun materialScatterMetalic(ray: Expression<ray>, record: Expression<HitRecord>, material: Expression<MetallicMaterial>) = object : Expression<ScatterResult>() {
-    override fun expr() = "materialScatterMetalic(${ray.expr()}, ${record.expr()}, ${material.expr()})"
-    override fun roots() = listOf(ray, record, material)
-}
-
-fun materialScatterDielectric(ray: Expression<ray>, record: Expression<HitRecord>, material: Expression<DielectricMaterial>) = object : Expression<ScatterResult>() {
-    override fun expr() = "materialScatterDielectric(${ray.expr()}, ${record.expr()}, ${material.expr()})"
-    override fun roots() = listOf(ray, record, material)
-}
-
-fun materialScatter(ray: Expression<ray>, record: Expression<HitRecord>) = object : Expression<ScatterResult>() {
-    override fun expr() = "materialScatter(${ray.expr()}, ${record.expr()})"
-    override fun roots() = listOf(ray, record)
-}
-
-fun sampleColor(rayBounces: Expression<Int>, camera: Expression<RtCamera>, u: Expression<Float>, v: Expression<Float>) = object : Expression<vec3>() {
-    override fun expr() = "sampleColor(${rayBounces.expr()}, ${camera.expr()}, ${u.expr()}, ${v.expr()})"
-    override fun roots() = listOf(rayBounces, camera, u, v)
 }
 
 fun fragmentColorRt(width: Expression<Int>, height: Expression<Int>, random: Expression<Float>, sampleCnt: Expression<Int>, rayBounces: Expression<Int>, eye: Expression<vec3>, center: Expression<vec3>, up: Expression<vec3>, fovy: Expression<Float>, aspect: Expression<Float>, aperture: Expression<Float>, focusDist: Expression<Float>, texCoord: Expression<vec2>) = object : Expression<vec4>() {

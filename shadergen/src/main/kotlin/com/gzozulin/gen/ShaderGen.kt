@@ -7,9 +7,11 @@ import org.antlr.v4.runtime.*
 import java.io.File
 
 private const val DEFINITIONS = "/home/greg/blaster/shaderlang/main.c"
-private const val ASSEMBLY = "/home/greg/blaster/minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
+private const val GL_GENERATED = "/home/greg/blaster/minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
+private const val ED_GENERATED = "/home/greg/blaster/shadered/src/main/kotlin/com/gzozulin/ed/EdGenerated.kt"
 
 private const val ACCESS_PUBLIC = "public"
+private const val ACCESS_PROTECTED = "protected"
 private const val ACCESS_CUSTOM = "custom"
 
 private typealias DeclCtx = CParser.ExternalDeclarationContext
@@ -18,7 +20,7 @@ private typealias FunctionCtx = CParser.FunctionDefinitionContext
 private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: CommonTokenStream, val parser: CParser)
 private data class CParam(val type: String, val name: String)
 
-private enum class CAccess { PRIVATE, CUSTOM, PUBLIC }
+private enum class CAccess { PRIVATE, CUSTOM, PROTECTED, PUBLIC }
 private interface CDeclaration {
     val access: CAccess
     val name: String
@@ -31,48 +33,59 @@ private data class CTypedef(override val name: String, override val def: String,
 private data class CConstant(override val name: String, override val access: CAccess,
                              override val def: String): CDeclaration
 
-fun main() = doCreateOutput(
-    renderDeclarations(visitCFile(parseCFile(File(DEFINITIONS)))), File(ASSEMBLY)
-)
-
-private fun doCreateOutput(content: String, file: File) {
-    file.writeText(content)
+fun main() {
+    val (glOutput, edOutput) = renderDefinitions(visitCFile(parseCFile(File(DEFINITIONS))))
+    doCreateOutput(glOutput, edOutput, File(GL_GENERATED), File(ED_GENERATED))
 }
 
-private fun renderDeclarations(declarations: List<CDeclaration>): String {
-    var result = "package com.gzozulin.minigl.api\n\n" +
+private fun doCreateOutput(glContent: String, edContent: String, glGenerated: File, edGenerated: File) {
+    glGenerated.writeText(glContent)
+    edGenerated.writeText(edContent)
+}
+
+private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, String> {
+    var glResult = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
-            "import com.gzozulin.minigl.tech.Hitable\n" +
-            "import com.gzozulin.minigl.tech.RtCamera\n" +
-            "import com.gzozulin.minigl.tech.HitRecord\n" +
-            "import com.gzozulin.minigl.tech.ScatterResult\n" +
-            "import com.gzozulin.minigl.tech.RefractResult\n" +
-            "import com.gzozulin.minigl.tech.Sphere\n" +
-            "import com.gzozulin.minigl.scene.PhongMaterial\n" +
-            "import com.gzozulin.minigl.tech.LambertianMaterial\n" +
-            "import com.gzozulin.minigl.tech.MetallicMaterial\n" +
-            "import com.gzozulin.minigl.tech.DielectricMaterial\n\n"
-    declarations.forEach { operation ->
-        if (operation.access == CAccess.PUBLIC) {
-            result += renderDeclaration(operation) + "\n"
+            "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
+    definitions.forEach { operation ->
+        if (operation.access == CAccess.PUBLIC || operation.access == CAccess.PROTECTED) {
+            glResult += renderDefinition(operation) + "\n"
         }
     }
-    result += "\n"
-    result += "const val PUBLIC_TYPES = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<CTypedef>()
+    val visibleDefinitions = definitions.filter { it.access == CAccess.PUBLIC || it.access == CAccess.PROTECTED}
+    glResult += "\n"
+    glResult += "const val TYPES_DEF = ${visibleDefinitions.filterIsInstance<CTypedef>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    result += "const val PUBLIC_OPS = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<COperation>()
+    glResult += "const val OPS_DEF = ${visibleDefinitions.filterIsInstance<COperation>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    result += "const val PUBLIC_CONST = ${declarations.filter { it.access == CAccess.PUBLIC }.filterIsInstance<CConstant>()
+    glResult += "const val CONST_DEF = ${visibleDefinitions.filterIsInstance<CConstant>()
         .joinToString("+") { "DEF_${it.name.toUpperCase()}" }}\n\n"
-    declarations.forEach { declaration ->
-        if (declaration is COperation) {
-            result += renderKotlinHandle(declaration) + "\n\n"
-        }
+
+
+    val handledDefinitions = definitions
+        .filterIsInstance<COperation>().filter { it.access == CAccess.PUBLIC || it.access == CAccess.CUSTOM }
+    var edHandles = ""
+    handledDefinitions.forEach { declaration ->
+        glResult += renderKotlinHandle(declaration) + "\n\n"
+        val params = declaration.params.joinToString(",") { "edParseParam(params.removeFirst(), heap)" }
+        edHandles += "        \"${declaration.name}\" -> ${declaration.name}($params)\n"
     }
-    return result
+
+    val edResult = """
+        package com.gzozulin.ed
+
+        import com.gzozulin.minigl.api.*
+        
+        internal fun edParseReference(reference: String, params: MutableList<String>, heap: Map<String, Expression<*>>) =
+            when (reference) {
+                $edHandles
+                else -> error("Unknown operation! " + reference)
+            }
+    """.trimIndent()
+    return glResult to edResult
 }
 
-private fun renderDeclaration(declaration: CDeclaration) =
+private fun renderDefinition(declaration: CDeclaration) =
     "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\""
 
 private fun renderKotlinHandle(operation: COperation) = """
@@ -106,18 +119,7 @@ private fun convertType(ctype: String) = when (ctype) {
     "mat3"                  -> "mat3"
     "Light"                 -> "Light"
     "Ray"                   -> "ray"
-    "Sphere"                -> "Sphere"
-    "Hitable"               -> "Hitable"
-    "HitRecord"             -> "HitRecord"
-    "HitableList"           -> "HitableList"
     "PhongMaterial"         -> "PhongMaterial"
-    "LambertianMaterial"    -> "LambertianMaterial"
-    "MetallicMaterial"      -> "MetallicMaterial"
-    "DielectricMaterial"    -> "DielectricMaterial"
-    "ScatterResult"         -> "ScatterResult"
-    "RefractResult"         -> "RefractResult"
-    "RtCamera"              -> "RtCamera"
-    "AABB"                  -> "aabb"
     else                    -> error("Unknown type! $ctype")
 }
 
@@ -171,10 +173,10 @@ private fun DeclCtx.isConstant(): Boolean {
 private fun parseAccess(declSpecifiers: CParser.DeclarationSpecifiersContext): CAccess {
     for (i in 0 until declSpecifiers.childCount) {
         val specifier = declSpecifiers.getChild(i)
-        if (specifier.text == ACCESS_CUSTOM) {
-            return CAccess.CUSTOM
-        } else if (specifier.text == ACCESS_PUBLIC) {
-            return CAccess.PUBLIC
+        when (specifier.text) {
+            ACCESS_CUSTOM       -> return CAccess.CUSTOM
+            ACCESS_PUBLIC       -> return CAccess.PUBLIC
+            ACCESS_PROTECTED    -> return CAccess.PROTECTED
         }
     }
     return CAccess.PRIVATE
@@ -253,5 +255,6 @@ private fun CommonTokenStream.filterAndExtract(ctx: ParserRuleContext, separator
         .filterNot { it.text == "struct" }
         .filterNot { it.text == ACCESS_PUBLIC }
         .filterNot { it.text == ACCESS_CUSTOM }
+        .filterNot { it.text == ACCESS_PROTECTED }
         .joinToString(separator) { it.text }
         .trim()

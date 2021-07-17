@@ -16,7 +16,7 @@ private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
 private var lastModified = FILE_RECIPE.lastModified()
 
-private fun <T> edParseReciepe(recipe: String): Expression<T> {
+private fun <T> edParseRecipe(recipe: String): Expression<T> {
     val heap = mutableMapOf<String, Expression<*>>()
     val lines = recipe.lines().filter { it.isNotBlank() }.filter { !it.startsWith("//") }
     for (line in lines) {
@@ -27,7 +27,7 @@ private fun <T> edParseReciepe(recipe: String): Expression<T> {
     return heap["out"]!! as Expression<T>
 }
 
-private fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): Expression<T> {
+internal fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): Expression<T> {
     @Suppress("UNCHECKED_CAST")
     when {
         heap.containsKey(param) -> {
@@ -60,16 +60,7 @@ private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<St
         return label to heap[reference]!!
     }
 
-    val expression = when (reference) {
-        "v3"            -> v3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
-        "addv3"         -> addv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
-        "subv3"         -> subv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
-        "mulv3"         -> mulv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
-        "divv3"         -> divv3(edParseParam(split.removeFirst(), heap), edParseParam(split.removeFirst(), heap))
-        "v3chartreuse"  -> v3chartreuse()
-        "v3aquamarine"  -> v3aquamarine()
-        else -> error("Unknown operation! $reference")
-    }
+    val expression = edParseReference(reference, split, heap)
     return label to expression
 }
 
@@ -78,7 +69,7 @@ private fun edReloadTechnique() {
     try {
         shadingFlat = ShadingFlat(
             constm4(mat4().orthoBox()),
-            v3tov4(edParseReciepe(FILE_RECIPE.readText()), constf(1f)))
+            v3tov4(edParseRecipe(FILE_RECIPE.readText()), constf(1f)))
     } catch (th: Throwable) {
         println("Error reloading shader: ${th.message}")
         shadingFlat = previous
