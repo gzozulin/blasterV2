@@ -360,6 +360,11 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
             "${value.get(3, 0)}, ${value.get(3, 1)}, ${value.get(3, 2)}, ${value.get(3, 3)});"
 }
 
+// ----------------------------- Time -----------------------------
+
+private val started = System.currentTimeMillis()
+fun timef() = uniff { (System.currentTimeMillis() - started).toFloat() / 1000f }
+
 // ----------------------------- Cache -----------------------------
 
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {

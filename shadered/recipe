@@ -1,7 +1,7 @@
 r: divf (addf (sinv time) 1f) 2f
-g: divf (addf (sinv time) 1f) 2f
-b: divf (addf (sinv time) 1f) 2f
+g: divf (addf (cosv time) 1f) 2f
+b: divf (addf (cosv time) 1f) 2f
 
-color: v3 r g b
+color: v3tov4 (v3 r g b) 1f
 
-out: v3tov4 color 1f
+out: mulv4 color texture

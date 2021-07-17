@@ -9,11 +9,17 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
+// todo: v3 (getr tex) (getg tex) (getb tex)
+// todo: some errors are fatal
+// todo: multiple outs: for each tech param
+// todo: good random with sampler
+// todo: wrap into technique
+// todo: like & subscribe demo screen
+
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
 
 private val window = GlWindow()
-private val started = System.currentTimeMillis()
 
 private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
@@ -25,7 +31,7 @@ private val logoTexture = libTextureCreate("textures/logo.png")
 private val intermediateVal = AtomicInteger(0)
 
 private val input = mapOf(
-    "time"      to uniff { (System.currentTimeMillis() - started).toFloat() / 1000f },
+    "time"      to timef(),
     "texture"   to sampler(unifs(logoTexture))
 )
 
