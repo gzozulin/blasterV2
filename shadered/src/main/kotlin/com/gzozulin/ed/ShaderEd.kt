@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger
 // todo: good random with sampler
 // todo: wrap into technique
 // todo: like & subscribe demo screen
+// todo: split current C code into files
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
@@ -26,13 +27,14 @@ private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(v
 private var lastModified = FILE_RECIPE.lastModified()
 
 private val logoTexture = libTextureCreate("textures/logo.png")
-    .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
+private val foggyTexture = libTextureCreate("textures/foggy.jpg")
 
 private val intermediateVal = AtomicInteger(0)
 
 private val input = mapOf(
     "time"      to timef(),
-    "texture"   to sampler(unifs(logoTexture))
+    "logo"      to sampler(unifs(logoTexture)),
+    "foggy"     to sampler(unifs(foggyTexture)),
 )
 
 private fun <T> edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Expression<T> {
@@ -121,18 +123,22 @@ private fun edCheckNeedReload() {
 fun main() = window.create {
     glMeshUse(rect) {
         glTextureUse(logoTexture) {
-            while (!glWindowShouldClose(window)) {
-                edReloadTechnique()
-                window.isLooping = true
-                glShadingFlatUse(shadingFlat) {
-                    window.show {
-                        glClear()
-                        glTextureBind(logoTexture) {
-                            glShadingFlatDraw(shadingFlat) {
-                                glShadingFlatInstance(shadingFlat, rect)
+            glTextureUse(foggyTexture) {
+                while (!glWindowShouldClose(window)) {
+                    edReloadTechnique()
+                    window.isLooping = true
+                    glShadingFlatUse(shadingFlat) {
+                        window.show {
+                            glClear()
+                            glTextureBind(logoTexture) {
+                                glTextureBind(foggyTexture) {
+                                    glShadingFlatDraw(shadingFlat) {
+                                        glShadingFlatInstance(shadingFlat, rect)
+                                    }
+                                }
                             }
+                            edCheckNeedReload()
                         }
-                        edCheckNeedReload()
                     }
                 }
             }

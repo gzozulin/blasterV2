@@ -4,4 +4,4 @@ b: divf (addf (cosv time) 1f) 2f
 
 color: v3tov4 (v3 r g b) 1f
 
-out: mulv4 color texture
+out: mulv4 color (mulv4 logo foggy)
