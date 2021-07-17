@@ -78,9 +78,7 @@ private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<St
 private fun edReloadTechnique() {
     val previous = shadingFlat
     try {
-        shadingFlat = ShadingFlat(
-            constm4(mat4().orthoBox()),
-            v3tov4(edParseRecipe(FILE_RECIPE.readText(), input), constf(1f)))
+        shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), edParseRecipe(FILE_RECIPE.readText(), input))
     } catch (th: Throwable) {
         println("Error reloading shader: ${th.message}")
         shadingFlat = previous

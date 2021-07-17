@@ -1,7 +1,15 @@
 channel1: sinv time
+c1: addf channel1 1f
+r: divf c1 2f
+
 channel2: cosv time
-channel3: tanv time
+c2: addf channel2 1f
+g: divf c2 2f
 
-color: v3 channel1 channel2 channel3
+channel3: sinv time
+c3: addf channel3 1f
+b: divf c3 2f
 
-out: color
+color: v3 r g b
+
+out: v3tov4 color 1f
