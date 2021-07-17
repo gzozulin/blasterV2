@@ -1,3 +1,7 @@
-color1: addv3 0,1,0 1,0,0
-color2: v3 0.5 0.5 0.5
-out: mulv3 color1 color2
+channel1: sinv time
+channel2: cosv time
+channel3: tanv time
+
+color: v3 channel1 channel2 channel3
+
+out: color

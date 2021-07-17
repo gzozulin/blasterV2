@@ -75,6 +75,13 @@ private const val DEF_SETAV4 = "vec4 setav4 ( vec4 v , float f ) { return v4 ( v
 private const val DEF_EQV2 = "bool eqv2 ( vec2 left , vec2 right ) { return left . x == right . x && left . y == right . y ; }\n"
 private const val DEF_EQV3 = "bool eqv3 ( vec3 left , vec3 right ) { return left . x == right . x && left . y == right . y && left . z == right . z ; }\n"
 private const val DEF_EQV4 = "bool eqv4 ( vec4 left , vec4 right ) { return left . x == right . x && left . y == right . y && left . z == right . z && left . w == right . w ; }\n"
+private const val DEF_SQRTV = "float sqrtv ( float value ) { return sqrt ( value ) ; }\n"
+private const val DEF_SINV = "float sinv ( float rad ) { return sin ( rad ) ; }\n"
+private const val DEF_COSV = "float cosv ( float rad ) { return cos ( rad ) ; }\n"
+private const val DEF_TANV = "float tanv ( float rad ) { return tan ( rad ) ; }\n"
+private const val DEF_POWV = "float powv ( float base , float power ) { return pow ( base , power ) ; }\n"
+private const val DEF_MINV = "float minv ( float left , float right ) { return min ( left , right ) ; }\n"
+private const val DEF_MAXV = "float maxv ( float left , float right ) { return max ( left , right ) ; }\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n"
 private const val DEF_DOTV3 = "float dotv3 ( vec3 left , vec3 right ) { return left . x * right . x + left . y * right . y + left . z * right . z ; }\n"
 private const val DEF_CROSSV3 = "vec3 crossv3 ( vec3 left , vec3 right ) { return v3 ( left . y * right . z - left . z * right . y , left . z * right . x - left . x * right . z , left . x * right . y - left . y * right . x ) ; }\n"
@@ -137,7 +144,7 @@ private const val DEF_GAMMASQRT = "vec4 gammaSqrt ( vec4 result ) { return v4 ( 
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val OPS_DEF = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_INDEXV3+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
+const val OPS_DEF = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_INDEXV3+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_SQRTV+DEF_SINV+DEF_COSV+DEF_TANV+DEF_POWV+DEF_MINV+DEF_MAXV+DEF_NEGV3+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
 
 const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT
 
@@ -448,6 +455,41 @@ fun eqv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<
 
 fun eqv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<Boolean>() {
     override fun expr() = "eqv4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun sqrtv(value: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "sqrtv(${value.expr()})"
+    override fun roots() = listOf(value)
+}
+
+fun sinv(rad: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "sinv(${rad.expr()})"
+    override fun roots() = listOf(rad)
+}
+
+fun cosv(rad: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "cosv(${rad.expr()})"
+    override fun roots() = listOf(rad)
+}
+
+fun tanv(rad: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "tanv(${rad.expr()})"
+    override fun roots() = listOf(rad)
+}
+
+fun powv(base: Expression<Float>, power: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "powv(${base.expr()}, ${power.expr()})"
+    override fun roots() = listOf(base, power)
+}
+
+fun minv(left: Expression<Float>, right: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "minv(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun maxv(left: Expression<Float>, right: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "maxv(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 

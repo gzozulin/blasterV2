@@ -9,12 +9,6 @@
 #define custom      // ops: handle only, definition is custom
 #define protected   // ops: definiton only, no handle
 
-#define sqrt sqrtf
-#define pow powf
-#define tan tanf
-#define min fminf
-#define max fmaxf
-
 // ------------------- TYPES -------------------
 
 typedef struct {
@@ -545,6 +539,49 @@ bool eqv4(const vec4 left, const vec4 right) {
 }
 
 // ------------------- MATH -------------------
+
+#define sqrt sqrtf
+#define pow powf
+#define tan tanf
+#define min fminf
+#define max fmaxf
+#define cos cosf
+#define sin cosf
+
+public
+float sqrtv(const float value) {
+    return sqrt(value);
+}
+
+public
+float sinv(const float rad) {
+    return sin(rad);
+}
+
+public
+float cosv(const float rad) {
+    return cos(rad);
+}
+
+public
+float tanv(const float rad) {
+    return tan(rad);
+}
+
+public
+float powv(const float base, const float power) {
+    return pow(base, power);
+}
+
+public
+float minv(const float left, const float right) {
+    return min(left, right);
+}
+
+public
+float maxv(const float left, const float right) {
+    return max(left, right);
+}
 
 public
 vec3 negv3(const vec3 v) {

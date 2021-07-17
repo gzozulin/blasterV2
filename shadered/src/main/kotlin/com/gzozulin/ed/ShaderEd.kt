@@ -1,6 +1,7 @@
 package com.gzozulin.ed
 
 import com.gzozulin.minigl.api.*
+import com.gzozulin.minigl.assets.libTextureCreate
 import com.gzozulin.minigl.tech.ShadingFlat
 import com.gzozulin.minigl.tech.glShadingFlatDraw
 import com.gzozulin.minigl.tech.glShadingFlatInstance
@@ -11,13 +12,23 @@ private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
 
 private val window = GlWindow()
+private val started = System.currentTimeMillis()
 
 private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
 private var lastModified = FILE_RECIPE.lastModified()
 
-private fun <T> edParseRecipe(recipe: String): Expression<T> {
+private val logoTexture = libTextureCreate("textures/logo.png")
+    .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
+
+private val input = mapOf(
+    "time"      to uniff { (System.currentTimeMillis() - started).toFloat() / 1000f },
+    "texture"   to sampler(unifs(logoTexture))
+)
+
+private fun <T> edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Expression<T> {
     val heap = mutableMapOf<String, Expression<*>>()
+    input.forEach { entry -> heap[entry.key] = entry.value }
     val lines = recipe.lines().filter { it.isNotBlank() }.filter { !it.startsWith("//") }
     for (line in lines) {
         val (label, expression) = edParseLine(line, heap)
@@ -69,7 +80,7 @@ private fun edReloadTechnique() {
     try {
         shadingFlat = ShadingFlat(
             constm4(mat4().orthoBox()),
-            v3tov4(edParseRecipe(FILE_RECIPE.readText()), constf(1f)))
+            v3tov4(edParseRecipe(FILE_RECIPE.readText(), input), constf(1f)))
     } catch (th: Throwable) {
         println("Error reloading shader: ${th.message}")
         shadingFlat = previous
@@ -84,17 +95,19 @@ private fun edCheckNeedReload() {
 }
 
 fun main() = window.create {
-    while (!glWindowShouldClose(window)) {
-        edReloadTechnique()
-        window.isLooping = true
-        glShadingFlatUse(shadingFlat) {
-            glMeshUse(rect) {
-                window.show {
-                    glClear()
-                    glShadingFlatDraw(shadingFlat) {
-                        glShadingFlatInstance(shadingFlat, rect)
+    glMeshUse(rect) {
+        glTextureUse(logoTexture) {
+            while (!glWindowShouldClose(window)) {
+                edReloadTechnique()
+                window.isLooping = true
+                glShadingFlatUse(shadingFlat) {
+                    window.show {
+                        glClear()
+                        glShadingFlatDraw(shadingFlat) {
+                            glShadingFlatInstance(shadingFlat, rect)
+                        }
+                        edCheckNeedReload()
                     }
-                    edCheckNeedReload()
                 }
             }
         }
