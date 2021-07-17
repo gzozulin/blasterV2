@@ -7,6 +7,7 @@ import com.gzozulin.minigl.tech.glShadingFlatDraw
 import com.gzozulin.minigl.tech.glShadingFlatInstance
 import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
@@ -20,6 +21,8 @@ private var lastModified = FILE_RECIPE.lastModified()
 
 private val logoTexture = libTextureCreate("textures/logo.png")
     .copy(minFilter = backend.GL_LINEAR, magFilter = backend.GL_LINEAR)
+
+private val intermediateVal = AtomicInteger(0)
 
 private val input = mapOf(
     "time"      to uniff { (System.currentTimeMillis() - started).toFloat() / 1000f },
@@ -59,10 +62,27 @@ internal fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): 
     }
 }
 
-private fun edParseLine(line: String, heap: Map<String, Expression<*>>): Pair<String, Expression<*>> {
-    val separatorIndex = line.indexOf(':')
-    val label = line.substring(0, separatorIndex)
-    val body = line.substring(separatorIndex + 1, line.length)
+private fun edSubstituteBrackets(line: String, heap: MutableMap<String, Expression<*>>): String {
+    if (line.contains('(')) {
+        val beg = line.indexOfLast { it == '(' } + 1
+        val end = line.indexOfFirst { it == ')' }
+        val body = line.substring(beg, end)
+        val name = "val${intermediateVal.getAndIncrement()}"
+        val split = body.split(PATTERN_WHITESPACE).filter { it.isNotBlank() }.toMutableList()
+        val reference = split.removeFirst()
+        val expression = edParseReference(reference, split, heap)
+        heap[name] = expression
+        return edSubstituteBrackets(line.substring(0, beg - 1) + name + line.substring(end + 1, line.length), heap)
+    } else {
+        return line
+    }
+}
+
+private fun edParseLine(line: String, heap: MutableMap<String, Expression<*>>): Pair<String, Expression<*>> {
+    val resolvedLine = edSubstituteBrackets(line, heap)
+    val separatorIndex = resolvedLine.indexOf(':')
+    val label = resolvedLine.substring(0, separatorIndex)
+    val body = resolvedLine.substring(separatorIndex + 1, resolvedLine.length)
     val split = body.split(PATTERN_WHITESPACE).filter { it.isNotBlank() }.toMutableList()
 
     val reference = split.removeFirst()
@@ -101,8 +121,10 @@ fun main() = window.create {
                 glShadingFlatUse(shadingFlat) {
                     window.show {
                         glClear()
-                        glShadingFlatDraw(shadingFlat) {
-                            glShadingFlatInstance(shadingFlat, rect)
+                        glTextureBind(logoTexture) {
+                            glShadingFlatDraw(shadingFlat) {
+                                glShadingFlatInstance(shadingFlat, rect)
+                            }
                         }
                         edCheckNeedReload()
                     }
