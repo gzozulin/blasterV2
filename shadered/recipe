@@ -1,6 +1,6 @@
-r: divf (addf (sinv time) 1f) 2f
-g: divf (addf (cosv time) 1f) 2f
-b: divf (addf (cosv time) 1f) 2f
+r: addf (sinv time) 1f
+g: addf (cosv time) 1f
+b: addf (cosv time) 1f
 
 color: v3tov4 (v3 r g b) 1f
 

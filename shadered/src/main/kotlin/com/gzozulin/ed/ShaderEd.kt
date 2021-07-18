@@ -9,18 +9,20 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: v3 (getr tex) (getg tex) (getb tex)
-// todo: some errors are fatal
 // todo: multiple outs: for each tech param
 // todo: good random with sampler
 // todo: wrap into technique
 // todo: like & subscribe demo screen
 // todo: split current C code into files
+// todo: named constants: uv coords and so on
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
 
-private val window = GlWindow()
+private val window = GlWindow(winWidth = 1280, winHeight = 720)
+
+private var showNextError = true
+private var showNextSuccess = true
 
 private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
@@ -31,10 +33,13 @@ private val foggyTexture = libTextureCreate("textures/foggy.jpg")
 
 private val intermediateVal = AtomicInteger(0)
 
+private val mouseVec = vec2()
+
 private val input = mapOf(
     "time"      to timef(),
     "logo"      to sampler(unifs(logoTexture)),
     "foggy"     to sampler(unifs(foggyTexture)),
+    "mouse"     to unifv2 { mouseVec }
 )
 
 private fun <T> edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Expression<T> {
@@ -73,7 +78,7 @@ internal fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): 
 private fun edSubstituteBrackets(line: String, heap: MutableMap<String, Expression<*>>): String {
     if (line.contains('(')) {
         val beg = line.indexOfLast { it == '(' } + 1
-        val end = line.indexOfFirst { it == ')' }
+        val end = beg + line.substring(beg, line.length).indexOfFirst { it == ')' }
         val body = line.substring(beg, end)
         val name = "val${intermediateVal.getAndIncrement()}"
         val split = body.split(PATTERN_WHITESPACE).filter { it.isNotBlank() }.toMutableList()
@@ -103,16 +108,6 @@ private fun edParseLine(line: String, heap: MutableMap<String, Expression<*>>): 
     return label to expression
 }
 
-private fun edReloadTechnique() {
-    val previous = shadingFlat
-    try {
-        shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), edParseRecipe(FILE_RECIPE.readText(), input))
-    } catch (th: Throwable) {
-        println("Error reloading shader: ${th.message}")
-        shadingFlat = previous
-    }
-}
-
 private fun edCheckNeedReload() {
     if (lastModified != FILE_RECIPE.lastModified()) {
         window.isLooping = false
@@ -120,27 +115,55 @@ private fun edCheckNeedReload() {
     }
 }
 
+private fun edReportError(throwable: Throwable) {
+    if (showNextError) {
+        println("Error reloading shader: ${throwable.message}")
+        showNextError = false
+        showNextSuccess = true
+    }
+}
+
+private fun edShaderIsGood() {
+    if (showNextSuccess) {
+        println("Shader compiled successfully!")
+        showNextSuccess = false
+        showNextError = true
+    }
+}
+
+private fun edShowWindow() {
+    while (!glWindowShouldClose(window)) {
+        val previous = shadingFlat
+        try {
+            shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), edParseRecipe(FILE_RECIPE.readText(), input))
+            window.isLooping = true
+            glShadingFlatUse(shadingFlat) {
+                window.show {
+                    glClear()
+                    glTextureBind(logoTexture) {
+                        glTextureBind(foggyTexture) {
+                            glShadingFlatDraw(shadingFlat) {
+                                glShadingFlatInstance(shadingFlat, rect)
+                            }
+                        }
+                    }
+                    edShaderIsGood()
+                    edCheckNeedReload()
+                }
+            }
+        } catch (th: Throwable) {
+            edReportError(th)
+            shadingFlat = previous
+        }
+    }
+}
+
 fun main() = window.create {
+    window.positionCallback = { mouseVec.set(it) }
     glMeshUse(rect) {
         glTextureUse(logoTexture) {
             glTextureUse(foggyTexture) {
-                while (!glWindowShouldClose(window)) {
-                    edReloadTechnique()
-                    window.isLooping = true
-                    glShadingFlatUse(shadingFlat) {
-                        window.show {
-                            glClear()
-                            glTextureBind(logoTexture) {
-                                glTextureBind(foggyTexture) {
-                                    glShadingFlatDraw(shadingFlat) {
-                                        glShadingFlatInstance(shadingFlat, rect)
-                                    }
-                                }
-                            }
-                            edCheckNeedReload()
-                        }
-                    }
-                }
+                edShowWindow()
             }
         }
     }
