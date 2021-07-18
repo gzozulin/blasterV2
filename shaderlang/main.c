@@ -35,11 +35,7 @@ typedef struct {
 } vec4;
 
 typedef struct {
-    float value;
-} mat3;
-
-typedef struct {
-    float value;
+    float value[16];
 } mat4;
 
 public
@@ -251,7 +247,38 @@ ivec2 iv2(const int x, const int y) {
     return (ivec2) { x, y };
 }
 
+public
+float getxv2(const vec2 v) {
+    return v.x;
+}
+
+public
+float getyv2(const vec2 v) {
+    return v.y;
+}
+
+public
+float getuv2(const vec2 v) {
+    return v.x;
+}
+
+public
+float getvv2(const vec2 v) {
+    return v.y;
+}
+
 // ------------------- VEC3 -------------------
+
+public
+float indexv3(const vec3 v, const int index) {
+    switch (index) {
+        case 0: return v.x;
+        case 1: return v.y;
+        case 2: return v.z;
+        default:
+            flagError(); return v.x;
+    }
+}
 
 custom
 vec3 v3(const float x, const float y, const float z) {
@@ -413,32 +440,6 @@ vec4 v4zero() {
     return ftov4(0.0f);
 }
 
-// ------------------- MAT4, RAY -------------------
-
-custom
-mat3 m3ident() {
-    return (mat3) { 0.0f };
-}
-
-public
-Ray rayBack() {
-    const Ray result = { v3zero(), v3back() };
-    return result;
-}
-
-// ------------------- GETRS ---------------
-
-public
-float indexv3(const vec3 v, const int index) {
-    switch (index) {
-        case 0: return v.x;
-        case 1: return v.y;
-        case 2: return v.z;
-        default:
-            flagError(); return v.x;
-    }
-}
-
 public
 float getxv4(const vec4 v) {
     return v.x;
@@ -480,28 +481,6 @@ float getav4(const vec4 v) {
 }
 
 public
-float getxv2(const vec2 v) {
-    return v.x;
-}
-
-public
-float getyv2(const vec2 v) {
-    return v.y;
-}
-
-public
-float getuv2(const vec2 v) {
-    return v.x;
-}
-
-public
-float getvv2(const vec2 v) {
-    return v.y;
-}
-
-// ------------------- SETRS ---------------
-
-public
 vec4 setxv4(const vec4 v, const float f) {
     return v4(f, v.y, v.z, v.w);
 }
@@ -539,6 +518,52 @@ vec4 setbv4(const vec4 v, const float f) {
 public
 vec4 setav4(const vec4 v, const float f) {
     return v4(v.x, v.y, v.z, f);
+}
+
+// ------------------- MAT4 -------------------
+
+custom
+mat4 m4ident() {
+    const mat4 result = {{
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    }};
+    return result;
+}
+
+custom
+mat4 mulm4(const mat4 left, const mat4 right) {
+    return m4ident();
+}
+
+custom
+mat4 translatem4(vec3 vec) {
+    return m4ident();
+}
+
+/*custom
+mat4 rotatem4() {
+
+}
+
+custom
+mat4 scalem4() {
+
+}*/
+
+custom
+vec4 transformv4(const vec4 vec, const mat4 mat) {
+    return v4zero();
+}
+
+// ------------------- RAY -------------------
+
+public
+Ray rayBack() {
+    const Ray result = { v3zero(), v3back() };
+    return result;
 }
 
 // ------------------- BOOL -------------------

@@ -49,6 +49,8 @@
       <w>texelf</w>
       <w>tmodel</w>
       <w>tproj</w>
+      <w>transformv</w>
+      <w>translatem</w>
       <w>transp</w>
       <w>tview</w>
       <w>uint</w>

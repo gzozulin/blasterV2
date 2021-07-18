@@ -9,10 +9,12 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
+// todo: reloading fails with fatal errors
+
 // todo: matrix operations
 // todo: good random with sampler
-// todo: reloading fails with fatal errors
 // todo: like & subscribe demo screen
+
 // todo: same recursive method for operation/param
 
 // todo: split current C code into files

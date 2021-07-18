@@ -24,6 +24,11 @@ private const val DEF_NO_REFRACT = "RefractResult NO_REFRACT = { false , { 0 , 0
 private const val DEF_FLAGERROR = "int flagError ( ) { errorFlag = true ; return 1 ; }\n"
 private const val DEF_FTOV2 = "vec2 ftov2 ( float v ) { return v2 ( v , v ) ; }\n"
 private const val DEF_V2ZERO = "vec2 v2zero ( ) { return ftov2 ( 0.0f ) ; }\n"
+private const val DEF_GETXV2 = "float getxv2 ( vec2 v ) { return v . x ; }\n"
+private const val DEF_GETYV2 = "float getyv2 ( vec2 v ) { return v . y ; }\n"
+private const val DEF_GETUV2 = "float getuv2 ( vec2 v ) { return v . x ; }\n"
+private const val DEF_GETVV2 = "float getvv2 ( vec2 v ) { return v . y ; }\n"
+private const val DEF_INDEXV3 = "float indexv3 ( vec3 v , int index ) { switch ( index ) { case 0 : return v . x ; case 1 : return v . y ; case 2 : return v . z ; default : flagError ( ) ; return v . x ; } }\n"
 private const val DEF_V2TOV3 = "vec3 v2tov3 ( vec2 v , float f ) { return v3 ( v . x , v . y , f ) ; }\n"
 private const val DEF_FTOV3 = "vec3 ftov3 ( float v ) { return v3 ( v , v , v ) ; }\n"
 private const val DEF_V3ZERO = "vec3 v3zero ( ) { return ftov3 ( 0.0f ) ; }\n"
@@ -54,8 +59,6 @@ private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f ,
 private const val DEF_V3TOV4 = "vec4 v3tov4 ( vec3 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n"
 private const val DEF_FTOV4 = "vec4 ftov4 ( float v ) { return v4 ( v , v , v , v ) ; }\n"
 private const val DEF_V4ZERO = "vec4 v4zero ( ) { return ftov4 ( 0.0f ) ; }\n"
-private const val DEF_RAYBACK = "Ray rayBack ( ) { Ray result = { v3zero ( ) , v3back ( ) } ; return result ; }\n"
-private const val DEF_INDEXV3 = "float indexv3 ( vec3 v , int index ) { switch ( index ) { case 0 : return v . x ; case 1 : return v . y ; case 2 : return v . z ; default : flagError ( ) ; return v . x ; } }\n"
 private const val DEF_GETXV4 = "float getxv4 ( vec4 v ) { return v . x ; }\n"
 private const val DEF_GETYV4 = "float getyv4 ( vec4 v ) { return v . y ; }\n"
 private const val DEF_GETZV4 = "float getzv4 ( vec4 v ) { return v . z ; }\n"
@@ -64,10 +67,6 @@ private const val DEF_GETRV4 = "float getrv4 ( vec4 v ) { return v . x ; }\n"
 private const val DEF_GETGV4 = "float getgv4 ( vec4 v ) { return v . y ; }\n"
 private const val DEF_GETBV4 = "float getbv4 ( vec4 v ) { return v . z ; }\n"
 private const val DEF_GETAV4 = "float getav4 ( vec4 v ) { return v . w ; }\n"
-private const val DEF_GETXV2 = "float getxv2 ( vec2 v ) { return v . x ; }\n"
-private const val DEF_GETYV2 = "float getyv2 ( vec2 v ) { return v . y ; }\n"
-private const val DEF_GETUV2 = "float getuv2 ( vec2 v ) { return v . x ; }\n"
-private const val DEF_GETVV2 = "float getvv2 ( vec2 v ) { return v . y ; }\n"
 private const val DEF_SETXV4 = "vec4 setxv4 ( vec4 v , float f ) { return v4 ( f , v . y , v . z , v . w ) ; }\n"
 private const val DEF_SETYV4 = "vec4 setyv4 ( vec4 v , float f ) { return v4 ( v . x , f , v . z , v . w ) ; }\n"
 private const val DEF_SETZV4 = "vec4 setzv4 ( vec4 v , float f ) { return v4 ( v . x , v . y , f , v . w ) ; }\n"
@@ -76,6 +75,7 @@ private const val DEF_SETRV4 = "vec4 setrv4 ( vec4 v , float f ) { return v4 ( f
 private const val DEF_SETGV4 = "vec4 setgv4 ( vec4 v , float f ) { return v4 ( v . x , f , v . z , v . w ) ; }\n"
 private const val DEF_SETBV4 = "vec4 setbv4 ( vec4 v , float f ) { return v4 ( v . x , v . y , f , v . w ) ; }\n"
 private const val DEF_SETAV4 = "vec4 setav4 ( vec4 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n"
+private const val DEF_RAYBACK = "Ray rayBack ( ) { Ray result = { v3zero ( ) , v3back ( ) } ; return result ; }\n"
 private const val DEF_EQV2 = "bool eqv2 ( vec2 left , vec2 right ) { return left . x == right . x && left . y == right . y ; }\n"
 private const val DEF_EQV3 = "bool eqv3 ( vec3 left , vec3 right ) { return left . x == right . x && left . y == right . y && left . z == right . z ; }\n"
 private const val DEF_EQV4 = "bool eqv4 ( vec4 left , vec4 right ) { return left . x == right . x && left . y == right . y && left . z == right . z && left . w == right . w ; }\n"
@@ -152,7 +152,7 @@ private const val DEF_GAMMASQRT = "vec4 gammaSqrt ( vec4 result ) { return v4 ( 
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val OPS_DEF = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_RAYBACK+DEF_INDEXV3+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_GETXV2+DEF_GETYV2+DEF_GETUV2+DEF_GETVV2+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_SQRTV+DEF_SINV+DEF_COSV+DEF_TANV+DEF_POWV+DEF_MINV+DEF_MAXV+DEF_NEGV3+DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
+const val OPS_DEF = DEF_FLAGERROR+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_GETUV2+DEF_GETVV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_RAYBACK+DEF_EQV2+DEF_EQV3+DEF_EQV4+DEF_SQRTV+DEF_SINV+DEF_COSV+DEF_TANV+DEF_POWV+DEF_MINV+DEF_MAXV+DEF_NEGV3+DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_DOTV3+DEF_CROSSV3+DEF_ADDV3+DEF_SUBV3+DEF_MULV3+DEF_MULV3F+DEF_POWV3+DEF_DIVV3F+DEF_DIVV3+DEF_MIXV3+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_RAYPOINT+DEF_SCHLICK+DEF_REFLECTV3+DEF_REFRACTV3+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_ERRORHANDLER+DEF_TILE+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYSPHEREHITRECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_MATERIALSCATTERLAMBERTIAN+DEF_MATERIALSCATTERMETALIC+DEF_MATERIALSCATTERDIELECTRIC+DEF_MATERIALSCATTER+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT
 
 const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT
 
@@ -194,6 +194,31 @@ fun v2zero() = object : Expression<vec2>() {
 fun iv2(x: Expression<Int>, y: Expression<Int>) = object : Expression<vec2i>() {
     override fun expr() = "iv2(${x.expr()}, ${y.expr()})"
     override fun roots() = listOf(x, y)
+}
+
+fun getxv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "getxv2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun getyv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "getyv2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun getuv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "getuv2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun getvv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "getvv2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun indexv3(v: Expression<vec3>, index: Expression<Int>) = object : Expression<Float>() {
+    override fun expr() = "indexv3(${v.expr()}, ${index.expr()})"
+    override fun roots() = listOf(v, index)
 }
 
 fun v3(x: Expression<Float>, y: Expression<Float>, z: Expression<Float>) = object : Expression<vec3>() {
@@ -356,21 +381,6 @@ fun v4zero() = object : Expression<vec4>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
-fun m3ident() = object : Expression<mat3>() {
-    override fun expr() = "m3ident()"
-    override fun roots() = listOf<Expression<*>>()
-}
-
-fun rayBack() = object : Expression<ray>() {
-    override fun expr() = "rayBack()"
-    override fun roots() = listOf<Expression<*>>()
-}
-
-fun indexv3(v: Expression<vec3>, index: Expression<Int>) = object : Expression<Float>() {
-    override fun expr() = "indexv3(${v.expr()}, ${index.expr()})"
-    override fun roots() = listOf(v, index)
-}
-
 fun getxv4(v: Expression<vec4>) = object : Expression<Float>() {
     override fun expr() = "getxv4(${v.expr()})"
     override fun roots() = listOf(v)
@@ -408,26 +418,6 @@ fun getbv4(v: Expression<vec4>) = object : Expression<Float>() {
 
 fun getav4(v: Expression<vec4>) = object : Expression<Float>() {
     override fun expr() = "getav4(${v.expr()})"
-    override fun roots() = listOf(v)
-}
-
-fun getxv2(v: Expression<vec2>) = object : Expression<Float>() {
-    override fun expr() = "getxv2(${v.expr()})"
-    override fun roots() = listOf(v)
-}
-
-fun getyv2(v: Expression<vec2>) = object : Expression<Float>() {
-    override fun expr() = "getyv2(${v.expr()})"
-    override fun roots() = listOf(v)
-}
-
-fun getuv2(v: Expression<vec2>) = object : Expression<Float>() {
-    override fun expr() = "getuv2(${v.expr()})"
-    override fun roots() = listOf(v)
-}
-
-fun getvv2(v: Expression<vec2>) = object : Expression<Float>() {
-    override fun expr() = "getvv2(${v.expr()})"
     override fun roots() = listOf(v)
 }
 
@@ -469,6 +459,31 @@ fun setbv4(v: Expression<vec4>, f: Expression<Float>) = object : Expression<vec4
 fun setav4(v: Expression<vec4>, f: Expression<Float>) = object : Expression<vec4>() {
     override fun expr() = "setav4(${v.expr()}, ${f.expr()})"
     override fun roots() = listOf(v, f)
+}
+
+fun m4ident() = object : Expression<mat4>() {
+    override fun expr() = "m4ident()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun mulm4(left: Expression<mat4>, right: Expression<mat4>) = object : Expression<mat4>() {
+    override fun expr() = "mulm4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun translatem4(vec: Expression<vec3>) = object : Expression<mat4>() {
+    override fun expr() = "translatem4(${vec.expr()})"
+    override fun roots() = listOf(vec)
+}
+
+fun transformv4(vec: Expression<vec4>, mat: Expression<mat4>) = object : Expression<vec4>() {
+    override fun expr() = "transformv4(${vec.expr()}, ${mat.expr()})"
+    override fun roots() = listOf(vec, mat)
+}
+
+fun rayBack() = object : Expression<ray>() {
+    override fun expr() = "rayBack()"
+    override fun roots() = listOf<Expression<*>>()
 }
 
 fun eqv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<Boolean>() {

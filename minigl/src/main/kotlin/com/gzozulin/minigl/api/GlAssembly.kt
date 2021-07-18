@@ -47,7 +47,7 @@ private const val CUSTOM_DEFINITIONS = """
     uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
 """
 
-private const val CUSTOM_CTORS_DEFINITIONS = """
+private const val CUSTOM_MAT_DEFINITIONS = """
     float itof(int i) {
         return float(i);
     }
@@ -74,6 +74,22 @@ private const val CUSTOM_CTORS_DEFINITIONS = """
     
     vec4 v4(float x, float y, float z, float w) {
         return vec4(x, y, z, w);
+    }
+    
+    mat4 m4ident() {
+        return mat4(1.0);
+    }
+    
+    mat4 mulm4(mat4 left, mat4 right) {
+        return left * right;
+    }
+    
+    mat4 translatem4(vec3 vec) {
+        return mat4(1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  vec.x, vec.y, vec.z, 1.0);
+    }
+    
+    vec4 transformv4(vec4 vec, mat4 mat) {
+        return mat * vec;
     }
 """
 
@@ -150,7 +166,7 @@ private const val CUSTOM_FRAG_DEFINITIONS = """
 private const val MAIN_DECL = "void main() {"
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
-        "$CUSTOM_DEFINITIONS\n$CUSTOM_CTORS_DEFINITIONS\n$CUSTOM_RANDOM_DEFINITIONS\n$CONST_DEF\n$OPS_DEF\n"
+        "$CUSTOM_DEFINITIONS\n$CUSTOM_MAT_DEFINITIONS\n$CUSTOM_RANDOM_DEFINITIONS\n$CONST_DEF\n$OPS_DEF\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEFINITIONS\n"
 
 private var next = AtomicInteger()

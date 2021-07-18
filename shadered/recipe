@@ -1,6 +1,9 @@
 // ---------------- MATRIX ------------------
 
-matrix: ortho
+offset: mulv3f (v3 (sinv time) (cosv time) 0f) 0.1f
+trans: translatem4 offset
+
+matrix: mulm4 ortho trans
 
 // ---------------- COLOR ------------------
 

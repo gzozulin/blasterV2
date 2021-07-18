@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = 
 
-C_INCLUDES = 
+C_INCLUDES = -I/home/greg/blaster/shaderlang/cglm/include
 
 C_FLAGS = -g -Wall -Wextra -pedantic -Werror -std=gnu11
 
