@@ -1,7 +1,16 @@
-r: addf (sinv time) 1f
-g: addf (cosv time) 1f
+// ---------------- MATRIX ------------------
+
+matrix: ortho
+
+// ---------------- COLOR ------------------
+
+u: addf (getuv2 (namedTexCoordsV2)) 1f
+v: addf (getvv2 (namedTexCoordsV2)) 1f
+
+r: mulf (addf (sinv time) 1f) u
+g: mulf (addf (cosv time) 1f) v
 b: addf (cosv time) 1f
 
-color: v3tov4 (v3 r g b) 1f
+mix: v3tov4 (v3 r g b) 1f
 
-out: mulv4 color (mulv4 logo foggy)
+color: mulv4 mix (mulv4 logo foggy)

@@ -9,12 +9,14 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: multiple outs: for each tech param
+// todo: matrix operations
 // todo: good random with sampler
-// todo: wrap into technique
+// todo: reloading fails with fatal errors
 // todo: like & subscribe demo screen
+// todo: same recursive method for operation/param
+
 // todo: split current C code into files
-// todo: named constants: uv coords and so on
+// todo: wrap into technique
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
@@ -37,12 +39,13 @@ private val mouseVec = vec2()
 
 private val input = mapOf(
     "time"      to timef(),
+    "ortho"     to constm4(mat4().orthoBox()),
     "logo"      to sampler(unifs(logoTexture)),
     "foggy"     to sampler(unifs(foggyTexture)),
     "mouse"     to unifv2 { mouseVec }
 )
 
-private fun <T> edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Expression<T> {
+private fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Map<String, Expression<*>> {
     val heap = mutableMapOf<String, Expression<*>>()
     input.forEach { entry -> heap[entry.key] = entry.value }
     val lines = recipe.lines().filter { it.isNotBlank() }.filter { !it.startsWith("//") }
@@ -51,7 +54,7 @@ private fun <T> edParseRecipe(recipe: String, input: Map<String, Expression<*>>)
         heap[label] = expression
     }
     @Suppress("UNCHECKED_CAST")
-    return heap["out"]!! as Expression<T>
+    return heap
 }
 
 internal fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): Expression<T> {
@@ -115,6 +118,12 @@ private fun edCheckNeedReload() {
     }
 }
 
+private fun edReloadShader() {
+    val heap = edParseRecipe(FILE_RECIPE.readText(), input)
+    @Suppress("UNCHECKED_CAST")
+    shadingFlat = ShadingFlat(heap["matrix"] as Expression<mat4>, heap["color"] as Expression<col4>)
+}
+
 private fun edReportError(throwable: Throwable) {
     if (showNextError) {
         println("Error reloading shader: ${throwable.message}")
@@ -135,7 +144,7 @@ private fun edShowWindow() {
     while (!glWindowShouldClose(window)) {
         val previous = shadingFlat
         try {
-            shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), edParseRecipe(FILE_RECIPE.readText(), input))
+            edReloadShader()
             window.isLooping = true
             glShadingFlatUse(shadingFlat) {
                 window.show {

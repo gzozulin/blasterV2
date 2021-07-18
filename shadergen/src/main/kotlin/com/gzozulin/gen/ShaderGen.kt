@@ -79,6 +79,17 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
         internal fun edParseReference(reference: String, params: MutableList<String>, heap: Map<String, Expression<*>>) =
             when (reference) {
                 $edHandles
+                "namedTexCoordsV2" -> namedTexCoordsV2()
+                "namedTexCoordsV3" -> namedTexCoordsV3()
+                "namedGlFragCoordV2" -> namedGlFragCoordV2()
+                "cachev4" -> cachev4(edParseParam(params.removeFirst(), heap))
+                "texel" -> texel(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                "sampler" -> sampler(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                "samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                "discard" -> discard()
+                "ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                //"more" -> more(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                "not" -> not(edParseParam(params.removeFirst(), heap))
                 else -> error("Unknown operation! " + reference)
             }
     """.trimIndent()

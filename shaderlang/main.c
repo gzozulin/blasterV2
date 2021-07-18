@@ -479,6 +479,26 @@ float getav4(const vec4 v) {
     return v.w;
 }
 
+public
+float getxv2(const vec2 v) {
+    return v.x;
+}
+
+public
+float getyv2(const vec2 v) {
+    return v.y;
+}
+
+public
+float getuv2(const vec2 v) {
+    return v.x;
+}
+
+public
+float getvv2(const vec2 v) {
+    return v.y;
+}
+
 // ------------------- SETRS ---------------
 
 public
