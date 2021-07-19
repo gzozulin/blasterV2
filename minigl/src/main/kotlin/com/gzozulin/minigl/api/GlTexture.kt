@@ -122,15 +122,21 @@ private fun glTextureDelete(texture: GlTexture) {
 }
 
 fun glTextureUse(texture: GlTexture, callback: Callback) {
-    glTextureUpload(texture)
-    callback.invoke()
-    glTextureDelete(texture)
+    try {
+        glTextureUpload(texture)
+        callback.invoke()
+    } finally {
+        glTextureDelete(texture)
+    }
 }
 
 fun glTextureUse(texture: Collection<GlTexture>, callback: Callback) {
-    texture.forEach { glTextureUpload(it) }
-    callback.invoke()
-    texture.forEach { glTextureDelete(it) }
+    try {
+        texture.forEach { glTextureUpload(it) }
+        callback.invoke()
+    } finally {
+        texture.forEach { glTextureDelete(it) }
+    }
 }
 
 fun glTextureBind(texture: GlTexture, callback: Callback) {

@@ -57,12 +57,15 @@ internal fun glProgramUse(program: GlProgram, callback: Callback) {
     check(program.handle == null) { "GlProgram is already in use!" }
     glShaderUpload(program.vertexShader)
     glShaderUpload(program.fragmentShader)
-    glProgramCreate(program)
-    callback.invoke()
-    backend.glDeleteProgram(program.handle!!)
-    program.handle = null
-    glShaderDelete(program.vertexShader)
-    glShaderDelete(program.fragmentShader)
+    try {
+        glProgramCreate(program)
+        callback.invoke()
+    } finally {
+        backend.glDeleteProgram(program.handle!!)
+        program.handle = null
+        glShaderDelete(program.vertexShader)
+        glShaderDelete(program.fragmentShader)
+    }
 }
 
 internal fun glProgramBind(program: GlProgram, callback: Callback) {

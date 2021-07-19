@@ -49,9 +49,12 @@ private fun glMeshDelete(mesh: GlMesh) {
 }
 
 fun glMeshUse(mesh: GlMesh, callback: Callback) {
-    glMeshUpload(mesh)
-    callback.invoke()
-    glMeshDelete(mesh)
+    try {
+        glMeshUpload(mesh)
+        callback.invoke()
+    } finally {
+        glMeshDelete(mesh)
+    }
 }
 
 internal fun glMeshUse(meshes: Collection<GlMesh>, callback: Callback) {

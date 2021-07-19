@@ -21,10 +21,13 @@ private fun glFrameBufferBindPrev(frameBuffer: GlFrameBuffer, callback: Callback
 
 internal fun glFrameBufferUse(frameBuffer: GlFrameBuffer, callback: Callback) {
     check(frameBuffer.handle == null) { "GlFrameBuffer is already in use!" }
-    frameBuffer.handle = backend.glGenFramebuffers()
-    callback.invoke()
-    backend.glDeleteFramebuffers(frameBuffer.handle!!)
-    frameBuffer.handle = null
+    try {
+        frameBuffer.handle = backend.glGenFramebuffers()
+        callback.invoke()
+    } finally {
+        backend.glDeleteFramebuffers(frameBuffer.handle!!)
+        frameBuffer.handle = null
+    }
 }
 
 internal fun glFrameBufferBind(frameBuffer: GlFrameBuffer, callback: Callback) {

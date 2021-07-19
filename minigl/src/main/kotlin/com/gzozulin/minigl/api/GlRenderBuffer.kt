@@ -23,14 +23,17 @@ private fun glRenderBufferBindPrev(renderBuffer: GlRenderBuffer, callback: Callb
 
 fun glRenderBufferUse(renderBuffer: GlRenderBuffer, callback: Callback) {
     check(renderBuffer.handle == null) { "GlRenderBuffer is already in use!" }
-    renderBuffer.handle = backend.glGenRenderbuffers()
-    glRenderBufferBindPrev(renderBuffer) {
-        backend.glBindRenderbuffer(renderBuffer.target, renderBuffer.handle!!)
-        backend.glRenderbufferStorage(renderBuffer.target, renderBuffer.component, renderBuffer.width, renderBuffer.height)
+    try {
+        renderBuffer.handle = backend.glGenRenderbuffers()
+        glRenderBufferBindPrev(renderBuffer) {
+            backend.glBindRenderbuffer(renderBuffer.target, renderBuffer.handle!!)
+            backend.glRenderbufferStorage(renderBuffer.target, renderBuffer.component, renderBuffer.width, renderBuffer.height)
+        }
+        callback.invoke()
+    } finally {
+        backend.glDeleteRenderBuffers(renderBuffer.handle!!)
+        renderBuffer.handle = null
     }
-    callback.invoke()
-    backend.glDeleteRenderBuffers(renderBuffer.handle!!)
-    renderBuffer.handle = null
 }
 
 fun glRenderBufferBind(renderBuffer: GlRenderBuffer, callback: Callback) {

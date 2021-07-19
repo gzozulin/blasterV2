@@ -1,6 +1,6 @@
 // ---------------- MATRIX ------------------
 
-offset: mulv3f (v3 (sinv time) (cosv time) 0f) 0.1f
+offset: mulv3f (v3 (sinv time) (sinv time) 0f) 0.2f
 trans: translatem4 offset
 
 matrix: mulm4 ortho trans
