@@ -540,7 +540,13 @@ mat4 mulm4(const mat4 left, const mat4 right) {
 
 custom
 mat4 translatem4(vec3 vec) {
-    return m4ident();
+    const mat4 result = {{
+         1, 0, 0, vec.x,
+         0, 1, 0, vec.y,
+         0, 0, 1, vec.z,
+         0, 0, 0, 1
+    }};
+    return result;
 }
 
 /*custom
@@ -653,12 +659,12 @@ float divf(const float left, const float right) {
     return left / right;
 }
 
-public
+custom
 float dotv3(const vec3 left, const vec3 right) {
     return left.x * right.x + left.y * right.y + left.z * right.z;
 }
 
-public
+custom
 vec3 crossv3(const vec3 left, const vec3 right) {
     return v3(
             left.y * right.z - left.z * right.y,
@@ -666,39 +672,39 @@ vec3 crossv3(const vec3 left, const vec3 right) {
             left.x * right.y - left.y * right.x);
 }
 
-public
+custom
 vec3 addv3(const vec3 left, const vec3 right) {
     return v3(left.x + right.x, left.y + right.y, left.z + right.z);
 }
 
-public
+custom
 vec3 subv3(const vec3 left, const vec3 right) {
     return v3(left.x - right.x, left.y - right.y, left.z - right.z);
 }
 
-public
+custom
 vec3 mulv3(const vec3 left, const vec3 right) {
     return v3(left.x * right.x, left.y * right.y, left.z * right.z);
 }
 
-public
+custom
 vec3 mulv3f(const vec3 left, const float right) {
     return v3(left.x * right, left.y * right, left.z * right);
+}
+
+custom
+vec3 divv3f(const vec3 left, const float right) {
+    return v3(left.x / right, left.y / right, left.z / right);
+}
+
+custom
+vec3 divv3(const vec3 left, const vec3 right) {
+    return v3(left.x / right.x, left.y / right.y, left.z / right.z);
 }
 
 public
 vec3 powv3(const vec3 left, const vec3 right) {
     return v3(pow(left.x, right.x), pow(left.y, right.y), pow(left.z, right.z));
-}
-
-public
-vec3 divv3f(const vec3 left, const float right) {
-    return v3(left.x / right, left.y / right, left.z / right);
-}
-
-public
-vec3 divv3(const vec3 left, const vec3 right) {
-    return v3(left.x / right.x, left.y / right.y, left.z / right.z);
 }
 
 public

@@ -7,8 +7,8 @@ import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = Int.MAX_VALUE
 private const val SAMPLES_PER_BATCH = 1
-private const val SAMPLES_CNT = 4
-private const val BOUNCES_CNT = 5
+private const val SAMPLES_CNT = 3
+private const val BOUNCES_CNT = 3
 
 enum class HitableType { BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
@@ -317,7 +317,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = true)
+private val window = GlWindow(isFullscreen = false)
 private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(
@@ -360,13 +360,15 @@ private fun glShadingRtCreateLayer(hitables: MutableList<Sphere>, side: Int, hei
     val half = (side / 2f).toInt()
     for (x in -half until half) {
         for (y in -half until half) {
-            val material = when (randi(3)) {
-                0 -> dielectrics.random()
-                1 -> metallics.random()
-                2 -> lambertians.random()
-                else -> error("wtf?!")
+            if ((x == -half || x == half - 1) || ((y == -half || y == half - 1))) {
+                val material = when (randi(3)) {
+                    0 -> dielectrics.random()
+                    1 -> metallics.random()
+                    2 -> lambertians.random()
+                    else -> error("wtf?!")
+                }
+                hitables.add(Sphere(vec3(x.toFloat(), height, y.toFloat()), 0.5f, material))
             }
-            hitables.add(Sphere(vec3(x.toFloat(), height, y.toFloat()), 0.5f, material))
         }
     }
 }

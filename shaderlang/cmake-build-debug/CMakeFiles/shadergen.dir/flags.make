@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/greg/blaster/shaderlang/cglm/include
 
-C_FLAGS = -g -Wall -Wextra -pedantic -Werror -std=gnu11
+C_FLAGS = -g -Wall -Wextra -pedantic -std=gnu11
 
