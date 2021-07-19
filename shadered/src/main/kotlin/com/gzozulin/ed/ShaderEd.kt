@@ -9,8 +9,6 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: reloading fails with fatal errors
-
 // todo: all custom math GLSL, C
 // todo: good random with sampler
 // todo: like & subscribe demo screen
@@ -25,8 +23,8 @@ private val PATTERN_WHITESPACE = "\\s+".toPattern()
 
 private val window = GlWindow(winWidth = 1400, winHeight = 800)
 
-private var showNextError = true
-private var showNextSuccess = true
+private enum class ShaderState { MODIFIED, RELOADED, ERROR, SUCCESS }
+private var shaderState = ShaderState.MODIFIED
 
 private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
@@ -116,84 +114,63 @@ private fun edParseLine(line: String, heap: MutableMap<String, Expression<*>>): 
 private fun edCheckNeedReload() {
     if (lastModified != FILE_RECIPE.lastModified()) {
         window.isLooping = false
+        shaderState = ShaderState.MODIFIED
         lastModified = FILE_RECIPE.lastModified()
     }
 }
 
 private fun edReloadShader() {
-    val heap = edParseRecipe(FILE_RECIPE.readText(), input)
-    @Suppress("UNCHECKED_CAST")
-    shadingFlat = ShadingFlat(heap["matrix"] as Expression<mat4>, heap["color"] as Expression<col4>)
-}
-
-private fun edShaderCompilSuccess() {
-    if (showNextSuccess) {
-        println("Shader compiled successfully!")
-        showNextSuccess = false
-        showNextError = true
+    if (shaderState == ShaderState.MODIFIED) {
+        val heap = edParseRecipe(FILE_RECIPE.readText(), input)
+        @Suppress("UNCHECKED_CAST")
+        shadingFlat = ShadingFlat(heap["matrix"] as Expression<mat4>, heap["color"] as Expression<col4>)
+        shaderState = ShaderState.RELOADED
     }
 }
 
-private fun edShaderCompilFailure(throwable: Throwable) {
-    if (showNextError) {
-        println("Error reloading shader: ${throwable.message}")
-        showNextError = false
-        showNextSuccess = true
+private fun edShaderCompilSuccess() {
+    if (shaderState == ShaderState.RELOADED) {
+        println("Shader compiled successfully!")
+        shaderState = ShaderState.SUCCESS
+    }
+}
+
+private fun edShaderCompilFailure(th: Throwable, previous: ShadingFlat) {
+    if (shaderState != ShaderState.ERROR) {
+        println("Error reloading shader: ${th.message}")
+        shaderState = ShaderState.ERROR
+        shadingFlat = previous
     }
 }
 
 private fun edShowWindow() {
     while (!glWindowShouldClose(window)) {
-        val previous = shadingFlat
-        try {
-            edReloadShader()
-            window.isLooping = true
-            glShadingFlatUse(shadingFlat) {
-                window.show {
-                    glClear(col3().black())
-                    glTextureBind(logoTexture) {
-                        glTextureBind(foggyTexture) {
-                            glShadingFlatDraw(shadingFlat) {
-                                glShadingFlatInstance(shadingFlat, rect)
-                            }
-                        }
-                    }
-                    edShaderCompilSuccess()
-                    edCheckNeedReload()
-                }
-            }
-        } catch (th: Throwable) {
-            edShaderCompilFailure(th)
-            shadingFlat = previous
-        }
-    }
-
-
-
-
-    /*while (!glWindowShouldClose(window)) {
         window.isLooping = true
         val previous = shadingFlat
         try {
             edReloadShader()
             glShadingFlatUse(shadingFlat) {
                 window.show {
-                    glClear(col3().black())
-                    glTextureBind(logoTexture) {
-                        glTextureBind(foggyTexture) {
-                            glShadingFlatDraw(shadingFlat) {
-                                glShadingFlatInstance(shadingFlat, rect)
-                            }
-                        }
-                    }
-                    edShaderCompilSuccess()
                     edCheckNeedReload()
+                    edShowFrame()
+                    edShaderCompilSuccess()
                 }
             }
         } catch (th: Throwable) {
-
+            edShaderCompilFailure(th, previous)
         }
-    }*/
+    }
+}
+
+private fun edShowFrame() {
+    glClear(col3().black())
+    glTextureBind(logoTexture) {
+        glTextureBind(foggyTexture) {
+            glShadingFlatDraw(shadingFlat) {
+                glShadingFlatInstance(shadingFlat, rect)
+            }
+        }
+    }
 }
 
 fun main() = window.create {
