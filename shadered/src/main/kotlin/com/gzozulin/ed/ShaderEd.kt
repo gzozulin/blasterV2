@@ -9,7 +9,6 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: all custom math GLSL, C
 // todo: good random with sampler
 // todo: like & subscribe demo screen
 
@@ -17,6 +16,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 // todo: split current C code into files
 // todo: wrap into technique
+
+// todo: somehow use https://github.com/recp/cglm for C definitions
+// todo: one way to import the lib is to rename types when generating code
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()
@@ -32,8 +34,6 @@ private var lastModified = FILE_RECIPE.lastModified()
 
 private val logoTexture = libTextureCreate("textures/logo.png")
 private val foggyTexture = libTextureCreate("textures/foggy.jpg")
-
-private val intermediateVal = AtomicInteger(0)
 
 private val mouseVec = vec2()
 
@@ -78,6 +78,7 @@ internal fun <T> edParseParam(param: String, heap: Map<String, Expression<*>>): 
     }
 }
 
+private val intermediateVal = AtomicInteger(0)
 private fun edSubstituteBrackets(line: String, heap: MutableMap<String, Expression<*>>): String {
     if (line.contains('(')) {
         val beg = line.indexOfLast { it == '(' } + 1

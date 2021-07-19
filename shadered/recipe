@@ -1,9 +1,11 @@
 // ---------------- MATRIX ------------------
 
-offset: mulv3f (v3 (sinv time) (sinv time) 0f) 0.2f
+offset: mulv3f (v3 (sinv time) (sinv time) 0f) 0.5f
+
+scale: scalem4 (v3 (mulf (sinv time) 1f) (mulf (sinv time) 1f) 0.5f)
 trans: translatem4 offset
 
-matrix: mulm4 ortho trans
+matrix: mulm4 ortho (mulm4 scale trans)
 
 // ---------------- COLOR ------------------
 

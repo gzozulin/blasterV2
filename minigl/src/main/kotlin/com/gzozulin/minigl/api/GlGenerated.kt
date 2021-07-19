@@ -453,26 +453,6 @@ fun setav4(v: Expression<vec4>, f: Expression<Float>) = object : Expression<vec4
     override fun roots() = listOf(v, f)
 }
 
-fun m4ident() = object : Expression<mat4>() {
-    override fun expr() = "m4ident()"
-    override fun roots() = listOf<Expression<*>>()
-}
-
-fun mulm4(left: Expression<mat4>, right: Expression<mat4>) = object : Expression<mat4>() {
-    override fun expr() = "mulm4(${left.expr()}, ${right.expr()})"
-    override fun roots() = listOf(left, right)
-}
-
-fun translatem4(vec: Expression<vec3>) = object : Expression<mat4>() {
-    override fun expr() = "translatem4(${vec.expr()})"
-    override fun roots() = listOf(vec)
-}
-
-fun transformv4(vec: Expression<vec4>, mat: Expression<mat4>) = object : Expression<vec4>() {
-    override fun expr() = "transformv4(${vec.expr()}, ${mat.expr()})"
-    override fun roots() = listOf(vec, mat)
-}
-
 fun rayBack() = object : Expression<ray>() {
     override fun expr() = "rayBack()"
     override fun roots() = listOf<Expression<*>>()
@@ -666,6 +646,36 @@ fun schlick(cosine: Expression<Float>, ri: Expression<Float>) = object : Express
 fun reflectv3(v: Expression<vec3>, n: Expression<vec3>) = object : Expression<vec3>() {
     override fun expr() = "reflectv3(${v.expr()}, ${n.expr()})"
     override fun roots() = listOf(v, n)
+}
+
+fun m4ident() = object : Expression<mat4>() {
+    override fun expr() = "m4ident()"
+    override fun roots() = listOf<Expression<*>>()
+}
+
+fun mulm4(left: Expression<mat4>, right: Expression<mat4>) = object : Expression<mat4>() {
+    override fun expr() = "mulm4(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun transformv4(vec: Expression<vec4>, mat: Expression<mat4>) = object : Expression<vec4>() {
+    override fun expr() = "transformv4(${vec.expr()}, ${mat.expr()})"
+    override fun roots() = listOf(vec, mat)
+}
+
+fun translatem4(vec: Expression<vec3>) = object : Expression<mat4>() {
+    override fun expr() = "translatem4(${vec.expr()})"
+    override fun roots() = listOf(vec)
+}
+
+fun rotatem4(axis: Expression<vec3>, angle: Expression<Float>) = object : Expression<mat4>() {
+    override fun expr() = "rotatem4(${axis.expr()}, ${angle.expr()})"
+    override fun roots() = listOf(axis, angle)
+}
+
+fun scalem4(scale: Expression<vec3>) = object : Expression<mat4>() {
+    override fun expr() = "scalem4(${scale.expr()})"
+    override fun roots() = listOf(scale)
 }
 
 fun seedRandom(s: Expression<vec3>) = object : Expression<vec3>() {

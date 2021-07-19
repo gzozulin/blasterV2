@@ -192,15 +192,36 @@ private const val CUSTOM_MAT4_DEF = """
         return left * right;
     }
     
+    vec4 transformv4(vec4 vec, mat4 mat) {
+        return mat * vec;
+    }
+    
     mat4 translatem4(vec3 vec) {
         return mat4(1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  vec.x, vec.y, vec.z, 1.0);
     }
     
-    vec4 transformv4(vec4 vec, mat4 mat) {
-        return mat * vec;
+    mat4 rotatem4(vec3 axis, float angle) {
+        axis = normalize(axis);
+        float s = sin(angle);
+        float c = cos(angle);
+        float oc = 1.0 - c;
+        
+        return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                    0.0,                                0.0,                                0.0,                                1.0);
+    }
+    
+    mat4 scalem4(vec3 scale) {
+        mat4 result = mat4(
+             scale.x, 0, 0, 0,
+             0, scale.y, 0, 0,
+             0, 0, scale.z, 0,
+             0, 0, 0, 1
+        );
+        return result;
     }
 """
-
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
         "$CUSTOM_DEF\n$CUSTOM_RANDOM_DEF\n" +
