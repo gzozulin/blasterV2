@@ -76,10 +76,10 @@ private const val CUSTOM_RANDOM_DEF = """
     }
     
     // Pseudo-random value in half-open range [0:1].
-    float random(float x) { return floatConstruct(hash(floatBitsToUint(x))); }
-    float random(vec2  v) { return floatConstruct(hash(floatBitsToUint(v))); }
-    float random(vec3  v) { return floatConstruct(hash(floatBitsToUint(v))); }
-    float random(vec4  v) { return floatConstruct(hash(floatBitsToUint(v))); }
+    float rndf (float x) { return floatConstruct(hash(floatBitsToUint(x))); }
+    float rndv2(vec2  v) { return floatConstruct(hash(floatBitsToUint(v))); }
+    float rndv3(vec3  v) { return floatConstruct(hash(floatBitsToUint(v))); }
+    float rndv4(vec4  v) { return floatConstruct(hash(floatBitsToUint(v))); }
     
     vec4 seed = vec4(0.0f, 0.0f, 0.0f, 0.0f);
     vec3 seedRandom(vec3 s) {
@@ -89,9 +89,9 @@ private const val CUSTOM_RANDOM_DEF = """
         return s;
     }
     
-    float randomFloat() {
+    float seededRndf() {
         seed.w += FLT_MIN;
-        return random(seed);
+        return rndv4(seed);
     }
 """
 

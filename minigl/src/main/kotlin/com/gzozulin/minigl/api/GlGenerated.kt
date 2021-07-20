@@ -107,9 +107,9 @@ private const val DEF_RAYPOINT = "vec3 rayPoint ( Ray ray , float t ) { return a
 private const val DEF_SCHLICK = "float schlick ( float cosine , float ri ) { float r0 = ( 1 - ri ) / ( 1 + ri ) ; r0 = r0 * r0 ; return r0 + ( 1 - r0 ) * pow ( ( 1 - cosine ) , 5 ) ; }\n"
 private const val DEF_REFLECTV3 = "vec3 reflectv3 ( vec3 v , vec3 n ) { return subv3 ( v , mulv3f ( n , 2.0f * dotv3 ( v , n ) ) ) ; }\n"
 private const val DEF_REFRACTV3 = "RefractResult refractv3 ( vec3 v , vec3 n , float niOverNt ) { vec3 unitV = normv3 ( v ) ; float dt = dotv3 ( unitV , n ) ; float D = 1.0f - niOverNt * niOverNt * ( 1.0f - dt * dt ) ; if ( D > 0 ) { vec3 left = mulv3f ( subv3 ( unitV , mulv3f ( n , dt ) ) , niOverNt ) ; vec3 right = mulv3f ( n , sqrt ( D ) ) ; RefractResult result = { true , subv3 ( left , right ) } ; return result ; } else { return NO_REFRACT ; } }\n"
-private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = v3 ( randomFloat ( ) * 2.0f - 1.0f , randomFloat ( ) * 2.0f - 1.0f , randomFloat ( ) * 2.0f - 1.0f ) ; if ( lensqv3 ( result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
-private const val DEF_RANDOMINUNITDISK = "vec3 randomInUnitDisk ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = subv3 ( mulv3f ( v3 ( randomFloat ( ) , randomFloat ( ) , 0.0f ) , 2.0f ) , v3 ( 1.0f , 1.0f , 0.0f ) ) ; if ( dotv3 ( result , result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
-private const val DEF_ERRORHANDLER = "vec4 errorHandler ( vec4 color ) { if ( errorFlag ) { vec3 signal ; float check = randomFloat ( ) ; if ( check > 0.6f ) { signal = v3red ( ) ; } else if ( check > 0.3f ) { signal = v3blue ( ) ; } else { signal = v3green ( ) ; } return v3tov4 ( signal , 1.0f ) ; } else { return color ; } }\n"
+private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = v3 ( seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f ) ; if ( lensqv3 ( result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
+private const val DEF_RANDOMINUNITDISK = "vec3 randomInUnitDisk ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = subv3 ( mulv3f ( v3 ( seededRndf ( ) , seededRndf ( ) , 0.0f ) , 2.0f ) , v3 ( 1.0f , 1.0f , 0.0f ) ) ; if ( dotv3 ( result , result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
+private const val DEF_ERRORHANDLER = "vec4 errorHandler ( vec4 color ) { if ( errorFlag ) { vec3 signal ; float check = seededRndf ( ) ; if ( check > 0.6f ) { signal = v3red ( ) ; } else if ( check > 0.3f ) { signal = v3blue ( ) ; } else { signal = v3green ( ) ; } return v3tov4 ( signal , 1.0f ) ; } else { return color ; } }\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; return v2 ( tileStartX + texCoord . x * tileSideX , tileStartY + texCoord . y * tileSideY ) ; }\n"
 private const val DEF_LUMINOSITY = "float luminosity ( float distance , Light light ) { return 1.0f / ( light . attenConstant + light . attenLinear * distance + light . attenQuadratic * distance * distance ) ; }\n"
 private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; return diffuseTerm > 0.0f ? mulv3f ( material . diffuse , diffuseTerm ) : v3zero ( ) ; }\n"
@@ -136,10 +136,10 @@ private const val DEF_RAYHITBVH = "HitRecord rayHitBvh ( Ray ray , float tMin , 
 private const val DEF_RAYHITWORLD = "HitRecord rayHitWorld ( Ray ray , float tMin , float tMax ) { return rayHitBvh ( ray , tMin , tMax , 0 ) ; }\n"
 private const val DEF_MATERIALSCATTERLAMBERTIAN = "ScatterResult materialScatterLambertian ( HitRecord record , LambertianMaterial material ) { vec3 tangent = addv3 ( record . point , record . normal ) ; vec3 direction = addv3 ( tangent , randomInUnitSphere ( ) ) ; ScatterResult result = { material . albedo , { record . point , subv3 ( direction , record . point ) } } ; return result ; }\n"
 private const val DEF_MATERIALSCATTERMETALIC = "ScatterResult materialScatterMetalic ( Ray ray , HitRecord record , MetallicMaterial material ) { vec3 reflected = reflectv3 ( ray . direction , record . normal ) ; if ( dotv3 ( reflected , record . normal ) > 0 ) { ScatterResult result = { material . albedo , { record . point , reflected } } ; return result ; } else { return NO_SCATTER ; } }\n"
-private const val DEF_MATERIALSCATTERDIELECTRIC = "ScatterResult materialScatterDielectric ( Ray ray , HitRecord record , DielectricMaterial material ) { float niOverNt ; float cosine ; vec3 outwardNormal ; float rdotn = dotv3 ( ray . direction , record . normal ) ; float dirlen = lenv3 ( ray . direction ) ; if ( rdotn > 0 ) { outwardNormal = negv3 ( record . normal ) ; niOverNt = material . reflectiveIndex ; cosine = material . reflectiveIndex * rdotn / dirlen ; } else { outwardNormal = record . normal ; niOverNt = 1.0f / material . reflectiveIndex ; cosine = - rdotn / dirlen ; } float reflectProbe ; RefractResult refractResult = refractv3 ( ray . direction , outwardNormal , niOverNt ) ; if ( refractResult . isRefracted ) { reflectProbe = schlick ( cosine , material . reflectiveIndex ) ; } else { reflectProbe = 1.0f ; } vec3 scatteredDir ; if ( randomFloat ( ) < reflectProbe ) { scatteredDir = reflectv3 ( ray . direction , record . normal ) ; } else { scatteredDir = refractResult . refracted ; } ScatterResult scatterResult = { v3one ( ) , { record . point , scatteredDir } } ; return scatterResult ; }\n"
+private const val DEF_MATERIALSCATTERDIELECTRIC = "ScatterResult materialScatterDielectric ( Ray ray , HitRecord record , DielectricMaterial material ) { float niOverNt ; float cosine ; vec3 outwardNormal ; float rdotn = dotv3 ( ray . direction , record . normal ) ; float dirlen = lenv3 ( ray . direction ) ; if ( rdotn > 0 ) { outwardNormal = negv3 ( record . normal ) ; niOverNt = material . reflectiveIndex ; cosine = material . reflectiveIndex * rdotn / dirlen ; } else { outwardNormal = record . normal ; niOverNt = 1.0f / material . reflectiveIndex ; cosine = - rdotn / dirlen ; } float reflectProbe ; RefractResult refractResult = refractv3 ( ray . direction , outwardNormal , niOverNt ) ; if ( refractResult . isRefracted ) { reflectProbe = schlick ( cosine , material . reflectiveIndex ) ; } else { reflectProbe = 1.0f ; } vec3 scatteredDir ; if ( seededRndf ( ) < reflectProbe ) { scatteredDir = reflectv3 ( ray . direction , record . normal ) ; } else { scatteredDir = refractResult . refracted ; } ScatterResult scatterResult = { v3one ( ) , { record . point , scatteredDir } } ; return scatterResult ; }\n"
 private const val DEF_MATERIALSCATTER = "ScatterResult materialScatter ( Ray ray , HitRecord record ) { switch ( record . materialType ) { case MATERIAL_LAMBERTIAN : return materialScatterLambertian ( record , uLambertianMaterials [ record . materialIndex ] ) ; case MATERIAL_METALIIC : return materialScatterMetalic ( ray , record , uMetallicMaterials [ record . materialIndex ] ) ; case MATERIAL_DIELECTRIC : return materialScatterDielectric ( ray , record , uDielectricMaterials [ record . materialIndex ] ) ; default : return NO_SCATTER ; } }\n"
 private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( int rayBounces , RtCamera camera , float u , float v ) { Ray ray = rayFromCamera ( camera , u , v ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < rayBounces ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = materialScatter ( ray , record ) ; if ( scatterResult . attenuation . x < 0 ) { return v3zero ( ) ; } fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n"
-private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( int width , int height , float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / itof ( width ) ; float DV = 1.0f / itof ( height ) ; RtCamera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * randomFloat ( ) ; float dv = DV * randomFloat ( ) ; float sampleU = texCoord . x + du ; float sampleV = texCoord . y + dv ; result = addv3 ( result , sampleColor ( rayBounces , camera , sampleU , sampleV ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n"
+private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( int width , int height , float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / itof ( width ) ; float DV = 1.0f / itof ( height ) ; RtCamera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * seededRndf ( ) ; float dv = DV * seededRndf ( ) ; float sampleU = texCoord . x + du ; float sampleV = texCoord . y + dv ; result = addv3 ( result , sampleColor ( rayBounces , camera , sampleU , sampleV ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n"
 private const val DEF_GAMMASQRT = "vec4 gammaSqrt ( vec4 result ) { return v4 ( sqrt ( result . x ) , sqrt ( result . y ) , sqrt ( result . z ) , 1.0f ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
@@ -678,13 +678,33 @@ fun scalem4(scale: Expression<vec3>) = object : Expression<mat4>() {
     override fun roots() = listOf(scale)
 }
 
+fun rndf(x: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "rndf(${x.expr()})"
+    override fun roots() = listOf(x)
+}
+
+fun rndv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "rndv2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun rndv3(v: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "rndv3(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
+fun rndv4(v: Expression<vec4>) = object : Expression<Float>() {
+    override fun expr() = "rndv4(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
 fun seedRandom(s: Expression<vec3>) = object : Expression<vec3>() {
     override fun expr() = "seedRandom(${s.expr()})"
     override fun roots() = listOf(s)
 }
 
-fun randomFloat() = object : Expression<Float>() {
-    override fun expr() = "randomFloat()"
+fun seededRndf() = object : Expression<Float>() {
+    override fun expr() = "seededRndf()"
     override fun roots() = listOf<Expression<*>>()
 }
 
