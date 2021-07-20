@@ -9,16 +9,15 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: good random with sampler
 // todo: like & subscribe demo screen
-
-// todo: same recursive method for operation/param
 
 // todo: split current C code into files
 // todo: wrap into technique
 
 // todo: somehow use https://github.com/recp/cglm for C definitions
 // todo: one way to import the lib is to rename types when generating code
+// todo: same recursive method for operation/param
+// todo: good random with sampler
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 private val PATTERN_WHITESPACE = "\\s+".toPattern()

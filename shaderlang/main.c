@@ -9,7 +9,7 @@
 #define custom      // ops: handle only, definition is custom
 #define protected   // ops: definiton only, no handle
 
-// ------------------- TYPES -------------------
+// region ------------------- TYPES -------------------
 
 typedef struct {
     float x;
@@ -131,7 +131,9 @@ typedef struct {
     vec3 refracted;
 } RefractResult;
 
-// ------------------- DEFINE -------------------
+// endregion ------------------- TYPES -------------------
+
+// region ------------------- DEFINE -------------------
 
 #define MAX_LIGHTS              128
 #define MAX_BVH                 512
@@ -149,7 +151,9 @@ typedef struct {
 #define MATERIAL_METALIIC 1
 #define MATERIAL_DIELECTRIC 2
 
-// ------------------- PUBLIC CONST -------------------
+// endregion ------------------- DEFINE -------------------
+
+// region ------------------- PUBLIC CONST -------------------
 
 public
 const float PI = 3.14159265359f;
@@ -166,7 +170,9 @@ const ScatterResult NO_SCATTER = { { -1, -1, -1 }, { { 0, 0, 0 }, { 0, 0, 0 } } 
 public
 const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
 
-// ------------------- PRIVATE CONST -------------------
+// endregion ------------------- PUBLIC CONST -------------------
+
+// region ------------------- PRIVATE CONST -------------------
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
@@ -195,7 +201,9 @@ const LambertianMaterial uLambertianMaterials[MAX_LAMBERTIANS] = {
 const MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
 const DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
 
-// ------------------- ERROR -------------------
+// endregion ------------------- PRIVATE CONST -------------------
+
+// region ------------------- ERROR -------------------
 
 bool errorFlag = false;
 
@@ -206,7 +214,80 @@ int flagError() {
     return 1;
 }
 
-// ------------------- CASTS -------------------
+// endregion
+
+// region ------------------- MATH -------------------
+
+#define sqrt sqrtf
+#define pow powf
+#define tan tanf
+#define min fminf
+#define max fmaxf
+#define cos cosf
+#define sin cosf
+
+public
+float sqrtv(const float value) {
+    return sqrt(value);
+}
+
+public
+float sinv(const float rad) {
+    return sin(rad);
+}
+
+public
+float cosv(const float rad) {
+    return cos(rad);
+}
+
+public
+float tanv(const float rad) {
+    return tan(rad);
+}
+
+public
+float powv(const float base, const float power) {
+    return pow(base, power);
+}
+
+public
+float minv(const float left, const float right) {
+    return min(left, right);
+}
+
+public
+float maxv(const float left, const float right) {
+    return max(left, right);
+}
+
+custom
+float clamp(float x, float lowerlimit, float upperlimit) {
+    if (x < lowerlimit)
+        x = lowerlimit;
+    if (x > upperlimit)
+        x = upperlimit;
+    return x;
+}
+
+custom
+float smoothstep(float edge0, float edge1, float x) {
+    // Scale, bias and saturate x to 0..1 range
+    x = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+    // Evaluate polynomial
+    return x * x * (3 - 2 * x);
+}
+
+public
+float schlick(float cosine, float ri) {
+    float r0 = (1 - ri) / (1 + ri);
+    r0 = r0*r0;
+    return r0 + (1 - r0) * pow((1 - cosine), 5);
+}
+
+// endregion ------------------- MATH -------------------
+
+// region ------------------- FLOAT -------------------
 
 custom
 float itof(const int i) {
@@ -223,7 +304,29 @@ float dtof(const double d) {
     return (float) d;
 }
 
-// ------------------- VEC2 -------------------
+public
+float addf(const float left, const float right) {
+    return left + right;
+}
+
+public
+float subf(const float left, const float right) {
+    return left - right;
+}
+
+public
+float mulf(const float left, const float right) {
+    return left * right;
+}
+
+public
+float divf(const float left, const float right) {
+    return left / right;
+}
+
+// endregion ------------------- FLOAT -------------------
+
+// region ------------------- VEC2 -------------------
 
 custom
 vec2 v2(const float x, const float y) {
@@ -240,7 +343,9 @@ vec2 v2zero() {
     return ftov2(0.0f);
 }
 
-// ------------------- IVEC2 -------------------
+// endregion ------------------- VEC2 -------------------
+
+// region ------------------- IVEC2 -------------------
 
 custom
 ivec2 iv2(const int x, const int y) {
@@ -267,7 +372,18 @@ float getvv2(const vec2 v) {
     return v.y;
 }
 
-// ------------------- VEC3 -------------------
+public
+vec2 tile(const vec2 texCoord, const ivec2 uv, const ivec2 cnt) {
+    float tileSideX = 1.0f / itof(cnt.x);
+    float tileStartX = itof(uv.x) * tileSideX;
+    float tileSideY = 1.0f / itof(cnt.y);
+    float tileStartY = itof(uv.y) * tileSideY;
+    return v2(tileStartX + texCoord.x * tileSideX, tileStartY + texCoord.y * tileSideY);
+}
+
+// endregion ------------------- IVEC2 -------------------
+
+// region ------------------- VEC3 -------------------
 
 public
 float indexv3(const vec3 v, const int index) {
@@ -418,7 +534,107 @@ vec3 v3chartreuse() {
     return v3(0.5f, 1.0f, 0.0f);
 }
 
-// ------------------- VEC4 -------------------
+public
+vec3 negv3(const vec3 v) {
+    return v3(-v.x, -v.y, -v.z);
+}
+
+custom
+float dotv3(const vec3 left, const vec3 right) {
+    return left.x * right.x + left.y * right.y + left.z * right.z;
+}
+
+custom
+vec3 crossv3(const vec3 left, const vec3 right) {
+    return v3(
+            left.y * right.z - left.z * right.y,
+            left.z * right.x - left.x * right.z,
+            left.x * right.y - left.y * right.x);
+}
+
+custom
+vec3 addv3(const vec3 left, const vec3 right) {
+    return v3(left.x + right.x, left.y + right.y, left.z + right.z);
+}
+
+custom
+vec3 subv3(const vec3 left, const vec3 right) {
+    return v3(left.x - right.x, left.y - right.y, left.z - right.z);
+}
+
+custom
+vec3 mulv3(const vec3 left, const vec3 right) {
+    return v3(left.x * right.x, left.y * right.y, left.z * right.z);
+}
+
+custom
+vec3 mulv3f(const vec3 left, const float right) {
+    return v3(left.x * right, left.y * right, left.z * right);
+}
+
+custom
+vec3 divv3f(const vec3 left, const float right) {
+    return v3(left.x / right, left.y / right, left.z / right);
+}
+
+custom
+vec3 divv3(const vec3 left, const vec3 right) {
+    return v3(left.x / right.x, left.y / right.y, left.z / right.z);
+}
+
+public
+vec3 powv3(const vec3 left, const vec3 right) {
+    return v3(pow(left.x, right.x), pow(left.y, right.y), pow(left.z, right.z));
+}
+
+public
+vec3 mixv3(const vec3 left, const vec3 right, const float proportion) {
+    return addv3(mulv3(left, ftov3(1.0f - proportion)), mulv3(right, ftov3(proportion)));
+}
+
+public
+float lenv3(const vec3 v) {
+    return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
+public
+float lensqv3(const vec3 v) {
+    return (v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
+public
+vec3 normv3(const vec3 v) {
+    return divv3f(v, lenv3(v));
+}
+
+public
+vec3 lerpv3(const vec3 from, const vec3 to, const float t) {
+    return addv3(mulv3f(from, 1.0f - t), mulv3f(to, t));
+}
+
+public
+vec3 reflectv3(const vec3 v, const vec3 n) {
+    return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
+}
+
+protected
+RefractResult refractv3(const vec3 v, const vec3 n, const float niOverNt) {
+    const vec3 unitV = normv3(v);
+    const float dt = dotv3(unitV, n);
+    const float D = 1.0f - niOverNt*niOverNt*(1.0f - dt*dt);
+    if (D > 0) {
+        const vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
+        const vec3 right = mulv3f(n, sqrt(D));
+        const RefractResult result = { true, subv3(left, right) };
+        return result;
+    } else {
+        return NO_REFRACT;
+    }
+}
+
+// endregion ------------------- VEC3 -------------------
+
+// region ------------------- VEC4 -------------------
 
 custom
 vec4 v4(const float x, const float y, const float z, const float w) {
@@ -438,6 +654,36 @@ vec4 ftov4(const float v) {
 public
 vec4 v4zero() {
     return ftov4(0.0f);
+}
+
+public
+vec4 addv4(const vec4 left, const vec4 right) {
+    return v4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
+}
+
+public
+vec4 subv4(const vec4 left, const vec4 right) {
+    return v4(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w);
+}
+
+public
+vec4 mulv4(const vec4 left, const vec4 right) {
+    return v4(left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w);
+}
+
+public
+vec4 mulv4f(const vec4 left, const float right) {
+    return v4(left.x * right, left.y * right, left.z * right, left.w * right);
+}
+
+public
+vec4 divv4(const vec4 left, const vec4 right) {
+    return v4(left.x / right.x, left.y / right.y, left.z / right.z, left.w / right.w);
+}
+
+public
+vec4 divv4f(const vec4 left, const float right) {
+    return v4(left.x / right, left.y / right, left.z / right, left.z / right);
 }
 
 public
@@ -520,237 +766,9 @@ vec4 setav4(const vec4 v, const float f) {
     return v4(v.x, v.y, v.z, f);
 }
 
-// ------------------- RAY -------------------
+// endregion ------------------- VEC4 -------------------
 
-public
-Ray rayBack() {
-    const Ray result = { v3zero(), v3back() };
-    return result;
-}
-
-// ------------------- BOOL -------------------
-
-public
-bool eqv2(const vec2 left, const vec2 right) {
-    return left.x == right.x && left.y == right.y;
-}
-
-public
-bool eqv3(const vec3 left, const vec3 right) {
-    return left.x == right.x && left.y == right.y && left.z == right.z;
-}
-
-public
-bool eqv4(const vec4 left, const vec4 right) {
-    return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
-}
-
-// ------------------- MATH -------------------
-
-#define sqrt sqrtf
-#define pow powf
-#define tan tanf
-#define min fminf
-#define max fmaxf
-#define cos cosf
-#define sin cosf
-
-public
-float sqrtv(const float value) {
-    return sqrt(value);
-}
-
-public
-float sinv(const float rad) {
-    return sin(rad);
-}
-
-public
-float cosv(const float rad) {
-    return cos(rad);
-}
-
-public
-float tanv(const float rad) {
-    return tan(rad);
-}
-
-public
-float powv(const float base, const float power) {
-    return pow(base, power);
-}
-
-public
-float minv(const float left, const float right) {
-    return min(left, right);
-}
-
-public
-float maxv(const float left, const float right) {
-    return max(left, right);
-}
-
-public
-vec3 negv3(const vec3 v) {
-    return v3(-v.x, -v.y, -v.z);
-}
-
-public
-float addf(const float left, const float right) {
-    return left + right;
-}
-
-public
-float subf(const float left, const float right) {
-    return left - right;
-}
-
-public
-float mulf(const float left, const float right) {
-    return left * right;
-}
-
-public
-float divf(const float left, const float right) {
-    return left / right;
-}
-
-custom
-float dotv3(const vec3 left, const vec3 right) {
-    return left.x * right.x + left.y * right.y + left.z * right.z;
-}
-
-custom
-vec3 crossv3(const vec3 left, const vec3 right) {
-    return v3(
-            left.y * right.z - left.z * right.y,
-            left.z * right.x - left.x * right.z,
-            left.x * right.y - left.y * right.x);
-}
-
-custom
-vec3 addv3(const vec3 left, const vec3 right) {
-    return v3(left.x + right.x, left.y + right.y, left.z + right.z);
-}
-
-custom
-vec3 subv3(const vec3 left, const vec3 right) {
-    return v3(left.x - right.x, left.y - right.y, left.z - right.z);
-}
-
-custom
-vec3 mulv3(const vec3 left, const vec3 right) {
-    return v3(left.x * right.x, left.y * right.y, left.z * right.z);
-}
-
-custom
-vec3 mulv3f(const vec3 left, const float right) {
-    return v3(left.x * right, left.y * right, left.z * right);
-}
-
-custom
-vec3 divv3f(const vec3 left, const float right) {
-    return v3(left.x / right, left.y / right, left.z / right);
-}
-
-custom
-vec3 divv3(const vec3 left, const vec3 right) {
-    return v3(left.x / right.x, left.y / right.y, left.z / right.z);
-}
-
-public
-vec3 powv3(const vec3 left, const vec3 right) {
-    return v3(pow(left.x, right.x), pow(left.y, right.y), pow(left.z, right.z));
-}
-
-public
-vec3 mixv3(const vec3 left, const vec3 right, const float proportion) {
-    return addv3(mulv3(left, ftov3(1.0f - proportion)), mulv3(right, ftov3(proportion)));
-}
-
-public
-vec4 addv4(const vec4 left, const vec4 right) {
-    return v4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
-}
-
-public
-vec4 subv4(const vec4 left, const vec4 right) {
-    return v4(left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w);
-}
-
-public
-vec4 mulv4(const vec4 left, const vec4 right) {
-    return v4(left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w);
-}
-
-public
-vec4 mulv4f(const vec4 left, const float right) {
-    return v4(left.x * right, left.y * right, left.z * right, left.w * right);
-}
-
-public
-vec4 divv4(const vec4 left, const vec4 right) {
-    return v4(left.x / right.x, left.y / right.y, left.z / right.z, left.w / right.w);
-}
-
-public
-vec4 divv4f(const vec4 left, const float right) {
-    return v4(left.x / right, left.y / right, left.z / right, left.z / right);
-}
-
-public
-float lenv3(const vec3 v) {
-    return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-}
-
-public
-float lensqv3(const vec3 v) {
-    return (v.x*v.x + v.y*v.y + v.z*v.z);
-}
-
-public
-vec3 normv3(const vec3 v) {
-    return divv3f(v, lenv3(v));
-}
-
-public
-vec3 lerpv3(const vec3 from, const vec3 to, const float t) {
-    return addv3(mulv3f(from, 1.0f - t), mulv3f(to, t));
-}
-
-public
-vec3 rayPoint(const Ray ray, const float t) {
-    return addv3(ray.origin, mulv3f(ray.direction, t));
-}
-
-public
-float schlick(float cosine, float ri) {
-    float r0 = (1 - ri) / (1 + ri);
-    r0 = r0*r0;
-    return r0 + (1 - r0) * pow((1 - cosine), 5);
-}
-
-public
-vec3 reflectv3(const vec3 v, const vec3 n) {
-    return subv3(v, mulv3f(n, 2.0f * dotv3(v, n)));
-}
-
-protected
-RefractResult refractv3(const vec3 v, const vec3 n, const float niOverNt) {
-    const vec3 unitV = normv3(v);
-    const float dt = dotv3(unitV, n);
-    const float D = 1.0f - niOverNt*niOverNt*(1.0f - dt*dt);
-    if (D > 0) {
-        const vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
-        const vec3 right = mulv3f(n, sqrt(D));
-        const RefractResult result = { true, subv3(left, right) };
-        return result;
-    } else {
-        return NO_REFRACT;
-    }
-}
-
-// ------------------- MAT4 -------------------
+// region ------------------- MAT4 -------------------
 
 custom
 mat4 m4ident() {
@@ -812,7 +830,43 @@ mat4 scalem4(const vec3 scale) {
     return result;
 }
 
-// ------------------- RAND -------------------
+// endregion ------------------- MAT4 -------------------
+
+// region ------------------- RAY -------------------
+
+public
+Ray rayBack() {
+    const Ray result = { v3zero(), v3back() };
+    return result;
+}
+
+public
+vec3 rayPoint(const Ray ray, const float t) {
+    return addv3(ray.origin, mulv3f(ray.direction, t));
+}
+
+// endregion ------------------- RAY -------------------
+
+// region ------------------- BOOL -------------------
+
+public
+bool eqv2(const vec2 left, const vec2 right) {
+    return left.x == right.x && left.y == right.y;
+}
+
+public
+bool eqv3(const vec3 left, const vec3 right) {
+    return left.x == right.x && left.y == right.y && left.z == right.z;
+}
+
+public
+bool eqv4(const vec4 left, const vec4 right) {
+    return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
+}
+
+// endregion ------------------- BOOL -------------------
+
+// region ------------------- RAND -------------------
 
 custom
 float rndf (float x) { return dtof(drand48()); }
@@ -860,7 +914,9 @@ vec3 randomInUnitDisk() {
     return normv3(result); // wrong, but should not happen
 }
 
-// ------------------- ERR_HANDLER ---------------
+// endregion ------------------- RAND -------------------
+
+// region ------------------- ERR_HANDLER ---------------
 
 public
 vec4 errorHandler(vec4 color) {
@@ -880,18 +936,9 @@ vec4 errorHandler(vec4 color) {
     }
 }
 
-// ------------------- TILE ---------------
+// endregion ------------------- ERR_HANDLER ---------------
 
-public
-vec2 tile(const vec2 texCoord, const ivec2 uv, const ivec2 cnt) {
-    float tileSideX = 1.0f / itof(cnt.x);
-    float tileStartX = itof(uv.x) * tileSideX;
-    float tileSideY = 1.0f / itof(cnt.y);
-    float tileStartY = itof(uv.y) * tileSideY;
-    return v2(tileStartX + texCoord.x * tileSideX, tileStartY + texCoord.y * tileSideY);
-}
-
-// ------------------- SHADING ---------------
+// region ------------------- SHADING ---------------
 
 // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
 // https://www.lighthouse3d.com/tutorials/glsl-tutorial/spotlights/
@@ -1062,7 +1109,9 @@ vec4 shadingPbr(const vec3 eye, const vec3 worldPos, const vec3 albedo, const ve
     return v3tov4(color, 1.0f);
 }
 
-// ------------------- RAYTRACING ---------------
+// endregion ------------------- SHADING ---------------
+
+// region ------------------- RAYTRACING ---------------
 
 protected
 RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const float vfoy, const float aspect,
@@ -1384,13 +1433,17 @@ void raytracer() {
     fclose(f);
 }
 
-// ------------------- LOGGING ---------------
+// endregion ------------------- RAYTRACING ---------------
+
+// region ------------------- LOGGING ---------------
 
 void printv3(const vec3 v) {
     printf("v3 = {%f, %f, %f}\n", v.x, v.y, v.z);
 }
 
-// ------------------- MAIN ---------------
+// endregion ------------------- LOGGING ---------------
+
+// region ------------------- MAIN ---------------
 
 int main() {
     assert(eqv3(v3(1, 1, 1), v3(1, 1, 1)));
@@ -1426,3 +1479,5 @@ int main() {
     raytracer();
     return 0;
 }
+
+// endregion ------------------- MAIN ---------------
