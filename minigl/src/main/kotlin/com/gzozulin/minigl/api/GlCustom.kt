@@ -149,6 +149,12 @@ private const val CUSTOM_CTORS_DEF = """
     }
 """
 
+private const val CUSTOM_VEC2_DEF = """
+    vec2 subv2f(vec2 left, float right) {
+        return left - right;
+    }
+"""
+
 private const val CUSTOM_VEC3_DEF = """
     float dotv3(vec3 left, vec3 right) {
         return dot(left, right);
@@ -225,6 +231,6 @@ private const val CUSTOM_MAT4_DEF = """
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
         "$CUSTOM_DEF\n$CUSTOM_RANDOM_DEF\n" +
-        "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT4_DEF\n" +
+        "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC2_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT4_DEF\n" +
         "$CONST_DEF\n$OPS_DEF\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEF\n"

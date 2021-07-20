@@ -41,7 +41,8 @@ private val input = mapOf(
     "ortho"     to constm4(mat4().orthoBox()),
     "logo"      to sampler(unifs(logoTexture)),
     "foggy"     to sampler(unifs(foggyTexture)),
-    "mouse"     to unifv2 { mouseVec }
+    "mouse"     to unifv2 { mouseVec },
+    "aspect"    to uniff(window.width.toFloat()/ window.height.toFloat())
 )
 
 private fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Map<String, Expression<*>> {

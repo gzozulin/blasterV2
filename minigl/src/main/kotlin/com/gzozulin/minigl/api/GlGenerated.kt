@@ -203,6 +203,11 @@ fun schlick(cosine: Expression<Float>, ri: Expression<Float>) = object : Express
     override fun roots() = listOf(cosine, ri)
 }
 
+fun length(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "length(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
 fun itof(i: Expression<Int>) = object : Expression<Float>() {
     override fun expr() = "itof(${i.expr()})"
     override fun roots() = listOf(i)
@@ -251,6 +256,11 @@ fun ftov2(v: Expression<Float>) = object : Expression<vec2>() {
 fun v2zero() = object : Expression<vec2>() {
     override fun expr() = "v2zero()"
     override fun roots() = listOf<Expression<*>>()
+}
+
+fun subv2f(left: Expression<vec2>, right: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "subv2f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
 }
 
 fun iv2(x: Expression<Int>, y: Expression<Int>) = object : Expression<vec2i>() {

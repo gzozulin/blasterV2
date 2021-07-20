@@ -285,6 +285,11 @@ float schlick(float cosine, float ri) {
     return r0 + (1 - r0) * pow((1 - cosine), 5);
 }
 
+custom
+float length(const vec2 v) {
+    return sqrtf(v.x*v.x + v.y*v.y);
+}
+
 // endregion ------------------- MATH -------------------
 
 // region ------------------- FLOAT -------------------
@@ -341,6 +346,11 @@ vec2 ftov2(const float v) {
 public
 vec2 v2zero() {
     return ftov2(0.0f);
+}
+
+custom
+vec2 subv2f(const vec2 left, const float right) {
+    return v2(left.x - right, left.y - right);
 }
 
 // endregion ------------------- VEC2 -------------------

@@ -4,4 +4,14 @@ matrix: ortho
 
 // ---------------- COLOR ------------------
 
-color: ftov4 (rndv2 (namedTexCoordsV2))
+//radius: 3f
+//border: 0.01f
+
+center: subv2f (namedTexCoordsV2) 0.5f
+
+uv: v2 (mulf (getxv2 center) aspect) (getyv2 center)
+
+distance: length uv
+
+out: ftov3 (smoothstep 0.3f (subf 0.3f 0.1f) distance)
+color: v3tov4 out 1f

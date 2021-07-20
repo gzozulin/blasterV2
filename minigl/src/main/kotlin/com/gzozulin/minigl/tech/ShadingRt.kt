@@ -13,12 +13,6 @@ private const val BOUNCES_CNT = 3
 enum class HitableType { BVH, SPHERE }
 enum class MaterialType { LAMBERTIAN, METALLIC, DIELECTRIC }
 
-// placeholders
-object RtCamera
-object HitRecord
-object ScatterResult
-object RefractResult
-
 interface Hitable
 data class BvhNode(val aabb: aabb, val left: Hitable?, val right: Hitable?): Hitable
 data class Sphere(val center: vec3, val radius: Float, val material: RtMaterial): Hitable
