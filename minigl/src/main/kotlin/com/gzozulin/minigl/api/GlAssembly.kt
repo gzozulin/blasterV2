@@ -251,7 +251,7 @@ fun <R> discard() = object : Expression<R>() {
 
 // ------------------------- Boolean -------------------------
 
-fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression<R>) = object : Expression<R>() {
+fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression<R>): Expression<R> = object : Expression<R>() {
     override fun expr() = "((${check.expr()}) ? ${left.expr()} : ${right.expr()})"
     override fun roots() = listOf(check, left, right)
 }

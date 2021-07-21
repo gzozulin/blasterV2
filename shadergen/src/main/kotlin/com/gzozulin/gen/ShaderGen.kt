@@ -67,7 +67,7 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
     var edHandles = ""
     handledDefinitions.forEach { declaration ->
         glResult += renderKotlinHandle(declaration) + "\n\n"
-        val params = declaration.params.joinToString(",") { "edParseParam(params.removeFirst(), heap)" }
+        val params = declaration.params.joinToString(",") { "edParseExpression(lineNo, split.removeFirst(), heap)" }
         edHandles += "        \"${declaration.name}\" -> ${declaration.name}($params)\n"
     }
 
@@ -75,26 +75,47 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
         package com.gzozulin.ed
 
         import com.gzozulin.minigl.api.*
+
+        private val PATTERN_WHITESPACE = "\\s+".toPattern()
         
-        internal fun edParseReference(reference: String, params: MutableList<String>, heap: Map<String, Expression<*>>) =
-            when (reference) {
+        @Suppress("UNCHECKED_CAST")
+        internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<String, Expression<*>>): Expression<*> {
+            val split = operation.split(PATTERN_WHITESPACE).toMutableList()
+            return when (split.removeFirst()) {
                 $edHandles
                 "namedTexCoordsV2" -> namedTexCoordsV2()
                 "namedTexCoordsV3" -> namedTexCoordsV3()
                 "namedGlFragCoordV2" -> namedGlFragCoordV2()
-                "cachev4" -> cachev4(edParseParam(params.removeFirst(), heap))
-                "texel" -> texel(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                "sampler" -> sampler(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                "samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                "discard" -> discard()
-                "ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                "moref" -> more(edParseParam<Float>(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                "not" -> not(edParseParam(params.removeFirst(), heap))
-                else -> error("Unknown operation! " + reference)
+                "cachev4" -> cachev4(edParseExpression(lineNo, split.removeFirst(), heap))
+                "texel" -> texel(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "sampler" -> sampler(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "samplerq" -> samplerq(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "discard" -> discard<Any>()
+                "ifexp" -> ifexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "more" -> more<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "not" -> not(edParseExpression(lineNo, split.removeFirst(), heap))
+                else -> error("Unknown operation!")
             }
+        }
     """.trimIndent()
+
     return glResult to edResult
 }
+
+/*
+"namedTexCoordsV2" -> namedTexCoordsV2()
+"namedTexCoordsV3" -> namedTexCoordsV3()
+"namedGlFragCoordV2" -> namedGlFragCoordV2()
+"cachev4" -> cachev4(edParseParam(params.removeFirst(), heap))
+"texel" -> texel(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+"sampler" -> sampler(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+"samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+"discard" -> discard()
+"ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+"moref" -> more(edParseParam<Float>(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+"not" -> not(edParseParam(params.removeFirst(), heap))
+else -> error("Unknown operation! " + reference)
+ */
 
 private fun renderDefinition(declaration: CDeclaration) =
     "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\""
