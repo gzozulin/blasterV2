@@ -150,6 +150,10 @@ private const val CUSTOM_CTORS_DEF = """
 """
 
 private const val CUSTOM_VEC2_DEF = """
+    vec2 mulv2f(vec2 vec, float v) {
+        return vec * v;
+    }
+    
     vec2 subv2f(vec2 left, float right) {
         return left - right;
     }

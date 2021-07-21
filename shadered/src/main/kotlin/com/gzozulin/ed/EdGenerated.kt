@@ -30,6 +30,7 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "v2" -> v2(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "ftov2" -> ftov2(edParseExpression(lineNo, split.removeFirst(), heap))
 "v2zero" -> v2zero()
+"mulv2f" -> mulv2f(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "subv2f" -> subv2f(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "iv2" -> iv2(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "getxv2" -> getxv2(edParseExpression(lineNo, split.removeFirst(), heap))

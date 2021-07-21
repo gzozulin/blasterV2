@@ -258,6 +258,11 @@ fun v2zero() = object : Expression<vec2>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
+fun mulv2f(vec: Expression<vec2>, v: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "mulv2f(${vec.expr()}, ${v.expr()})"
+    override fun roots() = listOf(vec, v)
+}
+
 fun subv2f(left: Expression<vec2>, right: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "subv2f(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
