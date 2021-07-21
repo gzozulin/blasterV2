@@ -64,7 +64,11 @@ circles: addf circle1 circle2
 circles: addf circles circle3
 circles: addf circles circle4
 circles: addf circles circle5
+circles: v3tov4 (mulv3f v3red circles) 1f
 
-out: mulv3f v3red circles
+// ---------------- LOGO ------------------
 
-color: v3tov4 out 1f
+period: divf (addf (sinv (mulf time .5f)) 1f) 2f
+logo:   ifexp (more (getxv2 texCoords) period) (ftov4 0f) thatsall
+
+color: addv4 circles logo

@@ -222,13 +222,15 @@ int flagError() {
 
 // region ------------------- MATH -------------------
 
-#define sqrt sqrtf
-#define pow powf
-#define tan tanf
-#define min fminf
-#define max fmaxf
-#define cos cosf
-#define sin cosf
+#define sqrt    sqrtf
+#define pow     powf
+#define tan     tanf
+#define min     fminf
+#define max     fmaxf
+#define cos     cosf
+#define sin     cosf
+
+#define floor _erased_
 
 public
 float sqrtv(const float value) {
@@ -280,6 +282,16 @@ float smoothstep(float edge0, float edge1, float x) {
     x = clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
     // Evaluate polynomial
     return x * x * (3 - 2 * x);
+}
+
+custom
+float floor(float value) {
+    return floorf(value);
+}
+
+custom
+float fract(float value) {
+    return value - floorf(value);
 }
 
 public
@@ -362,15 +374,6 @@ vec2 subv2f(const vec2 left, const float right) {
     return v2(left.x - right, left.y - right);
 }
 
-// endregion ------------------- VEC2 -------------------
-
-// region ------------------- IVEC2 -------------------
-
-custom
-ivec2 iv2(const int x, const int y) {
-    return (ivec2) { x, y };
-}
-
 public
 float getxv2(const vec2 v) {
     return v.x;
@@ -381,13 +384,32 @@ float getyv2(const vec2 v) {
     return v.y;
 }
 
+// endregion ------------------- VEC2 -------------------
+
+// region ------------------- IVEC2 -------------------
+
+custom
+ivec2 iv2(const int x, const int y) {
+    return (ivec2) { x, y };
+}
+
 public
-float getuv2(const vec2 v) {
+float getxiv2(const vec2 v) {
     return v.x;
 }
 
 public
-float getvv2(const vec2 v) {
+float getyiv2(const vec2 v) {
+    return v.y;
+}
+
+public
+float getuiv2(const vec2 v) {
+    return v.x;
+}
+
+public
+float getviv2(const vec2 v) {
     return v.y;
 }
 

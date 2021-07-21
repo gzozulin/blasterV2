@@ -30,7 +30,7 @@ private val rect = glMeshCreateRect()
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
 private var lastModified = FILE_RECIPE.lastModified()
 
-private val logoTexture = libTextureCreate("textures/logo.png")
+private val logoTexture = libTextureCreate("textures/thatsall.png")
 private val foggyTexture = libTextureCreate("textures/foggy.jpg")
 
 private val mouseVec = vec2()
@@ -38,7 +38,7 @@ private val mouseVec = vec2()
 private val input = mapOf(
     "time"      to timef(),
     "ortho"     to constm4(mat4().orthoBox()),
-    "logo"      to sampler(unifs(logoTexture)),
+    "thatsall"  to sampler(unifs(logoTexture)),
     "foggy"     to sampler(unifs(foggyTexture)),
     "mouse"     to unifv2 { mouseVec },
     "aspect"    to uniff(window.width.toFloat()/ window.height.toFloat())
