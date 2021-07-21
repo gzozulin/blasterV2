@@ -648,6 +648,16 @@ fun setav4(v: Expression<vec4>, f: Expression<Float>) = object : Expression<vec4
     override fun roots() = listOf(v, f)
 }
 
+fun scalem2(scale: Expression<vec2>) = object : Expression<mat2>() {
+    override fun expr() = "scalem2(${scale.expr()})"
+    override fun roots() = listOf(scale)
+}
+
+fun transformv2(vec: Expression<vec2>, mat: Expression<mat2>) = object : Expression<vec2>() {
+    override fun expr() = "transformv2(${vec.expr()}, ${mat.expr()})"
+    override fun roots() = listOf(vec, mat)
+}
+
 fun m4ident() = object : Expression<mat4>() {
     override fun expr() = "m4ident()"
     override fun roots() = listOf<Expression<*>>()

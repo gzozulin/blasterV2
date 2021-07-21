@@ -104,6 +104,8 @@ internal fun edParseReference(reference: String, params: MutableList<String>, he
 "setgv4" -> setgv4(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
 "setbv4" -> setbv4(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
 "setav4" -> setav4(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
+"scalem2" -> scalem2(edParseParam(params.removeFirst(), heap))
+"transformv2" -> transformv2(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
 "m4ident" -> m4ident()
 "mulm4" -> mulm4(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
 "transformv4" -> transformv4(edParseParam(params.removeFirst(), heap),edParseParam(params.removeFirst(), heap))
@@ -151,7 +153,7 @@ internal fun edParseReference(reference: String, params: MutableList<String>, he
         "samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
         "discard" -> discard()
         "ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-        //"more" -> more(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+        "moref" -> more(edParseParam<Float>(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
         "not" -> not(edParseParam(params.removeFirst(), heap))
         else -> error("Unknown operation! " + reference)
     }

@@ -88,7 +88,7 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
                 "samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
                 "discard" -> discard()
                 "ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-                //"more" -> more(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
+                "moref" -> more(edParseParam<Float>(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
                 "not" -> not(edParseParam(params.removeFirst(), heap))
                 else -> error("Unknown operation! " + reference)
             }
@@ -126,8 +126,9 @@ private fun convertType(ctype: String) = when (ctype) {
     "ivec2"                 -> "vec2i"
     "vec3"                  -> "vec3"
     "vec4"                  -> "vec4"
-    "mat4"                  -> "mat4"
+    "mat2"                  -> "mat2"
     "mat3"                  -> "mat3"
+    "mat4"                  -> "mat4"
     "Light"                 -> "Light"
     "Ray"                   -> "ray"
     "PhongMaterial"         -> "PhongMaterial"

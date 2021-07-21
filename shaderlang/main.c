@@ -35,6 +35,10 @@ typedef struct {
 } vec4;
 
 typedef struct {
+    float value[4];
+} mat2;
+
+typedef struct {
     float value[16];
 } mat4;
 
@@ -777,6 +781,24 @@ vec4 setav4(const vec4 v, const float f) {
 }
 
 // endregion ------------------- VEC4 -------------------
+
+// region ------------------- MAT2 -------------------
+
+custom
+mat2 scalem2(const vec2 scale) {
+    const mat2 result = {{
+             scale.x, 0,
+             0, scale.y,
+     }};
+    return result;
+}
+
+custom
+vec2 transformv2(const vec2 vec, const mat2 mat) {
+    return v2zero();
+}
+
+// endregion ------------------- MAT2 -------------------
 
 // region ------------------- MAT4 -------------------
 

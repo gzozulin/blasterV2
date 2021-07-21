@@ -189,6 +189,20 @@ private const val CUSTOM_VEC3_DEF = """
     }
 """
 
+private const val CUSTOM_MAT2_DEF = """
+    mat2 scalem2(vec2 scale) {
+        mat2 result = mat2(
+             scale.x, 0,
+             0, scale.y
+        );
+        return result;
+    }
+    
+    vec2 transformv2(vec2 vec, mat2 mat) {
+        return mat * vec;
+    }
+"""
+
 private const val CUSTOM_MAT4_DEF = """
     mat4 m4ident() {
         return mat4(1.0);
@@ -231,6 +245,6 @@ private const val CUSTOM_MAT4_DEF = """
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
         "$CUSTOM_DEF\n$CUSTOM_RANDOM_DEF\n" +
-        "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC2_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT4_DEF\n" +
+        "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC2_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT2_DEF\n$CUSTOM_MAT4_DEF\n" +
         "$CONST_DEF\n$OPS_DEF\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEF\n"

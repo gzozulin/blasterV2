@@ -8,10 +8,37 @@ matrix: ortho
 //border: 0.01f
 
 center: subv2f (namedTexCoordsV2) 0.5f
-
 uv: v2 (mulf (getxv2 center) aspect) (getyv2 center)
 
-distance: length uv
+// ---------------- CIRCLE1 ------------------
 
-out: ftov3 (smoothstep 0.3f (subf 0.3f 0.1f) distance)
-color: v3tov4 out 1f
+distance1: length uv
+outer1: smoothstep 0.5f (subf 0.5f 0.1f) distance1
+inner1: ifexp (moref distance1 0.3f) 0f 1f
+circle1: subv3 (ftov3 outer1) (ftov3 inner1)
+
+// ---------------- CIRCLE2 ------------------
+
+uv2: transformv2 uv (scalem2 (v2 2f 2f))
+distance2: length uv2
+outer2: smoothstep 0.5f (subf 0.5f 0.1f) distance2
+inner2: ifexp (moref distance2 0.3f) 0f 1f
+circle2: subv3 (ftov3 outer2) (ftov3 inner2)
+
+// ---------------- CIRCLE3 ------------------
+
+uv3: transformv2 uv (scalem2 (v2 3f 3f))
+distance3: length uv3
+outer3: smoothstep 0.5f (subf 0.5f 0.1f) distance3
+inner3: ifexp (moref distance3 0.3f) 0f 1f
+circle3: subv3 (ftov3 outer3) (ftov3 inner3)
+
+circles: addv3 circle1 circle2
+circles: addv3 circles circle3
+
+// ---------------- FILM ------------------
+
+ffactor: divf (addf (sinv (mulf time 1000f)) 1f) 2f
+film: mulv4f foggy ffactor
+
+color: addv4 (v3tov4 circles 1f) film
