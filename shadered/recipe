@@ -4,16 +4,17 @@ matrix: ortho
 
 // ---------------- COLOR ------------------
 
-//radius: 3f
-//border: 0.01f
+radius: 3f
+border: 0.01f
+texCoords: namedTexCoordsV2
 
-center: subv2f (namedTexCoordsV2) 0.5f
+center: subv2f texCoords 0.5f
 uv: v2 (mulf (getxv2 center) aspect) (getyv2 center)
 
 // ---------------- CIRCLE1 ------------------
 
 distance1: length uv
-outer1: smoothstep 0.5f (subf 0.5f 0.1f) distance1
+outer1: smoothstep 0.5f (subf 0.5f border) distance1
 inner1: ifexp (more distance1 0.3f) 0f 1f
 circle1: subv3 (ftov3 outer1) (ftov3 inner1)
 
@@ -21,7 +22,7 @@ circle1: subv3 (ftov3 outer1) (ftov3 inner1)
 
 uv2: transformv2 uv (scalem2 (v2 2f 2f))
 distance2: length uv2
-outer2: smoothstep 0.5f (subf 0.5f 0.1f) distance2
+outer2: smoothstep 0.5f (subf 0.5f border) distance2
 inner2: ifexp (more distance2 0.3f) 0f 1f
 circle2: subv3 (ftov3 outer2) (ftov3 inner2)
 
@@ -29,7 +30,7 @@ circle2: subv3 (ftov3 outer2) (ftov3 inner2)
 
 uv3: transformv2 uv (scalem2 (v2 3f 3f))
 distance3: length uv3
-outer3: smoothstep 0.5f (subf 0.5f 0.1f) distance3
+outer3: smoothstep 0.5f (subf 0.5f border) distance3
 inner3: ifexp (more distance3 0.3f) 0f 1f
 circle3: subv3 (ftov3 outer3) (ftov3 inner3)
 

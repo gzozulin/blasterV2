@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger
 // todo: somehow use https://github.com/recp/cglm for C definitions
 // todo: one way to import the lib is to rename types when generating code
 // todo: sampler based random
-// todo: define procedures
+// todo: define procedures (just add parameters to expressions? I already can store functions)
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 
@@ -57,7 +57,8 @@ private fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Ma
     return heap
 }
 
-private fun edParseLine(lineNo: Int, line: String, heap: MutableMap<String, Expression<*>>): Pair<String, Expression<*>> {
+private fun edParseLine(lineNo: Int, line: String,
+                        heap: MutableMap<String, Expression<*>>): Pair<String, Expression<*>> {
     val resolvedLine = edSubstituteBrackets(lineNo, line, heap)
     val separatorIndex = resolvedLine.indexOf(':')
     val label = resolvedLine.substring(0, separatorIndex)
@@ -73,22 +74,24 @@ private fun edSubstituteBrackets(lineNo: Int, line: String, heap: MutableMap<Str
         val body = line.substring(beg, end)
         val name = "val${intermediateVal.getAndIncrement()}"
         heap[name] = edParseExpression<Any>(lineNo, body, heap)
-        return edSubstituteBrackets(lineNo, line.substring(0, beg - 1) + name + line.substring(end + 1, line.length), heap)
+        return edSubstituteBrackets(lineNo,
+            line.substring(0, beg - 1) + name + line.substring(end + 1, line.length), heap)
     } else {
         return line
     }
 }
 
 @Suppress("UNCHECKED_CAST")
-internal fun <T> edParseExpression(lineNo: Int, expression: String, heap: MutableMap<String, Expression<*>>): Expression<T> {
+internal fun <T> edParseExpression(lineNo: Int, expression: String,
+                                   heap: MutableMap<String, Expression<*>>): Expression<T> {
     try {
         return edParseReference(expression, heap) as Expression<T>
     } catch (th: Throwable) {
         try {
-            return edParseVector(expression) as Expression<T>
+            return edParseFloat(expression) as Expression<T>
         } catch (th: Throwable) {
             try {
-                return edParseFloat(expression) as Expression<T>
+                return edParseVector(expression) as Expression<T>
             } catch (th: Throwable) {
                 try {
                     return edParseOperation(lineNo, expression, heap) as Expression<T>
@@ -109,7 +112,8 @@ private fun edParseVector(vector: String): Expression<*> {
     return when (split.size) {
         2 -> constv2(vec2(split.removeFirst().toFloat(), split.removeFirst().toFloat()))
         3 -> constv3(vec3(split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat()))
-        4 -> constv4(vec4(split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat()))
+        4 -> constv4(vec4(split.removeFirst().toFloat(), split.removeFirst().toFloat(), split.removeFirst().toFloat(),
+            split.removeFirst().toFloat()))
         else -> error("Unknown type of vector! $vector")
     }
 }

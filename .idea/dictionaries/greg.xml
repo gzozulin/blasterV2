@@ -1,7 +1,9 @@
 <component name="ProjectDictionaryState">
   <dictionary name="greg">
     <words>
+      <w>addf</w>
       <w>addr</w>
+      <w>addv</w>
       <w>alch</w>
       <w>apperture</w>
       <w>atten</w>
@@ -18,23 +20,30 @@
       <w>darkula</w>
       <w>decl</w>
       <w>defn</w>
+      <w>divf</w>
       <w>dtau</w>
+      <w>ffactor</w>
       <w>fovy</w>
       <w>fract</w>
       <w>ftov</w>
+      <w>getxv</w>
+      <w>getyv</w>
       <w>gzozulin</w>
       <w>highlevel</w>
       <w>highp</w>
       <w>hitable</w>
       <w>hitables</w>
       <w>identificatior</w>
+      <w>ifexp</w>
       <w>ivec</w>
       <w>lambertian</w>
       <w>lambertians</w>
       <w>metallics</w>
       <w>mmodel</w>
       <w>mproj</w>
+      <w>mulf</w>
       <w>multipage</w>
+      <w>mulv</w>
       <w>mview</w>
       <w>ortho</w>
       <w>phong</w>
@@ -48,6 +57,10 @@
       <w>scalem</w>
       <w>sfcs</w>
       <w>shadered</w>
+      <w>sinv</w>
+      <w>smoothstep</w>
+      <w>subf</w>
+      <w>subv</w>
       <w>templ</w>
       <w>texelf</w>
       <w>tmodel</w>
