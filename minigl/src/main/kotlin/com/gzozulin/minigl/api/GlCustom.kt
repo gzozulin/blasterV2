@@ -154,6 +154,10 @@ private const val CUSTOM_VEC2_DEF = """
         return vec * v;
     }
     
+    vec2 addv2f(vec2 left, float right) {
+        return left + right;
+    }
+    
     vec2 subv2f(vec2 left, float right) {
         return left - right;
     }

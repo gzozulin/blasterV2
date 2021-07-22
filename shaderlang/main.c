@@ -370,6 +370,11 @@ vec2 mulv2f(const vec2 vec, const float v) {
 }
 
 custom
+vec2 addv2f(const vec2 left, const float right) {
+    return v2(left.x + right, left.y + right);
+}
+
+custom
 vec2 subv2f(const vec2 left, const float right) {
     return v2(left.x - right, left.y - right);
 }

@@ -7,11 +7,17 @@ matrix: ortho
 texCoords: namedTexCoordsV2
 center: subv2f texCoords .5f
 uv: v2 (mulf (getxv2 center) aspect) (getyv2 center)
+uv: mulv2f uv (sinv (mulf time 0.05f))
 
 radOuter:       .4f
 radInner:       .27f
 borderOuter:    .1f
 borderInner:    .002f
+
+// ---------------- CORE ------------------
+
+coreDist:   length uv
+core:       v3tov4 (mulv3f (v3 .0 .0 .8) (smoothstep 0.2 0.1 coreDist)) 1f
 
 // ---------------- CIRCLE1 ------------------
 
@@ -60,15 +66,32 @@ circle5:    mulf circle5 .2f
 
 // ---------------- CIRCLES ------------------
 
-circles: addf circle1 circle2
-circles: addf circles circle3
-circles: addf circles circle4
-circles: addf circles circle5
-circles: v3tov4 (mulv3f v3red circles) 1f
+circles:    addf circle1 circle2
+circles:    addf circles circle3
+circles:    addf circles circle4
+circles:    addf circles circle5
+circles:    v3tov4 (mulv3f (v3 .8 .0 .0) circles) 1f
 
 // ---------------- LOGO ------------------
 
-period: divf (addf (sinv (mulf time .5f)) 1f) 2f
-logo:   ifexp (more (getxv2 texCoords) period) (ftov4 0f) thatsall
+periodVis:   divf (addf (sinv (mulf time .5f)) 1f) 2f
+periodShake: mulf (sinv (mulf time 30f)) 0.0002f
 
-color: addv4 circles logo
+thatsallUV: v2 (addf (getxv2 texCoords) periodShake) (addf (getyv2 texCoords) periodShake)
+thatsall:   sampler samplerThatsall thatsallUV
+logo:       ifexp (more (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsall
+
+// ---------------- FILM ------------------
+
+foggy:      sampler samplerFoggy texCoords
+filmPeriod: mulf (addf (sinv (mulf time 50f)) 1f) 0.01f
+film:       mulv4f foggy filmPeriod
+
+// ---------------- NOISE ------------------
+
+noise:      ftov4 (mulf (rndv2 texCoords) .05f)
+
+color:      addv4 circles logo
+color:      addv4 color core
+color:      addv4 color film
+color:      addv4 color noise

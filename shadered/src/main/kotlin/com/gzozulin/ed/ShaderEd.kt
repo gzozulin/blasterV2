@@ -2,6 +2,7 @@ package com.gzozulin.ed
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.libTextureCreate
+import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.tech.ShadingFlat
 import com.gzozulin.minigl.tech.glShadingFlatDraw
 import com.gzozulin.minigl.tech.glShadingFlatInstance
@@ -18,10 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger
 // todo: one way to import the lib is to rename types when generating code
 // todo: sampler based random
 // todo: define procedures (just add parameters to expressions? I already can store functions)
+// todo: reference in heap can have parameters
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 
-private val window = GlWindow(winWidth = 1400, winHeight = 800)
+private val window = GlWindow(isFullscreen = true)
+private val capturer = Capturer(window)
 
 private enum class ShaderState { MODIFIED, RELOADED, ERROR, SUCCESS }
 private var shaderState = ShaderState.MODIFIED
@@ -36,12 +39,12 @@ private val foggyTexture = libTextureCreate("textures/foggy.jpg")
 private val mouseVec = vec2()
 
 private val input = mapOf(
-    "time"      to timef(),
-    "ortho"     to constm4(mat4().orthoBox()),
-    "thatsall"  to sampler(unifs(logoTexture)),
-    "foggy"     to sampler(unifs(foggyTexture)),
-    "mouse"     to unifv2 { mouseVec },
-    "aspect"    to uniff(window.width.toFloat()/ window.height.toFloat())
+    "time"              to timef(),
+    "ortho"             to constm4(mat4().orthoBox()),
+    "mouse"             to unifv2 { mouseVec },
+    "aspect"            to uniff(window.width.toFloat()/ window.height.toFloat()),
+    "samplerThatsall"   to unifs(logoTexture),
+    "samplerFoggy"      to unifs(foggyTexture),
 )
 
 private fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Map<String, Expression<*>> {
@@ -165,6 +168,7 @@ private fun edShowWindow() {
                     edCheckNeedReload()
                     edShowFrame()
                     edShaderCompilSuccess()
+                    //capturer.addFrame()
                 }
             }
         } catch (th: Throwable) {
@@ -189,7 +193,9 @@ fun main() = window.create {
     glMeshUse(rect) {
         glTextureUse(logoTexture) {
             glTextureUse(foggyTexture) {
-                edShowWindow()
+                //capturer.capture {
+                    edShowWindow()
+                //}
             }
         }
     }
