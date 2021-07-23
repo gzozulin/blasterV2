@@ -10,16 +10,12 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-// todo: like & subscribe demo screen (merry melodies)
-
 // todo: split current C code into files
 // todo: wrap into technique
 
 // todo: somehow use https://github.com/recp/cglm for C definitions
 // todo: one way to import the lib is to rename types when generating code
-// todo: sampler based random
-// todo: define procedures (just add parameters to expressions? I already can store functions)
-// todo: reference in heap can have parameters
+// todo: define procedures (just add parameters to expressions? I already can store functions, reference in heap can have parameters)
 
 private val FILE_RECIPE = File("/home/greg/blaster/shadered/recipe")
 

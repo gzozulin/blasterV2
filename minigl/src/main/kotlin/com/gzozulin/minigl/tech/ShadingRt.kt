@@ -7,7 +7,7 @@ import kotlin.system.exitProcess
 
 private const val FRAMES_CNT = Int.MAX_VALUE
 private const val SAMPLES_PER_BATCH = 1
-private const val SAMPLES_CNT = 3
+private const val SAMPLES_CNT = 1024
 private const val BOUNCES_CNT = 3
 
 enum class HitableType { BVH, SPHERE }
@@ -311,7 +311,7 @@ fun glShadingRtInstance(shadingRt: ShadingRt) {
     }
 }
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
 private val controller = ControllerScenic(

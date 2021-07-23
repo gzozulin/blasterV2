@@ -4,7 +4,7 @@ import com.gzozulin.minigl.api.GlWindow
 import com.gzozulin.minigl.capture.Capturer
 import java.io.File
 
-private val scenario = File("/home/greg/Dropbox/episodes/ep5-speedup/scenario")
+private val scenario = File("/home/greg/Dropbox/episodes/ep5-acceleration/scenario")
 
 private val window = GlWindow(isFullscreen = true, isHoldingCursor = false, isMultisampling = true)
 private val capturer = Capturer(window, "code")
@@ -19,8 +19,8 @@ fun main() {
             projectorController.keyPressed(key, pressed)
         }
         projectorView.use {
-            //frameWithCapture()
-            justFrame()
+            frameWithCapture()
+            //justFrame()
         }
     }
 }
