@@ -1,13 +1,13 @@
 // ---------------- MATRIX ------------------
 
-matrix: ortho
+matrix:         ortho
 
 // ---------------- COLOR ------------------
 
-texCoords: namedTexCoordsV2
-center: subv2f texCoords .5f
-uv: v2 (mulf (getxv2 center) aspect) (getyv2 center)
-uv: mulv2f uv (sinv (mulf time 0.05f))
+texCoords:      namedTexCoordsV2
+center:         subv2f texCoords .5f
+uv:             v2 (mulf (getxv2 center) aspect) (getyv2 center)
+uv:             mulv2f uv (addf 1f (mulf time 0.01f))
 
 radOuter:       .4f
 radInner:       .27f
@@ -16,82 +16,82 @@ borderInner:    .002f
 
 // ---------------- CORE ------------------
 
-coreDist:   length uv
-core:       v3tov4 (mulv3f (v3 .0 .0 .8) (smoothstep 0.2 0.1 coreDist)) 1f
+coreDist:       length uv
+core:           v3tov4 (mulv3f (v3 .0 .0 .8) (smoothstep 0.2 0.1 coreDist)) 1f
 
 // ---------------- CIRCLE1 ------------------
 
-scale1:     1.5f
-distance1:  length (mulv2f uv scale1)
-outer1:     smoothstep radOuter (subf radOuter borderOuter) distance1
-inner1:     smoothstep radInner (subf radInner borderInner) distance1
-circle1:    subf outer1 inner1
-circle1:    mulf circle1 1f
+scale1:         1.5f
+distance1:      length (mulv2f uv scale1)
+outer1:         smoothstep radOuter (subf radOuter borderOuter) distance1
+inner1:         smoothstep radInner (subf radInner borderInner) distance1
+circle1:        subf outer1 inner1
+circle1:        mulf circle1 1f
 
 // ---------------- CIRCLE2 ------------------
 
-scale2:     1f
-distance2:  length (mulv2f uv scale2)
-outer2:     smoothstep radOuter (subf radOuter borderOuter) distance2
-inner2:     smoothstep radInner (subf radInner borderInner) distance2
-circle2:    subf outer2 inner2
-circle2:    mulf circle2 .8f
+scale2:         1f
+distance2:      length (mulv2f uv scale2)
+outer2:         smoothstep radOuter (subf radOuter borderOuter) distance2
+inner2:         smoothstep radInner (subf radInner borderInner) distance2
+circle2:        subf outer2 inner2
+circle2:        mulf circle2 .8f
 
 // ---------------- CIRCLE3 ------------------
 
-scale3:     .7f
-distance3:  length (mulv2f uv scale3)
-outer3:     smoothstep radOuter (subf radOuter borderOuter) distance3
-inner3:     smoothstep radInner (subf radInner borderInner) distance3
-circle3:    subf outer3 inner3
-circle3:    mulf circle3 .6f
+scale3:         .7f
+distance3:      length (mulv2f uv scale3)
+outer3:         smoothstep radOuter (subf radOuter borderOuter) distance3
+inner3:         smoothstep radInner (subf radInner borderInner) distance3
+circle3:        subf outer3 inner3
+circle3:        mulf circle3 .6f
 
 // ---------------- CIRCLE4 ------------------
 
-scale4:     .5f
-distance4:  length (mulv2f uv scale4)
-outer4:     smoothstep radOuter (subf radOuter borderOuter) distance4
-inner4:     smoothstep radInner (subf radInner borderInner) distance4
-circle4:    subf outer4 inner4
-circle4:    mulf circle4 .4f
+scale4:         .5f
+distance4:      length (mulv2f uv scale4)
+outer4:         smoothstep radOuter (subf radOuter borderOuter) distance4
+inner4:         smoothstep radInner (subf radInner borderInner) distance4
+circle4:        subf outer4 inner4
+circle4:        mulf circle4 .4f
 
 // ---------------- CIRCLE5 ------------------
 
-scale5:     .37f
-distance5:  length (mulv2f uv scale5)
-outer5:     smoothstep radOuter (subf radOuter borderOuter) distance5
-inner5:     smoothstep radInner (subf radInner borderInner) distance5
-circle5:    subf outer5 inner5
-circle5:    mulf circle5 .2f
+scale5:         .37f
+distance5:      length (mulv2f uv scale5)
+outer5:         smoothstep radOuter (subf radOuter borderOuter) distance5
+inner5:         smoothstep radInner (subf radInner borderInner) distance5
+circle5:        subf outer5 inner5
+circle5:        mulf circle5 .2f
 
 // ---------------- CIRCLES ------------------
 
-circles:    addf circle1 circle2
-circles:    addf circles circle3
-circles:    addf circles circle4
-circles:    addf circles circle5
-circles:    v3tov4 (mulv3f (v3 .8 .0 .0) circles) 1f
+circles:        addf circle1 circle2
+circles:        addf circles circle3
+circles:        addf circles circle4
+circles:        addf circles circle5
+circles:        v3tov4 (mulv3f (v3 .8 .0 .0) circles) 1f
 
 // ---------------- LOGO ------------------
 
-periodVis:   divf (addf (sinv (mulf time .5f)) 1f) 2f
-periodShake: mulf (sinv (mulf time 30f)) 0.0002f
+periodVis:      divf (addf (sinv (mulf time .5f)) 1f) 2f
+periodShake:    mulf (sinv (mulf time 30f)) 0.0002f
 
-thatsallUV: v2 (addf (getxv2 texCoords) periodShake) (addf (getyv2 texCoords) periodShake)
-thatsall:   sampler samplerThatsall thatsallUV
-logo:       ifexp (more (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsall
+thatsallUV:     v2 (addf (getxv2 texCoords) periodShake) (addf (getyv2 texCoords) periodShake)
+thatsall:       sampler samplerThatsall thatsallUV
+logo:           ifexp (more (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsall
 
 // ---------------- FILM ------------------
 
-foggy:      sampler samplerFoggy texCoords
-filmPeriod: mulf (addf (sinv (mulf time 50f)) 1f) 0.01f
-film:       mulv4f foggy filmPeriod
+foggy:          sampler samplerFoggy texCoords
+filmPeriod:     mulf (addf (sinv (mulf time 50f)) 1f) 0.01f
+film:           mulv4f foggy filmPeriod
 
 // ---------------- NOISE ------------------
 
-noise:      ftov4 (mulf (rndv2 texCoords) .05f)
+noise:          ftov4 (mulf (rndv2 texCoords) .05f)
 
-color:      addv4 circles logo
-color:      addv4 color core
-color:      addv4 color film
-color:      addv4 color noise
+color:          addv4 circles logo
+color:          addv4 color core
+color:          addv4 color film
+color:          addv4 color noise

@@ -10,7 +10,7 @@ import org.bytedeco.opencv.global.opencv_core.flip
 import org.bytedeco.opencv.opencv_core.Mat
 import org.opencv.core.CvType
 
-// code > raw, avi > ffmpeg > h264, mp4, lossless and H264, mp4 low profile for handling
+// code > huffyuv, avi > ffmpeg > h264, mp4, lossless and H264, mp4 low profile for handling
 
 private val converter = OpenCVFrameConverter.ToMat()
 
