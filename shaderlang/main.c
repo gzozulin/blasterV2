@@ -306,6 +306,11 @@ float length(const vec2 v) {
     return sqrtf(v.x*v.x + v.y*v.y);
 }
 
+public
+float remap(const float a, const float b, const float c, const float d, const float t) {
+    return ((t-a)/(b-a)) * (d-c) + c;
+}
+
 // endregion ------------------- MATH -------------------
 
 // region ------------------- FLOAT -------------------

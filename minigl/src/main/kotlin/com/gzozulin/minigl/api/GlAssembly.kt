@@ -256,6 +256,11 @@ fun <R> ifexp(check: Expression<Boolean>, left: Expression<R>, right: Expression
     override fun roots() = listOf(check, left, right)
 }
 
+fun <R> eqexp(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+    override fun expr() = "(${left.expr()} == ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
 fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
     override fun expr() = "(${left.expr()} > ${right.expr()})"
     override fun roots() = listOf(left, right)

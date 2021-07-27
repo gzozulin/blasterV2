@@ -1,0 +1,20 @@
+// ---------------- MATRIX ------------------
+
+matrix:         ortho
+
+// ---------------- COLOR ------------------
+
+uv:             namedTexCoordsV2
+x:              getxv2 uv
+y:              getyv2 uv
+
+time:           remap -1f 1f 0f 1f (sinv time)
+
+func:           addf (mulf (cosv (mulf x 20f)) 0.5f) 0.5f
+
+back:           v2tov3 uv time
+wave:           v3 time x y
+
+
+color:          ifexp (more func y) wave back
+color:          v3tov4 color 1f

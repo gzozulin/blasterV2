@@ -7,6 +7,7 @@
       <w>alch</w>
       <w>apperture</w>
       <w>atten</w>
+      <w>backgnd</w>
       <w>capturer</w>
       <w>cfile</w>
       <w>cfiles</w>
@@ -16,12 +17,14 @@
       <w>constv</w>
       <w>coord</w>
       <w>coords</w>
+      <w>cosv</w>
       <w>ctors</w>
       <w>darkula</w>
       <w>decl</w>
       <w>defn</w>
       <w>divf</w>
       <w>dtau</w>
+      <w>eqexp</w>
       <w>ffactor</w>
       <w>fovy</w>
       <w>fract</w>
@@ -45,6 +48,7 @@
       <w>multipage</w>
       <w>mulv</w>
       <w>mview</w>
+      <w>normv</w>
       <w>ortho</w>
       <w>phong</w>
       <w>postdeclare</w>

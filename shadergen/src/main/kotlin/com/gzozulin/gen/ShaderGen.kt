@@ -92,6 +92,7 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
                 "samplerq" -> samplerq(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
                 "discard" -> discard<Any>()
                 "ifexp" -> ifexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "eqexp" -> eqexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
                 "more" -> more<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
                 "not" -> not(edParseExpression(lineNo, split.removeFirst(), heap))
                 else -> error("Unknown operation!")
