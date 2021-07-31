@@ -6,7 +6,27 @@
 
 #IncludeRegexTransform: 
 
+/home/greg/blaster/shaderlang/float.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/ivec2.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
 /home/greg/blaster/shaderlang/main.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/math.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/random.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/shaderlang.h
 assert.h
 -
 math.h
@@ -19,4 +39,20 @@ stdlib.h
 -
 stdio.h
 -
+
+/home/greg/blaster/shaderlang/shading.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/vec2.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/vec3.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
+
+/home/greg/blaster/shaderlang/vec4.c
+shaderlang.h
+/home/greg/blaster/shaderlang/shaderlang.h
 

@@ -129,6 +129,54 @@ shadergen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/build
 .PHONY : shadergen/fast
 
+float.o: float.c.o
+.PHONY : float.o
+
+# target to build an object file
+float.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/float.c.o
+.PHONY : float.c.o
+
+float.i: float.c.i
+.PHONY : float.i
+
+# target to preprocess a source file
+float.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/float.c.i
+.PHONY : float.c.i
+
+float.s: float.c.s
+.PHONY : float.s
+
+# target to generate assembly for a file
+float.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/float.c.s
+.PHONY : float.c.s
+
+ivec2.o: ivec2.c.o
+.PHONY : ivec2.o
+
+# target to build an object file
+ivec2.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ivec2.c.o
+.PHONY : ivec2.c.o
+
+ivec2.i: ivec2.c.i
+.PHONY : ivec2.i
+
+# target to preprocess a source file
+ivec2.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ivec2.c.i
+.PHONY : ivec2.c.i
+
+ivec2.s: ivec2.c.s
+.PHONY : ivec2.s
+
+# target to generate assembly for a file
+ivec2.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ivec2.c.s
+.PHONY : ivec2.c.s
+
 main.o: main.c.o
 .PHONY : main.o
 
@@ -153,6 +201,222 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/main.c.s
 .PHONY : main.c.s
 
+mat3.o: mat3.c.o
+.PHONY : mat3.o
+
+# target to build an object file
+mat3.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat3.c.o
+.PHONY : mat3.c.o
+
+mat3.i: mat3.c.i
+.PHONY : mat3.i
+
+# target to preprocess a source file
+mat3.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat3.c.i
+.PHONY : mat3.c.i
+
+mat3.s: mat3.c.s
+.PHONY : mat3.s
+
+# target to generate assembly for a file
+mat3.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat3.c.s
+.PHONY : mat3.c.s
+
+mat4.o: mat4.c.o
+.PHONY : mat4.o
+
+# target to build an object file
+mat4.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat4.c.o
+.PHONY : mat4.c.o
+
+mat4.i: mat4.c.i
+.PHONY : mat4.i
+
+# target to preprocess a source file
+mat4.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat4.c.i
+.PHONY : mat4.c.i
+
+mat4.s: mat4.c.s
+.PHONY : mat4.s
+
+# target to generate assembly for a file
+mat4.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat4.c.s
+.PHONY : mat4.c.s
+
+math.o: math.c.o
+.PHONY : math.o
+
+# target to build an object file
+math.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/math.c.o
+.PHONY : math.c.o
+
+math.i: math.c.i
+.PHONY : math.i
+
+# target to preprocess a source file
+math.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/math.c.i
+.PHONY : math.c.i
+
+math.s: math.c.s
+.PHONY : math.s
+
+# target to generate assembly for a file
+math.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/math.c.s
+.PHONY : math.c.s
+
+random.o: random.c.o
+.PHONY : random.o
+
+# target to build an object file
+random.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/random.c.o
+.PHONY : random.c.o
+
+random.i: random.c.i
+.PHONY : random.i
+
+# target to preprocess a source file
+random.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/random.c.i
+.PHONY : random.c.i
+
+random.s: random.c.s
+.PHONY : random.s
+
+# target to generate assembly for a file
+random.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/random.c.s
+.PHONY : random.c.s
+
+raytracer.o: raytracer.c.o
+.PHONY : raytracer.o
+
+# target to build an object file
+raytracer.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/raytracer.c.o
+.PHONY : raytracer.c.o
+
+raytracer.i: raytracer.c.i
+.PHONY : raytracer.i
+
+# target to preprocess a source file
+raytracer.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/raytracer.c.i
+.PHONY : raytracer.c.i
+
+raytracer.s: raytracer.c.s
+.PHONY : raytracer.s
+
+# target to generate assembly for a file
+raytracer.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/raytracer.c.s
+.PHONY : raytracer.c.s
+
+shading.o: shading.c.o
+.PHONY : shading.o
+
+# target to build an object file
+shading.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/shading.c.o
+.PHONY : shading.c.o
+
+shading.i: shading.c.i
+.PHONY : shading.i
+
+# target to preprocess a source file
+shading.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/shading.c.i
+.PHONY : shading.c.i
+
+shading.s: shading.c.s
+.PHONY : shading.s
+
+# target to generate assembly for a file
+shading.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/shading.c.s
+.PHONY : shading.c.s
+
+vec2.o: vec2.c.o
+.PHONY : vec2.o
+
+# target to build an object file
+vec2.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec2.c.o
+.PHONY : vec2.c.o
+
+vec2.i: vec2.c.i
+.PHONY : vec2.i
+
+# target to preprocess a source file
+vec2.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec2.c.i
+.PHONY : vec2.c.i
+
+vec2.s: vec2.c.s
+.PHONY : vec2.s
+
+# target to generate assembly for a file
+vec2.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec2.c.s
+.PHONY : vec2.c.s
+
+vec3.o: vec3.c.o
+.PHONY : vec3.o
+
+# target to build an object file
+vec3.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec3.c.o
+.PHONY : vec3.c.o
+
+vec3.i: vec3.c.i
+.PHONY : vec3.i
+
+# target to preprocess a source file
+vec3.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec3.c.i
+.PHONY : vec3.c.i
+
+vec3.s: vec3.c.s
+.PHONY : vec3.s
+
+# target to generate assembly for a file
+vec3.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec3.c.s
+.PHONY : vec3.c.s
+
+vec4.o: vec4.c.o
+.PHONY : vec4.o
+
+# target to build an object file
+vec4.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec4.c.o
+.PHONY : vec4.c.o
+
+vec4.i: vec4.c.i
+.PHONY : vec4.i
+
+# target to preprocess a source file
+vec4.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec4.c.i
+.PHONY : vec4.c.i
+
+vec4.s: vec4.c.s
+.PHONY : vec4.s
+
+# target to generate assembly for a file
+vec4.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/vec4.c.s
+.PHONY : vec4.c.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +426,42 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... shadergen"
+	@echo "... float.o"
+	@echo "... float.i"
+	@echo "... float.s"
+	@echo "... ivec2.o"
+	@echo "... ivec2.i"
+	@echo "... ivec2.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... mat3.o"
+	@echo "... mat3.i"
+	@echo "... mat3.s"
+	@echo "... mat4.o"
+	@echo "... mat4.i"
+	@echo "... mat4.s"
+	@echo "... math.o"
+	@echo "... math.i"
+	@echo "... math.s"
+	@echo "... random.o"
+	@echo "... random.i"
+	@echo "... random.s"
+	@echo "... raytracer.o"
+	@echo "... raytracer.i"
+	@echo "... raytracer.s"
+	@echo "... shading.o"
+	@echo "... shading.i"
+	@echo "... shading.s"
+	@echo "... vec2.o"
+	@echo "... vec2.i"
+	@echo "... vec2.s"
+	@echo "... vec3.o"
+	@echo "... vec3.i"
+	@echo "... vec3.s"
+	@echo "... vec4.o"
+	@echo "... vec4.i"
+	@echo "... vec4.s"
 .PHONY : help
 
 

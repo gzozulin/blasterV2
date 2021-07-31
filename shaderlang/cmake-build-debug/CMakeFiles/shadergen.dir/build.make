@@ -79,17 +79,182 @@ CMakeFiles/shadergen.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/main.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/main.c -o CMakeFiles/shadergen.dir/main.c.s
 
+CMakeFiles/shadergen.dir/math.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/math.c.o: ../math.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/shadergen.dir/math.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/math.c.o -c /home/greg/blaster/shaderlang/math.c
+
+CMakeFiles/shadergen.dir/math.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/math.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/math.c > CMakeFiles/shadergen.dir/math.c.i
+
+CMakeFiles/shadergen.dir/math.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/math.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/math.c -o CMakeFiles/shadergen.dir/math.c.s
+
+CMakeFiles/shadergen.dir/vec2.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/vec2.c.o: ../vec2.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/shadergen.dir/vec2.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/vec2.c.o -c /home/greg/blaster/shaderlang/vec2.c
+
+CMakeFiles/shadergen.dir/vec2.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/vec2.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/vec2.c > CMakeFiles/shadergen.dir/vec2.c.i
+
+CMakeFiles/shadergen.dir/vec2.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/vec2.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/vec2.c -o CMakeFiles/shadergen.dir/vec2.c.s
+
+CMakeFiles/shadergen.dir/vec3.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/vec3.c.o: ../vec3.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/shadergen.dir/vec3.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/vec3.c.o -c /home/greg/blaster/shaderlang/vec3.c
+
+CMakeFiles/shadergen.dir/vec3.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/vec3.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/vec3.c > CMakeFiles/shadergen.dir/vec3.c.i
+
+CMakeFiles/shadergen.dir/vec3.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/vec3.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/vec3.c -o CMakeFiles/shadergen.dir/vec3.c.s
+
+CMakeFiles/shadergen.dir/vec4.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/vec4.c.o: ../vec4.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/shadergen.dir/vec4.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/vec4.c.o -c /home/greg/blaster/shaderlang/vec4.c
+
+CMakeFiles/shadergen.dir/vec4.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/vec4.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/vec4.c > CMakeFiles/shadergen.dir/vec4.c.i
+
+CMakeFiles/shadergen.dir/vec4.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/vec4.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/vec4.c -o CMakeFiles/shadergen.dir/vec4.c.s
+
+CMakeFiles/shadergen.dir/ivec2.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/ivec2.c.o: ../ivec2.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/shadergen.dir/ivec2.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/ivec2.c.o -c /home/greg/blaster/shaderlang/ivec2.c
+
+CMakeFiles/shadergen.dir/ivec2.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/ivec2.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/ivec2.c > CMakeFiles/shadergen.dir/ivec2.c.i
+
+CMakeFiles/shadergen.dir/ivec2.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/ivec2.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/ivec2.c -o CMakeFiles/shadergen.dir/ivec2.c.s
+
+CMakeFiles/shadergen.dir/mat3.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/mat3.c.o: ../mat3.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/shadergen.dir/mat3.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/mat3.c.o -c /home/greg/blaster/shaderlang/mat3.c
+
+CMakeFiles/shadergen.dir/mat3.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/mat3.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/mat3.c > CMakeFiles/shadergen.dir/mat3.c.i
+
+CMakeFiles/shadergen.dir/mat3.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/mat3.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/mat3.c -o CMakeFiles/shadergen.dir/mat3.c.s
+
+CMakeFiles/shadergen.dir/mat4.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/mat4.c.o: ../mat4.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/shadergen.dir/mat4.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/mat4.c.o -c /home/greg/blaster/shaderlang/mat4.c
+
+CMakeFiles/shadergen.dir/mat4.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/mat4.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/mat4.c > CMakeFiles/shadergen.dir/mat4.c.i
+
+CMakeFiles/shadergen.dir/mat4.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/mat4.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/mat4.c -o CMakeFiles/shadergen.dir/mat4.c.s
+
+CMakeFiles/shadergen.dir/float.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/float.c.o: ../float.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/shadergen.dir/float.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/float.c.o -c /home/greg/blaster/shaderlang/float.c
+
+CMakeFiles/shadergen.dir/float.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/float.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/float.c > CMakeFiles/shadergen.dir/float.c.i
+
+CMakeFiles/shadergen.dir/float.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/float.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/float.c -o CMakeFiles/shadergen.dir/float.c.s
+
+CMakeFiles/shadergen.dir/raytracer.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/raytracer.c.o: ../raytracer.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/shadergen.dir/raytracer.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/raytracer.c.o -c /home/greg/blaster/shaderlang/raytracer.c
+
+CMakeFiles/shadergen.dir/raytracer.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/raytracer.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/raytracer.c > CMakeFiles/shadergen.dir/raytracer.c.i
+
+CMakeFiles/shadergen.dir/raytracer.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/raytracer.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/raytracer.c -o CMakeFiles/shadergen.dir/raytracer.c.s
+
+CMakeFiles/shadergen.dir/shading.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/shading.c.o: ../shading.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/shadergen.dir/shading.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/shading.c.o -c /home/greg/blaster/shaderlang/shading.c
+
+CMakeFiles/shadergen.dir/shading.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/shading.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/shading.c > CMakeFiles/shadergen.dir/shading.c.i
+
+CMakeFiles/shadergen.dir/shading.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/shading.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/shading.c -o CMakeFiles/shadergen.dir/shading.c.s
+
+CMakeFiles/shadergen.dir/random.c.o: CMakeFiles/shadergen.dir/flags.make
+CMakeFiles/shadergen.dir/random.c.o: ../random.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/shadergen.dir/random.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/shadergen.dir/random.c.o -c /home/greg/blaster/shaderlang/random.c
+
+CMakeFiles/shadergen.dir/random.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/shadergen.dir/random.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/greg/blaster/shaderlang/random.c > CMakeFiles/shadergen.dir/random.c.i
+
+CMakeFiles/shadergen.dir/random.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/shadergen.dir/random.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/greg/blaster/shaderlang/random.c -o CMakeFiles/shadergen.dir/random.c.s
+
 # Object files for target shadergen
 shadergen_OBJECTS = \
-"CMakeFiles/shadergen.dir/main.c.o"
+"CMakeFiles/shadergen.dir/main.c.o" \
+"CMakeFiles/shadergen.dir/math.c.o" \
+"CMakeFiles/shadergen.dir/vec2.c.o" \
+"CMakeFiles/shadergen.dir/vec3.c.o" \
+"CMakeFiles/shadergen.dir/vec4.c.o" \
+"CMakeFiles/shadergen.dir/ivec2.c.o" \
+"CMakeFiles/shadergen.dir/mat3.c.o" \
+"CMakeFiles/shadergen.dir/mat4.c.o" \
+"CMakeFiles/shadergen.dir/float.c.o" \
+"CMakeFiles/shadergen.dir/raytracer.c.o" \
+"CMakeFiles/shadergen.dir/shading.c.o" \
+"CMakeFiles/shadergen.dir/random.c.o"
 
 # External object files for target shadergen
 shadergen_EXTERNAL_OBJECTS =
 
 shadergen: CMakeFiles/shadergen.dir/main.c.o
+shadergen: CMakeFiles/shadergen.dir/math.c.o
+shadergen: CMakeFiles/shadergen.dir/vec2.c.o
+shadergen: CMakeFiles/shadergen.dir/vec3.c.o
+shadergen: CMakeFiles/shadergen.dir/vec4.c.o
+shadergen: CMakeFiles/shadergen.dir/ivec2.c.o
+shadergen: CMakeFiles/shadergen.dir/mat3.c.o
+shadergen: CMakeFiles/shadergen.dir/mat4.c.o
+shadergen: CMakeFiles/shadergen.dir/float.c.o
+shadergen: CMakeFiles/shadergen.dir/raytracer.c.o
+shadergen: CMakeFiles/shadergen.dir/shading.c.o
+shadergen: CMakeFiles/shadergen.dir/random.c.o
 shadergen: CMakeFiles/shadergen.dir/build.make
 shadergen: CMakeFiles/shadergen.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable shadergen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking C executable shadergen"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/shadergen.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
