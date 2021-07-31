@@ -78,13 +78,22 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/greg/blaster/shaderlang/bool.c">
+			<Option target="shadergen"/>
+		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/float.c">
 			<Option target="shadergen"/>
 		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/ivec2.c">
 			<Option target="shadergen"/>
 		</Unit>
+		<Unit filename="/home/greg/blaster/shaderlang/lang.h">
+			<Option target="shadergen"/>
+		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/main.c">
+			<Option target="shadergen"/>
+		</Unit>
+		<Unit filename="/home/greg/blaster/shaderlang/mat2.c">
 			<Option target="shadergen"/>
 		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/mat3.c">
@@ -99,10 +108,10 @@
 		<Unit filename="/home/greg/blaster/shaderlang/random.c">
 			<Option target="shadergen"/>
 		</Unit>
-		<Unit filename="/home/greg/blaster/shaderlang/raytracer.c">
+		<Unit filename="/home/greg/blaster/shaderlang/ray.c">
 			<Option target="shadergen"/>
 		</Unit>
-		<Unit filename="/home/greg/blaster/shaderlang/shaderlang.h">
+		<Unit filename="/home/greg/blaster/shaderlang/raytracer.c">
 			<Option target="shadergen"/>
 		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/shading.c">

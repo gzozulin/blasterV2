@@ -129,6 +129,30 @@ shadergen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/build
 .PHONY : shadergen/fast
 
+bool.o: bool.c.o
+.PHONY : bool.o
+
+# target to build an object file
+bool.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/bool.c.o
+.PHONY : bool.c.o
+
+bool.i: bool.c.i
+.PHONY : bool.i
+
+# target to preprocess a source file
+bool.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/bool.c.i
+.PHONY : bool.c.i
+
+bool.s: bool.c.s
+.PHONY : bool.s
+
+# target to generate assembly for a file
+bool.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/bool.c.s
+.PHONY : bool.c.s
+
 float.o: float.c.o
 .PHONY : float.o
 
@@ -200,6 +224,30 @@ main.s: main.c.s
 main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/main.c.s
 .PHONY : main.c.s
+
+mat2.o: mat2.c.o
+.PHONY : mat2.o
+
+# target to build an object file
+mat2.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat2.c.o
+.PHONY : mat2.c.o
+
+mat2.i: mat2.c.i
+.PHONY : mat2.i
+
+# target to preprocess a source file
+mat2.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat2.c.i
+.PHONY : mat2.c.i
+
+mat2.s: mat2.c.s
+.PHONY : mat2.s
+
+# target to generate assembly for a file
+mat2.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/mat2.c.s
+.PHONY : mat2.c.s
 
 mat3.o: mat3.c.o
 .PHONY : mat3.o
@@ -296,6 +344,30 @@ random.s: random.c.s
 random.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/random.c.s
 .PHONY : random.c.s
+
+ray.o: ray.c.o
+.PHONY : ray.o
+
+# target to build an object file
+ray.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ray.c.o
+.PHONY : ray.c.o
+
+ray.i: ray.c.i
+.PHONY : ray.i
+
+# target to preprocess a source file
+ray.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ray.c.i
+.PHONY : ray.c.i
+
+ray.s: ray.c.s
+.PHONY : ray.s
+
+# target to generate assembly for a file
+ray.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/ray.c.s
+.PHONY : ray.c.s
 
 raytracer.o: raytracer.c.o
 .PHONY : raytracer.o
@@ -426,6 +498,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... shadergen"
+	@echo "... bool.o"
+	@echo "... bool.i"
+	@echo "... bool.s"
 	@echo "... float.o"
 	@echo "... float.i"
 	@echo "... float.s"
@@ -435,6 +510,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... mat2.o"
+	@echo "... mat2.i"
+	@echo "... mat2.s"
 	@echo "... mat3.o"
 	@echo "... mat3.i"
 	@echo "... mat3.s"
@@ -447,6 +525,9 @@ help:
 	@echo "... random.o"
 	@echo "... random.i"
 	@echo "... random.s"
+	@echo "... ray.o"
+	@echo "... ray.i"
+	@echo "... ray.s"
 	@echo "... raytracer.o"
 	@echo "... raytracer.i"
 	@echo "... raytracer.s"

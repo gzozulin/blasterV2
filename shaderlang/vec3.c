@@ -2,7 +2,7 @@
 // Created by greg on 2021-07-30.
 //
 
-#include "shaderlang.h"
+#include "lang.h"
 
 public
 const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };

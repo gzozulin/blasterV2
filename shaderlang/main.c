@@ -1,4 +1,4 @@
-#include "shaderlang.h"
+#include "lang.h"
 
 custom
 void error() {
@@ -6,6 +6,9 @@ void error() {
 }
 
 // region ------------------- PUBLIC CONST -------------------
+
+public
+const float PI = 3.1415f;
 
 public
 const float BOUNCE_ERR = 0.001f;
@@ -42,172 +45,6 @@ const MetallicMaterial   uMetallicMaterials  [MAX_METALS] = { { { 0, 1, 0 } } };
 const DielectricMaterial uDielectricMaterials[MAX_DIELECTRICS] = { { 2 } };
 
 // endregion ------------------- PRIVATE CONST -------------------
-
-// region ------------------- MAT2 -------------------
-
-custom
-mat2 scalem2(const vec2 scale) {
-    const mat2 result = {{
-             scale.x, 0,
-             0, scale.y,
-     }};
-    return result;
-}
-
-custom
-vec2 transformv2(const vec2 vec, const mat2 mat) {
-    return v2zero();
-}
-
-// endregion ------------------- MAT2 -------------------
-
-// region ------------------- MAT4 -------------------
-
-custom
-mat4 m4ident() {
-    const mat4 result = {{
-         1, 0, 0, 0,
-         0, 1, 0, 0,
-         0, 0, 1, 0,
-         0, 0, 0, 1
-     }};
-    return result;
-}
-
-custom
-mat4 mulm4(const mat4 left, const mat4 right) {
-    return m4ident();
-}
-
-custom
-vec4 transformv4(const vec4 vec, const mat4 mat) {
-    return v4zero();
-}
-
-custom
-mat4 translatem4(vec3 vec) {
-    const mat4 result = {{
-         1, 0, 0, vec.x,
-         0, 1, 0, vec.y,
-         0, 0, 1, vec.z,
-         0, 0, 0, 1
-     }};
-    return result;
-}
-
-custom
-mat4 rotatem4(vec3 axis, const float angle) {
-    axis = normv3(axis);
-    float s = sin(angle);
-    float c = cos(angle);
-    float oc = 1.0f - c;
-
-    const mat4 result = {{
-         oc * axis.x * axis.x + c,          oc * axis.x * axis.y - axis.z * s, oc * axis.z * axis.x + axis.y * s, 0.0f,
-         oc * axis.x * axis.y + axis.z * s, oc * axis.y * axis.y + c,          oc * axis.y * axis.z - axis.x * s, 0.0f,
-         oc * axis.z * axis.x - axis.y * s, oc * axis.y * axis.z + axis.x * s, oc * axis.z * axis.z + c,          0.0f,
-         0.0f,                              0.0f,                              0.0f,                              1.0f
-     }};
-
-    return result;
-}
-
-custom
-mat4 scalem4(const vec3 scale) {
-    const mat4 result = {{
-         scale.x, 0, 0, 0,
-         0, scale.y, 0, 0,
-         0, 0, scale.z, 0,
-         0, 0, 0, 1
-     }};
-    return result;
-}
-
-// endregion ------------------- MAT4 -------------------
-
-// region ------------------- RAY -------------------
-
-public
-Ray rayBack() {
-    const Ray result = { v3zero(), v3back() };
-    return result;
-}
-
-public
-vec3 rayPoint(const Ray ray, const float t) {
-    return addv3(ray.origin, mulv3f(ray.direction, t));
-}
-
-// endregion ------------------- RAY -------------------
-
-// region ------------------- BOOL -------------------
-
-public
-bool eqv2(const vec2 left, const vec2 right) {
-    return left.x == right.x && left.y == right.y;
-}
-
-public
-bool eqv3(const vec3 left, const vec3 right) {
-    return left.x == right.x && left.y == right.y && left.z == right.z;
-}
-
-public
-bool eqv4(const vec4 left, const vec4 right) {
-    return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w;
-}
-
-// endregion ------------------- BOOL -------------------
-
-// region ------------------- RAND -------------------
-
-custom
-float rndf (float x) { return dtof(drand48()); }
-
-custom
-float rndv2(vec2  v) { return dtof(drand48()); }
-
-custom
-float rndv3(vec3  v) { return dtof(drand48()); }
-
-custom
-float rndv4(vec4  v) { return dtof(drand48()); }
-
-custom
-vec3 seedRandom(const vec3 s) {
-    return s;
-}
-
-custom
-float seededRndf() {
-    return dtof(drand48());
-}
-
-public
-vec3 randomInUnitSphere() {
-    vec3 result;
-    for (int i = 0; i < 10; i++) {
-        result = v3(seededRndf() * 2.0f - 1.0f, seededRndf() * 2.0f - 1.0f, seededRndf() * 2.0f - 1.0f);
-        if (lensqv3(result) >= 1.0f) {
-            return result;
-        }
-    }
-    return normv3(result);
-}
-
-public
-vec3 randomInUnitDisk() {
-    vec3 result;
-    for (int i = 0; i < 10; i++) {
-        result = subv3(mulv3f(v3(seededRndf(), seededRndf(), 0.0f), 2.0f), v3(1.0f, 1.0f, 0.0f));
-        if (dotv3(result, result) >= 1.0f) {
-            return result;
-        }
-    }
-    return normv3(result); // wrong, but should not happen
-}
-
-// endregion ------------------- RAND -------------------
 
 // region ------------------- RAYTRACING ---------------
 

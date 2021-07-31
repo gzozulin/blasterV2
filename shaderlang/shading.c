@@ -2,7 +2,7 @@
 // Created by greg on 2021-07-30.
 //
 
-#include "shaderlang.h"
+#include "lang.h"
 
 const int uLightsPointCnt = 1;
 const int uLightsDirCnt = 0;
