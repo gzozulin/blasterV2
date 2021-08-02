@@ -5,17 +5,20 @@ import com.gzozulin.minigl.assets.libTextureCreate
 import com.gzozulin.minigl.tech.*
 
 private val window = GlWindow()
+private val constWH = constv2i(window.width, window.height)
 
 private var currentBuffer = 0
 private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
 private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
 
 private val physicsIn = unifs()
-private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()), sandPhysics(physicsIn))
+private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()),
+    sandPhysics(physicsIn, namedTexCoordsV2(), constWH))
 
 private val solverOrigin = unifs()
 private val solverDeltas = unifs()
-private val sandSolver = ShadingFlat(constm4(mat4().orthoBox()), sandSolver(solverOrigin, solverDeltas))
+private val sandSolver = ShadingFlat(constm4(mat4().orthoBox()),
+    sandSolver(solverOrigin, solverDeltas, namedTexCoordsV2(), constWH))
 
 private val renderIn = unifs()
 private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))

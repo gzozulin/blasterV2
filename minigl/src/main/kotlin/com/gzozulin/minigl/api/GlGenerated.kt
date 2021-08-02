@@ -142,8 +142,8 @@ private const val DEF_GEOMETRYSCHLICKGGX = "float geometrySchlickGGX ( float Ndo
 private const val DEF_GEOMETRYSMITH = "float geometrySmith ( vec3 N , vec3 V , vec3 L , float roughness ) { float NdotV = max ( dotv3 ( N , V ) , 0.0f ) ; float NdotL = max ( dotv3 ( N , L ) , 0.0f ) ; float ggx2 = geometrySchlickGGX ( NdotV , roughness ) ; float ggx1 = geometrySchlickGGX ( NdotL , roughness ) ; return ggx1 * ggx2 ; }\n"
 private const val DEF_FRESNELSCHLICK = "vec3 fresnelSchlick ( float cosTheta , vec3 F0 ) { return addv3 ( F0 , mulv3 ( subv3 ( ftov3 ( 1.0f ) , F0 ) , ftov3 ( pow ( 1.0f - cosTheta , 5.0f ) ) ) ) ; }\n"
 private const val DEF_SHADINGPBR = "vec4 shadingPbr ( vec3 eye , vec3 worldPos , vec3 albedo , vec3 N , float metallic , float roughness , float ao ) { vec3 alb = powv3 ( albedo , ftov3 ( 2.2f ) ) ; vec3 V = normv3 ( subv3 ( eye , worldPos ) ) ; vec3 F0 = ftov3 ( 0.04f ) ; F0 = mixv3 ( F0 , alb , metallic ) ; vec3 Lo = v3zero ( ) ; for ( int i = 0 ; i < uLightsPointCnt ; ++ i ) { vec3 toLight = subv3 ( uLights [ i ] . vector , worldPos ) ; vec3 L = normv3 ( toLight ) ; vec3 H = normv3 ( addv3 ( V , L ) ) ; float distance = lenv3 ( toLight ) ; float lum = luminosity ( distance , uLights [ i ] ) ; vec3 radiance = mulv3 ( uLights [ i ] . color , ftov3 ( lum ) ) ; float NDF = distributionGGX ( N , H , roughness ) ; float G = geometrySmith ( N , V , L , roughness ) ; vec3 F = fresnelSchlick ( max ( dotv3 ( H , V ) , 0.0f ) , F0 ) ; vec3 nominator = mulv3 ( F , ftov3 ( NDF * G ) ) ; float denominator = 4.0f * max ( dotv3 ( N , V ) , 0.0f ) * max ( dotv3 ( N , L ) , 0.0f ) + 0.001f ; vec3 specular = divv3f ( nominator , denominator ) ; vec3 kD = subv3 ( ftov3 ( 1.0f ) , F ) ; kD = mulv3 ( kD , ftov3 ( 1.0f - metallic ) ) ; float NdotL = max ( dotv3 ( N , L ) , 0.0f ) ; Lo = addv3 ( Lo , mulv3 ( mulv3 ( addv3 ( divv3 ( mulv3 ( kD , alb ) , ftov3 ( PI ) ) , specular ) , radiance ) , ftov3 ( NdotL ) ) ) ; } vec3 ambient = mulv3 ( ftov3 ( 0.1f * ao ) , alb ) ; vec3 color = addv3 ( ambient , Lo ) ; color = divv3 ( color , addv3 ( color , ftov3 ( 1.0f ) ) ) ; color = powv3 ( color , ftov3 ( 1.0f / 2.2f ) ) ; return v3tov4 ( color , 1.0f ) ; }\n"
-private const val DEF_SANDPHYSICS = "vec4 sandPhysics ( sampler2D orig ) { return sampler ( orig , v2zero ( ) ) ; }\n"
-private const val DEF_SANDSOLVER = "vec4 sandSolver ( sampler2D orig , sampler2D deltas ) { return addv4 ( sampler ( orig , v2zero ( ) ) , sampler ( deltas , v2zero ( ) ) ) ; }\n"
+private const val DEF_SANDPHYSICS = "vec4 sandPhysics ( sampler2D orig , vec2 uv , ivec2 wh ) { return sampler ( orig , v2zero ( ) ) ; }\n"
+private const val DEF_SANDSOLVER = "vec4 sandSolver ( sampler2D orig , sampler2D deltas , vec2 uv , ivec2 wh ) { return addv4 ( sampler ( orig , v2zero ( ) ) , sampler ( deltas , v2zero ( ) ) ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
@@ -886,13 +886,13 @@ fun shadingPbr(eye: Expression<vec3>, worldPos: Expression<vec3>, albedo: Expres
     override fun roots() = listOf(eye, worldPos, albedo, N, metallic, roughness, ao)
 }
 
-fun sandPhysics(orig: Expression<GlTexture>) = object : Expression<vec4>() {
-    override fun expr() = "sandPhysics(${orig.expr()})"
-    override fun roots() = listOf(orig)
+fun sandPhysics(orig: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<vec2i>) = object : Expression<vec4>() {
+    override fun expr() = "sandPhysics(${orig.expr()}, ${uv.expr()}, ${wh.expr()})"
+    override fun roots() = listOf(orig, uv, wh)
 }
 
-fun sandSolver(orig: Expression<GlTexture>, deltas: Expression<GlTexture>) = object : Expression<vec4>() {
-    override fun expr() = "sandSolver(${orig.expr()}, ${deltas.expr()})"
-    override fun roots() = listOf(orig, deltas)
+fun sandSolver(orig: Expression<GlTexture>, deltas: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<vec2i>) = object : Expression<vec4>() {
+    override fun expr() = "sandSolver(${orig.expr()}, ${deltas.expr()}, ${uv.expr()}, ${wh.expr()})"
+    override fun roots() = listOf(orig, deltas, uv, wh)
 }
 
