@@ -31,12 +31,12 @@ data class ShadingRt(val window: GlWindow,
     private val matrix = constm4(mat4().orthoBox())
 
     internal val unifRandom = uniff()
-    private val colorSampled = errorHandler(fragmentColorRt(
+    private val colorSampled = fragmentColorRt(
         consti(window.width), consti(window.height),
         unifRandom, sampleCnt, rayBounces,
         eye, center, up,
         fovy, aspect, aperture, focus,
-        namedTexCoordsV2()))
+        namedTexCoordsV2())
 
     internal var currentBuffer = 0
     internal val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)

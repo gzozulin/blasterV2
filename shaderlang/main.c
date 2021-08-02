@@ -1,7 +1,7 @@
 #include "lang.h"
 
 custom
-void error() {
+float error() {
     assert(0 && "WTF?!");
 }
 

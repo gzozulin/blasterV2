@@ -7,8 +7,7 @@
 // todo: glsl reflect
 // todo: math library
 
-#ifndef SHADERGEN_LANG_H
-#define SHADERGEN_LANG_H
+#pragma once
 
 #include <assert.h>
 #include <math.h>
@@ -167,7 +166,7 @@ typedef struct RefractResult {
 
 // endregion ------------------- TYPES -------------------
 
-void error();
+float error();
 void printv3(vec3 v);
 
 // region ------------------- CONST -------------------
@@ -409,5 +408,3 @@ vec4 gammaSqrt(vec4 result);
 void raytracer();
 
 // endregion ------------------- RAYTRACING ---------------
-
-#endif //SHADERGEN_LANG_H

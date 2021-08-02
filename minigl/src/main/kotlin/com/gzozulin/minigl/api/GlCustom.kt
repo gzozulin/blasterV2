@@ -45,6 +45,8 @@ private const val CUSTOM_DEF = """
     uniform LambertianMaterial     uLambertianMaterials[$MAX_LAMBERTIANS];
     uniform MetallicMaterial       uMetallicMaterials  [$MAX_METALLICS];
     uniform DielectricMaterial     uDielectricMaterials[$MAX_DIELECTRICS];
+    
+    float error() { return 0.0f; } // nothing
 """
 
 private const val CUSTOM_RANDOM_DEF = """

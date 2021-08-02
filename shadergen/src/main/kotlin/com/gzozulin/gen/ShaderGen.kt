@@ -6,7 +6,26 @@ import com.gzozulin.c.CParser
 import org.antlr.v4.runtime.*
 import java.io.File
 
-private const val DEFINITIONS = "/home/greg/blaster/shaderlang/main.c"
+private val DEFINITIONS = listOf(
+    "/home/greg/blaster/shaderlang/lang.h",
+    "/home/greg/blaster/shaderlang/main.c",
+    "/home/greg/blaster/shaderlang/float.c",
+    "/home/greg/blaster/shaderlang/bool.c",
+    "/home/greg/blaster/shaderlang/math.c",
+    "/home/greg/blaster/shaderlang/vec2.c",
+    "/home/greg/blaster/shaderlang/vec3.c",
+    "/home/greg/blaster/shaderlang/vec4.c",
+    "/home/greg/blaster/shaderlang/ivec2.c",
+    "/home/greg/blaster/shaderlang/mat2.c",
+    "/home/greg/blaster/shaderlang/mat3.c",
+    "/home/greg/blaster/shaderlang/mat4.c",
+    "/home/greg/blaster/shaderlang/ray.c",
+    "/home/greg/blaster/shaderlang/random.c",
+    "/home/greg/blaster/shaderlang/const.c",
+    "/home/greg/blaster/shaderlang/raytracer.c",
+    "/home/greg/blaster/shaderlang/shading.c",
+)
+
 private const val GL_GENERATED = "/home/greg/blaster/minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"
 private const val ED_GENERATED = "/home/greg/blaster/shadered/src/main/kotlin/com/gzozulin/ed/EdGenerated.kt"
 
@@ -21,20 +40,24 @@ private data class CFile(val chars: CharStream, val lexer: CLexer, val tokens: C
 private data class CParam(val type: String, val name: String)
 
 private enum class CAccess { PRIVATE, CUSTOM, PROTECTED, PUBLIC }
-private interface CDeclaration {
+private interface CDefinition {
     val access: CAccess
     val name: String
     val def: String
 }
 private data class COperation(val type: String, override val name: String, val params: List<CParam>,
-                              override val def: String, override val access: CAccess): CDeclaration
+                              override val def: String, override val access: CAccess): CDefinition
 private data class CTypedef(override val name: String, override val def: String,
-                            override val access: CAccess): CDeclaration
+                            override val access: CAccess): CDefinition
 private data class CConstant(override val name: String, override val access: CAccess,
-                             override val def: String): CDeclaration
+                             override val def: String): CDefinition
 
 fun main() {
-    val (glOutput, edOutput) = renderDefinitions(visitCFile(parseCFile(File(DEFINITIONS))))
+    val definitions = mutableListOf<CDefinition>()
+    DEFINITIONS.forEach { definition ->
+        definitions += visitCFile(parseCFile(File(definition)))
+    }
+    val (glOutput, edOutput) = renderDefinitions(definitions)
     doCreateOutput(glOutput, edOutput, File(GL_GENERATED), File(ED_GENERATED))
 }
 
@@ -43,7 +66,7 @@ private fun doCreateOutput(glContent: String, edContent: String, glGenerated: Fi
     edGenerated.writeText(edContent)
 }
 
-private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, String> {
+private fun renderDefinitions(definitions: List<CDefinition>): Pair<String, String> {
     var glResult = "package com.gzozulin.minigl.api\n\n" +
             "import com.gzozulin.minigl.scene.Light\n" +
             "import com.gzozulin.minigl.scene.PhongMaterial\n\n"
@@ -103,22 +126,7 @@ private fun renderDefinitions(definitions: List<CDeclaration>): Pair<String, Str
     return glResult to edResult
 }
 
-/*
-"namedTexCoordsV2" -> namedTexCoordsV2()
-"namedTexCoordsV3" -> namedTexCoordsV3()
-"namedGlFragCoordV2" -> namedGlFragCoordV2()
-"cachev4" -> cachev4(edParseParam(params.removeFirst(), heap))
-"texel" -> texel(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-"sampler" -> sampler(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-"samplerq" -> samplerq(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-"discard" -> discard()
-"ifexp" -> ifexp(edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-"moref" -> more(edParseParam<Float>(params.removeFirst(), heap), edParseParam(params.removeFirst(), heap))
-"not" -> not(edParseParam(params.removeFirst(), heap))
-else -> error("Unknown operation! " + reference)
- */
-
-private fun renderDefinition(declaration: CDeclaration) =
+private fun renderDefinition(declaration: CDefinition) =
     "private const val DEF_${declaration.name.toUpperCase()} = \"${declaration.def}\\n\""
 
 private fun renderKotlinHandle(operation: COperation) = """
@@ -157,8 +165,8 @@ private fun convertType(ctype: String) = when (ctype) {
     else                    -> error("Unknown type! $ctype")
 }
 
-private fun visitCFile(cfile: CFile): List<CDeclaration> {
-    val result = mutableListOf<CDeclaration>()
+private fun visitCFile(cfile: CFile): List<CDefinition> {
+    val result = mutableListOf<CDefinition>()
     val visitor = ExternalDeclarationVisitor { ctx ->
         when {
             ctx.isFunction() -> {
