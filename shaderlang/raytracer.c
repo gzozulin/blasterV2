@@ -82,7 +82,7 @@ bool rayHitAabb(const Ray ray, const AABB aabb, const float tMin, const float tM
 }
 
 protected
-HitRecord raySphereHitRecord(const Ray ray, const float t, const Sphere sphere) {
+HitRecord rayHitSphereRecord(Ray ray, float t, Sphere sphere) {
     const vec3 point = rayPoint(ray, t);
     const vec3 N = normv3(divv3f(subv3(point, sphere.center), sphere.radius));
     const HitRecord result = { t, point, N, sphere.materialType, sphere.materialIndex };
@@ -100,12 +100,12 @@ HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const 
     if (D > 0) {
         float t = (-b - sqrt(D)) / 2 * a;
         if (t < tMax && t > tMin) {
-            return raySphereHitRecord(ray, t, sphere);
+            return rayHitSphereRecord(ray, t, sphere);
         }
 
         t = (-b + sqrt(D)) / 2 * a;
         if (t < tMax && t > tMin) {
-            return raySphereHitRecord(ray, t, sphere);
+            return rayHitSphereRecord(ray, t, sphere);
         }
     }
     return NO_HIT;
@@ -161,7 +161,7 @@ HitRecord rayHitWorld(const Ray ray, const float tMin, const float tMax) {
 }
 
 protected
-ScatterResult materialScatterLambertian(const HitRecord record, const LambertianMaterial material) {
+ScatterResult scatterLambertian(HitRecord record, LambertianMaterial material) {
     const vec3 tangent = addv3(record.point, record.normal);
     const vec3 direction = addv3(tangent, randomInUnitSphere());
     const ScatterResult result = { material.albedo, { record.point, subv3(direction, record.point) } };
@@ -169,7 +169,7 @@ ScatterResult materialScatterLambertian(const HitRecord record, const Lambertian
 }
 
 protected
-ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record, const MetallicMaterial material) {
+ScatterResult scatterMetallic(Ray ray, HitRecord record, MetallicMaterial material) {
     const vec3 reflected = reflectv3(ray.direction, record.normal);
     if (dotv3(reflected, record.normal) > 0) {
         const ScatterResult result = { material.albedo, { record.point, reflected } };
@@ -180,7 +180,7 @@ ScatterResult materialScatterMetalic(const Ray ray, const HitRecord record, cons
 }
 
 protected
-ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record, const DielectricMaterial material) {
+ScatterResult scatterDielectric(Ray ray, HitRecord record, DielectricMaterial material) {
     float niOverNt;
     float cosine;
     vec3 outwardNormal;
@@ -218,14 +218,14 @@ ScatterResult materialScatterDielectric(const Ray ray, const HitRecord record, c
 }
 
 protected
-ScatterResult materialScatter(const Ray ray, const HitRecord record) {
+ScatterResult scatterMaterial(Ray ray, HitRecord record) {
     switch (record.materialType) {
         case MATERIAL_LAMBERTIAN:
-            return materialScatterLambertian(record, uLambertianMaterials[record.materialIndex]);
+            return scatterLambertian(record, uLambertianMaterials[record.materialIndex]);
         case MATERIAL_METALIIC:
-            return materialScatterMetalic(ray, record, uMetallicMaterials[record.materialIndex]);
+            return scatterMetallic(ray, record, uMetallicMaterials[record.materialIndex]);
         case MATERIAL_DIELECTRIC:
-            return materialScatterDielectric(ray, record, uDielectricMaterials[record.materialIndex]);
+            return scatterDielectric(ray, record, uDielectricMaterials[record.materialIndex]);
         default:
             return NO_SCATTER;
     }
@@ -240,7 +240,7 @@ vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, con
         if (record.t < 0) {
             break;
         } else {
-            const ScatterResult scatterResult = materialScatter(ray, record);
+            const ScatterResult scatterResult = scatterMaterial(ray, record);
             if (scatterResult.attenuation.x < 0) {
                 return v3zero();
             }

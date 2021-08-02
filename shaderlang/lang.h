@@ -412,15 +412,15 @@ RtCamera cameraLookAt(vec3 eye, vec3 center, vec3 up,float vfoy, float aspect, f
 Ray rayFromCamera(RtCamera camera, float u, float v);
 vec3 background(Ray ray);
 bool rayHitAabb(Ray ray, AABB aabb, float tMin, float tMax);
-HitRecord raySphereHitRecord(Ray ray, float t, Sphere sphere);
+HitRecord rayHitSphereRecord(Ray ray, float t, Sphere sphere);
 HitRecord rayHitSphere(Ray ray, float tMin, float tMax, Sphere sphere);
 HitRecord rayHitObject(Ray ray,float tMin, float tMax, int type, int index);
 HitRecord rayHitBvh(Ray ray, float tMin, float tMax, int index);
 HitRecord rayHitWorld(Ray ray, float tMin, float tMax);
-ScatterResult materialScatterLambertian(HitRecord record, LambertianMaterial material);
-ScatterResult materialScatterMetalic(Ray ray, HitRecord record, MetallicMaterial material);
-ScatterResult materialScatterDielectric(Ray ray, HitRecord record, DielectricMaterial material);
-ScatterResult materialScatter(Ray ray, HitRecord record);
+ScatterResult scatterLambertian(HitRecord record, LambertianMaterial material);
+ScatterResult scatterMetallic(Ray ray, HitRecord record, MetallicMaterial material);
+ScatterResult scatterDielectric(Ray ray, HitRecord record, DielectricMaterial material);
+ScatterResult scatterMaterial(Ray ray, HitRecord record);
 vec3 sampleColor(int rayBounces, RtCamera camera, float u, float v);
 vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
                      float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
