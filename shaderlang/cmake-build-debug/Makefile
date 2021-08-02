@@ -153,6 +153,30 @@ bool.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/bool.c.s
 .PHONY : bool.c.s
 
+const.o: const.c.o
+.PHONY : const.o
+
+# target to build an object file
+const.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/const.c.o
+.PHONY : const.c.o
+
+const.i: const.c.i
+.PHONY : const.i
+
+# target to preprocess a source file
+const.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/const.c.i
+.PHONY : const.c.i
+
+const.s: const.c.s
+.PHONY : const.s
+
+# target to generate assembly for a file
+const.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/shadergen.dir/build.make CMakeFiles/shadergen.dir/const.c.s
+.PHONY : const.c.s
+
 float.o: float.c.o
 .PHONY : float.o
 
@@ -501,6 +525,9 @@ help:
 	@echo "... bool.o"
 	@echo "... bool.i"
 	@echo "... bool.s"
+	@echo "... const.o"
+	@echo "... const.i"
+	@echo "... const.s"
 	@echo "... float.o"
 	@echo "... float.i"
 	@echo "... float.s"

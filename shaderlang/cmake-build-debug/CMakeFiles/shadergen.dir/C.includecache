@@ -6,18 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/greg/blaster/shaderlang/bool.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/float.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/ivec2.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
 /home/greg/blaster/shaderlang/lang.h
 assert.h
 -
@@ -32,43 +20,7 @@ stdlib.h
 stdio.h
 -
 
-/home/greg/blaster/shaderlang/main.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/mat2.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/mat4.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/math.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/random.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/ray.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/shading.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/vec2.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/vec3.c
-lang.h
-/home/greg/blaster/shaderlang/lang.h
-
-/home/greg/blaster/shaderlang/vec4.c
+/home/greg/blaster/shaderlang/raytracer.c
 lang.h
 /home/greg/blaster/shaderlang/lang.h
 

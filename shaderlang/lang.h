@@ -21,8 +21,6 @@
 #define custom      // ops: handle only, definition is custom
 #define protected   // ops: definiton only, no handle
 
-void error();
-
 // region ------------------- DEFINE -------------------
 
 #define MAX_LIGHTS              128
@@ -169,10 +167,31 @@ typedef struct RefractResult {
 
 // endregion ------------------- TYPES -------------------
 
+void error();
+void printv3(vec3 v);
+
 // region ------------------- CONST -------------------
 
-extern const float PI;
-extern const float BOUNCE_ERR;
+extern const float                  PI;
+extern const float                  BOUNCE_ERR;
+
+extern const HitRecord              NO_HIT;
+extern const ScatterResult          NO_SCATTER;
+extern const RefractResult          NO_REFRACT;
+
+extern const int                    uLightsPointCnt;
+extern const int                    uLightsDirCnt;
+extern const Light                  uLights[];
+
+extern const BvhNode                uBvhNodes[];
+extern int                          bvhStack[];
+extern int                          bvhTop;
+
+extern const Sphere                 uSpheres[];
+
+extern const LambertianMaterial     uLambertianMaterials[];
+extern const MetallicMaterial       uMetallicMaterials  [];
+extern const DielectricMaterial     uDielectricMaterials[];
 
 // endregion ------------------- CONST -------------------
 
@@ -367,5 +386,28 @@ vec3 randomInUnitSphere() ;
 vec3 randomInUnitDisk();
 
 // endregion ------------------- RAND -------------------
+
+// region ------------------- RAYTRACING ---------------
+
+RtCamera cameraLookAt(vec3 eye, vec3 center, vec3 up,float vfoy, float aspect, float aperture, float focusDist);
+Ray rayFromCamera(RtCamera camera, float u, float v);
+vec3 background(Ray ray);
+bool rayHitAabb(Ray ray, AABB aabb, float tMin, float tMax);
+HitRecord raySphereHitRecord(Ray ray, float t, Sphere sphere);
+HitRecord rayHitSphere(Ray ray, float tMin, float tMax, Sphere sphere);
+HitRecord rayHitObject(Ray ray,float tMin, float tMax, int type, int index);
+HitRecord rayHitBvh(Ray ray, float tMin, float tMax, int index);
+HitRecord rayHitWorld(Ray ray, float tMin, float tMax);
+ScatterResult materialScatterLambertian(HitRecord record, LambertianMaterial material);
+ScatterResult materialScatterMetalic(Ray ray, HitRecord record, MetallicMaterial material);
+ScatterResult materialScatterDielectric(Ray ray, HitRecord record, DielectricMaterial material);
+ScatterResult materialScatter(Ray ray, HitRecord record);
+vec3 sampleColor(int rayBounces, RtCamera camera, float u, float v);
+vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
+                     float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
+vec4 gammaSqrt(vec4 result);
+void raytracer();
+
+// endregion ------------------- RAYTRACING ---------------
 
 #endif //SHADERGEN_LANG_H

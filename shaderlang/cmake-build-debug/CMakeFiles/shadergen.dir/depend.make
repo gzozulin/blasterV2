@@ -4,6 +4,9 @@
 CMakeFiles/shadergen.dir/bool.c.o: \
  ../bool.c \
  ../lang.h
+CMakeFiles/shadergen.dir/const.c.o: \
+ ../const.c \
+ ../lang.h
 CMakeFiles/shadergen.dir/float.c.o: \
  ../float.c \
  ../lang.h
@@ -31,6 +34,7 @@ CMakeFiles/shadergen.dir/ray.c.o: \
  ../lang.h \
  ../ray.c
 CMakeFiles/shadergen.dir/raytracer.c.o: \
+ ../lang.h \
  ../raytracer.c
 CMakeFiles/shadergen.dir/shading.c.o: \
  ../lang.h \

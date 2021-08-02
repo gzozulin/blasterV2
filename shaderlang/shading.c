@@ -4,12 +4,6 @@
 
 #include "lang.h"
 
-const int uLightsPointCnt = 1;
-const int uLightsDirCnt = 0;
-const Light uLights[MAX_LIGHTS] = {
-        { { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f, 1.0f }, 1.0f, 1.0f, 1.0f }
-};
-
 // region ------------------- SHADING ---------------
 
 // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment

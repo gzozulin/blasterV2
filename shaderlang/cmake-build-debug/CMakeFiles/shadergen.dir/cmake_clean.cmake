@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/shadergen.dir/bool.c.o"
+  "CMakeFiles/shadergen.dir/const.c.o"
   "CMakeFiles/shadergen.dir/float.c.o"
   "CMakeFiles/shadergen.dir/ivec2.c.o"
   "CMakeFiles/shadergen.dir/main.c.o"

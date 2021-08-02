@@ -4,9 +4,6 @@
 
 #include "lang.h"
 
-public
-const RefractResult NO_REFRACT = { false, { 0, 0, 0 } };
-
 // region ------------------- VEC3 -------------------
 
 public

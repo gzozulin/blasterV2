@@ -81,6 +81,9 @@
 		<Unit filename="/home/greg/blaster/shaderlang/bool.c">
 			<Option target="shadergen"/>
 		</Unit>
+		<Unit filename="/home/greg/blaster/shaderlang/const.c">
+			<Option target="shadergen"/>
+		</Unit>
 		<Unit filename="/home/greg/blaster/shaderlang/float.c">
 			<Option target="shadergen"/>
 		</Unit>

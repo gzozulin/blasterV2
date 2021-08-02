@@ -9,6 +9,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
   "/home/greg/blaster/shaderlang/bool.c" "/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir/bool.c.o"
+  "/home/greg/blaster/shaderlang/const.c" "/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir/const.c.o"
   "/home/greg/blaster/shaderlang/float.c" "/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir/float.c.o"
   "/home/greg/blaster/shaderlang/ivec2.c" "/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir/ivec2.c.o"
   "/home/greg/blaster/shaderlang/main.c" "/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir/main.c.o"
