@@ -214,7 +214,7 @@ extern const DielectricMaterial     uDielectricMaterials[];
 #define min     fminf
 #define max     fmaxf
 #define cos     cosf
-#define sin     cosf
+#define sin     sinf
 
 #define floor _erased_
 
