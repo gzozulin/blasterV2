@@ -408,3 +408,10 @@ vec4 gammaSqrt(vec4 result);
 void raytracer();
 
 // endregion ------------------- RAYTRACING ---------------
+
+// region ------------------- SANDSIM ---------------
+
+vec4 sandPhysics(vec4 orig);
+vec4 sandSolver(vec4 orig, vec4 deltas);
+
+// endregion ------------------- SANDSIM ---------------

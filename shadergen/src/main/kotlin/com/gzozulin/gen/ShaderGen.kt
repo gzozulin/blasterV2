@@ -24,6 +24,7 @@ private val DEFINITIONS = listOf(
     "/home/greg/blaster/shaderlang/const.c",
     "/home/greg/blaster/shaderlang/raytracer.c",
     "/home/greg/blaster/shaderlang/shading.c",
+    "/home/greg/blaster/shaderlang/sandsim.c",
 )
 
 private const val GL_GENERATED = "/home/greg/blaster/minigl/src/main/kotlin/com/gzozulin/minigl/api/GlGenerated.kt"

@@ -11,10 +11,14 @@ private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
 private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
 
 private val physicsIn = unifs()
-private val processPhysics = ShadingFlat(constm4(mat4().orthoBox()), sampler(physicsIn))
+private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()), sampler(physicsIn))
+
+private val solveOrigin = unifs()
+private val solveDeltas = unifs()
+private val sandSolve = ShadingFlat(constm4(mat4().orthoBox()))
 
 private val renderIn = unifs()
-private val renderWorld = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))
+private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))
 
 private val rect = glMeshCreateRect()
 private val startTexture = libTextureCreate("textures/font.png")
@@ -22,8 +26,8 @@ private val startTexture = libTextureCreate("textures/font.png")
 private fun sandUse(callback: Callback) {
     glRttUse(buffer0) {
         glRttUse(buffer1) {
-            glShadingFlatUse(processPhysics) {
-                glShadingFlatUse(renderWorld) {
+            glShadingFlatUse(sandPhysics) {
+                glShadingFlatUse(sandRender) {
                     glMeshUse(rect) {
                         glTextureUse(startTexture) {
                             callback.invoke()
@@ -46,26 +50,26 @@ private fun sandStart() {
 }
 
 private fun sandFrame() {
-    val from: TechniqueRtt
-    val to: TechniqueRtt
+    val buffIn: TechniqueRtt
+    val buffOut: TechniqueRtt
     if (currentBuffer % 2 == 0) {
-        from = buffer0
-        to = buffer1
+        buffIn = buffer0
+        buffOut = buffer1
     } else {
-        from = buffer1
-        to = buffer0
+        buffIn = buffer1
+        buffOut = buffer0
     }
-    sandPopulate(from.color, to)
-    sandDraw(to.color)
+    sandPopulate(buffIn.color, buffOut)
+    sandDraw(buffOut.color)
     currentBuffer++
 }
 
 private fun sandPopulate(from: GlTexture, to: TechniqueRtt) {
     glRttDraw(to) {
         glTextureBind(from) {
-            glShadingFlatDraw(processPhysics) {
+            glShadingFlatDraw(sandPhysics) {
                 physicsIn.value = from
-                glShadingFlatInstance(processPhysics, rect)
+                glShadingFlatInstance(sandPhysics, rect)
             }
         }
     }
@@ -73,9 +77,9 @@ private fun sandPopulate(from: GlTexture, to: TechniqueRtt) {
 
 private fun sandDraw(buffer: GlTexture) {
     glTextureBind(buffer) {
-        glShadingFlatDraw(renderWorld) {
+        glShadingFlatDraw(sandRender) {
             renderIn.value = buffer
-            glShadingFlatInstance(renderWorld, rect)
+            glShadingFlatInstance(sandRender, rect)
         }
     }
 }
