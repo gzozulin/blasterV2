@@ -161,11 +161,6 @@ fun unifs(p: () -> GlTexture) = object : Uniform<GlTexture>(p, null) {
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
 }
 
-fun unifs1(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
-    override fun declare() = "uniform sampler1D $name;"
-    override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
-}
-
 fun unifsb(v: GlTexture? = null) = object : Uniform<GlTexture>(null, v) {
     override fun declare() = "uniform samplerBuffer $name;"
     override fun submit(program: GlProgram) = glProgramUniform(program, name, value)
@@ -228,20 +223,7 @@ fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {
 
 // ----------------------------- Sampler -----------------------------
 
-fun texel(sampler: Expression<GlTexture>, index: Expression<Int>) = object : Expression<vec4>() {
-    override fun expr() = "texelFetch(${sampler.expr()}, ${index.expr()})"
-    override fun roots() = listOf(index, sampler)
-}
-
-fun sampler(sampler: Expression<GlTexture>, texCoord: Expression<vec2> = namedTexCoordsV2()) = object : Expression<vec4>() {
-    override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
-    override fun roots() = listOf(texCoord, sampler)
-}
-
-fun samplerq(texCoord: Expression<vec3>, sampler: Expression<GlTexture>) = object : Expression<vec4>() {
-    override fun expr() = "texture(${sampler.expr()}, ${texCoord.expr()})"
-    override fun roots() = listOf(texCoord, sampler)
-}
+fun sampler(sampler: Expression<GlTexture>) = sampler(sampler, namedTexCoordsV2())
 
 // ------------------------- Discard -------------------------
 

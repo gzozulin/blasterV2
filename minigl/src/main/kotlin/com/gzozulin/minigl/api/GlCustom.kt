@@ -253,8 +253,22 @@ private const val CUSTOM_MAT4_DEF = """
     }
 """
 
+private const val CUSTOM_SAMPLER_DEF = """
+    vec4 sampler(sampler2D sampler, vec2 texCoords) {
+        return texture(sampler, texCoords);
+    }
+    
+    vec4 texel(samplerBuffer sampler, int index) {
+        return texelFetch(sampler, index);
+    }
+    
+    vec4 samplerq(samplerCube sampler, vec3 texCoords) {
+        return texture(sampler, texCoords);
+    }
+"""
+
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
         "$CUSTOM_DEF\n$CUSTOM_RANDOM_DEF\n" +
         "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC2_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT2_DEF\n$CUSTOM_MAT4_DEF\n" +
-        "$CONST_DEF\n$OPS_DEF\n"
+        "$CUSTOM_SAMPLER_DEF\n$CONST_DEF\n$OPS_DEF\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEF\n"

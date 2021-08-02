@@ -786,6 +786,21 @@ fun randomInUnitDisk() = object : Expression<vec3>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
+fun sampler(sampler: Expression<GlTexture>, texCoords: Expression<vec2>) = object : Expression<vec4>() {
+    override fun expr() = "sampler(${sampler.expr()}, ${texCoords.expr()})"
+    override fun roots() = listOf(sampler, texCoords)
+}
+
+fun texel(sampler: Expression<GlTexture>, index: Expression<Int>) = object : Expression<vec4>() {
+    override fun expr() = "texel(${sampler.expr()}, ${index.expr()})"
+    override fun roots() = listOf(sampler, index)
+}
+
+fun samplerq(sampler: Expression<GlTexture>, texCoords: Expression<vec3>) = object : Expression<vec4>() {
+    override fun expr() = "samplerq(${sampler.expr()}, ${texCoords.expr()})"
+    override fun roots() = listOf(sampler, texCoords)
+}
+
 fun fragmentColorRt(width: Expression<Int>, height: Expression<Int>, random: Expression<Float>, sampleCnt: Expression<Int>, rayBounces: Expression<Int>, eye: Expression<vec3>, center: Expression<vec3>, up: Expression<vec3>, fovy: Expression<Float>, aspect: Expression<Float>, aperture: Expression<Float>, focusDist: Expression<Float>, texCoord: Expression<vec2>) = object : Expression<vec4>() {
     override fun expr() = "fragmentColorRt(${width.expr()}, ${height.expr()}, ${random.expr()}, ${sampleCnt.expr()}, ${rayBounces.expr()}, ${eye.expr()}, ${center.expr()}, ${up.expr()}, ${fovy.expr()}, ${aspect.expr()}, ${aperture.expr()}, ${focusDist.expr()}, ${texCoord.expr()})"
     override fun roots() = listOf(width, height, random, sampleCnt, rayBounces, eye, center, up, fovy, aspect, aperture, focusDist, texCoord)

@@ -21,6 +21,7 @@ private val DEFINITIONS = listOf(
     "/home/greg/blaster/shaderlang/mat4.c",
     "/home/greg/blaster/shaderlang/ray.c",
     "/home/greg/blaster/shaderlang/random.c",
+    "/home/greg/blaster/shaderlang/sampler.c",
     "/home/greg/blaster/shaderlang/const.c",
     "/home/greg/blaster/shaderlang/raytracer.c",
     "/home/greg/blaster/shaderlang/shading.c",
@@ -162,6 +163,9 @@ private fun convertType(ctype: String) = when (ctype) {
     "mat4"                  -> "mat4"
     "Light"                 -> "Light"
     "Ray"                   -> "ray"
+    "sampler2D"             -> "GlTexture"
+    "samplerBuffer"         -> "GlTexture"
+    "samplerCube"           -> "GlTexture"
     "PhongMaterial"         -> "PhongMaterial"
     else                    -> error("Unknown type! $ctype")
 }

@@ -97,8 +97,8 @@ private val cubeSampler2 = unifsq(cubeMap2)
 
 private val texCoords = namedTexCoordsV3()
 
-private val color1 = samplerq(texCoords, cubeSampler1)
-private val color2 = samplerq(texCoords, cubeSampler2)
+private val color1 = samplerq(cubeSampler1, texCoords)
+private val color2 = samplerq(cubeSampler2, texCoords)
 
 private var direction = true
 private var timer = 0

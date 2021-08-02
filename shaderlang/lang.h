@@ -71,6 +71,18 @@ typedef struct mat4 {
     float value[16];
 } mat4;
 
+typedef struct sampler2D {
+    int handle;
+} sampler2D;
+
+typedef struct samplerBuffer {
+    int handle;
+} samplerBuffer;
+
+typedef struct samplerCube {
+    int handle;
+} samplerCube;
+
 public
 typedef struct Ray {
     vec3 origin;
@@ -385,6 +397,14 @@ vec3 randomInUnitSphere() ;
 vec3 randomInUnitDisk();
 
 // endregion ------------------- RAND -------------------
+
+// region ------------------- SAMPLER -------------------
+
+vec4 sampler(sampler2D sampler, vec2 texCoords);
+vec4 texel(samplerBuffer sampler, int index);
+vec4 samplerq(samplerCube sampler, vec3 texCoords);
+
+// endregion ------------------- SAMPLER -------------------
 
 // region ------------------- RAYTRACING ---------------
 
