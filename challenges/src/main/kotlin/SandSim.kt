@@ -11,11 +11,11 @@ private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
 private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
 
 private val physicsIn = unifs()
-private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()), sampler(physicsIn))
+private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()), sandPhysics(physicsIn))
 
-private val solveOrigin = unifs()
-private val solveDeltas = unifs()
-private val sandSolve = ShadingFlat(constm4(mat4().orthoBox()))
+private val solverOrigin = unifs()
+private val solverDeltas = unifs()
+private val sandSolver = ShadingFlat(constm4(mat4().orthoBox()), sandSolver(solverOrigin, solverDeltas))
 
 private val renderIn = unifs()
 private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))

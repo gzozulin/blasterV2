@@ -5,11 +5,11 @@
 #include "lang.h"
 
 public
-vec4 sandPhysics(vec4 orig) {
-    return orig;
+vec4 sandPhysics(sampler2D orig) {
+    return sampler(orig, v2zero());
 }
 
 public
-vec4 sandSolver(vec4 orig, vec4 deltas) {
-    return addv4(orig, deltas);
+vec4 sandSolver(sampler2D orig, sampler2D deltas) {
+    return addv4(sampler(orig, v2zero()), sampler(deltas, v2zero()));
 }

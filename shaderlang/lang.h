@@ -431,7 +431,7 @@ void raytracer();
 
 // region ------------------- SANDSIM ---------------
 
-vec4 sandPhysics(vec4 orig);
-vec4 sandSolver(vec4 orig, vec4 deltas);
+vec4 sandPhysics(sampler2D orig);
+vec4 sandSolver(sampler2D orig, sampler2D deltas);
 
 // endregion ------------------- SANDSIM ---------------
