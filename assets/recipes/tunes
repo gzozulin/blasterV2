@@ -79,7 +79,7 @@ periodShake:    mulf (sinv (mulf time 30f)) 0.0002f
 
 thatsallUV:     v2 (addf (getxv2 texCoords) periodShake) (addf (getyv2 texCoords) periodShake)
 thatsall:       sampler samplerThatsall thatsallUV
-logo:           ifexp (more (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsall
+logo:           ifexp (moreexp (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsall
 
 // ---------------- FILM ------------------
 

@@ -16,5 +16,5 @@ back:           v2tov3 uv time
 wave:           v3 time x y
 
 
-color:          ifexp (more func y) wave back
+color:          ifexp (moreexp func y) wave back
 color:          v3tov4 color 1f

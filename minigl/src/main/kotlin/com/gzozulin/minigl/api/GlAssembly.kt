@@ -243,12 +243,12 @@ fun <R> eqexp(left: Expression<R>, right: Expression<R>) = object : Expression<B
     override fun roots() = listOf(left, right)
 }
 
-fun <R> more(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
+fun <R> moreexp(left: Expression<R>, right: Expression<R>) = object : Expression<Boolean>() {
     override fun expr() = "(${left.expr()} > ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 
-fun not(expr: Expression<Boolean>) = object : Expression<Boolean>() {
+fun notexp(expr: Expression<Boolean>) = object : Expression<Boolean>() {
     override fun expr() = expr.expr() + listOf("(!${expr.expr()})")
     override fun roots() = listOf(expr)
 }

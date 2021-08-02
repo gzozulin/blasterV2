@@ -78,7 +78,7 @@ class TechniqueText(
 
     internal val uniformColor = unifv4()
     private val fontColor = cachev4(sampler(unifs(font), texCoordTiled))
-    private val fontCheck = more(getav4(fontColor), constf(0f))
+    private val fontCheck = moreexp(getav4(fontColor), constf(0f))
     private val resultColor = setav4(uniformColor, getrv4(fontColor))
     private val result = ifexp(fontCheck, resultColor, discard())
 
