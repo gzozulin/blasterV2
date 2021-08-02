@@ -1,3 +1,0 @@
-/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/greg/blaster/shaderlang/cmake-build-debug/CMakeFiles/shadergen.dir

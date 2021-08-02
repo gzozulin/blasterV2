@@ -1,4 +1,0 @@
-/snap/clion/162/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/greg/blaster/shaderlang
--- Configuring done
--- Generating done
--- Build files have been written to: /home/greg/blaster/shaderlang/cmake-build-debug
