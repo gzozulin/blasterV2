@@ -9,7 +9,7 @@ private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 private val constWH = constv2i(window.width, window.height)
 
-private var isSimulating = true
+private var isSimulating = false
 
 private var currentBuffer = 0
 private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F, minFilter = backend.GL_LINEAR) // non-normalized, linear
@@ -29,7 +29,7 @@ private val renderIn = unifs()
 private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))
 
 private val rect = glMeshCreateRect()
-private val startTexture = libTextureCreate("textures/font.png")
+private val startTexture = libTextureCreate("textures/font_hires.png")
 
 private fun sandUse(callback: Callback) {
     glShadingFlatUse(sandPhysics) {
@@ -63,6 +63,12 @@ private fun sandPopulate() {
     }
     glRttDraw(buffer1) {
         glClear(col3().black())
+        glTextureBind(startTexture) {
+            glShadingFlatDraw(sandRender) {
+                renderIn.value = startTexture
+                glShadingFlatInstance(sandRender, rect)
+            }
+        }
     }
     glRttDraw(deltas) {
         glClear(col3().black())

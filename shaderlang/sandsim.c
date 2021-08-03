@@ -16,7 +16,7 @@ ivec2 tryDepositParticle(const sampler2D orig, const vec2 uv, const float cellW,
         return iv2zero();
     }
     const vec4 below = sampler(orig, coords);
-    if (below.x == 0.0f) {
+    if (eqv4(below, v4zero())) {
         return iv2(x, -1);
     }
     return iv2zero();
@@ -72,7 +72,7 @@ vec4 sandSolver(const sampler2D orig, const sampler2D deltas, const vec2 uv, con
             }
             const vec4 delta = sampler(deltas, coords);
             if (delta.x == itof(-x) && delta.y == itof(-y)) {
-                result.x += cell.x;
+                return v4one();
             }
         }
     }
