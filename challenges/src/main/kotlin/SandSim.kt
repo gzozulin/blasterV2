@@ -2,15 +2,19 @@ package com.gzozulin.examples
 
 import com.gzozulin.minigl.api.*
 import com.gzozulin.minigl.assets.libTextureCreate
+import com.gzozulin.minigl.capture.Capturer
 import com.gzozulin.minigl.tech.*
 
-private val window = GlWindow()
+private val window = GlWindow(isFullscreen = true)
+private val capturer = Capturer(window)
 private val constWH = constv2i(window.width, window.height)
 
+private var isSimulating = false
+
 private var currentBuffer = 0
-private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
-private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
-private val deltas = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
+private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F, minFilter = backend.GL_LINEAR) // non-normalized, linear
+private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F, minFilter = backend.GL_LINEAR)// non-normalized, linear
+private val deltas = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F, minFilter = backend.GL_LINEAR)// non-normalized, linear
 
 private val physicsIn = unifs()
 private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()),
@@ -50,6 +54,12 @@ private fun sandUse(callback: Callback) {
 private fun sandPopulate() {
     glRttDraw(buffer0) {
         glClear(col3().black())
+        glTextureBind(startTexture) {
+            glShadingFlatDraw(sandRender) {
+                renderIn.value = startTexture
+                glShadingFlatInstance(sandRender, rect)
+            }
+        }
     }
     glRttDraw(buffer1) {
         glClear(col3().black())
@@ -57,15 +67,16 @@ private fun sandPopulate() {
     glRttDraw(deltas) {
         glClear(col3().black())
     }
-    sandPhysics(startTexture)
 }
 
 private fun sandFrame() {
     val (buffIn, buffOut) = sandSelectBuffer()
-    sandPhysics(buffIn.color)
-    sandSolve(buffIn, buffOut)
+    if (isSimulating) {
+        sandPhysics(buffIn.color)
+        sandSolve(buffIn, buffOut)
+        currentBuffer++
+    }
     sandDraw(buffOut.color)
-    currentBuffer++
 }
 
 private fun sandSelectBuffer(): Pair<TechniqueRtt, TechniqueRtt> {
@@ -92,12 +103,12 @@ private fun sandPhysics(from: GlTexture) {
     }
 }
 
-private fun sandSolve(buffIn: TechniqueRtt, buffOut: TechniqueRtt) {
-    glRttDraw(buffOut) {
-        glTextureBind(buffIn.color) {
+private fun sandSolve(origin: TechniqueRtt, result: TechniqueRtt) {
+    glRttDraw(result) {
+        glTextureBind(origin.color) {
             glTextureBind(deltas.color) {
                 glShadingFlatDraw(sandSolver) {
-                    solverOrigin.value = buffIn.color
+                    solverOrigin.value = origin.color
                     solverDeltas.value = deltas.color
                     glShadingFlatInstance(sandSolver, rect)
                 }
@@ -106,10 +117,10 @@ private fun sandSolve(buffIn: TechniqueRtt, buffOut: TechniqueRtt) {
     }
 }
 
-private fun sandDraw(buffer: GlTexture) {
-    glTextureBind(buffer) {
+private fun sandDraw(result: GlTexture) {
+    glTextureBind(result) {
         glShadingFlatDraw(sandRender) {
-            renderIn.value = buffer
+            renderIn.value = result
             glShadingFlatInstance(sandRender, rect)
         }
     }
@@ -117,11 +128,17 @@ private fun sandDraw(buffer: GlTexture) {
 
 fun main() {
     window.create {
+        window.keyCallback = { key, pressed ->
+            isSimulating = pressed
+        }
         sandUse {
             sandPopulate()
-            window.show {
-                sandFrame()
-            }
+            //capturer.capture {
+                window.show {
+                    sandFrame()
+                    //capturer.addFrame()
+                }
+            //}
         }
     }
 }
