@@ -233,6 +233,7 @@ float divf(float left, float right);
 // region ------------------- BOOL -------------------
 
 bool eqv2(vec2 left, vec2 right);
+bool eqiv2(ivec2 left, ivec2 right);
 bool eqv3(vec3 left, vec3 right);
 bool eqv4(vec4 left, vec4 right);
 
@@ -255,6 +256,8 @@ float length(vec2 v);
 // region ------------------- IVEC2 -------------------
 
 ivec2 iv2(int x, int y);
+ivec2 iv2zero();
+vec4 iv2tov4(ivec2 vec, float z, float w);
 float getxiv2(vec2 v);
 float getyiv2(vec2 v);
 float getuiv2(vec2 v);

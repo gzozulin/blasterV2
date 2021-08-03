@@ -5,58 +5,69 @@
 #include "lang.h"
 
 protected
-vec4 tryDepositParticle(sampler2D orig, vec2 cell, vec2 uv, int x) {
-    const vec2 coords = v2(uv.x + itof(x) * cell.x, uv.y - cell.y);
+vec2 nearbyCellCoords(const vec2 uv, const float cellW, const float cellH, const int x, const int y) {
+    return v2(uv.x + itof(x) * cellW, uv.y + itof(y) * cellH);
+}
+
+protected
+ivec2 tryDepositParticle(const sampler2D orig, const vec2 uv, const float cellW, const float cellH, const int x) {
+    const vec2 coords = nearbyCellCoords(uv, cellW, cellH, x, -1);
     if (coords.x < 0.0f || coords.y < 0.0f || coords.x > 1.0f || coords.y > 1.0f) {
-        return v4zero();
+        return iv2zero();
     }
     const vec4 below = sampler(orig, coords);
     if (below.x == 0.0f) {
-        return v4(itof(x), -1.0f, 0.0f, 1.0f);
+        return iv2(x, -1);
     }
-    return v4zero();
+    return iv2zero();
 }
 
 public
-vec4 sandPhysics(sampler2D orig, vec2 uv, ivec2 wh) {
-    const vec2 cell = v2(1.0f / itof(wh.x), 1.0f / itof(wh.y));
+vec4 sandPhysics(const sampler2D orig, const vec2 uv, const ivec2 wh) {
+    const float cellW = 1.0f / itof(wh.x);
+    const float cellH = 1.0f / itof(wh.y);
 
     const vec4 own = sampler(orig, uv);
     if (own.x == 0.0f) {
         return v4zero();
     }
 
-    vec4 deposit = tryDepositParticle(orig, cell, uv, 0); // center
-    if (!eqv4(deposit, v4zero())) {
-        return deposit;
+    ivec2 deposit = tryDepositParticle(orig, uv, cellW, cellH, 0);
+    if (!eqiv2(deposit, iv2zero())) {
+        return iv2tov4(deposit, 0.0f, 0.0f);
     }
 
-    deposit = tryDepositParticle(orig, cell, uv, -1); // left
-    if (!eqv4(deposit, v4zero())) {
-        return deposit;
+    const bool left = rndv2(uv) > 0.5f;
+    const int first =  left ? -1 :  1;
+    const int second = left ?  1 : -1;
+
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, first);
+    if (!eqiv2(deposit, iv2zero())) {
+        return iv2tov4(deposit, 0.0f, 0.0f);
     }
 
-    deposit = tryDepositParticle(orig, cell, uv, 1); // right
-    if (!eqv4(deposit, v4zero())) {
-        return deposit;
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, second);
+    if (!eqiv2(deposit, iv2zero())) {
+        return iv2tov4(deposit, 0.0f, 0.0f);
     }
 
     return v4zero();
 }
 
 public
-vec4 sandSolver(sampler2D orig, sampler2D deltas, vec2 uv, ivec2 wh) {
+vec4 sandSolver(const sampler2D orig, const sampler2D deltas, const vec2 uv, const ivec2 wh) {
     const float cellW = 1.0f / itof(wh.x);
     const float cellH = 1.0f / itof(wh.y);
-    vec4 result = v4(0.0f, 0.0f, 0.0f, 1.0f);
+
+    vec4 result = v4zero();
     for (int x = -1; x < 2; x++) {
         for (int y = -1; y < 2; y++) {
-            const vec2 coords = v2(uv.x + itof(x) * cellW, uv.y + itof(y) * cellH);
+            const vec2 coords = nearbyCellCoords(uv, cellW, cellH, x, y);
             if (coords.x < 0.0f || coords.y < 0.0f || coords.x > 1.0f || coords.y > 1.0f) {
                 continue;
             }
             const vec4 cell = sampler(orig, coords);
-            if (cell.x == 0.0f) {
+            if (eqv4(cell, v4zero())) {
                 continue;
             }
             const vec4 delta = sampler(deltas, coords);
@@ -65,8 +76,5 @@ vec4 sandSolver(sampler2D orig, sampler2D deltas, vec2 uv, ivec2 wh) {
             }
         }
     }
-
-
-    // if still empty - try spreading
     return result;
 }

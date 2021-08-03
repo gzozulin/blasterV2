@@ -9,7 +9,7 @@ private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 private val constWH = constv2i(window.width, window.height)
 
-private var isSimulating = false
+private var isSimulating = true
 
 private var currentBuffer = 0
 private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F, minFilter = backend.GL_LINEAR) // non-normalized, linear

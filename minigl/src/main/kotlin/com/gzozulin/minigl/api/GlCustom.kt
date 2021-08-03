@@ -184,7 +184,7 @@ private const val CUSTOM_CTORS_DEF = """
         return vec2(x, y);
     }
     
-    ivec2 v2i(int x, int y) {
+    ivec2 iv2(int x, int y) {
         return ivec2(x, y);
     }
     

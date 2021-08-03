@@ -12,6 +12,11 @@ bool eqv2(const vec2 left, const vec2 right) {
 }
 
 public
+bool eqiv2(const ivec2 left, const ivec2 right) {
+    return left.x == right.x && left.y == right.y;
+}
+
+public
 bool eqv3(const vec3 left, const vec3 right) {
     return left.x == right.x && left.y == right.y && left.z == right.z;
 }
