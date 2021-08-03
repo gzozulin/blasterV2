@@ -10,6 +10,7 @@ private val constWH = constv2i(window.width, window.height)
 private var currentBuffer = 0
 private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F)
 private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
+private val deltas = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F)
 
 private val physicsIn = unifs()
 private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()),
@@ -27,13 +28,17 @@ private val rect = glMeshCreateRect()
 private val startTexture = libTextureCreate("textures/font.png")
 
 private fun sandUse(callback: Callback) {
-    glRttUse(buffer0) {
-        glRttUse(buffer1) {
-            glShadingFlatUse(sandPhysics) {
-                glShadingFlatUse(sandRender) {
-                    glMeshUse(rect) {
-                        glTextureUse(startTexture) {
-                            callback.invoke()
+    glShadingFlatUse(sandPhysics) {
+        glShadingFlatUse(sandRender) {
+            glShadingFlatUse(sandSolver) {
+                glRttUse(buffer0) {
+                    glRttUse(buffer1) {
+                        glRttUse(deltas) {
+                            glMeshUse(rect) {
+                                glTextureUse(startTexture) {
+                                    callback.invoke()
+                                }
+                            }
                         }
                     }
                 }
@@ -42,17 +47,28 @@ private fun sandUse(callback: Callback) {
     }
 }
 
-private fun sandStart() {
+private fun sandPopulate() {
     glRttDraw(buffer0) {
         glClear(col3().black())
     }
     glRttDraw(buffer1) {
         glClear(col3().black())
     }
-    sandPopulate(startTexture, buffer0)
+    glRttDraw(deltas) {
+        glClear(col3().black())
+    }
+    sandPhysics(startTexture)
 }
 
 private fun sandFrame() {
+    val (buffIn, buffOut) = sandSelectBuffer()
+    sandPhysics(buffIn.color)
+    sandSolve(buffIn, buffOut)
+    sandDraw(buffOut.color)
+    currentBuffer++
+}
+
+private fun sandSelectBuffer(): Pair<TechniqueRtt, TechniqueRtt> {
     val buffIn: TechniqueRtt
     val buffOut: TechniqueRtt
     if (currentBuffer % 2 == 0) {
@@ -62,17 +78,29 @@ private fun sandFrame() {
         buffIn = buffer1
         buffOut = buffer0
     }
-    sandPopulate(buffIn.color, buffOut)
-    sandDraw(buffOut.color)
-    currentBuffer++
+    return buffIn to buffOut
 }
 
-private fun sandPopulate(from: GlTexture, to: TechniqueRtt) {
-    glRttDraw(to) {
+private fun sandPhysics(from: GlTexture) {
+    glRttDraw(deltas) {
         glTextureBind(from) {
             glShadingFlatDraw(sandPhysics) {
                 physicsIn.value = from
                 glShadingFlatInstance(sandPhysics, rect)
+            }
+        }
+    }
+}
+
+private fun sandSolve(buffIn: TechniqueRtt, buffOut: TechniqueRtt) {
+    glRttDraw(buffOut) {
+        glTextureBind(buffIn.color) {
+            glTextureBind(deltas.color) {
+                glShadingFlatDraw(sandSolver) {
+                    solverOrigin.value = buffIn.color
+                    solverDeltas.value = deltas.color
+                    glShadingFlatInstance(sandSolver, rect)
+                }
             }
         }
     }
@@ -90,7 +118,7 @@ private fun sandDraw(buffer: GlTexture) {
 fun main() {
     window.create {
         sandUse {
-            sandStart()
+            sandPopulate()
             window.show {
                 sandFrame()
             }

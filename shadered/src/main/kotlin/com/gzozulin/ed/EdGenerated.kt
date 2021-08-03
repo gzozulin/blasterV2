@@ -89,6 +89,7 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "v3tov4" -> v3tov4(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "ftov4" -> ftov4(edParseExpression(lineNo, split.removeFirst(), heap))
 "v4zero" -> v4zero()
+"v4one" -> v4one()
 "addv4" -> addv4(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "subv4" -> subv4(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "mulv4" -> mulv4(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))

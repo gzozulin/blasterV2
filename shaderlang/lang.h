@@ -78,16 +78,16 @@ typedef struct samplerCube {
 } samplerCube;
 
 public
-typedef struct Ray {
+typedef struct ray {
     vec3 origin;
     vec3 direction;
-} Ray;
+} ray;
 
 public
-typedef struct AABB {
+typedef struct aabb {
     vec3 pointMin;
     vec3 pointMax;
-} AABB;
+} aabb;
 
 public
 typedef struct RtCamera {
@@ -119,7 +119,7 @@ typedef struct PhongMaterial {
 
 public
 typedef struct BvhNode {
-    AABB aabb;
+    aabb aabb;
     int leftType;
     int leftIndex;
     int rightType;
@@ -161,7 +161,7 @@ typedef struct HitRecord {
 public
 typedef struct ScatterResult {
     vec3 attenuation;
-    Ray scattered;
+    ray scattered;
 } ScatterResult;
 
 public
@@ -319,6 +319,7 @@ vec4 v4(float x, float y, float z, float w);
 vec4 v3tov4(vec3 v, float f) ;
 vec4 ftov4(float v);
 vec4 v4zero();
+vec4 v4one();
 vec4 addv4(vec4 left, vec4 right);
 vec4 subv4(vec4 left, vec4 right);
 vec4 mulv4(vec4 left, vec4 right);
@@ -364,8 +365,8 @@ mat4 scalem4(vec3 scale);
 
 // region ------------------- RAY -------------------
 
-Ray rayBack();
-vec3 rayPoint(Ray ray, float t);
+ray rayBack();
+vec3 rayPoint(ray ray, float t);
 
 // endregion ------------------- RAY -------------------
 
@@ -393,18 +394,18 @@ vec4 samplerq(samplerCube sampler, vec3 texCoords);
 // region ------------------- RAYTRACING ---------------
 
 RtCamera cameraLookAt(vec3 eye, vec3 center, vec3 up,float vfoy, float aspect, float aperture, float focusDist);
-Ray rayFromCamera(RtCamera camera, float u, float v);
-vec3 background(Ray ray);
-bool rayHitAabb(Ray ray, AABB aabb, float tMin, float tMax);
-HitRecord rayHitSphereRecord(Ray ray, float t, Sphere sphere);
-HitRecord rayHitSphere(Ray ray, float tMin, float tMax, Sphere sphere);
-HitRecord rayHitObject(Ray ray,float tMin, float tMax, int type, int index);
-HitRecord rayHitBvh(Ray ray, float tMin, float tMax, int index);
-HitRecord rayHitWorld(Ray ray, float tMin, float tMax);
+ray rayFromCamera(RtCamera camera, float u, float v);
+vec3 background(ray ray);
+bool rayHitAabb(ray ray, aabb aabb, float tMin, float tMax);
+HitRecord rayHitSphereRecord(ray ray, float t, Sphere sphere);
+HitRecord rayHitSphere(ray ray, float tMin, float tMax, Sphere sphere);
+HitRecord rayHitObject(ray ray, float tMin, float tMax, int type, int index);
+HitRecord rayHitBvh(ray ray, float tMin, float tMax, int index);
+HitRecord rayHitWorld(ray ray, float tMin, float tMax);
 ScatterResult scatterLambertian(HitRecord record, LambertianMaterial material);
-ScatterResult scatterMetallic(Ray ray, HitRecord record, MetallicMaterial material);
-ScatterResult scatterDielectric(Ray ray, HitRecord record, DielectricMaterial material);
-ScatterResult scatterMaterial(Ray ray, HitRecord record);
+ScatterResult scatterMetallic(ray ray, HitRecord record, MetallicMaterial material);
+ScatterResult scatterDielectric(ray ray, HitRecord record, DielectricMaterial material);
+ScatterResult scatterMaterial(ray ray, HitRecord record);
 vec3 sampleColor(int rayBounces, RtCamera camera, float u, float v);
 vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
                      float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);

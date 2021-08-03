@@ -27,6 +27,11 @@ vec4 v4zero() {
 }
 
 public
+vec4 v4one() {
+    return ftov4(1.0f);
+}
+
+public
 vec4 addv4(const vec4 left, const vec4 right) {
     return v4(left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w);
 }

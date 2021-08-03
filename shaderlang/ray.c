@@ -7,13 +7,13 @@
 // region ------------------- RAY -------------------
 
 public
-Ray rayBack() {
-    const Ray result = { v3zero(), v3back() };
+ray rayBack() {
+    const ray result = {v3zero(), v3back() };
     return result;
 }
 
 public
-vec3 rayPoint(const Ray ray, const float t) {
+vec3 rayPoint(const ray ray, const float t) {
     return addv3(ray.origin, mulv3f(ray.direction, t));
 }
 
