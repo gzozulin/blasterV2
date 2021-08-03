@@ -74,8 +74,8 @@ circles:        v3tov4 (mulv3f (v3 .8 .0 .0) circles) 1f
 
 // ---------------- LOGO ------------------
 
-periodVis:      divf (addf (sinv (mulf time .5f)) 1f) 2f
-periodShake:    mulf (sinv (mulf time 30f)) 0.0002f
+periodVis:      divf (addf (sinf (mulf time .5f)) 1f) 2f
+periodShake:    mulf (sinf (mulf time 30f)) 0.0002f
 
 thatsallUV:     v2 (addf (getxv2 texCoords) periodShake) (addf (getyv2 texCoords) periodShake)
 thatsall:       sampler samplerThatsall thatsallUV
@@ -84,7 +84,7 @@ logo:           ifexp (moreexp (getxv2 thatsallUV) periodVis) (ftov4 0f) thatsal
 // ---------------- FILM ------------------
 
 foggy:          sampler samplerFoggy texCoords
-filmPeriod:     mulf (addf (sinv (mulf time 50f)) 1f) 0.01f
+filmPeriod:     mulf (addf (sinf (mulf time 50f)) 1f) 0.01f
 film:           mulv4f foggy filmPeriod
 
 // ---------------- NOISE ------------------

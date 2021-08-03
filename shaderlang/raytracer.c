@@ -4,6 +4,10 @@
 
 #include "lang.h"
 
+#include <float.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 // region ------------------- RAYTRACING ---------------
 
 protected
@@ -11,7 +15,7 @@ RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const flo
                       const float aperture, const float focusDist) {
     const float lensRadius = aperture / 2.0f;
 
-    const float halfHeight = tan(vfoy/2.0f);
+    const float halfHeight = tanf(vfoy/2.0f);
     const float halfWidth = aspect * halfHeight;
 
     const vec3 w = normv3(subv3(eye, center));
@@ -98,12 +102,12 @@ HitRecord rayHitSphere(const Ray ray, const float tMin, const float tMax, const 
     const float D = b*b - 4*a*c;
 
     if (D > 0) {
-        float t = (-b - sqrt(D)) / 2 * a;
+        float t = (-b - sqrtf(D)) / 2 * a;
         if (t < tMax && t > tMin) {
             return rayHitSphereRecord(ray, t, sphere);
         }
 
-        t = (-b + sqrt(D)) / 2 * a;
+        t = (-b + sqrtf(D)) / 2 * a;
         if (t < tMax && t > tMin) {
             return rayHitSphereRecord(ray, t, sphere);
         }
@@ -201,7 +205,7 @@ ScatterResult scatterDielectric(Ray ray, HitRecord record, DielectricMaterial ma
     float reflectProbe;
     const RefractResult refractResult = refractv3(ray.direction, outwardNormal, niOverNt);
     if (refractResult.isRefracted) {
-        reflectProbe = schlick(cosine, material.reflectiveIndex);
+        reflectProbe = schlickf(cosine, material.reflectiveIndex);
     } else {
         reflectProbe = 1.0f;
     }
@@ -278,7 +282,7 @@ vec4 fragmentColorRt(const int width, const int height,
 
 public
 vec4 gammaSqrt(const vec4 result) {
-    return v4(sqrt(result.x), sqrt(result.y), sqrt(result.z), 1.0f);
+    return v4(sqrtf(result.x), sqrtf(result.y), sqrtf(result.z), 1.0f);
 }
 
 void raytracer() {

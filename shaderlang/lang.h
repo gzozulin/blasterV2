@@ -9,12 +9,7 @@
 
 #pragma once
 
-#include <assert.h>
-#include <math.h>
 #include <stdbool.h>
-#include <float.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #define public      // define and add handle
 #define custom      // ops: handle only, definition is custom
@@ -208,30 +203,19 @@ extern const DielectricMaterial     uDielectricMaterials[];
 
 // region ------------------- MATH -------------------
 
-#define sqrt    sqrtf
-#define pow     powf
-#define tan     tanf
-#define min     fminf
-#define max     fmaxf
-#define cos     cosf
-#define sin     sinf
-
-#define floor _erased_
-
-float sqrtv(float value);
-float sinv(float rad);
-float cosv(float rad);
-float tanv(float rad);
-float powv(float base, float power);
-float minv(float left, float right);
-float maxv(float left, float right);
-float clamp(float x, float lowerlimit, float upperlimit);
-float smoothstep(float edge0, float edge1, float x);
-float floor(float value);
-float fract(float value);
-float schlick(float cosine, float ri);
-float length(vec2 v);
-float remap(float a, float b, float c, float d, float t);
+float sqrtf(float value);
+float sinf(float rad);
+float cosf(float rad);
+float tanf(float rad);
+float powf(float base, float power);
+float minf(float left, float right);
+float maxf(float left, float right);
+float clampf(float x, float lowerlimit, float upperlimit);
+float smoothf(float edge0, float edge1, float x);
+float floorf(float value);
+float fractf(float value);
+float schlickf(float cosine, float ri);
+float remapf(float a, float b, float c, float d, float t);
 
 // endregion ------------------- MATH -------------------
 
@@ -265,6 +249,7 @@ vec2 addv2f(vec2 left, float right);
 vec2 subv2f(vec2 left, float right);
 float getxv2(vec2 v);
 float getyv2(vec2 v);
+float length(vec2 v);
 
 // endregion ------------------- VEC2 -------------------
 

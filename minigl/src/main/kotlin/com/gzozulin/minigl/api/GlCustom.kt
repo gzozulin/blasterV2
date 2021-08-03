@@ -49,6 +49,52 @@ private const val CUSTOM_DEF = """
     float error() { return 0.0f; } // nothing
 """
 
+private const val CUSTOM_MATH_DEF = """
+    float sqrtf(float value) {
+        return sqrt(value);
+    }
+    
+    float sinf(float rad) {
+        return sin(rad);
+    }
+    
+    float cosf(float rad) {
+        return cos(rad);
+    }
+    
+    float tanf(float rad) {
+        return tan(rad);
+    }
+    
+    float powf(float base, float power) {
+        return pow(base, power);
+    }
+    
+    float minf(float left, float right) {
+        return min(left, right);
+    }
+    
+    float maxf(float left, float right) {
+        return max(left, right);
+    }
+    
+    float clampf(float x, float lowerlimit, float upperlimit) {
+        return clamp(x, lowerlimit, upperlimit);
+    }
+    
+    float smoothf(float edge0, float edge1, float x) {
+        return smoothstep(edge0, edge1, x);
+    }
+    
+    float floorf(float value) {
+        return floor(value);
+    }
+    
+    float fractf(float value) {
+        return fract(value);
+    }
+"""
+
 private const val CUSTOM_RANDOM_DEF = """
     // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
     // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
@@ -268,7 +314,7 @@ private const val CUSTOM_SAMPLER_DEF = """
 """
 
 const val VERT_SHADER_HEADER = "$VERSION\n$PRECISION_HIGH\n$TYPES_DEF\n" +
-        "$CUSTOM_DEF\n$CUSTOM_RANDOM_DEF\n" +
+        "$CUSTOM_DEF\n$CUSTOM_MATH_DEF\n$CUSTOM_RANDOM_DEF\n" +
         "$CUSTOM_CASTS_DEF\n$CUSTOM_CTORS_DEF\n$CUSTOM_VEC2_DEF\n$CUSTOM_VEC3_DEF\n$CUSTOM_MAT2_DEF\n$CUSTOM_MAT4_DEF\n" +
         "$CUSTOM_SAMPLER_DEF\n$CONST_DEF\n$OPS_DEF\n"
 const val FRAG_SHADER_HEADER = VERT_SHADER_HEADER + "$CUSTOM_FRAG_DEF\n"

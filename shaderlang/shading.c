@@ -4,6 +4,8 @@
 
 #include "lang.h"
 
+#include <assert.h>
+
 // region ------------------- SHADING ---------------
 
 // todo: spot light is done by comparing the angle (dot prod) between light dir an vec from light to fragment
@@ -29,7 +31,7 @@ vec3 specularContrib(const vec3 viewDir, const vec3 lightDir, const vec3 fragNor
                      const PhongMaterial material) {
     vec3 hv = halfVector(viewDir, lightDir);
     float specularTerm = dotv3(hv, fragNormal);
-    return specularTerm > 0.0f ? mulv3f(material.specular, pow(specularTerm, material.shine)) : v3zero();
+    return specularTerm > 0.0f ? mulv3f(material.specular, powf(specularTerm, material.shine)) : v3zero();
 }
 
 public
@@ -101,7 +103,7 @@ vec3 getNormalFromMap(const vec3 normal, const vec3 worldPos, const vec2 texCoor
 public
 float distributionGGX(const vec3 N, const vec3 H, const float a) {
     float a2        = a * a;
-    float NdotH     = max(dotv3(N, H), 0.0f);
+    float NdotH     = maxf(dotv3(N, H), 0.0f);
     float NdotH2    = NdotH*NdotH;
     float nom       = a2;
     float denom     = (NdotH2 * (a2 - 1.0f) + 1.0f);
@@ -120,8 +122,8 @@ float geometrySchlickGGX(const float NdotV, const float roughness) {
 
 public
 float geometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughness) {
-    float NdotV     = max(dotv3(N, V), 0.0f);
-    float NdotL     = max(dotv3(N, L), 0.0f);
+    float NdotV     = maxf(dotv3(N, V), 0.0f);
+    float NdotL     = maxf(dotv3(N, L), 0.0f);
     float ggx2      = geometrySchlickGGX(NdotV, roughness);
     float ggx1      = geometrySchlickGGX(NdotL, roughness);
     return ggx1 * ggx2;
@@ -129,7 +131,7 @@ float geometrySmith(const vec3 N, const vec3 V, const vec3 L, const float roughn
 
 public
 vec3 fresnelSchlick(const float cosTheta, const vec3 F0) {
-    return addv3(F0, mulv3(subv3(ftov3(1.0f), F0), ftov3(pow(1.0f - cosTheta, 5.0f))));
+    return addv3(F0, mulv3(subv3(ftov3(1.0f), F0), ftov3(powf(1.0f - cosTheta, 5.0f))));
 }
 
 public
@@ -155,16 +157,16 @@ vec4 shadingPbr(const vec3 eye, const vec3 worldPos, const vec3 albedo, const ve
 
         const float NDF = distributionGGX(N, H, roughness);
         const float G   = geometrySmith(N, V, L, roughness);
-        const vec3 F    = fresnelSchlick(max(dotv3(H, V), 0.0f), F0);
+        const vec3 F    = fresnelSchlick(maxf(dotv3(H, V), 0.0f), F0);
 
         const vec3 nominator = mulv3(F, ftov3(NDF * G));
-        const float denominator = 4.0f * max(dotv3(N, V), 0.0f) * max(dotv3(N, L), 0.0f) + 0.001f;
+        const float denominator = 4.0f * maxf(dotv3(N, V), 0.0f) * maxf(dotv3(N, L), 0.0f) + 0.001f;
 
         const vec3 specular = divv3f(nominator, denominator);
 
         vec3 kD = subv3(ftov3(1.0f), F);
         kD = mulv3(kD, ftov3(1.0f - metallic));
-        const float NdotL = max(dotv3(N, L), 0.0f);
+        const float NdotL = maxf(dotv3(N, L), 0.0f);
         Lo = addv3(Lo, mulv3(mulv3(addv3(divv3(mulv3(kD, alb), ftov3(PI)), specular), radiance), ftov3(NdotL)));
     }
 

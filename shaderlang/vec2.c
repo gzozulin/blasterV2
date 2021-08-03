@@ -45,4 +45,9 @@ float getyv2(const vec2 v) {
     return v.y;
 }
 
+custom
+float length(const vec2 v) {
+    return sqrtf(v.x*v.x + v.y*v.y);
+}
+
 // endregion ------------------- VEC2 -------------------

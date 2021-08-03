@@ -1,5 +1,9 @@
 #include "lang.h"
 
+#include <stdio.h>
+#include <assert.h>
+#include <float.h>
+
 custom
 float error() {
     assert(0 && "WTF?!");
