@@ -50,6 +50,7 @@
       <w>mulv</w>
       <w>mview</w>
       <w>normv</w>
+      <w>notexp</w>
       <w>ortho</w>
       <w>phong</w>
       <w>postdeclare</w>

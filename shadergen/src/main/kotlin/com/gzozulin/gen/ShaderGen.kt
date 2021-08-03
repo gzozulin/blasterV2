@@ -112,14 +112,11 @@ private fun renderDefinitions(definitions: List<CDefinition>): Pair<String, Stri
                 "namedTexCoordsV3" -> namedTexCoordsV3()
                 "namedGlFragCoordV2" -> namedGlFragCoordV2()
                 "cachev4" -> cachev4(edParseExpression(lineNo, split.removeFirst(), heap))
-                "texel" -> texel(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
-                "sampler" -> sampler(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
-                "samplerq" -> samplerq(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
                 "discard" -> discard<Any>()
                 "ifexp" -> ifexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
                 "eqexp" -> eqexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
-                "more" -> more<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
-                "not" -> not(edParseExpression(lineNo, split.removeFirst(), heap))
+                "moreexp" -> moreexp<Any>(edParseExpression(lineNo, split.removeFirst(), heap), edParseExpression(lineNo, split.removeFirst(), heap))
+                "notexp" -> notexp(edParseExpression(lineNo, split.removeFirst(), heap))
                 else -> error("Unknown operation!")
             }
         }

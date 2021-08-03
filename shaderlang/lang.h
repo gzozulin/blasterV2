@@ -2,7 +2,6 @@
 // Created by greg on 2021-07-30.
 //
 
-// todo: naming: sinf, mulv3, mulv3f
 // todo: glsl refract
 // todo: glsl reflect
 // todo: math library

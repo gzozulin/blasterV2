@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 private val FILE_RECIPE = File("/home/greg/blaster/assets/recipes/tex-coords-time")
 
-private val window = GlWindow(isFullscreen = true)
+private val window = GlWindow(isFullscreen = false)
 private val capturer = Capturer(window)
 
 private enum class ShaderState { MODIFIED, RELOADED, ERROR, SUCCESS }
@@ -165,7 +165,7 @@ private fun edShowWindow() {
                     edCheckNeedReload()
                     edShowFrame()
                     edShaderCompilSuccess()
-                    capturer.addFrame()
+                    //capturer.addFrame()
                 }
             }
         } catch (th: Throwable) {
@@ -190,9 +190,9 @@ fun main() = window.create {
     glMeshUse(rect) {
         glTextureUse(logoTexture) {
             glTextureUse(foggyTexture) {
-                capturer.capture {
+                //capturer.capture {
                     edShowWindow()
-                }
+                //}
             }
         }
     }
