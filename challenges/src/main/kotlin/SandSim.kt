@@ -16,6 +16,11 @@ private val buffer0 = TechniqueRtt(window, internalFormat = backend.GL_RGBA32F, 
 private val buffer1 = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F, minFilter = backend.GL_LINEAR)// non-normalized, linear
 private val deltas = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F, minFilter = backend.GL_LINEAR)// non-normalized, linear
 
+private val rect = glMeshCreateRect()
+private val startTexture = libTextureCreate("textures/sandsim.png")
+
+private val sandPopulate = ShadingFlat(constm4(mat4().orthoBox()), sandConvert(sampler(unifs(startTexture))))
+
 private val physicsIn = unifs()
 private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()),
     sandPhysics(physicsIn, namedTexCoordsV2(), constWH))
@@ -26,21 +31,20 @@ private val sandSolver = ShadingFlat(constm4(mat4().orthoBox()),
     sandSolver(solverOrigin, solverDeltas, namedTexCoordsV2(), constWH))
 
 private val renderIn = unifs()
-private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sampler(renderIn))
-
-private val rect = glMeshCreateRect()
-private val startTexture = libTextureCreate("textures/font_hires.png")
+private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sandDraw(sampler(renderIn)))
 
 private fun sandUse(callback: Callback) {
-    glShadingFlatUse(sandPhysics) {
-        glShadingFlatUse(sandRender) {
-            glShadingFlatUse(sandSolver) {
-                glRttUse(buffer0) {
-                    glRttUse(buffer1) {
-                        glRttUse(deltas) {
-                            glMeshUse(rect) {
-                                glTextureUse(startTexture) {
-                                    callback.invoke()
+    glShadingFlatUse(sandPopulate) {
+        glShadingFlatUse(sandPhysics) {
+            glShadingFlatUse(sandRender) {
+                glShadingFlatUse(sandSolver) {
+                    glRttUse(buffer0) {
+                        glRttUse(buffer1) {
+                            glRttUse(deltas) {
+                                glMeshUse(rect) {
+                                    glTextureUse(startTexture) {
+                                        callback.invoke()
+                                    }
                                 }
                             }
                         }
@@ -55,18 +59,16 @@ private fun sandPopulate() {
     glRttDraw(buffer0) {
         glClear(col3().black())
         glTextureBind(startTexture) {
-            glShadingFlatDraw(sandRender) {
-                renderIn.value = startTexture
-                glShadingFlatInstance(sandRender, rect)
+            glShadingFlatDraw(sandPopulate) {
+                glShadingFlatInstance(sandPopulate, rect)
             }
         }
     }
     glRttDraw(buffer1) {
         glClear(col3().black())
         glTextureBind(startTexture) {
-            glShadingFlatDraw(sandRender) {
-                renderIn.value = startTexture
-                glShadingFlatInstance(sandRender, rect)
+            glShadingFlatDraw(sandPopulate) {
+                glShadingFlatInstance(sandPopulate, rect)
             }
         }
     }
@@ -139,12 +141,12 @@ fun main() {
         }
         sandUse {
             sandPopulate()
-            //capturer.capture {
+            capturer.capture {
                 window.show {
                     sandFrame()
-                    //capturer.addFrame()
+                    capturer.addFrame()
                 }
-            //}
+            }
         }
     }
 }

@@ -170,7 +170,7 @@ private const val CUSTOM_CASTS_DEF = """
         return float(i);
     }
     
-    float ftoi(float f) {
+    int ftoi(float f) {
         return int(f);
     }
     

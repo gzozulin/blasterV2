@@ -4,21 +4,91 @@
 
 #include "lang.h"
 
+public
+const int TYPE_EMPTY    = 0;
+
+public
+const int TYPE_SAND     = 1;
+
+public
+const int TYPE_WATER    = 2;
+
+public
+vec4 sandConvert(const vec4 pixel) {
+    if (pixel.x > 0.9f && pixel.y > 0.9f) {
+        return v4(itof(TYPE_SAND), 0.0f, 0.0f, pixel.x);
+    } if (pixel.z > 0.9f) {
+        return v4(itof(TYPE_WATER), 0.0f, 0.0f, pixel.x);
+    } else {
+        return v4zero();
+    }
+}
+
 protected
 vec2 nearbyCellCoords(const vec2 uv, const float cellW, const float cellH, const int x, const int y) {
     return v2(uv.x + itof(x) * cellW, uv.y + itof(y) * cellH);
 }
 
 protected
-ivec2 tryDepositParticle(const sampler2D orig, const vec2 uv, const float cellW, const float cellH, const int x) {
-    const vec2 coords = nearbyCellCoords(uv, cellW, cellH, x, -1);
+ivec2 tryDepositParticle(const sampler2D orig, const vec2 uv,
+                         const float cellW, const float cellH,
+                         const int x, const int y) {
+    const vec2 coords = nearbyCellCoords(uv, cellW, cellH, x, y);
     if (coords.x < 0.0f || coords.y < 0.0f || coords.x > 1.0f || coords.y > 1.0f) {
         return iv2zero();
     }
-    const vec4 below = sampler(orig, coords);
-    if (eqv4(below, v4zero())) {
-        return iv2(x, -1);
+    const vec4 cell = sampler(orig, coords);
+    if (ftoi(cell.x) == TYPE_EMPTY) {
+        return iv2(x, y);
     }
+    return iv2zero();
+}
+
+protected
+ivec2 simTypeSand(const sampler2D orig, const vec2 uv, const float cellW, const float cellH) {
+    ivec2 deposit = tryDepositParticle(orig, uv, cellW, cellH, 0, -1);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
+    const bool left = rndv2(uv) > 0.5f;
+    const int first =  left ? -1 :  1;
+    const int second = left ?  1 : -1;
+
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, first, -1);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, second, -1);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
+    return iv2zero();
+}
+
+protected
+ivec2 simTypeWater(const sampler2D orig, const vec2 uv, const float cellW, const float cellH) {
+    ivec2 deposit = simTypeSand(orig, uv, cellW, cellH);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
+    const bool left = rndv3(v2tov3(uv, itof(TYPE_WATER))) > 0.5f;
+    const int first =  left ? -1 :  1;
+    const int second = left ?  1 : -1;
+
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, first, 0);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
+    deposit = tryDepositParticle(orig, uv, cellW, cellH, second, 0);
+    if (!eqiv2(deposit, iv2zero())) {
+        return deposit;
+    }
+
     return iv2zero();
 }
 
@@ -27,31 +97,14 @@ vec4 sandPhysics(const sampler2D orig, const vec2 uv, const ivec2 wh) {
     const float cellW = 1.0f / itof(wh.x);
     const float cellH = 1.0f / itof(wh.y);
 
-    const vec4 own = sampler(orig, uv);
-    if (own.x == 0.0f) {
+    const int type = ftoi(sampler(orig, uv).x);
+    if (type == TYPE_SAND) {
+        return iv2tov4(simTypeSand(orig, uv, cellW, cellH), 0.0f, 0.0f);
+    } if (type == TYPE_WATER) {
+        return iv2tov4(simTypeWater(orig, uv, cellW, cellH), 0.0f, 0.0f);
+    } else {
         return v4zero();
     }
-
-    ivec2 deposit = tryDepositParticle(orig, uv, cellW, cellH, 0);
-    if (!eqiv2(deposit, iv2zero())) {
-        return iv2tov4(deposit, 0.0f, 0.0f);
-    }
-
-    const bool left = rndv2(uv) > 0.5f;
-    const int first =  left ? -1 :  1;
-    const int second = left ?  1 : -1;
-
-    deposit = tryDepositParticle(orig, uv, cellW, cellH, first);
-    if (!eqiv2(deposit, iv2zero())) {
-        return iv2tov4(deposit, 0.0f, 0.0f);
-    }
-
-    deposit = tryDepositParticle(orig, uv, cellW, cellH, second);
-    if (!eqiv2(deposit, iv2zero())) {
-        return iv2tov4(deposit, 0.0f, 0.0f);
-    }
-
-    return v4zero();
 }
 
 public
@@ -67,14 +120,27 @@ vec4 sandSolver(const sampler2D orig, const sampler2D deltas, const vec2 uv, con
                 continue;
             }
             const vec4 cell = sampler(orig, coords);
-            if (eqv4(cell, v4zero())) {
+            if (ftoi(cell.x) == TYPE_EMPTY) {
                 continue;
             }
             const vec4 delta = sampler(deltas, coords);
             if (delta.x == itof(-x) && delta.y == itof(-y)) {
-                return v4one();
+                return cell;
             }
         }
     }
     return result;
 }
+
+public
+vec4 sandDraw(const vec4 orig) {
+    const int type = ftoi(orig.x);
+    if (type == TYPE_SAND) {
+        return v3tov4(v3yellow(), 1.0f);
+    }if (type == TYPE_WATER) {
+        return v3tov4(v3blue(), 1.0f);
+    } else {
+        return v4zero();
+    }
+}
+
