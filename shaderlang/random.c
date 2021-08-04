@@ -4,6 +4,8 @@
 
 #include "lang.h"
 
+#include <stdlib.h>
+
 // region ------------------- RAND -------------------
 
 custom

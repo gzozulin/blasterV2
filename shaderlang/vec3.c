@@ -205,7 +205,7 @@ vec3 divv3(const vec3 left, const vec3 right) {
 
 public
 vec3 powv3(const vec3 left, const vec3 right) {
-    return v3(pow(left.x, right.x), pow(left.y, right.y), pow(left.z, right.z));
+    return v3(powf(left.x, right.x), powf(left.y, right.y), powf(left.z, right.z));
 }
 
 public
@@ -215,7 +215,7 @@ vec3 mixv3(const vec3 left, const vec3 right, const float proportion) {
 
 public
 float lenv3(const vec3 v) {
-    return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+    return sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
 public
@@ -245,7 +245,7 @@ RefractResult refractv3(const vec3 v, const vec3 n, const float niOverNt) {
     const float D = 1.0f - niOverNt*niOverNt*(1.0f - dt*dt);
     if (D > 0) {
         const vec3 left = mulv3f(subv3(unitV, mulv3f(n, dt)), niOverNt);
-        const vec3 right = mulv3f(n, sqrt(D));
+        const vec3 right = mulv3f(n, sqrtf(D));
         const RefractResult result = { true, subv3(left, right) };
         return result;
     } else {
