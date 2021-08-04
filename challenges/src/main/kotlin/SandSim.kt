@@ -31,7 +31,8 @@ private val sandSolver = ShadingFlat(constm4(mat4().orthoBox()),
     sandSolver(solverOrigin, solverDeltas, namedTexCoordsV2(), constWH))
 
 private val renderIn = unifs()
-private val sandRender = ShadingFlat(constm4(mat4().orthoBox()), sandDraw(sampler(renderIn)))
+private val sandRender = ShadingFlat(constm4(mat4().orthoBox()),
+    sandDraw(renderIn, namedTexCoordsV2(), constWH))
 
 private fun sandUse(callback: Callback) {
     glShadingFlatUse(sandPopulate) {

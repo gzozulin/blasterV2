@@ -149,7 +149,7 @@ private const val DEF_SIMTYPESAND = "ivec2 simTypeSand ( sampler2D orig , vec2 u
 private const val DEF_SIMTYPEWATER = "ivec2 simTypeWater ( sampler2D orig , vec2 uv , float cellW , float cellH ) { ivec2 deposit = simTypeSand ( orig , uv , cellW , cellH ) ; if ( ! eqiv2 ( deposit , iv2zero ( ) ) ) { return deposit ; } bool left = rndv3 ( v2tov3 ( uv , itof ( TYPE_WATER ) ) ) > 0.5f ; int first = left ? - 1 : 1 ; int second = left ? 1 : - 1 ; deposit = tryDepositParticle ( orig , uv , cellW , cellH , first , 0 ) ; if ( ! eqiv2 ( deposit , iv2zero ( ) ) ) { return deposit ; } deposit = tryDepositParticle ( orig , uv , cellW , cellH , second , 0 ) ; if ( ! eqiv2 ( deposit , iv2zero ( ) ) ) { return deposit ; } return iv2zero ( ) ; }\n"
 private const val DEF_SANDPHYSICS = "vec4 sandPhysics ( sampler2D orig , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; int type = ftoi ( sampler ( orig , uv ) . x ) ; if ( type == TYPE_SAND ) { return iv2tov4 ( simTypeSand ( orig , uv , cellW , cellH ) , 0.0f , 0.0f ) ; } if ( type == TYPE_WATER ) { return iv2tov4 ( simTypeWater ( orig , uv , cellW , cellH ) , 0.0f , 0.0f ) ; } else { return v4zero ( ) ; } }\n"
 private const val DEF_SANDSOLVER = "vec4 sandSolver ( sampler2D orig , sampler2D deltas , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; vec4 result = v4zero ( ) ; for ( int x = - 1 ; x < 2 ; x ++ ) { for ( int y = - 1 ; y < 2 ; y ++ ) { vec2 coords = nearbyCellCoords ( uv , cellW , cellH , x , y ) ; if ( coords . x < 0.0f || coords . y < 0.0f || coords . x > 1.0f || coords . y > 1.0f ) { continue ; } vec4 cell = sampler ( orig , coords ) ; if ( ftoi ( cell . x ) == TYPE_EMPTY ) { continue ; } vec4 delta = sampler ( deltas , coords ) ; if ( delta . x == itof ( - x ) && delta . y == itof ( - y ) ) { return cell ; } } } return result ; }\n"
-private const val DEF_SANDDRAW = "vec4 sandDraw ( vec4 orig ) { int type = ftoi ( orig . x ) ; if ( type == TYPE_SAND ) { return v3tov4 ( v3yellow ( ) , 1.0f ) ; } if ( type == TYPE_WATER ) { return v3tov4 ( v3blue ( ) , 1.0f ) ; } else { return v4zero ( ) ; } }\n"
+private const val DEF_SANDDRAW = "vec4 sandDraw ( sampler2D orig , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; vec3 result = v3zero ( ) ; for ( int x = - 1 ; x < 2 ; x ++ ) { for ( int y = - 1 ; y < 2 ; y ++ ) { vec2 coords = nearbyCellCoords ( uv , cellW , cellH , x , y ) ; vec4 cell = sampler ( orig , coords ) ; int type = ftoi ( cell . x ) ; if ( type == TYPE_SAND ) { result = addv3 ( result , v3yellow ( ) ) ; } if ( type == TYPE_WATER ) { result = addv3 ( result , v3blue ( ) ) ; } else { result = addv3 ( result , mulv3f ( v3cyan ( ) , coords . y ) ) ; } } } result = divv3f ( result , 9.0f ) ; return v3tov4 ( result , 1.0f ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
@@ -927,8 +927,8 @@ fun sandSolver(orig: Expression<GlTexture>, deltas: Expression<GlTexture>, uv: E
     override fun roots() = listOf(orig, deltas, uv, wh)
 }
 
-fun sandDraw(orig: Expression<vec4>) = object : Expression<vec4>() {
-    override fun expr() = "sandDraw(${orig.expr()})"
-    override fun roots() = listOf(orig)
+fun sandDraw(orig: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<vec2i>) = object : Expression<vec4>() {
+    override fun expr() = "sandDraw(${orig.expr()}, ${uv.expr()}, ${wh.expr()})"
+    override fun roots() = listOf(orig, uv, wh)
 }
 

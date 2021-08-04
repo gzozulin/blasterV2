@@ -41,8 +41,8 @@ mat4 translatem4(vec3 vec) {
 custom
 mat4 rotatem4(vec3 axis, const float angle) {
     axis = normv3(axis);
-    float s = sin(angle);
-    float c = cos(angle);
+    float s = sinf(angle);
+    float c = cosf(angle);
     float oc = 1.0f - c;
 
     const mat4 result = {{

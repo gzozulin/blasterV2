@@ -162,7 +162,7 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "sandConvert" -> sandConvert(edParseExpression(lineNo, split.removeFirst(), heap))
 "sandPhysics" -> sandPhysics(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sandSolver" -> sandSolver(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
-"sandDraw" -> sandDraw(edParseExpression(lineNo, split.removeFirst(), heap))
+"sandDraw" -> sandDraw(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 
         "namedTexCoordsV2" -> namedTexCoordsV2()
         "namedTexCoordsV3" -> namedTexCoordsV3()

@@ -244,11 +244,14 @@ bool eqv4(vec4 left, vec4 right);
 vec2 v2(float x, float y);
 vec2 ftov2(float v);
 vec2 v2zero();
+
 vec2 mulv2f(vec2 vec, float v);
 vec2 addv2f(vec2 left, float right);
 vec2 subv2f(vec2 left, float right);
+
 float getxv2(vec2 v);
 float getyv2(vec2 v);
+
 float length(vec2 v);
 
 // endregion ------------------- VEC2 -------------------
@@ -258,10 +261,12 @@ float length(vec2 v);
 ivec2 iv2(int x, int y);
 ivec2 iv2zero();
 vec4 iv2tov4(ivec2 vec, float z, float w);
+
 float getxiv2(vec2 v);
 float getyiv2(vec2 v);
 float getuiv2(vec2 v);
 float getviv2(vec2 v);
+
 vec2 tile(vec2 texCoord, ivec2 uv, ivec2 cnt);
 
 // endregion ------------------- IVEC2 -------------------
@@ -269,6 +274,7 @@ vec2 tile(vec2 texCoord, ivec2 uv, ivec2 cnt);
 // region ------------------- VEC3 -------------------
 
 float indexv3(vec3 v, int index);
+
 vec3 v3(float x, float y, float z);
 vec3 v2tov3(vec2 v, float f);
 vec3 ftov3(float v);
@@ -296,6 +302,7 @@ vec3 v3rose();
 vec3 v3violet();
 vec3 v3azure();
 vec3 v3aquamarine();
+
 vec3 negv3(vec3 v);
 float dotv3(vec3 left, vec3 right);
 vec3 crossv3(vec3 left, vec3 right);
@@ -307,6 +314,7 @@ vec3 divv3f(vec3 left, float right);
 vec3 divv3(vec3 left, vec3 right);
 vec3 powv3(vec3 left, vec3 right);
 vec3 mixv3(vec3 left, vec3 right, float proportion);
+
 float lenv3(vec3 v);
 float lensqv3(vec3 v);
 vec3 normv3(vec3 v);
@@ -323,12 +331,14 @@ vec4 v3tov4(vec3 v, float f) ;
 vec4 ftov4(float v);
 vec4 v4zero();
 vec4 v4one();
+
 vec4 addv4(vec4 left, vec4 right);
 vec4 subv4(vec4 left, vec4 right);
 vec4 mulv4(vec4 left, vec4 right);
 vec4 mulv4f(vec4 left, float right);
 vec4 divv4(vec4 left, vec4 right);
 vec4 divv4f(vec4 left, float right);
+
 float getxv4(vec4 v);
 float getyv4(vec4 v);
 float getzv4(vec4 v);
@@ -337,6 +347,7 @@ float getrv4(vec4 v);
 float getgv4(vec4 v);
 float getbv4(vec4 v);
 float getav4(vec4 v);
+
 vec4 setxv4(vec4 v, float f);
 vec4 setyv4(vec4 v, float f);
 vec4 setzv4(vec4 v, float f);
@@ -358,8 +369,10 @@ vec2 transformv2(vec2 vec, mat2 mat);
 // region ------------------- MAT4 -------------------
 
 mat4 m4ident();
+
 mat4 mulm4(mat4 left, mat4 right);
 vec4 transformv4(vec4 vec, mat4 mat);
+
 mat4 translatem4(vec3 vec);
 mat4 rotatem4(vec3 axis, float angle);
 mat4 scalem4(vec3 scale);
@@ -379,8 +392,10 @@ float rndf (float x);
 float rndv2(vec2  v);
 float rndv3(vec3  v);
 float rndv4(vec4  v);
+
 vec3 seedRandom(vec3 s);
 float seededRndf();
+
 vec3 randomInUnitSphere() ;
 vec3 randomInUnitDisk();
 
@@ -398,17 +413,21 @@ vec4 samplerq(samplerCube sampler, vec3 texCoords);
 
 RtCamera cameraLookAt(vec3 eye, vec3 center, vec3 up,float vfoy, float aspect, float aperture, float focusDist);
 ray rayFromCamera(RtCamera camera, float u, float v);
+
 vec3 background(ray ray);
+
 bool rayHitAabb(ray ray, aabb aabb, float tMin, float tMax);
 HitRecord rayHitSphereRecord(ray ray, float t, Sphere sphere);
 HitRecord rayHitSphere(ray ray, float tMin, float tMax, Sphere sphere);
 HitRecord rayHitObject(ray ray, float tMin, float tMax, int type, int index);
 HitRecord rayHitBvh(ray ray, float tMin, float tMax, int index);
 HitRecord rayHitWorld(ray ray, float tMin, float tMax);
+
 ScatterResult scatterLambertian(HitRecord record, LambertianMaterial material);
 ScatterResult scatterMetallic(ray ray, HitRecord record, MetallicMaterial material);
 ScatterResult scatterDielectric(ray ray, HitRecord record, DielectricMaterial material);
 ScatterResult scatterMaterial(ray ray, HitRecord record);
+
 vec3 sampleColor(int rayBounces, RtCamera camera, float u, float v);
 vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
                      float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
@@ -419,7 +438,9 @@ void raytracer();
 
 // region ------------------- SANDSIM ---------------
 
+vec4 sandConvert(vec4 pixel);
 vec4 sandPhysics(sampler2D orig, vec2 uv, ivec2 wh);
 vec4 sandSolver(sampler2D orig, sampler2D deltas, vec2 uv, ivec2 wh);
+vec4 sandDraw(sampler2D orig, vec2 uv, ivec2 wh);
 
 // endregion ------------------- SANDSIM ---------------

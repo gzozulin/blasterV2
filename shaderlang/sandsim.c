@@ -133,14 +133,29 @@ vec4 sandSolver(const sampler2D orig, const sampler2D deltas, const vec2 uv, con
 }
 
 public
-vec4 sandDraw(const vec4 orig) {
-    const int type = ftoi(orig.x);
-    if (type == TYPE_SAND) {
-        return v3tov4(v3yellow(), 1.0f);
-    }if (type == TYPE_WATER) {
-        return v3tov4(v3blue(), 1.0f);
-    } else {
-        return v4zero();
+vec4 sandDraw(const sampler2D orig, const vec2 uv, const ivec2 wh) {
+    const float cellW = 1.0f / itof(wh.x);
+    const float cellH = 1.0f / itof(wh.y);
+
+    vec3 result = v3zero();
+
+    for (int x = -1; x < 2; x++) {
+        for (int y = -1; y < 2; y++) {
+            const vec2 coords = nearbyCellCoords(uv, cellW, cellH, x, y);
+            const vec4 cell = sampler(orig, coords);
+
+            const int type = ftoi(cell.x);
+            if (type == TYPE_SAND) {
+                result = addv3(result, v3yellow());
+            } if (type == TYPE_WATER) {
+                result = addv3(result, v3blue());
+            } else {
+                result = addv3(result, mulv3f(v3cyan(), coords.y));
+            }
+        }
     }
+
+    result = divv3f(result, 9.0f);
+    return v3tov4(result, 1.0f);
 }
 
