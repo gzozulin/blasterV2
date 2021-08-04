@@ -19,7 +19,8 @@ private val deltas = TechniqueRtt(window, internalFormat= backend.GL_RGBA32F, mi
 private val rect = glMeshCreateRect()
 private val startTexture = libTextureCreate("textures/sandsim.png")
 
-private val sandPopulate = ShadingFlat(constm4(mat4().orthoBox()), sandConvert(sampler(unifs(startTexture))))
+private val sandPopulate = ShadingFlat(constm4(mat4().orthoBox()),
+    sandConvert(sampler(unifs(startTexture))))
 
 private val physicsIn = unifs()
 private val sandPhysics = ShadingFlat(constm4(mat4().orthoBox()),
