@@ -59,14 +59,14 @@ private const val DEF_V3AZURE = "vec3 v3azure ( ) { return v3 ( 0.0f , 0.5f , 1.
 private const val DEF_V3AQUAMARINE = "vec3 v3aquamarine ( ) { return v3 ( 0.0f , 1.0f , 0.5f ) ; }\n"
 private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f , 1.0f , 0.0f ) ; }\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n"
-private const val DEF_POWV3 = "vec3 powv3 ( vec3 left , vec3 right ) { return v3 ( pow ( left . x , right . x ) , pow ( left . y , right . y ) , pow ( left . z , right . z ) ) ; }\n"
+private const val DEF_POWV3 = "vec3 powv3 ( vec3 left , vec3 right ) { return v3 ( powf ( left . x , right . x ) , powf ( left . y , right . y ) , powf ( left . z , right . z ) ) ; }\n"
 private const val DEF_MIXV3 = "vec3 mixv3 ( vec3 left , vec3 right , float proportion ) { return addv3 ( mulv3 ( left , ftov3 ( 1.0f - proportion ) ) , mulv3 ( right , ftov3 ( proportion ) ) ) ; }\n"
-private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrt ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
+private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrtf ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
 private const val DEF_LENSQV3 = "float lensqv3 ( vec3 v ) { return ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n"
 private const val DEF_LERPV3 = "vec3 lerpv3 ( vec3 from , vec3 to , float t ) { return addv3 ( mulv3f ( from , 1.0f - t ) , mulv3f ( to , t ) ) ; }\n"
 private const val DEF_REFLECTV3 = "vec3 reflectv3 ( vec3 v , vec3 n ) { return subv3 ( v , mulv3f ( n , 2.0f * dotv3 ( v , n ) ) ) ; }\n"
-private const val DEF_REFRACTV3 = "RefractResult refractv3 ( vec3 v , vec3 n , float niOverNt ) { vec3 unitV = normv3 ( v ) ; float dt = dotv3 ( unitV , n ) ; float D = 1.0f - niOverNt * niOverNt * ( 1.0f - dt * dt ) ; if ( D > 0 ) { vec3 left = mulv3f ( subv3 ( unitV , mulv3f ( n , dt ) ) , niOverNt ) ; vec3 right = mulv3f ( n , sqrt ( D ) ) ; RefractResult result = { true , subv3 ( left , right ) } ; return result ; } else { return NO_REFRACT ; } }\n"
+private const val DEF_REFRACTV3 = "RefractResult refractv3 ( vec3 v , vec3 n , float niOverNt ) { vec3 unitV = normv3 ( v ) ; float dt = dotv3 ( unitV , n ) ; float D = 1.0f - niOverNt * niOverNt * ( 1.0f - dt * dt ) ; if ( D > 0 ) { vec3 left = mulv3f ( subv3 ( unitV , mulv3f ( n , dt ) ) , niOverNt ) ; vec3 right = mulv3f ( n , sqrtf ( D ) ) ; RefractResult result = { true , subv3 ( left , right ) } ; return result ; } else { return NO_REFRACT ; } }\n"
 private const val DEF_V3TOV4 = "vec4 v3tov4 ( vec3 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n"
 private const val DEF_FTOV4 = "vec4 ftov4 ( float v ) { return v4 ( v , v , v , v ) ; }\n"
 private const val DEF_V4ZERO = "vec4 v4zero ( ) { return ftov4 ( 0.0f ) ; }\n"
@@ -150,12 +150,21 @@ private const val DEF_SIMTYPEWATER = "ivec2 simTypeWater ( sampler2D orig , vec2
 private const val DEF_SANDPHYSICS = "vec4 sandPhysics ( sampler2D orig , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; int type = ftoi ( sampler ( orig , uv ) . x ) ; if ( type == TYPE_SAND ) { return iv2tov4 ( simTypeSand ( orig , uv , cellW , cellH ) , 0.0f , 0.0f ) ; } if ( type == TYPE_WATER ) { return iv2tov4 ( simTypeWater ( orig , uv , cellW , cellH ) , 0.0f , 0.0f ) ; } else { return v4zero ( ) ; } }\n"
 private const val DEF_SANDSOLVER = "vec4 sandSolver ( sampler2D orig , sampler2D deltas , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; vec4 result = v4zero ( ) ; for ( int x = - 1 ; x < 2 ; x ++ ) { for ( int y = - 1 ; y < 2 ; y ++ ) { vec2 coords = nearbyCellCoords ( uv , cellW , cellH , x , y ) ; if ( coords . x < 0.0f || coords . y < 0.0f || coords . x > 1.0f || coords . y > 1.0f ) { continue ; } vec4 cell = sampler ( orig , coords ) ; if ( ftoi ( cell . x ) == TYPE_EMPTY ) { continue ; } vec4 delta = sampler ( deltas , coords ) ; if ( delta . x == itof ( - x ) && delta . y == itof ( - y ) ) { return cell ; } } } return result ; }\n"
 private const val DEF_SANDDRAW = "vec4 sandDraw ( sampler2D orig , vec2 uv , ivec2 wh ) { float cellW = 1.0f / itof ( wh . x ) ; float cellH = 1.0f / itof ( wh . y ) ; vec3 result = v3zero ( ) ; for ( int x = - 1 ; x < 2 ; x ++ ) { for ( int y = - 1 ; y < 2 ; y ++ ) { vec2 coords = nearbyCellCoords ( uv , cellW , cellH , x , y ) ; vec4 cell = sampler ( orig , coords ) ; int type = ftoi ( cell . x ) ; if ( type == TYPE_SAND ) { result = addv3 ( result , v3yellow ( ) ) ; } if ( type == TYPE_WATER ) { result = addv3 ( result , v3blue ( ) ) ; } else { result = addv3 ( result , mulv3f ( v3cyan ( ) , coords . y ) ) ; } } } result = divv3f ( result , 9.0f ) ; return v3tov4 ( result , 1.0f ) ; }\n"
+private const val DEF_MAX_STEPS = "int MAX_STEPS = 100 ;\n"
+private const val DEF_MAX_DIST = "float MAX_DIST = 100.0f ;\n"
+private const val DEF_SURF_DIST = "float SURF_DIST = 0.01f ;\n"
+private const val DEF_GETDIST = "float getDist ( vec3 p ) { float sphereDist = lenv3 ( subv3 ( p , v3 ( 0 , 1 , 6 ) ) ) - 1.0f ; float planeDist = p . y ; float d = minf ( sphereDist , planeDist ) ; return d ; }\n"
+private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = getDist ( p ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
+private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p ) { float d = getDist ( p ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( getDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) ) ) ) ; return normv3 ( n ) ; }\n"
+private const val DEF_GETLIGHT = "float getLight ( vec3 p , float time ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; lightPos = v3 ( ( lightPos . x + sinf ( time ) ) * 2.0f , ( lightPos . y + cosf ( time ) ) * 2.0f , lightPos . z ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
+private const val DEF_CENTERUV = "vec2 centerUV ( vec2 uv , float aspect ) { vec2 center = subv2f ( uv , 0.5f ) ; return v2 ( center . x * aspect , center . y ) ; }\n"
+private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec2 uv , float time , float aspect ) { uv = centerUV ( uv , aspect ) ; vec3 ro = v3 ( 0 , 1 , 0 ) ; vec3 rd = normv3 ( v3 ( uv . x , uv . y , 1 ) ) ; float d = rayMarch ( ro , rd ) ; vec3 p = addv3 ( ro , mulv3f ( rd , d ) ) ; float dif = getLight ( p , time ) ; vec3 col = ftov3 ( dif ) ; col = powv3 ( col , ftov3 ( 0.4545f ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_RTCAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_NEGV3+DEF_POWV3+DEF_MIXV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW
+const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_NEGV3+DEF_POWV3+DEF_MIXV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_GETDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_CENTERUV+DEF_RAYMARCHER
 
-const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER
+const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER+DEF_MAX_STEPS+DEF_MAX_DIST+DEF_SURF_DIST
 
 fun error() = object : Expression<Float>() {
     override fun expr() = "error()"
@@ -292,6 +301,11 @@ fun v2zero() = object : Expression<vec2>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
+fun subv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<vec2>() {
+    override fun expr() = "subv2(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
 fun mulv2f(vec: Expression<vec2>, v: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "mulv2f(${vec.expr()}, ${v.expr()})"
     override fun roots() = listOf(vec, v)
@@ -317,8 +331,8 @@ fun getyv2(v: Expression<vec2>) = object : Expression<Float>() {
     override fun roots() = listOf(v)
 }
 
-fun length(v: Expression<vec2>) = object : Expression<Float>() {
-    override fun expr() = "length(${v.expr()})"
+fun lenv2(v: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "lenv2(${v.expr()})"
     override fun roots() = listOf(v)
 }
 
@@ -930,5 +944,10 @@ fun sandSolver(orig: Expression<GlTexture>, deltas: Expression<GlTexture>, uv: E
 fun sandDraw(orig: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<vec2i>) = object : Expression<vec4>() {
     override fun expr() = "sandDraw(${orig.expr()}, ${uv.expr()}, ${wh.expr()})"
     override fun roots() = listOf(orig, uv, wh)
+}
+
+fun raymarcher(uv: Expression<vec2>, time: Expression<Float>, aspect: Expression<Float>) = object : Expression<vec4>() {
+    override fun expr() = "raymarcher(${uv.expr()}, ${time.expr()}, ${aspect.expr()})"
+    override fun roots() = listOf(uv, time, aspect)
 }
 

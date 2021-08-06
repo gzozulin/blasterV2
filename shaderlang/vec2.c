@@ -21,6 +21,11 @@ vec2 v2zero() {
 }
 
 custom
+vec2 subv2(const vec2 left, const vec2 right) {
+    return v2(left.x - right.x, left.y - right.y);
+}
+
+custom
 vec2 mulv2f(const vec2 vec, const float v) {
     return v2(vec.x * v, vec.y * v);
 }
@@ -46,7 +51,7 @@ float getyv2(const vec2 v) {
 }
 
 custom
-float length(const vec2 v) {
+float lenv2(const vec2 v) {
     return sqrtf(v.x*v.x + v.y*v.y);
 }
 

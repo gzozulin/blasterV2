@@ -214,6 +214,10 @@ fun constm4(value: mat4) = object : Constant<mat4>(value) {
 private val started = System.currentTimeMillis()
 fun timef() = uniff { (System.currentTimeMillis() - started).toFloat() / 1000f }
 
+// ----------------------------- Aspect -----------------------------
+
+fun aspectf(window: GlWindow) = constf(window.width.toFloat() / window.height.toFloat())
+
 // ----------------------------- Cache -----------------------------
 
 fun cachev4(value: Expression<vec4>) = object : Cache<vec4>() {

@@ -9,6 +9,9 @@ import com.gzozulin.minigl.tech.glShadingFlatInstance
 import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
 
+// todo: quit from window
+// todo: reuse try-catch
+
 private val window = GlWindow()
 
 private val rect = glMeshCreateRect()
@@ -42,6 +45,7 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/colors") { reci
             }
             glShadingFlatUse(shadingFlat, callback)
         } catch (reload: EdReloadRequest) {
+            recipe.isError = false
             println("Recipe reloaded:  ${recipe.file}")
         } catch (program: GlProgramException) {
             recipe.isError = true
@@ -56,7 +60,6 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/colors") { reci
 private fun edRecipeCheck(recipe: EdRecipe) {
     if (recipe.lastModified != recipe.file.lastModified()) {
         recipe.lastModified = recipe.file.lastModified()
-        recipe.isError = false
         throw EdReloadRequest()
     }
 }

@@ -245,6 +245,8 @@ vec2 v2(float x, float y);
 vec2 ftov2(float v);
 vec2 v2zero();
 
+vec2 subv2(vec2 left, vec2 right);
+
 vec2 mulv2f(vec2 vec, float v);
 vec2 addv2f(vec2 left, float right);
 vec2 subv2f(vec2 left, float right);
@@ -252,7 +254,7 @@ vec2 subv2f(vec2 left, float right);
 float getxv2(vec2 v);
 float getyv2(vec2 v);
 
-float length(vec2 v);
+float lenv2(vec2 v);
 
 // endregion ------------------- VEC2 -------------------
 

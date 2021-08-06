@@ -138,7 +138,7 @@ private fun sandDraw(result: GlTexture) {
 
 fun main() {
     window.create {
-        window.keyCallback = { key, pressed ->
+        window.keyCallback = { _, pressed ->
             isSimulating = pressed
         }
         sandUse {
