@@ -2,8 +2,11 @@ package com.gzozulin.minigl.api
 
 import com.gzozulin.minigl.scene.*
 import org.lwjgl.opengl.GL20.GL_CURRENT_PROGRAM
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+
+class GlProgramException(msg: String) : Exception(msg)
 
 private val bufferVec2i = ByteBuffer.allocateDirect(2 * 4)
     .order(ByteOrder.nativeOrder())
@@ -49,7 +52,7 @@ private fun glProgramCreate(program: GlProgram) {
     backend.glLinkProgram(program.handle!!)
     val isLinked = backend.glGetProgrami(program.handle!!, backend.GL_LINK_STATUS)
     if (isLinked == backend.GL_FALSE) {
-        error(backend.glGetProgramInfoLog(program.handle!!))
+        throw GlProgramException(backend.glGetProgramInfoLog(program.handle!!))
     }
 }
 

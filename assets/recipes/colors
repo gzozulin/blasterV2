@@ -8,7 +8,7 @@ uv:             namedTexCoordsV2
 x:              getxv2 uv
 y:              getyv2 uv
 
-time:           remap -1f 1f 0f 1f (sinf time)
+time:           remapf -1f 1f 0f 1f (sinf time)
 
 func:           addf (mulf (cosf (mulf x 20f)) 0.5f) 0.5f
 

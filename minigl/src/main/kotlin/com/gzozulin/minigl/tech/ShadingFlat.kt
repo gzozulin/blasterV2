@@ -34,7 +34,8 @@ private val fragmentSrs = """
 """.trimIndent()
 
 data class ShadingFlat(
-    val matrix: Expression<mat4>, val color: Expression<col4> = constv4(vec4(1f))) {
+    val matrix: Expression<mat4> = constm4(mat4().orthoBox()),
+    val color: Expression<col4> = constv4(vec4(1f))) {
 
     private val vertShader = GlShader(backend.GL_VERTEX_SHADER,
         glExprSubstitute(vertexSrc, mapOf("MATRIX" to matrix)))
