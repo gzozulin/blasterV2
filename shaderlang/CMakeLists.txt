@@ -8,5 +8,5 @@ add_compile_options(-Wall -Wextra -pedantic)
 
 include_directories(cglm/include)
 
-add_executable(shadergen main.c lang.h math.c vec2.c vec3.c vec4.c ivec2.c mat3.c mat4.c float.c raytracer.c shading.c random.c bool.c mat2.c ray.c const.c sandsim.c sampler.c)
+add_executable(shadergen main.c lang.h math.c vec2.c vec3.c vec4.c ivec2.c mat3.c mat4.c float.c raytracer.c shading.c random.c bool.c mat2.c ray.c const.c sandsim.c sampler.c raymarcher.c)
 target_link_libraries(shadergen m)

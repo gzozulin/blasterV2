@@ -25,8 +25,8 @@ x 2021-04-25 (A) 2021-04-25 Move projector to subproject from sfc +code @simple
 x 2021-05-19 2021-04-25 Fix texture UV missing on doors +assets @complex
 x 2021-05-07 (A) 2021-04-26 Find a way to show charts, pictures, diagrams, etc (cross-fade pics? water based markers comics?) +video +code @complex
 x 2021-05-04 2021-04-28 Logo scene +code +assets @complex
-2021-04-29 Better tripod +video @simple
-2021-04-29 Better lighting +video @complex
+x 2021-08-04 2021-04-29 Better tripod +video @simple
+x 2021-08-04 2021-04-29 Better lighting +video @complex
 x 2021-06-22 2021-04-29 Better camera +video @complex
 x 2021-05-26 (A) 2021-04-29 Better teleprompter app +video @simple
 x 2021-05-22 2021-04-29 Screen capture for any scene +code @simple
@@ -40,7 +40,7 @@ x 2021-05-15 (A) 2021-04-30 Stop capturing after N seconds +code @simple
 x 2021-07-12 2021-04-30 Typing sounds for KB from NoCopyrightSounds +video @simple
 x 2021-06-09 (B) 2021-04-30 Generate typing sounds with video +code @complex
 x 2021-06-12 (A) 2021-05-02 Ask questions from audience +video @simple
-2021-05-02 Create avatar for a channel +video @complex
+x 2021-08-04 2021-05-02 Create avatar for a channel +video @complex
 2021-05-03 Create a header strip for the channel page +video @simple
 2021-05-03 Forum on gzozulin.com +web @complex
 x 2021-05-26 (A) 2021-05-04 Blender file template +video @simple
@@ -69,7 +69,7 @@ x 2021-07-12 (B) 2021-05-31 Basic support for C and interop +code @complex
 x 2021-07-12 2021-06-03 Cron job to copy the current video once a day +video @simple
 x 2021-06-09 2021-06-05 Chart as overlay on top of video +video @simple
 x 2021-06-12 (A) 2021-06-08 Intrigue, humor, establishing shot +video @complex
-2021-06-09 Journal cleanup: playlists and hashtags +video @simple
+x 2021-08-04 2021-06-09 Journal cleanup: playlists and hashtags +video @simple
 2021-04-23 Add the ability to show existing code without animation (frame = 0?) +code @simple
 2021-06-12 Highlight string injected code +code @complex
 x 2021-07-12 (B) 2021-06-12 Blurred rendered background for pictures (or even integrate it with Projector) +code @complex
@@ -81,4 +81,9 @@ x 2021-07-12 2021-06-22 Do not flex your back on video +video @simple
 x 2021-07-12 2021-06-22 Tablet for diagrams +video @complex
 x 2021-07-12 2021-06-24 Move all techniques test code into SFCs (main functions): will remove the load and facilitate testing area +code @simple
 x 2021-07-12 2021-06-26 LIke and subscribe pop-up inside the video +video @complex
-2021-07-12 Split the raytracer C code into multiple files +code @complex
+x 2021-08-04 2021-07-12 Split the raytracer C code into multiple files +code @complex
+2021-08-04 Channel Reel 10-15 sec +video @simple
+2021-08-04 CPP: references as parameters, operators can be useful +code @complex
+2021-08-04 Videos in 4k resolution +video @complex
+2021-08-05 Make capturer.capture {  } add a frame and create other stuff lazily when needed +code @simple
+2021-08-05 ShaderGen extract defines +code @complex

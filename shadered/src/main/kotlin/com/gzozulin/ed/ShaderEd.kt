@@ -27,21 +27,14 @@ private enum class ShaderState { MODIFIED, RELOADED, ERROR, SUCCESS }
 private var shaderState = ShaderState.MODIFIED
 
 private val rect = glMeshCreateRect()
+
 private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
 private var lastModified = FILE_RECIPE.lastModified()
-
-private val logoTexture = libTextureCreate("textures/thatsall.png")
-private val foggyTexture = libTextureCreate("textures/foggy.jpg")
-
-private val mouseVec = vec2()
 
 private val input = mapOf(
     "time"              to timef(),
     "ortho"             to constm4(mat4().orthoBox()),
-    "mouse"             to unifv2 { mouseVec },
     "aspect"            to uniff(window.width.toFloat()/ window.height.toFloat()),
-    "samplerThatsall"   to unifs(logoTexture),
-    "samplerFoggy"      to unifs(foggyTexture),
 )
 
 private fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Map<String, Expression<*>> {
@@ -154,20 +147,13 @@ private fun edShaderCompilFailure(th: Throwable, previous: ShadingFlat) {
     }
 }
 
-private fun edShowWindow() {
+private fun edReloadTech(window: GlWindow, callback: Callback) {
     while (!glWindowShouldClose(window)) {
         window.isLooping = true
         val previous = shadingFlat
         try {
             edReloadShader()
-            glShadingFlatUse(shadingFlat) {
-                window.show {
-                    edCheckNeedReload()
-                    edShowFrame()
-                    edShaderCompilSuccess()
-                    //capturer.addFrame()
-                }
-            }
+            callback.invoke()
         } catch (th: Throwable) {
             edShaderCompilFailure(th, previous)
         }
@@ -176,24 +162,24 @@ private fun edShowWindow() {
 
 private fun edShowFrame() {
     glClear(col3().black())
-    glTextureBind(logoTexture) {
-        glTextureBind(foggyTexture) {
-            glShadingFlatDraw(shadingFlat) {
-                glShadingFlatInstance(shadingFlat, rect)
-            }
-        }
+    glShadingFlatDraw(shadingFlat) {
+        glShadingFlatInstance(shadingFlat, rect)
     }
 }
 
 fun main() = window.create {
-    window.positionCallback = { mouseVec.set(it) }
     glMeshUse(rect) {
-        glTextureUse(logoTexture) {
-            glTextureUse(foggyTexture) {
-                //capturer.capture {
-                    edShowWindow()
-                //}
+        //capturer.capture {
+        edReloadTech(window) {
+            glShadingFlatUse(shadingFlat) {
+                window.show {
+                    edCheckNeedReload()
+                    edShowFrame()
+                    edShaderCompilSuccess()
+                    //capturer.addFrame()
+                }
             }
         }
+        //}
     }
 }
