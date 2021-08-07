@@ -13,12 +13,17 @@ const float MAX_DIST = 100.0f;
 public
 const float SURF_DIST = 0.01f;
 
+public
+const vec3 spheres[3] = { { 0, 1, 6 }, { 1, 1, 6 }, { -1, 1, 6 } };
+
 protected
 float getDist(vec3 p) {
-    float sphereDist = lenv3(subv3(p, v3(0, 1, 6))) - 1.0f;
+    float sphereDist0 = lenv3(subv3(p, spheres[0])) - 1.0f;
+    float sphereDist1 = lenv3(subv3(p, spheres[1])) - 1.0f;
+    float sphereDist2 = lenv3(subv3(p, spheres[2])) - 1.0f;
     float planeDist = p.y;
 
-    float d = minf(sphereDist, planeDist);
+    float d = minf(minf(minf(sphereDist0, sphereDist1), sphereDist2), planeDist);
     return d;
 }
 
@@ -51,7 +56,7 @@ vec3 getNormal(vec3 p) {
 protected
 float getLight(vec3 p, float time) {
     vec3 lightPos = v3(0, 5, 6);
-    lightPos = v3((lightPos.x + sinf(time)) * 2.0f, (lightPos.y + cosf(time)) * 2.0f, lightPos.z);
+    lightPos = v3(lightPos.x + sinf(time) * 2.0f, lightPos.y, lightPos.z + cosf(time) * 2.0f);
 
     vec3 l = normv3(subv3(lightPos, p));
     vec3 n = getNormal(p);

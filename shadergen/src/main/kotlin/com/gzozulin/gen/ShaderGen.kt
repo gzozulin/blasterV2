@@ -272,7 +272,14 @@ private fun parseCConstant(ctx: CParser.DeclarationContext, tokens: CommonTokenS
     if (access == CAccess.PRIVATE) {
         return null
     }
-    val name = ctx.initDeclaratorList().initDeclarator()[0].declarator().text
+
+    val nameFull = ctx.initDeclaratorList().initDeclarator()[0].declarator().text
+    val name = if (nameFull.contains("[")) {
+        nameFull.subSequence(0, nameFull.indexOfFirst { it == '[' }).toString()
+    } else {
+        nameFull
+    }
+
     val def = tokens.filterAndExtract(ctx)
     return CConstant(name, access, def)
 }
