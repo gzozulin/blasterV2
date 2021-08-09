@@ -3,27 +3,22 @@
 package com.gzozulin.ed
 
 import com.gzozulin.minigl.api.*
-import com.gzozulin.minigl.tech.ShadingFlat
-import com.gzozulin.minigl.tech.glShadingFlatDraw
-import com.gzozulin.minigl.tech.glShadingFlatInstance
-import com.gzozulin.minigl.tech.glShadingFlatUse
 import java.io.File
-import java.lang.Exception
 import java.util.concurrent.atomic.AtomicInteger
 
 class EdParsingException(msg: String) : Exception(msg)
 
-private val FILE_RECIPE = File("/home/greg/blaster/assets/recipes/tex-coords-time")
+private class EdReloadRequest : Exception()
 
-private val window = GlWindow(isFullscreen = false)
+data class EdRecipe(val file: File, val input: Heap,
+                            val onReload: (isReloaded: Boolean, heap: Heap, callback: Callback) -> Unit) {
 
-private val rect = glMeshCreateRect()
+    constructor(filename: String, input: Heap,
+                onReload: (isReloaded: Boolean, heap: Heap, callback: Callback) -> Unit)
+            : this(File(filename), input, onReload)
 
-private val input = mapOf(
-    "time"              to timef(),
-    "ortho"             to constm4(mat4().orthoBox()),
-    "aspect"            to uniff(window.width.toFloat()/ window.height.toFloat()),
-)
+    internal var lastModified = file.lastModified()
+}
 
 fun edParseRecipe(recipe: String, input: Map<String, Expression<*>>): Map<String, Expression<*>> {
     val heap = mutableMapOf<String, Expression<*>>()
@@ -102,90 +97,34 @@ private fun edParseVector(vector: String): Expression<*> {
 private fun edParseFloat(float: String): Expression<*> {
     return constf(float.toFloat())
 }
-/*
-private fun edRecipeCheck(recipe: Recipt) {
-    if (lastModified != FILE_RECIPE.lastModified()) {
-        window.isLooping = false
-        shaderState = ShaderState.MODIFIED
-        lastModified = FILE_RECIPE.lastModified()
-    }
-}*/
 
-private fun edReloadShader() {
-    if (shaderState == ShaderState.MODIFIED) {
-        val heap = edParseRecipe(FILE_RECIPE.readText(), input)
-        @Suppress("UNCHECKED_CAST")
-        shadingFlat = ShadingFlat(heap["matrix"] as Expression<mat4>, heap["color"] as Expression<col4>)
-        shaderState = ShaderState.RELOADED
-    }
-}
-
-private fun edShaderCompilSuccess() {
-    if (shaderState == ShaderState.RELOADED) {
-        println("Shader compiled successfully!")
-        shaderState = ShaderState.SUCCESS
-    }
-}
-
-private fun edShaderCompilFailure(th: Throwable, previous: ShadingFlat) {
-    if (shaderState != ShaderState.ERROR) {
-        println("Error reloading shader: ${th.message}")
-        shaderState = ShaderState.ERROR
-        shadingFlat = previous
-    }
-}
-
-private fun edReloadIfNeeded(window: GlWindow, callback: Callback) {
+fun edRecipeUse(window: GlWindow, recipe: EdRecipe, callback: Callback) {
+    var isReloaded = true
     while (!glWindowShouldClose(window)) {
-        window.isLooping = true
-        val previous = shadingFlat
         try {
-            edReloadShader()
-            callback.invoke()
-        } catch (th: Throwable) {
-            edShaderCompilFailure(th, previous)
-        }
-    }
-}
-
-private fun edShowFrame() {
-    glClear(col3().black())
-    glShadingFlatDraw(shadingFlat) {
-        glShadingFlatInstance(shadingFlat, rect)
-    }
-}
-
-private enum class ShaderState { MODIFIED, RELOADED, ERROR, SUCCESS }
-private var shaderState = ShaderState.MODIFIED
-
-private var shadingFlat = ShadingFlat(constm4(mat4().orthoBox()), constv4(vec4(vec3().azure(), 1f)))
-private var lastModified = FILE_RECIPE.lastModified()
-
-private data class Recipt(val file: File, val reload: (callback: Callback) -> Unit)
-private fun edUseReciept(recipe: Recipt, callback: Callback) {
-    recipe.reload.invoke(callback)
-}
-
-private val recipe = Recipt(File("")) { callback ->
-    try {
-        val heap = edParseRecipe(FILE_RECIPE.readText(), input)
-        shadingFlat = ShadingFlat(heap["matrix"] as Expression<mat4>, heap["color"] as Expression<col4>)
-        glShadingFlatUse(shadingFlat, callback)
-    } catch (th: Throwable) {
-        glShadingFlatUse(shadingFlat, callback)
-    }
-}
-
-fun main() = window.create {
-    glMeshUse(rect) {
-        edReloadIfNeeded(window) {
-            edUseReciept(recipe) {
-                window.show {
-                    //edRecipeCheck(recipe)
-                    edShowFrame()
-                    edShaderCompilSuccess()
-                }
+            val heap: Heap
+            if (isReloaded) {
+                heap = edParseRecipe(recipe.file.readText(), recipe.input)
+            } else {
+                heap = emptyMap()
             }
+            recipe.onReload.invoke(isReloaded, heap, callback)
+        } catch (reload: EdReloadRequest) {
+            isReloaded = true
+            println("Recipe reloaded:  ${recipe.file}")
+        } catch (throwable: GlProgramException) {
+            isReloaded = false
+            println("Error while using recipe: ${throwable.message}")
+        } catch (throwable: EdParsingException) {
+            isReloaded = false
+            println("Error while using recipe: ${throwable.message}")
         }
+    }
+}
+
+fun edRecipeCheck(recipe: EdRecipe) {
+    if (recipe.lastModified != recipe.file.lastModified()) {
+        recipe.lastModified = recipe.file.lastModified()
+        throw EdReloadRequest()
     }
 }

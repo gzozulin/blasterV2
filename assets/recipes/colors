@@ -12,7 +12,7 @@ time:           remapf -1f 1f 0f 1f (sinf time)
 
 func:           addf (mulf (cosf (mulf x 20f)) 0.5f) 0.5f
 
-back:           v2tov3 uv time
+back:           v2tov3 uv 1f
 wave:           v3 time x y
 
 

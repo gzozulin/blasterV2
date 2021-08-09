@@ -118,7 +118,7 @@ HitRecord rayHitSphere(const ray ray, const float tMin, const float tMax, const 
 protected
 HitRecord rayHitObject(const ray ray, const float tMin, const float tMax, const int type, const int index) {
     if (type != HITABLE_SPHERE) {
-        error(); // spheres only
+        error(); // raymarcherSpheres only
         return NO_HIT;
     }
     return rayHitSphere(ray, tMin, tMax, uSpheres[index]);

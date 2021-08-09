@@ -40,8 +40,6 @@ class GlWindow(
 
     var handle: Long? = null
 
-    var isLooping = true
-
     var keyCallback: KeyCallback? = null
     var buttonCallback: ButtonCallback? = null
     var positionCallback: PositionCallback? = null
@@ -122,7 +120,7 @@ class GlWindow(
         } else {
             backend.glDisable(backend.GL_MULTISAMPLE)
         }
-        while (isLooping && !glfwWindowShouldClose(handle!!)) {
+        while (!glfwWindowShouldClose(handle!!)) {
             updateCursor(handle!!)
             onFrame.invoke()
             throttle()

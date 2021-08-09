@@ -14,13 +14,13 @@ public
 const float SURF_DIST = 0.01f;
 
 public
-const vec3 spheres[3] = { { 0, 1, 6 }, { 1, 1, 6 }, { -1, 1, 6 } };
+const vec3 raymarcherSpheres[3] = { { 0, 1, 6 }, { 1, 1, 6 }, { -1, 1, 6 } };
 
 protected
 float getDist(vec3 p) {
-    float sphereDist0 = lenv3(subv3(p, spheres[0])) - 1.0f;
-    float sphereDist1 = lenv3(subv3(p, spheres[1])) - 1.0f;
-    float sphereDist2 = lenv3(subv3(p, spheres[2])) - 1.0f;
+    float sphereDist0 = lenv3(subv3(p, raymarcherSpheres[0])) - 1.0f;
+    float sphereDist1 = lenv3(subv3(p, raymarcherSpheres[1])) - 1.0f;
+    float sphereDist2 = lenv3(subv3(p, raymarcherSpheres[2])) - 1.0f;
     float planeDist = p.y;
 
     float d = minf(minf(minf(sphereDist0, sphereDist1), sphereDist2), planeDist);
