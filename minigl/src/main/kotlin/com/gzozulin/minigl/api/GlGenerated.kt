@@ -30,6 +30,7 @@ private const val DEF_FTOV2 = "vec2 ftov2 ( float v ) { return v2 ( v , v ) ; }\
 private const val DEF_V2ZERO = "vec2 v2zero ( ) { return ftov2 ( 0.0f ) ; }\n"
 private const val DEF_GETXV2 = "float getxv2 ( vec2 v ) { return v . x ; }\n"
 private const val DEF_GETYV2 = "float getyv2 ( vec2 v ) { return v . y ; }\n"
+private const val DEF_LENV2 = "float lenv2 ( vec2 v ) { return sqrtf ( v . x * v . x + v . y * v . y ) ; }\n"
 private const val DEF_INDEXV3 = "float indexv3 ( vec3 v , int index ) { switch ( index ) { case 0 : return v . x ; case 1 : return v . y ; case 2 : return v . z ; default : error ( ) ; return v . x ; } }\n"
 private const val DEF_V2TOV3 = "vec3 v2tov3 ( vec2 v , float f ) { return v3 ( v . x , v . y , f ) ; }\n"
 private const val DEF_FTOV3 = "vec3 ftov3 ( float v ) { return v3 ( v , v , v ) ; }\n"
@@ -58,12 +59,16 @@ private const val DEF_V3VIOLET = "vec3 v3violet ( ) { return v3 ( 0.5f , 0.0f , 
 private const val DEF_V3AZURE = "vec3 v3azure ( ) { return v3 ( 0.0f , 0.5f , 1.0f ) ; }\n"
 private const val DEF_V3AQUAMARINE = "vec3 v3aquamarine ( ) { return v3 ( 0.0f , 1.0f , 0.5f ) ; }\n"
 private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f , 1.0f , 0.0f ) ; }\n"
-private const val DEF_V3XY = "vec2 v3xy ( vec3 vec ) { return v2 ( vec . x , vec . y ) ; }\n"
-private const val DEF_V3XZ = "vec2 v3xz ( vec3 vec ) { return v2 ( vec . x , vec . z ) ; }\n"
-private const val DEF_V3YZ = "vec2 v3yz ( vec3 vec ) { return v2 ( vec . y , vec . z ) ; }\n"
+private const val DEF_XYV3 = "vec2 xyv3 ( vec3 vec ) { return v2 ( vec . x , vec . y ) ; }\n"
+private const val DEF_XZV3 = "vec2 xzv3 ( vec3 vec ) { return v2 ( vec . x , vec . z ) ; }\n"
+private const val DEF_YZV3 = "vec2 yzv3 ( vec3 vec ) { return v2 ( vec . y , vec . z ) ; }\n"
+private const val DEF_ABSV3 = "vec3 absv3 ( vec3 v ) { return v3 ( absf ( v . x ) , absf ( v . y ) , absf ( v . z ) ) ; }\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n"
+private const val DEF_SUBV3F = "vec3 subv3f ( vec3 left , float right ) { return subv3 ( left , ftov3 ( right ) ) ; }\n"
 private const val DEF_POWV3 = "vec3 powv3 ( vec3 left , vec3 right ) { return v3 ( powf ( left . x , right . x ) , powf ( left . y , right . y ) , powf ( left . z , right . z ) ) ; }\n"
 private const val DEF_MIXV3 = "vec3 mixv3 ( vec3 left , vec3 right , float proportion ) { return addv3 ( mulv3 ( left , ftov3 ( 1.0f - proportion ) ) , mulv3 ( right , ftov3 ( proportion ) ) ) ; }\n"
+private const val DEF_MAXV3 = "vec3 maxv3 ( vec3 left , vec3 right ) { return v3 ( maxf ( left . x , right . x ) , maxf ( left . y , right . y ) , maxf ( left . z , right . z ) ) ; }\n"
+private const val DEF_MINV3 = "vec3 minv3 ( vec3 left , vec3 right ) { return v3 ( minf ( left . x , right . x ) , minf ( left . y , right . y ) , minf ( left . z , right . z ) ) ; }\n"
 private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrtf ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
 private const val DEF_LENSQV3 = "float lensqv3 ( vec3 v ) { return ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n"
@@ -105,6 +110,14 @@ private const val DEF_GETVIV2 = "float getviv2 ( vec2 v ) { return v . y ; }\n"
 private const val DEF_TILE = "vec2 tile ( vec2 texCoord , ivec2 uv , ivec2 cnt ) { float tileSideX = 1.0f / itof ( cnt . x ) ; float tileStartX = itof ( uv . x ) * tileSideX ; float tileSideY = 1.0f / itof ( cnt . y ) ; float tileStartY = itof ( uv . y ) * tileSideY ; return v2 ( tileStartX + texCoord . x * tileSideX , tileStartY + texCoord . y * tileSideY ) ; }\n"
 private const val DEF_RAYBACK = "ray rayBack ( ) { ray result = { v3zero ( ) , v3back ( ) } ; return result ; }\n"
 private const val DEF_RAYPOINT = "vec3 rayPoint ( ray ray , float t ) { return addv3 ( ray . origin , mulv3f ( ray . direction , t ) ) ; }\n"
+private const val DEF_SDXZPLANE = "float sdXZPlane ( vec3 p ) { return p . y ; }\n"
+private const val DEF_SDSPHERE = "float sdSphere ( vec3 p , float r ) { return lenv3 ( p ) - r ; }\n"
+private const val DEF_SDBOX = "float sdBox ( vec3 p , vec3 b ) { vec3 q = subv3 ( absv3 ( p ) , b ) ; return lenv3 ( maxv3 ( q , v3zero ( ) ) ) + minf ( maxf ( q . x , maxf ( q . y , q . z ) ) , 0.0f ) ; }\n"
+private const val DEF_SDCAPPEDCYLINDER = "float sdCappedCylinder ( vec3 p , vec3 a , vec3 b , float r ) { vec3 ba = subv3 ( b , a ) ; vec3 pa = subv3 ( p , a ) ; float baba = dotv3 ( ba , ba ) ; float paba = dotv3 ( pa , ba ) ; float x = lenv3 ( subv3 ( mulv3f ( pa , baba ) , mulv3f ( ba , paba ) ) ) - r * baba ; float y = absf ( paba - baba * 0.5f ) - baba * 0.5f ; float x2 = x * x ; float y2 = y * y * baba ; float d = ( maxf ( x , y ) < 0.0f ) ? - minf ( x2 , y2 ) : ( ( ( x > 0.0f ) ? x2 : 0.0f ) + ( ( y > 0.0f ) ? y2 : 0.0f ) ) ; return signf ( d ) * sqrtf ( absf ( d ) ) / baba ; }\n"
+private const val DEF_SDCONE = "float sdCone ( vec3 p , vec2 c , float h ) { vec2 q = mulv2f ( v2 ( c . x / c . y , - 1.0f ) , h ) ; vec2 w = v2 ( lenv2 ( xzv3 ( p ) ) , p . y ) ; vec2 a = subv2 ( w , mulv2f ( q , clampf ( dotv2 ( w , q ) / dotv2 ( q , q ) , 0.0f , 1.0f ) ) ) ; vec2 b = subv2 ( w , mulv2 ( q , v2 ( clampf ( w . x / q . x , 0.0f , 1.0f ) , 1.0f ) ) ) ; float k = signf ( q . y ) ; float d = minf ( dotv2 ( a , a ) , dotv2 ( b , b ) ) ; float s = maxf ( k * ( w . x * q . y - w . y * q . x ) , k * ( w . y - q . y ) ) ; return sqrtf ( d ) * signf ( s ) ; }\n"
+private const val DEF_OPUNION = "float opUnion ( float d1 , float d2 ) { return minf ( d1 , d2 ) ; }\n"
+private const val DEF_OPSUBTRACTION = "float opSubtraction ( float d1 , float d2 ) { return maxf ( - d1 , d2 ) ; }\n"
+private const val DEF_OPINTERSECTION = "float opIntersection ( float d1 , float d2 ) { return maxf ( d1 , d2 ) ; }\n"
 private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = v3 ( seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f ) ; if ( lensqv3 ( result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
 private const val DEF_RANDOMINUNITDISK = "vec3 randomInUnitDisk ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = subv3 ( mulv3f ( v3 ( seededRndf ( ) , seededRndf ( ) , 0.0f ) , 2.0f ) , v3 ( 1.0f , 1.0f , 0.0f ) ) ; if ( dotv3 ( result , result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
 private const val DEF_CENTERUV = "vec2 centerUV ( vec2 uv , float aspect ) { vec2 center = subv2f ( uv , 0.5f ) ; return v2 ( center . x * aspect , center . y ) ; }\n"
@@ -158,15 +171,15 @@ private const val DEF_MAX_STEPS = "int MAX_STEPS = 100 ;\n"
 private const val DEF_MAX_DIST = "float MAX_DIST = 100.0f ;\n"
 private const val DEF_SURF_DIST = "float SURF_DIST = 0.01f ;\n"
 private const val DEF_RAYMARCH_AA = "int RAYMARCH_AA = 3 ;\n"
-private const val DEF_GETDIST = "float getDist ( vec3 p ) { float sphereDist = lenv3 ( subv3 ( p , v3 ( 0 , 1 , - 3 ) ) ) - 1.0f ; float planeDist = p . y ; float d = minf ( sphereDist , planeDist ) ; return d ; }\n"
-private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = getDist ( p ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
-private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p ) { float d = getDist ( p ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( getDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) ) ) ) ; return normv3 ( n ) ; }\n"
+private const val DEF_SCENEDIST = "float sceneDist ( vec3 p ) { vec3 sphere = v3 ( 0 , 1 , - 3 ) ; float sphereDist = sdSphere ( subv3 ( p , sphere ) , 1.0f ) ; vec3 cylStart = v3 ( 1 , 2 , 0 ) ; vec3 cylStop = v3 ( - 10 , 2 , 0 ) ; float cylDist = sdCappedCylinder ( p , cylStart , cylStop , 1.0f ) ; vec3 box = v3 ( 5 , 1 , 0 ) ; float boxDist = sdBox ( subv3 ( p , box ) , v3 ( 1 , 3 , 4 ) ) ; vec3 cone = v3 ( - 4 , 4 , 1 ) ; float coneDist = sdCone ( subv3 ( p , cone ) , v2 ( 5 , 5 ) , 3.0f ) ; float planeDist = sdXZPlane ( p ) ; float d = opUnion ( opUnion ( opUnion ( opUnion ( sphereDist , planeDist ) , cylDist ) , boxDist ) , coneDist ) ; return d ; }\n"
+private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = sceneDist ( p ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
+private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p ) { float d = sceneDist ( p ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( sceneDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) ) ) ) ; return normv3 ( n ) ; }\n"
 private const val DEF_GETLIGHT = "float getLight ( vec3 p ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
 private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec3 eye , vec3 center , vec2 uv , float fovy , float aspect , ivec2 wh ) { Camera camera = cameraLookAt ( eye , center , v3up ( ) , fovy , aspect , 0.0f , 1.0f ) ; float DU = 1.0f / itof ( wh . x ) ; float DV = 1.0f / itof ( wh . y ) ; vec3 col = v3zero ( ) ; for ( int i = 0 ; i < RAYMARCH_AA ; i ++ ) { float shift = rndv3 ( v2tov3 ( uv , itof ( i ) ) ) ; float du = remapf ( 0.0f , 1.0f , - DU / 2 , DU / 2 , shift ) ; float dv = remapf ( 0.0f , 1.0f , - DV / 2 , DV / 2 , shift ) ; ray r = rayFromCamera ( camera , uv . x + du , uv . y + dv ) ; float d = rayMarch ( r . origin , r . direction ) ; vec3 p = addv3 ( r . origin , mulv3f ( r . direction , d ) ) ; float dif = getLight ( p ) ; col = addv3 ( col , ftov3 ( dif ) ) ; } col = divv3f ( col , itof ( RAYMARCH_AA ) ) ; col = powv3 ( col , ftov3 ( 0.4545f ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_CAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3XY+DEF_V3XZ+DEF_V3YZ+DEF_NEGV3+DEF_POWV3+DEF_MIXV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CENTERUV+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_GETDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_RAYMARCHER
+const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_LENV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_XYV3+DEF_XZV3+DEF_YZV3+DEF_ABSV3+DEF_NEGV3+DEF_SUBV3F+DEF_POWV3+DEF_MIXV3+DEF_MAXV3+DEF_MINV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_SDXZPLANE+DEF_SDSPHERE+DEF_SDBOX+DEF_SDCAPPEDCYLINDER+DEF_SDCONE+DEF_OPUNION+DEF_OPSUBTRACTION+DEF_OPINTERSECTION+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CENTERUV+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_SCENEDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_RAYMARCHER
 
 const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER+DEF_MAX_STEPS+DEF_MAX_DIST+DEF_SURF_DIST+DEF_RAYMARCH_AA
 
@@ -228,6 +241,16 @@ fun eqv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<
 fun eqv4(left: Expression<vec4>, right: Expression<vec4>) = object : Expression<Boolean>() {
     override fun expr() = "eqv4(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
+}
+
+fun signf(value: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "signf(${value.expr()})"
+    override fun roots() = listOf(value)
+}
+
+fun absf(value: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "absf(${value.expr()})"
+    override fun roots() = listOf(value)
 }
 
 fun sqrtf(value: Expression<Float>) = object : Expression<Float>() {
@@ -310,6 +333,11 @@ fun subv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression
     override fun roots() = listOf(left, right)
 }
 
+fun mulv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<vec2>() {
+    override fun expr() = "mulv2(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
 fun mulv2f(vec: Expression<vec2>, v: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "mulv2f(${vec.expr()}, ${v.expr()})"
     override fun roots() = listOf(vec, v)
@@ -322,6 +350,11 @@ fun addv2f(left: Expression<vec2>, right: Expression<Float>) = object : Expressi
 
 fun subv2f(left: Expression<vec2>, right: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "subv2f(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun dotv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "dotv2(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 
@@ -485,19 +518,24 @@ fun v3chartreuse() = object : Expression<vec3>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
-fun v3xy(vec: Expression<vec3>) = object : Expression<vec2>() {
-    override fun expr() = "v3xy(${vec.expr()})"
+fun xyv3(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "xyv3(${vec.expr()})"
     override fun roots() = listOf(vec)
 }
 
-fun v3xz(vec: Expression<vec3>) = object : Expression<vec2>() {
-    override fun expr() = "v3xz(${vec.expr()})"
+fun xzv3(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "xzv3(${vec.expr()})"
     override fun roots() = listOf(vec)
 }
 
-fun v3yz(vec: Expression<vec3>) = object : Expression<vec2>() {
-    override fun expr() = "v3yz(${vec.expr()})"
+fun yzv3(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "yzv3(${vec.expr()})"
     override fun roots() = listOf(vec)
+}
+
+fun absv3(v: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "absv3(${v.expr()})"
+    override fun roots() = listOf(v)
 }
 
 fun negv3(v: Expression<vec3>) = object : Expression<vec3>() {
@@ -522,6 +560,11 @@ fun addv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression
 
 fun subv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
     override fun expr() = "subv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun subv3f(left: Expression<vec3>, right: Expression<Float>) = object : Expression<vec3>() {
+    override fun expr() = "subv3f(${left.expr()}, ${right.expr()})"
     override fun roots() = listOf(left, right)
 }
 
@@ -553,6 +596,16 @@ fun powv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression
 fun mixv3(left: Expression<vec3>, right: Expression<vec3>, proportion: Expression<Float>) = object : Expression<vec3>() {
     override fun expr() = "mixv3(${left.expr()}, ${right.expr()}, ${proportion.expr()})"
     override fun roots() = listOf(left, right, proportion)
+}
+
+fun maxv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "maxv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
+fun minv3(left: Expression<vec3>, right: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "minv3(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
 }
 
 fun lenv3(v: Expression<vec3>) = object : Expression<Float>() {
@@ -803,6 +856,46 @@ fun rayBack() = object : Expression<ray>() {
 fun rayPoint(ray: Expression<ray>, t: Expression<Float>) = object : Expression<vec3>() {
     override fun expr() = "rayPoint(${ray.expr()}, ${t.expr()})"
     override fun roots() = listOf(ray, t)
+}
+
+fun sdXZPlane(p: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "sdXZPlane(${p.expr()})"
+    override fun roots() = listOf(p)
+}
+
+fun sdSphere(p: Expression<vec3>, r: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "sdSphere(${p.expr()}, ${r.expr()})"
+    override fun roots() = listOf(p, r)
+}
+
+fun sdBox(p: Expression<vec3>, b: Expression<vec3>) = object : Expression<Float>() {
+    override fun expr() = "sdBox(${p.expr()}, ${b.expr()})"
+    override fun roots() = listOf(p, b)
+}
+
+fun sdCappedCylinder(p: Expression<vec3>, a: Expression<vec3>, b: Expression<vec3>, r: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "sdCappedCylinder(${p.expr()}, ${a.expr()}, ${b.expr()}, ${r.expr()})"
+    override fun roots() = listOf(p, a, b, r)
+}
+
+fun sdCone(p: Expression<vec3>, c: Expression<vec2>, h: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "sdCone(${p.expr()}, ${c.expr()}, ${h.expr()})"
+    override fun roots() = listOf(p, c, h)
+}
+
+fun opUnion(d1: Expression<Float>, d2: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "opUnion(${d1.expr()}, ${d2.expr()})"
+    override fun roots() = listOf(d1, d2)
+}
+
+fun opSubtraction(d1: Expression<Float>, d2: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "opSubtraction(${d1.expr()}, ${d2.expr()})"
+    override fun roots() = listOf(d1, d2)
+}
+
+fun opIntersection(d1: Expression<Float>, d2: Expression<Float>) = object : Expression<Float>() {
+    override fun expr() = "opIntersection(${d1.expr()}, ${d2.expr()})"
+    override fun roots() = listOf(d1, d2)
 }
 
 fun rndf(x: Expression<Float>) = object : Expression<Float>() {

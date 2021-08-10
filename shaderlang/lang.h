@@ -202,6 +202,8 @@ extern const DielectricMaterial     uDielectricMaterials[];
 
 // region ------------------- MATH -------------------
 
+float signf(float value);
+float absf(float value);
 float sqrtf(float value);
 float sinf(float rad);
 float cosf(float rad);
@@ -246,10 +248,12 @@ vec2 ftov2(float v);
 vec2 v2zero();
 
 vec2 subv2(vec2 left, vec2 right);
+vec2 mulv2(vec2 left, vec2 right);
 
 vec2 mulv2f(vec2 vec, float v);
 vec2 addv2f(vec2 left, float right);
 vec2 subv2f(vec2 left, float right);
+float dotv2(vec2 left, vec2 right);
 
 float getxv2(vec2 v);
 float getyv2(vec2 v);
@@ -305,21 +309,25 @@ vec3 v3violet();
 vec3 v3azure();
 vec3 v3aquamarine();
 
-vec2 v3xy(vec3 vec);
-vec2 v3xz(vec3 vec);
-vec2 v3yz(vec3 vec);
+vec2 xyv3(vec3 vec);
+vec2 xzv3(vec3 vec);
+vec2 yzv3(vec3 vec);
 
+vec3 absv3(vec3 v);
 vec3 negv3(vec3 v);
 float dotv3(vec3 left, vec3 right);
 vec3 crossv3(vec3 left, vec3 right);
 vec3 addv3(vec3 left, vec3 right);
 vec3 subv3(vec3 left, vec3 right);
+vec3 subv3f(vec3 left, float right);
 vec3 mulv3(vec3 left, vec3 right);
 vec3 mulv3f(vec3 left, float right);
 vec3 divv3f(vec3 left, float right);
 vec3 divv3(vec3 left, vec3 right);
 vec3 powv3(vec3 left, vec3 right);
 vec3 mixv3(vec3 left, vec3 right, float proportion);
+vec3 maxv3(vec3 left, vec3 right);
+vec3 minv3(vec3 left, vec3 right);
 
 float lenv3(vec3 v);
 float lensqv3(vec3 v);
@@ -384,6 +392,20 @@ mat4 rotatem4(vec3 axis, float angle);
 mat4 scalem4(vec3 scale);
 
 // endregion ------------------- MAT4 -------------------
+
+// region ------------------- SDFS -------------------
+
+float sdXZPlane(vec3 p);
+float sdSphere(vec3 p, float r);
+float sdBox(vec3 p, vec3 b);
+float sdCappedCylinder(vec3 p, vec3 a, vec3 b, float r);
+float sdCone(vec3 p, vec2 c, float h);
+
+float opUnion(float d1, float d2);
+float opSubtraction(float d1, float d2);
+float opIntersection(float d1, float d2);
+
+// endregion ------------------- SDFS -------------------
 
 // region ------------------- RAY -------------------
 

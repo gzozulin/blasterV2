@@ -9,7 +9,7 @@ import com.gzozulin.minigl.tech.glShadingFlatDraw
 import com.gzozulin.minigl.tech.glShadingFlatInstance
 import com.gzozulin.minigl.tech.glShadingFlatUse
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
 private var mouseLook = false

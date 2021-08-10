@@ -57,12 +57,14 @@
       <w>postdeclare</w>
       <w>predeclare</w>
       <w>randf</w>
+      <w>raymarcher</w>
       <w>rects</w>
       <w>resizables</w>
       <w>rotatem</w>
       <w>samplerq</w>
       <w>sandsim</w>
       <w>scalem</w>
+      <w>sdfs</w>
       <w>sfcs</w>
       <w>shadered</w>
       <w>shaderlang</w>

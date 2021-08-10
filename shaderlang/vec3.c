@@ -156,18 +156,23 @@ vec3 v3chartreuse() {
 }
 
 public
-vec2 v3xy(vec3 vec) {
+vec2 xyv3(vec3 vec) {
     return v2(vec.x, vec.y);
 }
 
 public
-vec2 v3xz(vec3 vec) {
+vec2 xzv3(vec3 vec) {
     return v2(vec.x, vec.z);
 }
 
 public
-vec2 v3yz(vec3 vec){
+vec2 yzv3(vec3 vec){
     return v2(vec.y, vec.z);
+}
+
+public
+vec3 absv3(vec3 v) {
+    return v3(absf(v.x), absf(v.y), absf(v.z));
 }
 
 public
@@ -198,6 +203,11 @@ vec3 subv3(const vec3 left, const vec3 right) {
     return v3(left.x - right.x, left.y - right.y, left.z - right.z);
 }
 
+public
+vec3 subv3f(const vec3 left, const float right) {
+    return subv3(left, ftov3(right));
+}
+
 custom
 vec3 mulv3(const vec3 left, const vec3 right) {
     return v3(left.x * right.x, left.y * right.y, left.z * right.z);
@@ -226,6 +236,16 @@ vec3 powv3(const vec3 left, const vec3 right) {
 public
 vec3 mixv3(const vec3 left, const vec3 right, const float proportion) {
     return addv3(mulv3(left, ftov3(1.0f - proportion)), mulv3(right, ftov3(proportion)));
+}
+
+public
+vec3 maxv3(vec3 left, vec3 right) {
+    return v3(maxf(left.x, right.x), maxf(left.y, right.y), maxf(left.z, right.z));
+}
+
+public
+vec3 minv3(vec3 left, vec3 right) {
+    return v3(minf(left.x, right.x), minf(left.y, right.y), minf(left.z, right.z));
 }
 
 public

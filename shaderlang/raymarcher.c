@@ -17,11 +17,24 @@ public
 const int RAYMARCH_AA = 3;
 
 protected
-float getDist(vec3 p) {
-    float sphereDist = lenv3(subv3(p, v3(0, 1, -3))) - 1.0f;
-    float planeDist = p.y;
+float sceneDist(vec3 p) {
+    const vec3 sphere = v3(0, 1, -3);
+    float sphereDist = sdSphere(subv3(p, sphere), 1.0f);
 
-    float d = minf(sphereDist, planeDist);
+    const vec3 cylStart = v3(1, 2, 0);
+    const vec3 cylStop = v3(-10, 2, 0);
+
+    float cylDist = sdCappedCylinder(p, cylStart, cylStop, 1.0f);
+
+    const vec3 box = v3(5, 1, 0);
+    const float boxDist = sdBox(subv3(p, box), v3(1, 3, 4));
+
+    const vec3 cone = v3(-4, 4, 1);
+    float coneDist = sdCone(subv3(p, cone), v2(5, 5), 3.0f);
+
+    float planeDist = sdXZPlane(p);
+
+    float d = opUnion(opUnion(opUnion(opUnion(sphereDist, planeDist), cylDist), boxDist), coneDist);
     return d;
 }
 
@@ -31,7 +44,7 @@ float rayMarch(vec3 ro, vec3 rd) {
 
     for(int i=0; i<MAX_STEPS; i++) {
         vec3 p = addv3(ro, mulv3f(rd, dO));
-        float dS = getDist(p);
+        float dS = sceneDist(p);
         dO += dS;
         if(dO>MAX_DIST || dS<SURF_DIST) break;
     }
@@ -41,12 +54,12 @@ float rayMarch(vec3 ro, vec3 rd) {
 
 protected
 vec3 getNormal(vec3 p) {
-    float d = getDist(p);
+    float d = sceneDist(p);
 
     vec3 n = subv3(ftov3(d), v3(
-            getDist(subv3(p, v3(0.01f, 0.0f, 0.0f))),
-            getDist(subv3(p, v3(0.0f, 0.01f, 0.0f))),
-            getDist(subv3(p, v3(0.0f, 0.0f, 0.01f)))));
+            sceneDist(subv3(p, v3(0.01f, 0.0f, 0.0f))),
+            sceneDist(subv3(p, v3(0.0f, 0.01f, 0.0f))),
+            sceneDist(subv3(p, v3(0.0f, 0.0f, 0.01f)))));
 
     return normv3(n);
 }

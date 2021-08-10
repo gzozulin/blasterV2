@@ -5,8 +5,25 @@
 #include "lang.h"
 
 #include <math.h>
+#include <stdlib.h>
 
 // region ------------------- MATH -------------------
+
+custom
+float signf(const float value) {
+    if (value < 0.0f) {
+        return -1.0f;
+    } else if (value > 0.0f) {
+        return 1.0f;
+    } else {
+        return 0.0f;
+    }
+}
+
+custom
+float absf(const float value) {
+    return value < 0.0f ? -value : value;
+}
 
 custom
 float sqrtf(const float value) {

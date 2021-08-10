@@ -26,6 +26,11 @@ vec2 subv2(const vec2 left, const vec2 right) {
 }
 
 custom
+vec2 mulv2(const vec2 left, const vec2 right) {
+    return v2(left.x * right.x, left.y * right.y);
+}
+
+custom
 vec2 mulv2f(const vec2 vec, const float v) {
     return v2(vec.x * v, vec.y * v);
 }
@@ -40,6 +45,11 @@ vec2 subv2f(const vec2 left, const float right) {
     return v2(left.x - right, left.y - right);
 }
 
+custom
+float dotv2(const vec2 left, const vec2 right) {
+    return left.x * right.x + left.y * right.y;
+}
+
 public
 float getxv2(const vec2 v) {
     return v.x;
@@ -50,7 +60,7 @@ float getyv2(const vec2 v) {
     return v.y;
 }
 
-custom
+public
 float lenv2(const vec2 v) {
     return sqrtf(v.x*v.x + v.y*v.y);
 }

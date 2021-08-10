@@ -20,6 +20,7 @@ private val DEFINITIONS = listOf(
     "/home/greg/blaster/shaderlang/mat3.c",
     "/home/greg/blaster/shaderlang/mat4.c",
     "/home/greg/blaster/shaderlang/ray.c",
+    "/home/greg/blaster/shaderlang/sdfs.c",
     "/home/greg/blaster/shaderlang/random.c",
     "/home/greg/blaster/shaderlang/camera.c",
     "/home/greg/blaster/shaderlang/sampler.c",

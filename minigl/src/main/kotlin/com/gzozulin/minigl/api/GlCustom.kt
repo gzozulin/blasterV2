@@ -50,6 +50,14 @@ private const val CUSTOM_DEF = """
 """
 
 private const val CUSTOM_MATH_DEF = """
+    float signf(float value) {
+        return sign(value);
+    }
+    
+    float absf(float value) {
+        return abs(value);
+    }
+    
     float sqrtf(float value) {
         return sqrt(value);
     }
@@ -202,6 +210,10 @@ private const val CUSTOM_VEC2_DEF = """
         return left - right;
     }
 
+    vec2 mulv2(vec2 left, vec2 right) {
+        return left * right;
+    }
+
     vec2 mulv2f(vec2 vec, float v) {
         return vec * v;
     }
@@ -212,6 +224,10 @@ private const val CUSTOM_VEC2_DEF = """
     
     vec2 subv2f(vec2 left, float right) {
         return left - right;
+    }
+    
+    float dotv2(vec2 left, vec2 right) {
+        return dot(left, right);
     }
 """
 
