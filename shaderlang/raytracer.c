@@ -11,52 +11,6 @@
 // region ------------------- RAYTRACING ---------------
 
 protected
-RtCamera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,const float vfoy, const float aspect,
-                      const float aperture, const float focusDist) {
-    const float lensRadius = aperture / 2.0f;
-
-    const float halfHeight = tanf(vfoy/2.0f);
-    const float halfWidth = aspect * halfHeight;
-
-    const vec3 w = normv3(subv3(eye, center));
-    const vec3 u = normv3(crossv3(up, w));
-    const vec3 v = crossv3(w, u);
-
-    const vec3 hwu = mulv3f(u, halfWidth * focusDist);
-    const vec3 hhv = mulv3f(v, halfHeight * focusDist);
-    const vec3 wf = mulv3f(w, focusDist);
-    const vec3 lowerLeft = subv3(subv3(subv3(eye, hwu), hhv), wf);
-
-    const vec3 horizontal = mulv3f(u, halfWidth * focusDist * 2.0f);
-    const vec3 vertical  = mulv3f(v, halfHeight * focusDist * 2.0f);
-
-    const RtCamera result = { eye, lowerLeft, horizontal, vertical, w, u, v, lensRadius};
-    return result;
-}
-
-protected
-ray rayFromCamera(const RtCamera camera, const float u, const float v) {
-    const vec3 horShift = mulv3f(camera.horizontal, u);
-    const vec3 verShift = mulv3f(camera.vertical, v);
-
-    vec3 origin;
-    vec3 direction;
-
-    if (camera.lensRadius > 0.0f) {
-        const vec3 rd = mulv3f(randomInUnitDisk(), camera.lensRadius);
-        const vec3 offset = addv3(mulv3f(camera.u, rd.x), mulv3f(camera.v, rd.y));
-        origin = addv3(camera.origin, offset);
-        direction = normv3(subv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin), offset));
-    } else {
-        origin = camera.origin;
-        direction = normv3(subv3(addv3(camera.lowerLeft, addv3(horShift, verShift)), camera.origin));
-    }
-
-    const ray result = {origin, direction };
-    return result;
-}
-
-protected
 vec3 background(const ray ray) {
     const float t = (ray.direction.y + 1.0f) * 0.5f;
     const vec3 gradient = lerpv3(v3one(), v3(0.5f, 0.7f, 1.0f), t);
@@ -236,7 +190,7 @@ ScatterResult scatterMaterial(ray ray, HitRecord record) {
 }
 
 protected
-vec3 sampleColor(const int rayBounces, const RtCamera camera, const float u, const float v) {
+vec3 sampleColor(const int rayBounces, const Camera camera, const float u, const float v) {
     ray ray = rayFromCamera(camera, u, v);
     vec3 fraction = ftov3(1.0f);
     for (int i = 0; i < rayBounces; i++) {
@@ -268,7 +222,7 @@ vec4 fragmentColorRt(const int width, const int height,
     const float DU = 1.0f / itof(width);
     const float DV = 1.0f / itof(height);
 
-    const RtCamera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
+    const Camera camera = cameraLookAt(eye, center, up, fovy, aspect, aperture, focusDist);
     vec3 result = v3zero();
     for (int i = 0; i < sampleCnt; i++) {
         const float du = DU * seededRndf();

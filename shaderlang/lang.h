@@ -90,14 +90,14 @@ typedef struct aabb {
 } aabb;
 
 public
-typedef struct RtCamera {
+typedef struct Camera {
     vec3 origin;
     vec3 lowerLeft;
     vec3 horizontal;
     vec3 vertical;
     vec3 w, u, v;
     float lensRadius;
-} RtCamera;
+} Camera;
 
 public
 typedef struct Light {
@@ -388,6 +388,13 @@ vec3 rayPoint(ray ray, float t);
 
 // endregion ------------------- RAY -------------------
 
+// region ------------------- CAMERA -------------------
+
+Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float vfoy, float aspect, float aperture, float focusDist);
+ray rayFromCamera(Camera camera, float u, float v);
+
+// endregion ------------------- CAMERA -------------------
+
 // region ------------------- RAND -------------------
 
 float rndf (float x);
@@ -413,8 +420,8 @@ vec4 samplerq(samplerCube sampler, vec3 texCoords);
 
 // region ------------------- RAYTRACING ---------------
 
-RtCamera cameraLookAt(vec3 eye, vec3 center, vec3 up,float vfoy, float aspect, float aperture, float focusDist);
-ray rayFromCamera(RtCamera camera, float u, float v);
+Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float vfoy, float aspect, float aperture, float focusDist);
+ray rayFromCamera(Camera camera, float u, float v);
 
 vec3 background(ray ray);
 
@@ -430,7 +437,7 @@ ScatterResult scatterMetallic(ray ray, HitRecord record, MetallicMaterial materi
 ScatterResult scatterDielectric(ray ray, HitRecord record, DielectricMaterial material);
 ScatterResult scatterMaterial(ray ray, HitRecord record);
 
-vec3 sampleColor(int rayBounces, RtCamera camera, float u, float v);
+vec3 sampleColor(int rayBounces, Camera camera, float u, float v);
 vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
                      float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
 vec4 gammaSqrt(vec4 result);
