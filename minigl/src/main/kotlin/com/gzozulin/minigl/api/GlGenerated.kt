@@ -58,6 +58,9 @@ private const val DEF_V3VIOLET = "vec3 v3violet ( ) { return v3 ( 0.5f , 0.0f , 
 private const val DEF_V3AZURE = "vec3 v3azure ( ) { return v3 ( 0.0f , 0.5f , 1.0f ) ; }\n"
 private const val DEF_V3AQUAMARINE = "vec3 v3aquamarine ( ) { return v3 ( 0.0f , 1.0f , 0.5f ) ; }\n"
 private const val DEF_V3CHARTREUSE = "vec3 v3chartreuse ( ) { return v3 ( 0.5f , 1.0f , 0.0f ) ; }\n"
+private const val DEF_V3XY = "vec2 v3xy ( vec3 vec ) { return v2 ( vec . x , vec . y ) ; }\n"
+private const val DEF_V3XZ = "vec2 v3xz ( vec3 vec ) { return v2 ( vec . x , vec . z ) ; }\n"
+private const val DEF_V3YZ = "vec2 v3yz ( vec3 vec ) { return v2 ( vec . y , vec . z ) ; }\n"
 private const val DEF_NEGV3 = "vec3 negv3 ( vec3 v ) { return v3 ( - v . x , - v . y , - v . z ) ; }\n"
 private const val DEF_POWV3 = "vec3 powv3 ( vec3 left , vec3 right ) { return v3 ( powf ( left . x , right . x ) , powf ( left . y , right . y ) , powf ( left . z , right . z ) ) ; }\n"
 private const val DEF_MIXV3 = "vec3 mixv3 ( vec3 left , vec3 right , float proportion ) { return addv3 ( mulv3 ( left , ftov3 ( 1.0f - proportion ) ) , mulv3 ( right , ftov3 ( proportion ) ) ) ; }\n"
@@ -104,7 +107,8 @@ private const val DEF_RAYBACK = "ray rayBack ( ) { ray result = { v3zero ( ) , v
 private const val DEF_RAYPOINT = "vec3 rayPoint ( ray ray , float t ) { return addv3 ( ray . origin , mulv3f ( ray . direction , t ) ) ; }\n"
 private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = v3 ( seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f , seededRndf ( ) * 2.0f - 1.0f ) ; if ( lensqv3 ( result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
 private const val DEF_RANDOMINUNITDISK = "vec3 randomInUnitDisk ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = subv3 ( mulv3f ( v3 ( seededRndf ( ) , seededRndf ( ) , 0.0f ) , 2.0f ) , v3 ( 1.0f , 1.0f , 0.0f ) ) ; if ( dotv3 ( result , result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
-private const val DEF_CAMERALOOKAT = "Camera cameraLookAt ( vec3 eye , vec3 center , vec3 up , float vfoy , float aspect , float aperture , float focusDist ) { float lensRadius = aperture / 2.0f ; float halfHeight = tanf ( vfoy / 2.0f ) ; float halfWidth = aspect * halfHeight ; vec3 w = normv3 ( subv3 ( eye , center ) ) ; vec3 u = normv3 ( crossv3 ( up , w ) ) ; vec3 v = crossv3 ( w , u ) ; vec3 hwu = mulv3f ( u , halfWidth * focusDist ) ; vec3 hhv = mulv3f ( v , halfHeight * focusDist ) ; vec3 wf = mulv3f ( w , focusDist ) ; vec3 lowerLeft = subv3 ( subv3 ( subv3 ( eye , hwu ) , hhv ) , wf ) ; vec3 horizontal = mulv3f ( u , halfWidth * focusDist * 2.0f ) ; vec3 vertical = mulv3f ( v , halfHeight * focusDist * 2.0f ) ; Camera result = { eye , lowerLeft , horizontal , vertical , w , u , v , lensRadius } ; return result ; }\n"
+private const val DEF_CENTERUV = "vec2 centerUV ( vec2 uv , float aspect ) { vec2 center = subv2f ( uv , 0.5f ) ; return v2 ( center . x * aspect , center . y ) ; }\n"
+private const val DEF_CAMERALOOKAT = "Camera cameraLookAt ( vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist ) { float lensRadius = aperture / 2.0f ; float halfHeight = tanf ( fovy / 2.0f ) ; float halfWidth = aspect * halfHeight ; vec3 w = normv3 ( subv3 ( eye , center ) ) ; vec3 u = normv3 ( crossv3 ( up , w ) ) ; vec3 v = crossv3 ( w , u ) ; vec3 hwu = mulv3f ( u , halfWidth * focusDist ) ; vec3 hhv = mulv3f ( v , halfHeight * focusDist ) ; vec3 wf = mulv3f ( w , focusDist ) ; vec3 lowerLeft = subv3 ( subv3 ( subv3 ( eye , hwu ) , hhv ) , wf ) ; vec3 horizontal = mulv3f ( u , halfWidth * focusDist * 2.0f ) ; vec3 vertical = mulv3f ( v , halfHeight * focusDist * 2.0f ) ; Camera result = { eye , lowerLeft , horizontal , vertical , w , u , v , lensRadius } ; return result ; }\n"
 private const val DEF_RAYFROMCAMERA = "ray rayFromCamera ( Camera camera , float u , float v ) { vec3 horShift = mulv3f ( camera . horizontal , u ) ; vec3 verShift = mulv3f ( camera . vertical , v ) ; vec3 origin ; vec3 direction ; if ( camera . lensRadius > 0.0f ) { vec3 rd = mulv3f ( randomInUnitDisk ( ) , camera . lensRadius ) ; vec3 offset = addv3 ( mulv3f ( camera . u , rd . x ) , mulv3f ( camera . v , rd . y ) ) ; origin = addv3 ( camera . origin , offset ) ; direction = normv3 ( subv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) , offset ) ) ; } else { origin = camera . origin ; direction = normv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) ) ; } ray result = { origin , direction } ; return result ; }\n"
 private const val DEF_PI = "float PI = 3.1415f ;\n"
 private const val DEF_BOUNCE_ERR = "float BOUNCE_ERR = 0.001f ;\n"
@@ -153,19 +157,18 @@ private const val DEF_SANDDRAW = "vec4 sandDraw ( sampler2D orig , vec2 uv , ive
 private const val DEF_MAX_STEPS = "int MAX_STEPS = 100 ;\n"
 private const val DEF_MAX_DIST = "float MAX_DIST = 100.0f ;\n"
 private const val DEF_SURF_DIST = "float SURF_DIST = 0.01f ;\n"
-private const val DEF_RAYMARCHERSPHERES = "vec3 raymarcherSpheres [ 3 ] = { { 0 , 1 , 6 } , { 1 , 1 , 6 } , { - 1 , 1 , 6 } } ;\n"
-private const val DEF_GETDIST = "float getDist ( vec3 p ) { float sphereDist0 = lenv3 ( subv3 ( p , raymarcherSpheres [ 0 ] ) ) - 1.0f ; float sphereDist1 = lenv3 ( subv3 ( p , raymarcherSpheres [ 1 ] ) ) - 1.0f ; float sphereDist2 = lenv3 ( subv3 ( p , raymarcherSpheres [ 2 ] ) ) - 1.0f ; float planeDist = p . y ; float d = minf ( minf ( minf ( sphereDist0 , sphereDist1 ) , sphereDist2 ) , planeDist ) ; return d ; }\n"
+private const val DEF_RAYMARCH_AA = "int RAYMARCH_AA = 3 ;\n"
+private const val DEF_GETDIST = "float getDist ( vec3 p ) { float sphereDist = lenv3 ( subv3 ( p , v3 ( 0 , 1 , - 3 ) ) ) - 1.0f ; float planeDist = p . y ; float d = minf ( sphereDist , planeDist ) ; return d ; }\n"
 private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = getDist ( p ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
 private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p ) { float d = getDist ( p ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( getDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) ) , getDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) ) ) ) ; return normv3 ( n ) ; }\n"
-private const val DEF_GETLIGHT = "float getLight ( vec3 p , float time ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; lightPos = v3 ( lightPos . x + sinf ( time ) * 2.0f , lightPos . y , lightPos . z + cosf ( time ) * 2.0f ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
-private const val DEF_CENTERUV = "vec2 centerUV ( vec2 uv , float aspect ) { vec2 center = subv2f ( uv , 0.5f ) ; return v2 ( center . x * aspect , center . y ) ; }\n"
-private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec2 uv , float time , float aspect ) { uv = centerUV ( uv , aspect ) ; vec3 ro = v3 ( 0 , 1 , 0 ) ; vec3 rd = normv3 ( v3 ( uv . x , uv . y , 1 ) ) ; float d = rayMarch ( ro , rd ) ; vec3 p = addv3 ( ro , mulv3f ( rd , d ) ) ; float dif = getLight ( p , time ) ; vec3 col = ftov3 ( dif ) ; col = powv3 ( col , ftov3 ( 0.4545f ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
+private const val DEF_GETLIGHT = "float getLight ( vec3 p ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
+private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec3 eye , vec3 center , vec2 uv , float fovy , float aspect , ivec2 wh ) { Camera camera = cameraLookAt ( eye , center , v3up ( ) , fovy , aspect , 0.0f , 1.0f ) ; float DU = 1.0f / itof ( wh . x ) ; float DV = 1.0f / itof ( wh . y ) ; vec3 col = v3zero ( ) ; for ( int i = 0 ; i < RAYMARCH_AA ; i ++ ) { float shift = rndv3 ( v2tov3 ( uv , itof ( i ) ) ) ; float du = remapf ( 0.0f , 1.0f , - DU / 2 , DU / 2 , shift ) ; float dv = remapf ( 0.0f , 1.0f , - DV / 2 , DV / 2 , shift ) ; ray r = rayFromCamera ( camera , uv . x + du , uv . y + dv ) ; float d = rayMarch ( r . origin , r . direction ) ; vec3 p = addv3 ( r . origin , mulv3f ( r . direction , d ) ) ; float dif = getLight ( p ) ; col = addv3 ( col , ftov3 ( dif ) ) ; } col = divv3f ( col , itof ( RAYMARCH_AA ) ) ; col = powv3 ( col , ftov3 ( 0.4545f ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
 
 const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_CAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
 
-const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_NEGV3+DEF_POWV3+DEF_MIXV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_GETDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_CENTERUV+DEF_RAYMARCHER
+const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_V3XY+DEF_V3XZ+DEF_V3YZ+DEF_NEGV3+DEF_POWV3+DEF_MIXV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CENTERUV+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_GETDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_RAYMARCHER
 
-const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER+DEF_MAX_STEPS+DEF_MAX_DIST+DEF_SURF_DIST+DEF_RAYMARCHERSPHERES
+const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER+DEF_MAX_STEPS+DEF_MAX_DIST+DEF_SURF_DIST+DEF_RAYMARCH_AA
 
 fun error() = object : Expression<Float>() {
     override fun expr() = "error()"
@@ -480,6 +483,21 @@ fun v3aquamarine() = object : Expression<vec3>() {
 fun v3chartreuse() = object : Expression<vec3>() {
     override fun expr() = "v3chartreuse()"
     override fun roots() = listOf<Expression<*>>()
+}
+
+fun v3xy(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "v3xy(${vec.expr()})"
+    override fun roots() = listOf(vec)
+}
+
+fun v3xz(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "v3xz(${vec.expr()})"
+    override fun roots() = listOf(vec)
+}
+
+fun v3yz(vec: Expression<vec3>) = object : Expression<vec2>() {
+    override fun expr() = "v3yz(${vec.expr()})"
+    override fun roots() = listOf(vec)
 }
 
 fun negv3(v: Expression<vec3>) = object : Expression<vec3>() {
@@ -947,8 +965,8 @@ fun sandDraw(orig: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<v
     override fun roots() = listOf(orig, uv, wh)
 }
 
-fun raymarcher(uv: Expression<vec2>, time: Expression<Float>, aspect: Expression<Float>) = object : Expression<vec4>() {
-    override fun expr() = "raymarcher(${uv.expr()}, ${time.expr()}, ${aspect.expr()})"
-    override fun roots() = listOf(uv, time, aspect)
+fun raymarcher(eye: Expression<vec3>, center: Expression<vec3>, uv: Expression<vec2>, fovy: Expression<Float>, aspect: Expression<Float>, wh: Expression<vec2i>) = object : Expression<vec4>() {
+    override fun expr() = "raymarcher(${eye.expr()}, ${center.expr()}, ${uv.expr()}, ${fovy.expr()}, ${aspect.expr()}, ${wh.expr()})"
+    override fun roots() = listOf(eye, center, uv, fovy, aspect, wh)
 }
 

@@ -305,6 +305,10 @@ vec3 v3violet();
 vec3 v3azure();
 vec3 v3aquamarine();
 
+vec2 v3xy(vec3 vec);
+vec2 v3xz(vec3 vec);
+vec2 v3yz(vec3 vec);
+
 vec3 negv3(vec3 v);
 float dotv3(vec3 left, vec3 right);
 vec3 crossv3(vec3 left, vec3 right);
@@ -390,7 +394,8 @@ vec3 rayPoint(ray ray, float t);
 
 // region ------------------- CAMERA -------------------
 
-Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float vfoy, float aspect, float aperture, float focusDist);
+vec2 centerUV(vec2 uv, float aspect);
+Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float fovy, float aspect, float aperture, float focusDist);
 ray rayFromCamera(Camera camera, float u, float v);
 
 // endregion ------------------- CAMERA -------------------
@@ -420,7 +425,7 @@ vec4 samplerq(samplerCube sampler, vec3 texCoords);
 
 // region ------------------- RAYTRACING ---------------
 
-Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float vfoy, float aspect, float aperture, float focusDist);
+Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float fovy, float aspect, float aperture, float focusDist);
 ray rayFromCamera(Camera camera, float u, float v);
 
 vec3 background(ray ray);

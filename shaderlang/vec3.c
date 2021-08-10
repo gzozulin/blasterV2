@@ -156,6 +156,21 @@ vec3 v3chartreuse() {
 }
 
 public
+vec2 v3xy(vec3 vec) {
+    return v2(vec.x, vec.y);
+}
+
+public
+vec2 v3xz(vec3 vec) {
+    return v2(vec.x, vec.z);
+}
+
+public
+vec2 v3yz(vec3 vec){
+    return v2(vec.y, vec.z);
+}
+
+public
 vec3 negv3(const vec3 v) {
     return v3(-v.x, -v.y, -v.z);
 }

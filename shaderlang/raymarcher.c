@@ -14,16 +14,14 @@ public
 const float SURF_DIST = 0.01f;
 
 public
-const vec3 raymarcherSpheres[3] = { { 0, 1, 6 }, { 1, 1, 6 }, { -1, 1, 6 } };
+const int RAYMARCH_AA = 3;
 
 protected
 float getDist(vec3 p) {
-    float sphereDist0 = lenv3(subv3(p, raymarcherSpheres[0])) - 1.0f;
-    float sphereDist1 = lenv3(subv3(p, raymarcherSpheres[1])) - 1.0f;
-    float sphereDist2 = lenv3(subv3(p, raymarcherSpheres[2])) - 1.0f;
+    float sphereDist = lenv3(subv3(p, v3(0, 1, -3))) - 1.0f;
     float planeDist = p.y;
 
-    float d = minf(minf(minf(sphereDist0, sphereDist1), sphereDist2), planeDist);
+    float d = minf(sphereDist, planeDist);
     return d;
 }
 
@@ -54,9 +52,8 @@ vec3 getNormal(vec3 p) {
 }
 
 protected
-float getLight(vec3 p, float time) {
+float getLight(vec3 p) {
     vec3 lightPos = v3(0, 5, 6);
-    lightPos = v3(lightPos.x + sinf(time) * 2.0f, lightPos.y, lightPos.z + cosf(time) * 2.0f);
 
     vec3 l = normv3(subv3(lightPos, p));
     vec3 n = getNormal(p);
@@ -68,24 +65,29 @@ float getLight(vec3 p, float time) {
     return dif;
 }
 
-protected
-vec2 centerUV(vec2 uv, float aspect) {
-    const vec2 center = subv2f(uv, 0.5f);
-    return v2(center.x * aspect, center.y);
-}
-
 public
-vec4 raymarcher(vec2 uv, float time, float aspect) {
-    uv = centerUV(uv, aspect);
+vec4 raymarcher(const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh) {
+    Camera camera = cameraLookAt(eye, center, v3up(), fovy, aspect, 0.0f, 1.0f);
 
-    vec3 ro = v3(0, 1, 0);
-    vec3 rd = normv3(v3(uv.x, uv.y, 1));
+    const float DU = 1.0f / itof(wh.x);
+    const float DV = 1.0f / itof(wh.y);
 
-    float d = rayMarch(ro, rd);
-    vec3 p = addv3(ro, mulv3f(rd, d));
+    vec3 col = v3zero();
+    for (int i = 0; i < RAYMARCH_AA; i++) {
+        const float shift = rndv3(v2tov3(uv, itof(i)));
+        const float du = remapf(0.0f, 1.0f, -DU/2, DU/2, shift);
+        const float dv = remapf(0.0f, 1.0f, -DV/2, DV/2, shift);
 
-    float dif = getLight(p, time);
-    vec3 col = ftov3(dif);
+        ray r = rayFromCamera(camera, uv.x + du, uv.y + dv);
+
+        float d = rayMarch(r.origin, r.direction);
+        vec3 p = addv3(r.origin, mulv3f(r.direction, d));
+
+        float dif = getLight(p);
+        col = addv3(col, ftov3(dif));
+    }
+
+    col = divv3f(col, itof(RAYMARCH_AA));
     col = powv3(col, ftov3(0.4545f));	// gamma correction
 
     return v3tov4(col, 1.0f);

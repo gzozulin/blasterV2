@@ -216,7 +216,9 @@ fun timef() = uniff { (System.currentTimeMillis() - started).toFloat() / 1000f }
 
 // ----------------------------- Aspect -----------------------------
 
+fun fovyf() = constf(radf(90.0f))
 fun aspectf(window: GlWindow) = constf(window.width.toFloat() / window.height.toFloat())
+fun whf(window: GlWindow) = constv2i(vec2i(window.width, window.height))
 
 // ----------------------------- Cache -----------------------------
 

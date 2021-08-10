@@ -71,6 +71,9 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "v3azure" -> v3azure()
 "v3aquamarine" -> v3aquamarine()
 "v3chartreuse" -> v3chartreuse()
+"v3xy" -> v3xy(edParseExpression(lineNo, split.removeFirst(), heap))
+"v3xz" -> v3xz(edParseExpression(lineNo, split.removeFirst(), heap))
+"v3yz" -> v3yz(edParseExpression(lineNo, split.removeFirst(), heap))
 "negv3" -> negv3(edParseExpression(lineNo, split.removeFirst(), heap))
 "dotv3" -> dotv3(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "crossv3" -> crossv3(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
@@ -164,7 +167,7 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "sandPhysics" -> sandPhysics(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sandSolver" -> sandSolver(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sandDraw" -> sandDraw(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
-"raymarcher" -> raymarcher(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
+"raymarcher" -> raymarcher(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 
         "namedTexCoordsV2" -> namedTexCoordsV2()
         "namedTexCoordsV3" -> namedTexCoordsV3()
