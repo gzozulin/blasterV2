@@ -14,94 +14,104 @@ public
 const float SURF_DIST = 0.01f;
 
 public
-const int RAYMARCH_AA = 3;
+const int RAYMARCH_AA = 1;
+
+public
+typedef struct RaymarcherScene {
+    vec3 sphereO;
+    float sphereR;
+
+    vec3 cylStart;
+    vec3 cylStop;
+    float cylR;
+
+    vec3 boxO;
+    vec3 boxR;
+
+    vec3 coneO;
+    vec2 coneS;
+    float coneH;
+
+    vec3 prismO;
+    vec2 prismS;
+} RaymarcherScene;
 
 protected
-float sceneDist(vec3 p) {
-    const vec3 sphere = v3(0, 1, -3);
-    float sphereDist = sdSphere(subv3(p, sphere), 1.0f);
-
-    const vec3 cylStart = v3(1, 2, 0);
-    const vec3 cylStop = v3(-10, 2, 0);
-
-    float cylDist = sdCappedCylinder(p, cylStart, cylStop, 1.0f);
-
-    const vec3 box = v3(5, 1, 0);
-    const float boxDist = sdBox(subv3(p, box), v3(1, 3, 4));
-
-    const vec3 cone = v3(-4, 4, 1);
-    float coneDist = sdCone(subv3(p, cone), v2(5, 5), 3.0f);
-
-    float planeDist = sdXZPlane(p);
-
-    float d = opUnion(opUnion(opUnion(opUnion(sphereDist, planeDist), cylDist), boxDist), coneDist);
-    return d;
+float sceneDist(vec3 p, RaymarcherScene scene) {
+    const float sphereDist = sdSphere(subv3(p, scene.sphereO), scene.sphereR);
+    const float cylDist = sdCappedCylinder(p, scene.cylStart, scene.cylStop, scene.cylR);
+    const float boxDist = sdBox(subv3(p, scene.boxO), scene.boxR);
+    const float coneDist = sdCone(subv3(p, scene.coneO), scene.coneS, scene.coneH);
+    const float prismDist = sdTriPrism(subv3(p, scene.prismO), scene.prismS);
+    const float planeDist = sdXZPlane(p);
+    return opUnion(opUnion(opUnion(opUnion(opUnion(
+            sphereDist, planeDist), cylDist), boxDist), coneDist), prismDist);
 }
 
 protected
-float rayMarch(vec3 ro, vec3 rd) {
+float rayMarch(vec3 ro, vec3 rd, RaymarcherScene scene) {
     float dO = 0.0f;
-
-    for(int i=0; i<MAX_STEPS; i++) {
+    for(int i = 0; i < MAX_STEPS; i++) {
         vec3 p = addv3(ro, mulv3f(rd, dO));
-        float dS = sceneDist(p);
+        float dS = sceneDist(p, scene);
         dO += dS;
-        if(dO>MAX_DIST || dS<SURF_DIST) break;
+        if(dO > MAX_DIST || dS < SURF_DIST) break;
     }
-
     return dO;
 }
 
 protected
-vec3 getNormal(vec3 p) {
-    float d = sceneDist(p);
-
+vec3 getNormal(vec3 p, RaymarcherScene scene) {
+    float d = sceneDist(p, scene);
     vec3 n = subv3(ftov3(d), v3(
-            sceneDist(subv3(p, v3(0.01f, 0.0f, 0.0f))),
-            sceneDist(subv3(p, v3(0.0f, 0.01f, 0.0f))),
-            sceneDist(subv3(p, v3(0.0f, 0.0f, 0.01f)))));
-
+            sceneDist(subv3(p, v3(0.01f, 0.0f, 0.0f)), scene),
+            sceneDist(subv3(p, v3(0.0f, 0.01f, 0.0f)), scene),
+            sceneDist(subv3(p, v3(0.0f, 0.0f, 0.01f)), scene)));
     return normv3(n);
 }
 
 protected
-float getLight(vec3 p) {
+float getLight(vec3 p, RaymarcherScene scene) {
     vec3 lightPos = v3(0, 5, 6);
 
     vec3 l = normv3(subv3(lightPos, p));
-    vec3 n = getNormal(p);
+    vec3 n = getNormal(p, scene);
 
     float dif = clampf(dotv3(n, l), 0.0f, 1.0f);
-    float d = rayMarch(addv3(p, mulv3f(n, SURF_DIST * 2.0f)), l);
-    if(d<lenv3(subv3(lightPos, p))) dif *= 0.1f;
+    float d = rayMarch(addv3(p, mulv3f(n, SURF_DIST * 2.0f)), l, scene);
+    if(d < lenv3(subv3(lightPos, p))) dif *= 0.1f;
 
     return dif;
 }
 
 public
-vec4 raymarcher(const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh) {
+vec4 raymarcher(
+        const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh,
+        vec3 sphereO, float sphereR,
+        vec3 cylStart, vec3 cylStop, float cylR,
+        vec3 boxO, vec3 boxR,
+        vec3 coneO, vec2 coneS, float coneH,
+        vec3 prismO, vec2 prismS ) {
+
+    const RaymarcherScene scene = { sphereO, sphereR, cylStart, cylStop, cylR, boxO, boxR, coneO, coneS, coneH, prismO, prismS };
     Camera camera = cameraLookAt(eye, center, v3up(), fovy, aspect, 0.0f, 1.0f);
 
-    const float DU = 1.0f / itof(wh.x);
-    const float DV = 1.0f / itof(wh.y);
-
     vec3 col = v3zero();
-    for (int i = 0; i < RAYMARCH_AA; i++) {
-        const float shift = rndv3(v2tov3(uv, itof(i)));
-        const float du = remapf(0.0f, 1.0f, -DU/2, DU/2, shift);
-        const float dv = remapf(0.0f, 1.0f, -DV/2, DV/2, shift);
+    for( int m = 0; m < RAYMARCH_AA; m++ ) {
+        for( int n = 0; n < RAYMARCH_AA; n++ ) {
 
-        ray r = rayFromCamera(camera, uv.x + du, uv.y + dv);
+            const vec2 duv = divv2(subv2f(divv2f(v2(itof(m), itof(n)), itof(RAYMARCH_AA)), 0.5f), iv2tov2(wh));
+            const ray r = rayFromCamera(camera, addv2(uv, duv));
 
-        float d = rayMarch(r.origin, r.direction);
-        vec3 p = addv3(r.origin, mulv3f(r.direction, d));
+            const float d = rayMarch(r.origin, r.direction, scene);
+            const vec3 p = addv3(r.origin, mulv3f(r.direction, d));
 
-        float dif = getLight(p);
-        col = addv3(col, ftov3(dif));
+            vec3 addition = ftov3(getLight(p, scene));
+            addition = sqrtv3(addition);
+            col = addv3(col, addition);
+        }
     }
 
-    col = divv3f(col, itof(RAYMARCH_AA));
-    col = powv3(col, ftov3(0.4545f));	// gamma correction
-
+    col = divv3f(col, itof(RAYMARCH_AA * RAYMARCH_AA));
     return v3tov4(col, 1.0f);
 }

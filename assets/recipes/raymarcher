@@ -1,0 +1,16 @@
+sphereO:    v3 -4 1 1
+sphereR:    1f
+
+cylStart:   v3 0 1 -2
+cylStop:    v3 3 1 -2
+cylR:       1f
+
+boxO:       v3 4 1 1
+boxR:       v3 1 1 1
+
+coneO:      v3 0 1 3
+coneS:      v2 4 2
+coneH:      2
+
+prismO:     v3 -2 1 -2
+prismH:     v2 1 1

@@ -6,6 +6,7 @@
 
 // region ------------------- VEC2 -------------------
 
+custom
 vec2 v2(const float x, const float y) {
     return (vec2) { x, y };
 }
@@ -20,6 +21,11 @@ vec2 v2zero() {
     return ftov2(0.0f);
 }
 
+public
+vec2 addv2(const vec2 l, const vec2 r) {
+    return v2(l.x + r.x, l.y + r.y);
+}
+
 custom
 vec2 subv2(const vec2 left, const vec2 right) {
     return v2(left.x - right.x, left.y - right.y);
@@ -30,9 +36,19 @@ vec2 mulv2(const vec2 left, const vec2 right) {
     return v2(left.x * right.x, left.y * right.y);
 }
 
+public
+vec2 divv2(const vec2 left, const vec2 right) {
+    return v2(left.x/right.x, left.y/right.y);
+}
+
 custom
 vec2 mulv2f(const vec2 vec, const float v) {
     return v2(vec.x * v, vec.y * v);
+}
+
+public
+vec2 divv2f(const vec2 v, const float f) {
+    return v2(v.x / f, v.y / f);
 }
 
 custom

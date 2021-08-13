@@ -247,10 +247,13 @@ vec2 v2(float x, float y);
 vec2 ftov2(float v);
 vec2 v2zero();
 
+vec2 addv2(vec2 l, vec2 r);
 vec2 subv2(vec2 left, vec2 right);
 vec2 mulv2(vec2 left, vec2 right);
+vec2 divv2(vec2 left, vec2 right);
 
 vec2 mulv2f(vec2 vec, float v);
+vec2 divv2f(vec2 v, float f);
 vec2 addv2f(vec2 left, float right);
 vec2 subv2f(vec2 left, float right);
 float dotv2(vec2 left, vec2 right);
@@ -266,6 +269,7 @@ float lenv2(vec2 v);
 
 ivec2 iv2(int x, int y);
 ivec2 iv2zero();
+vec2 iv2tov2(ivec2 v);
 vec4 iv2tov4(ivec2 vec, float z, float w);
 
 float getxiv2(vec2 v);
@@ -330,6 +334,7 @@ vec3 maxv3(vec3 left, vec3 right);
 vec3 minv3(vec3 left, vec3 right);
 
 float lenv3(vec3 v);
+vec3 sqrtv3(vec3 v);
 float lensqv3(vec3 v);
 vec3 normv3(vec3 v);
 vec3 lerpv3(vec3 from, vec3 to, float t);
@@ -400,6 +405,7 @@ float sdSphere(vec3 p, float r);
 float sdBox(vec3 p, vec3 b);
 float sdCappedCylinder(vec3 p, vec3 a, vec3 b, float r);
 float sdCone(vec3 p, vec2 c, float h);
+float sdTriPrism(vec3 p, vec2 h);
 
 float opUnion(float d1, float d2);
 float opSubtraction(float d1, float d2);
@@ -418,7 +424,7 @@ vec3 rayPoint(ray ray, float t);
 
 vec2 centerUV(vec2 uv, float aspect);
 Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float fovy, float aspect, float aperture, float focusDist);
-ray rayFromCamera(Camera camera, float u, float v);
+ray rayFromCamera(Camera camera, vec2 uv);
 
 // endregion ------------------- CAMERA -------------------
 
@@ -448,7 +454,7 @@ vec4 samplerq(samplerCube sampler, vec3 texCoords);
 // region ------------------- RAYTRACING ---------------
 
 Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float fovy, float aspect, float aperture, float focusDist);
-ray rayFromCamera(Camera camera, float u, float v);
+ray rayFromCamera(Camera camera, vec2 uv);
 
 vec3 background(ray ray);
 
@@ -464,7 +470,7 @@ ScatterResult scatterMetallic(ray ray, HitRecord record, MetallicMaterial materi
 ScatterResult scatterDielectric(ray ray, HitRecord record, DielectricMaterial material);
 ScatterResult scatterMaterial(ray ray, HitRecord record);
 
-vec3 sampleColor(int rayBounces, Camera camera, float u, float v);
+vec3 sampleColor(int rayBounces, Camera camera, vec2 uv);
 vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
                      float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
 vec4 gammaSqrt(vec4 result);

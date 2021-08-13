@@ -190,8 +190,8 @@ ScatterResult scatterMaterial(ray ray, HitRecord record) {
 }
 
 protected
-vec3 sampleColor(const int rayBounces, const Camera camera, const float u, const float v) {
-    ray ray = rayFromCamera(camera, u, v);
+vec3 sampleColor(const int rayBounces, const Camera camera, const vec2 uv) {
+    ray ray = rayFromCamera(camera, uv);
     vec3 fraction = ftov3(1.0f);
     for (int i = 0; i < rayBounces; i++) {
         const HitRecord record = rayHitWorld(ray, BOUNCE_ERR, FLT_MAX);
@@ -227,9 +227,8 @@ vec4 fragmentColorRt(const int width, const int height,
     for (int i = 0; i < sampleCnt; i++) {
         const float du = DU * seededRndf();
         const float dv = DV * seededRndf();
-        const float sampleU = texCoord.x + du;
-        const float sampleV = texCoord.y + dv;
-        result = addv3(result, sampleColor(rayBounces, camera, sampleU, sampleV));
+        const vec2 uv = addv2(texCoord, v2(du, dv));
+        result = addv3(result, sampleColor(rayBounces, camera, uv));
     }
     return v3tov4(result, 1.0f);
 }

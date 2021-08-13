@@ -254,6 +254,11 @@ float lenv3(const vec3 v) {
 }
 
 public
+vec3 sqrtv3(const vec3 v) {
+    return v3(sqrtf(v.x), sqrtf(v.y), sqrtf(v.z));
+}
+
+public
 float lensqv3(const vec3 v) {
     return (v.x*v.x + v.y*v.y + v.z*v.z);
 }

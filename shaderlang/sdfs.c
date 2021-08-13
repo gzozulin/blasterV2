@@ -47,6 +47,12 @@ float sdCone(vec3 p, vec2 c, float h) {
 }
 
 public
+float sdTriPrism(vec3 p, vec2 h) {
+    vec3 q = absv3(p);
+    return maxf(q.z-h.y,maxf(q.x*0.866025f+p.y*0.5f,-p.y)-h.x*0.5f);
+}
+
+public
 float opUnion(float d1, float d2) {
     return minf(d1, d2);
 }

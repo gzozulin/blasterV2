@@ -28,6 +28,9 @@ private const val DEF_SCHLICKF = "float schlickf ( float cosine , float ri ) { f
 private const val DEF_REMAPF = "float remapf ( float a , float b , float c , float d , float t ) { return ( ( t - a ) / ( b - a ) ) * ( d - c ) + c ; }\n"
 private const val DEF_FTOV2 = "vec2 ftov2 ( float v ) { return v2 ( v , v ) ; }\n"
 private const val DEF_V2ZERO = "vec2 v2zero ( ) { return ftov2 ( 0.0f ) ; }\n"
+private const val DEF_ADDV2 = "vec2 addv2 ( vec2 l , vec2 r ) { return v2 ( l . x + r . x , l . y + r . y ) ; }\n"
+private const val DEF_DIVV2 = "vec2 divv2 ( vec2 left , vec2 right ) { return v2 ( left . x / right . x , left . y / right . y ) ; }\n"
+private const val DEF_DIVV2F = "vec2 divv2f ( vec2 v , float f ) { return v2 ( v . x / f , v . y / f ) ; }\n"
 private const val DEF_GETXV2 = "float getxv2 ( vec2 v ) { return v . x ; }\n"
 private const val DEF_GETYV2 = "float getyv2 ( vec2 v ) { return v . y ; }\n"
 private const val DEF_LENV2 = "float lenv2 ( vec2 v ) { return sqrtf ( v . x * v . x + v . y * v . y ) ; }\n"
@@ -70,6 +73,7 @@ private const val DEF_MIXV3 = "vec3 mixv3 ( vec3 left , vec3 right , float propo
 private const val DEF_MAXV3 = "vec3 maxv3 ( vec3 left , vec3 right ) { return v3 ( maxf ( left . x , right . x ) , maxf ( left . y , right . y ) , maxf ( left . z , right . z ) ) ; }\n"
 private const val DEF_MINV3 = "vec3 minv3 ( vec3 left , vec3 right ) { return v3 ( minf ( left . x , right . x ) , minf ( left . y , right . y ) , minf ( left . z , right . z ) ) ; }\n"
 private const val DEF_LENV3 = "float lenv3 ( vec3 v ) { return sqrtf ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
+private const val DEF_SQRTV3 = "vec3 sqrtv3 ( vec3 v ) { return v3 ( sqrtf ( v . x ) , sqrtf ( v . y ) , sqrtf ( v . z ) ) ; }\n"
 private const val DEF_LENSQV3 = "float lensqv3 ( vec3 v ) { return ( v . x * v . x + v . y * v . y + v . z * v . z ) ; }\n"
 private const val DEF_NORMV3 = "vec3 normv3 ( vec3 v ) { return divv3f ( v , lenv3 ( v ) ) ; }\n"
 private const val DEF_LERPV3 = "vec3 lerpv3 ( vec3 from , vec3 to , float t ) { return addv3 ( mulv3f ( from , 1.0f - t ) , mulv3f ( to , t ) ) ; }\n"
@@ -102,6 +106,7 @@ private const val DEF_SETGV4 = "vec4 setgv4 ( vec4 v , float f ) { return v4 ( v
 private const val DEF_SETBV4 = "vec4 setbv4 ( vec4 v , float f ) { return v4 ( v . x , v . y , f , v . w ) ; }\n"
 private const val DEF_SETAV4 = "vec4 setav4 ( vec4 v , float f ) { return v4 ( v . x , v . y , v . z , f ) ; }\n"
 private const val DEF_IV2ZERO = "ivec2 iv2zero ( ) { return iv2 ( 0 , 0 ) ; }\n"
+private const val DEF_IV2TOV2 = "vec2 iv2tov2 ( ivec2 v ) { return v2 ( itof ( v . x ) , itof ( v . y ) ) ; }\n"
 private const val DEF_IV2TOV4 = "vec4 iv2tov4 ( ivec2 vec , float z , float w ) { return v4 ( itof ( vec . x ) , itof ( vec . y ) , z , w ) ; }\n"
 private const val DEF_GETXIV2 = "float getxiv2 ( vec2 v ) { return v . x ; }\n"
 private const val DEF_GETYIV2 = "float getyiv2 ( vec2 v ) { return v . y ; }\n"
@@ -115,6 +120,7 @@ private const val DEF_SDSPHERE = "float sdSphere ( vec3 p , float r ) { return l
 private const val DEF_SDBOX = "float sdBox ( vec3 p , vec3 b ) { vec3 q = subv3 ( absv3 ( p ) , b ) ; return lenv3 ( maxv3 ( q , v3zero ( ) ) ) + minf ( maxf ( q . x , maxf ( q . y , q . z ) ) , 0.0f ) ; }\n"
 private const val DEF_SDCAPPEDCYLINDER = "float sdCappedCylinder ( vec3 p , vec3 a , vec3 b , float r ) { vec3 ba = subv3 ( b , a ) ; vec3 pa = subv3 ( p , a ) ; float baba = dotv3 ( ba , ba ) ; float paba = dotv3 ( pa , ba ) ; float x = lenv3 ( subv3 ( mulv3f ( pa , baba ) , mulv3f ( ba , paba ) ) ) - r * baba ; float y = absf ( paba - baba * 0.5f ) - baba * 0.5f ; float x2 = x * x ; float y2 = y * y * baba ; float d = ( maxf ( x , y ) < 0.0f ) ? - minf ( x2 , y2 ) : ( ( ( x > 0.0f ) ? x2 : 0.0f ) + ( ( y > 0.0f ) ? y2 : 0.0f ) ) ; return signf ( d ) * sqrtf ( absf ( d ) ) / baba ; }\n"
 private const val DEF_SDCONE = "float sdCone ( vec3 p , vec2 c , float h ) { vec2 q = mulv2f ( v2 ( c . x / c . y , - 1.0f ) , h ) ; vec2 w = v2 ( lenv2 ( xzv3 ( p ) ) , p . y ) ; vec2 a = subv2 ( w , mulv2f ( q , clampf ( dotv2 ( w , q ) / dotv2 ( q , q ) , 0.0f , 1.0f ) ) ) ; vec2 b = subv2 ( w , mulv2 ( q , v2 ( clampf ( w . x / q . x , 0.0f , 1.0f ) , 1.0f ) ) ) ; float k = signf ( q . y ) ; float d = minf ( dotv2 ( a , a ) , dotv2 ( b , b ) ) ; float s = maxf ( k * ( w . x * q . y - w . y * q . x ) , k * ( w . y - q . y ) ) ; return sqrtf ( d ) * signf ( s ) ; }\n"
+private const val DEF_SDTRIPRISM = "float sdTriPrism ( vec3 p , vec2 h ) { vec3 q = absv3 ( p ) ; return maxf ( q . z - h . y , maxf ( q . x * 0.866025f + p . y * 0.5f , - p . y ) - h . x * 0.5f ) ; }\n"
 private const val DEF_OPUNION = "float opUnion ( float d1 , float d2 ) { return minf ( d1 , d2 ) ; }\n"
 private const val DEF_OPSUBTRACTION = "float opSubtraction ( float d1 , float d2 ) { return maxf ( - d1 , d2 ) ; }\n"
 private const val DEF_OPINTERSECTION = "float opIntersection ( float d1 , float d2 ) { return maxf ( d1 , d2 ) ; }\n"
@@ -122,7 +128,7 @@ private const val DEF_RANDOMINUNITSPHERE = "vec3 randomInUnitSphere ( ) { vec3 r
 private const val DEF_RANDOMINUNITDISK = "vec3 randomInUnitDisk ( ) { vec3 result ; for ( int i = 0 ; i < 10 ; i ++ ) { result = subv3 ( mulv3f ( v3 ( seededRndf ( ) , seededRndf ( ) , 0.0f ) , 2.0f ) , v3 ( 1.0f , 1.0f , 0.0f ) ) ; if ( dotv3 ( result , result ) >= 1.0f ) { return result ; } } return normv3 ( result ) ; }\n"
 private const val DEF_CENTERUV = "vec2 centerUV ( vec2 uv , float aspect ) { vec2 center = subv2f ( uv , 0.5f ) ; return v2 ( center . x * aspect , center . y ) ; }\n"
 private const val DEF_CAMERALOOKAT = "Camera cameraLookAt ( vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist ) { float lensRadius = aperture / 2.0f ; float halfHeight = tanf ( fovy / 2.0f ) ; float halfWidth = aspect * halfHeight ; vec3 w = normv3 ( subv3 ( eye , center ) ) ; vec3 u = normv3 ( crossv3 ( up , w ) ) ; vec3 v = crossv3 ( w , u ) ; vec3 hwu = mulv3f ( u , halfWidth * focusDist ) ; vec3 hhv = mulv3f ( v , halfHeight * focusDist ) ; vec3 wf = mulv3f ( w , focusDist ) ; vec3 lowerLeft = subv3 ( subv3 ( subv3 ( eye , hwu ) , hhv ) , wf ) ; vec3 horizontal = mulv3f ( u , halfWidth * focusDist * 2.0f ) ; vec3 vertical = mulv3f ( v , halfHeight * focusDist * 2.0f ) ; Camera result = { eye , lowerLeft , horizontal , vertical , w , u , v , lensRadius } ; return result ; }\n"
-private const val DEF_RAYFROMCAMERA = "ray rayFromCamera ( Camera camera , float u , float v ) { vec3 horShift = mulv3f ( camera . horizontal , u ) ; vec3 verShift = mulv3f ( camera . vertical , v ) ; vec3 origin ; vec3 direction ; if ( camera . lensRadius > 0.0f ) { vec3 rd = mulv3f ( randomInUnitDisk ( ) , camera . lensRadius ) ; vec3 offset = addv3 ( mulv3f ( camera . u , rd . x ) , mulv3f ( camera . v , rd . y ) ) ; origin = addv3 ( camera . origin , offset ) ; direction = normv3 ( subv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) , offset ) ) ; } else { origin = camera . origin ; direction = normv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) ) ; } ray result = { origin , direction } ; return result ; }\n"
+private const val DEF_RAYFROMCAMERA = "ray rayFromCamera ( Camera camera , vec2 uv ) { vec3 horShift = mulv3f ( camera . horizontal , uv . x ) ; vec3 verShift = mulv3f ( camera . vertical , uv . y ) ; vec3 origin ; vec3 direction ; if ( camera . lensRadius > 0.0f ) { vec3 rd = mulv3f ( randomInUnitDisk ( ) , camera . lensRadius ) ; vec3 offset = addv3 ( mulv3f ( camera . u , rd . x ) , mulv3f ( camera . v , rd . y ) ) ; origin = addv3 ( camera . origin , offset ) ; direction = normv3 ( subv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) , offset ) ) ; } else { origin = camera . origin ; direction = normv3 ( subv3 ( addv3 ( camera . lowerLeft , addv3 ( horShift , verShift ) ) , camera . origin ) ) ; } ray result = { origin , direction } ; return result ; }\n"
 private const val DEF_PI = "float PI = 3.1415f ;\n"
 private const val DEF_BOUNCE_ERR = "float BOUNCE_ERR = 0.001f ;\n"
 private const val DEF_NO_HIT = "HitRecord NO_HIT = { - 1 , { 0 , 0 , 0 } , { 1 , 0 , 0 } , 0 , 0 } ;\n"
@@ -139,8 +145,8 @@ private const val DEF_SCATTERLAMBERTIAN = "ScatterResult scatterLambertian ( Hit
 private const val DEF_SCATTERMETALLIC = "ScatterResult scatterMetallic ( ray ray , HitRecord record , MetallicMaterial material ) { vec3 reflected = reflectv3 ( ray . direction , record . normal ) ; if ( dotv3 ( reflected , record . normal ) > 0 ) { ScatterResult result = { material . albedo , { record . point , reflected } } ; return result ; } else { return NO_SCATTER ; } }\n"
 private const val DEF_SCATTERDIELECTRIC = "ScatterResult scatterDielectric ( ray ray , HitRecord record , DielectricMaterial material ) { float niOverNt ; float cosine ; vec3 outwardNormal ; float rdotn = dotv3 ( ray . direction , record . normal ) ; float dirlen = lenv3 ( ray . direction ) ; if ( rdotn > 0 ) { outwardNormal = negv3 ( record . normal ) ; niOverNt = material . reflectiveIndex ; cosine = material . reflectiveIndex * rdotn / dirlen ; } else { outwardNormal = record . normal ; niOverNt = 1.0f / material . reflectiveIndex ; cosine = - rdotn / dirlen ; } float reflectProbe ; RefractResult refractResult = refractv3 ( ray . direction , outwardNormal , niOverNt ) ; if ( refractResult . isRefracted ) { reflectProbe = schlickf ( cosine , material . reflectiveIndex ) ; } else { reflectProbe = 1.0f ; } vec3 scatteredDir ; if ( seededRndf ( ) < reflectProbe ) { scatteredDir = reflectv3 ( ray . direction , record . normal ) ; } else { scatteredDir = refractResult . refracted ; } ScatterResult scatterResult = { v3one ( ) , { record . point , scatteredDir } } ; return scatterResult ; }\n"
 private const val DEF_SCATTERMATERIAL = "ScatterResult scatterMaterial ( ray ray , HitRecord record ) { switch ( record . materialType ) { case MATERIAL_LAMBERTIAN : return scatterLambertian ( record , uLambertianMaterials [ record . materialIndex ] ) ; case MATERIAL_METALIIC : return scatterMetallic ( ray , record , uMetallicMaterials [ record . materialIndex ] ) ; case MATERIAL_DIELECTRIC : return scatterDielectric ( ray , record , uDielectricMaterials [ record . materialIndex ] ) ; default : return NO_SCATTER ; } }\n"
-private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( int rayBounces , Camera camera , float u , float v ) { ray ray = rayFromCamera ( camera , u , v ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < rayBounces ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = scatterMaterial ( ray , record ) ; if ( scatterResult . attenuation . x < 0 ) { return v3zero ( ) ; } fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n"
-private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( int width , int height , float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / itof ( width ) ; float DV = 1.0f / itof ( height ) ; Camera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * seededRndf ( ) ; float dv = DV * seededRndf ( ) ; float sampleU = texCoord . x + du ; float sampleV = texCoord . y + dv ; result = addv3 ( result , sampleColor ( rayBounces , camera , sampleU , sampleV ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n"
+private const val DEF_SAMPLECOLOR = "vec3 sampleColor ( int rayBounces , Camera camera , vec2 uv ) { ray ray = rayFromCamera ( camera , uv ) ; vec3 fraction = ftov3 ( 1.0f ) ; for ( int i = 0 ; i < rayBounces ; i ++ ) { HitRecord record = rayHitWorld ( ray , BOUNCE_ERR , FLT_MAX ) ; if ( record . t < 0 ) { break ; } else { ScatterResult scatterResult = scatterMaterial ( ray , record ) ; if ( scatterResult . attenuation . x < 0 ) { return v3zero ( ) ; } fraction = mulv3 ( fraction , scatterResult . attenuation ) ; ray = scatterResult . scattered ; } } return mulv3 ( background ( ray ) , fraction ) ; }\n"
+private const val DEF_FRAGMENTCOLORRT = "vec4 fragmentColorRt ( int width , int height , float random , int sampleCnt , int rayBounces , vec3 eye , vec3 center , vec3 up , float fovy , float aspect , float aperture , float focusDist , vec2 texCoord ) { seedRandom ( v2tov3 ( texCoord , random ) ) ; float DU = 1.0f / itof ( width ) ; float DV = 1.0f / itof ( height ) ; Camera camera = cameraLookAt ( eye , center , up , fovy , aspect , aperture , focusDist ) ; vec3 result = v3zero ( ) ; for ( int i = 0 ; i < sampleCnt ; i ++ ) { float du = DU * seededRndf ( ) ; float dv = DV * seededRndf ( ) ; vec2 uv = addv2 ( texCoord , v2 ( du , dv ) ) ; result = addv3 ( result , sampleColor ( rayBounces , camera , uv ) ) ; } return v3tov4 ( result , 1.0f ) ; }\n"
 private const val DEF_GAMMASQRT = "vec4 gammaSqrt ( vec4 result ) { return v4 ( sqrtf ( result . x ) , sqrtf ( result . y ) , sqrtf ( result . z ) , 1.0f ) ; }\n"
 private const val DEF_LUMINOSITY = "float luminosity ( float distance , Light light ) { return 1.0f / ( light . attenConstant + light . attenLinear * distance + light . attenQuadratic * distance * distance ) ; }\n"
 private const val DEF_DIFFUSECONTRIB = "vec3 diffuseContrib ( vec3 lightDir , vec3 fragNormal , PhongMaterial material ) { float diffuseTerm = dotv3 ( fragNormal , lightDir ) ; return diffuseTerm > 0.0f ? mulv3f ( material . diffuse , diffuseTerm ) : v3zero ( ) ; }\n"
@@ -170,16 +176,17 @@ private const val DEF_SANDDRAW = "vec4 sandDraw ( sampler2D orig , vec2 uv , ive
 private const val DEF_MAX_STEPS = "int MAX_STEPS = 100 ;\n"
 private const val DEF_MAX_DIST = "float MAX_DIST = 100.0f ;\n"
 private const val DEF_SURF_DIST = "float SURF_DIST = 0.01f ;\n"
-private const val DEF_RAYMARCH_AA = "int RAYMARCH_AA = 3 ;\n"
-private const val DEF_SCENEDIST = "float sceneDist ( vec3 p ) { vec3 sphere = v3 ( 0 , 1 , - 3 ) ; float sphereDist = sdSphere ( subv3 ( p , sphere ) , 1.0f ) ; vec3 cylStart = v3 ( 1 , 2 , 0 ) ; vec3 cylStop = v3 ( - 10 , 2 , 0 ) ; float cylDist = sdCappedCylinder ( p , cylStart , cylStop , 1.0f ) ; vec3 box = v3 ( 5 , 1 , 0 ) ; float boxDist = sdBox ( subv3 ( p , box ) , v3 ( 1 , 3 , 4 ) ) ; vec3 cone = v3 ( - 4 , 4 , 1 ) ; float coneDist = sdCone ( subv3 ( p , cone ) , v2 ( 5 , 5 ) , 3.0f ) ; float planeDist = sdXZPlane ( p ) ; float d = opUnion ( opUnion ( opUnion ( opUnion ( sphereDist , planeDist ) , cylDist ) , boxDist ) , coneDist ) ; return d ; }\n"
-private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = sceneDist ( p ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
-private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p ) { float d = sceneDist ( p ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( sceneDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) ) ) ) ; return normv3 ( n ) ; }\n"
-private const val DEF_GETLIGHT = "float getLight ( vec3 p ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
-private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec3 eye , vec3 center , vec2 uv , float fovy , float aspect , ivec2 wh ) { Camera camera = cameraLookAt ( eye , center , v3up ( ) , fovy , aspect , 0.0f , 1.0f ) ; float DU = 1.0f / itof ( wh . x ) ; float DV = 1.0f / itof ( wh . y ) ; vec3 col = v3zero ( ) ; for ( int i = 0 ; i < RAYMARCH_AA ; i ++ ) { float shift = rndv3 ( v2tov3 ( uv , itof ( i ) ) ) ; float du = remapf ( 0.0f , 1.0f , - DU / 2 , DU / 2 , shift ) ; float dv = remapf ( 0.0f , 1.0f , - DV / 2 , DV / 2 , shift ) ; ray r = rayFromCamera ( camera , uv . x + du , uv . y + dv ) ; float d = rayMarch ( r . origin , r . direction ) ; vec3 p = addv3 ( r . origin , mulv3f ( r . direction , d ) ) ; float dif = getLight ( p ) ; col = addv3 ( col , ftov3 ( dif ) ) ; } col = divv3f ( col , itof ( RAYMARCH_AA ) ) ; col = powv3 ( col , ftov3 ( 0.4545f ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
+private const val DEF_RAYMARCH_AA = "int RAYMARCH_AA = 1 ;\n"
+private const val DEF_RAYMARCHERSCENE = "struct RaymarcherScene {  vec3 sphereO ; float sphereR ; vec3 cylStart ; vec3 cylStop ; float cylR ; vec3 boxO ; vec3 boxR ; vec3 coneO ; vec2 coneS ; float coneH ; vec3 prismO ; vec2 prismS ;  };\n"
+private const val DEF_SCENEDIST = "float sceneDist ( vec3 p , RaymarcherScene scene ) { float sphereDist = sdSphere ( subv3 ( p , scene . sphereO ) , scene . sphereR ) ; float cylDist = sdCappedCylinder ( p , scene . cylStart , scene . cylStop , scene . cylR ) ; float boxDist = sdBox ( subv3 ( p , scene . boxO ) , scene . boxR ) ; float coneDist = sdCone ( subv3 ( p , scene . coneO ) , scene . coneS , scene . coneH ) ; float prismDist = sdTriPrism ( subv3 ( p , scene . prismO ) , scene . prismS ) ; float planeDist = sdXZPlane ( p ) ; return opUnion ( opUnion ( opUnion ( opUnion ( opUnion ( sphereDist , planeDist ) , cylDist ) , boxDist ) , coneDist ) , prismDist ) ; }\n"
+private const val DEF_RAYMARCH = "float rayMarch ( vec3 ro , vec3 rd , RaymarcherScene scene ) { float dO = 0.0f ; for ( int i = 0 ; i < MAX_STEPS ; i ++ ) { vec3 p = addv3 ( ro , mulv3f ( rd , dO ) ) ; float dS = sceneDist ( p , scene ) ; dO += dS ; if ( dO > MAX_DIST || dS < SURF_DIST ) break ; } return dO ; }\n"
+private const val DEF_GETNORMAL = "vec3 getNormal ( vec3 p , RaymarcherScene scene ) { float d = sceneDist ( p , scene ) ; vec3 n = subv3 ( ftov3 ( d ) , v3 ( sceneDist ( subv3 ( p , v3 ( 0.01f , 0.0f , 0.0f ) ) , scene ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.01f , 0.0f ) ) , scene ) , sceneDist ( subv3 ( p , v3 ( 0.0f , 0.0f , 0.01f ) ) , scene ) ) ) ; return normv3 ( n ) ; }\n"
+private const val DEF_GETLIGHT = "float getLight ( vec3 p , RaymarcherScene scene ) { vec3 lightPos = v3 ( 0 , 5 , 6 ) ; vec3 l = normv3 ( subv3 ( lightPos , p ) ) ; vec3 n = getNormal ( p , scene ) ; float dif = clampf ( dotv3 ( n , l ) , 0.0f , 1.0f ) ; float d = rayMarch ( addv3 ( p , mulv3f ( n , SURF_DIST * 2.0f ) ) , l , scene ) ; if ( d < lenv3 ( subv3 ( lightPos , p ) ) ) dif *= 0.1f ; return dif ; }\n"
+private const val DEF_RAYMARCHER = "vec4 raymarcher ( vec3 eye , vec3 center , vec2 uv , float fovy , float aspect , ivec2 wh , vec3 sphereO , float sphereR , vec3 cylStart , vec3 cylStop , float cylR , vec3 boxO , vec3 boxR , vec3 coneO , vec2 coneS , float coneH , vec3 prismO , vec2 prismS ) { RaymarcherScene scene = { sphereO , sphereR , cylStart , cylStop , cylR , boxO , boxR , coneO , coneS , coneH , prismO , prismS } ; Camera camera = cameraLookAt ( eye , center , v3up ( ) , fovy , aspect , 0.0f , 1.0f ) ; vec3 col = v3zero ( ) ; for ( int m = 0 ; m < RAYMARCH_AA ; m ++ ) { for ( int n = 0 ; n < RAYMARCH_AA ; n ++ ) { vec2 duv = divv2 ( subv2f ( divv2f ( v2 ( itof ( m ) , itof ( n ) ) , itof ( RAYMARCH_AA ) ) , 0.5f ) , iv2tov2 ( wh ) ) ; ray r = rayFromCamera ( camera , addv2 ( uv , duv ) ) ; float d = rayMarch ( r . origin , r . direction , scene ) ; vec3 p = addv3 ( r . origin , mulv3f ( r . direction , d ) ) ; vec3 addition = ftov3 ( getLight ( p , scene ) ) ; addition = sqrtv3 ( addition ) ; col = addv3 ( col , addition ) ; } } col = divv3f ( col , itof ( RAYMARCH_AA * RAYMARCH_AA ) ) ; return v3tov4 ( col , 1.0f ) ; }\n"
 
-const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_CAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT
+const val TYPES_DEF = DEF_RAY+DEF_AABB+DEF_CAMERA+DEF_LIGHT+DEF_PHONGMATERIAL+DEF_BVHNODE+DEF_SPHERE+DEF_LAMBERTIANMATERIAL+DEF_METALLICMATERIAL+DEF_DIELECTRICMATERIAL+DEF_HITRECORD+DEF_SCATTERRESULT+DEF_REFRACTRESULT+DEF_RAYMARCHERSCENE
 
-const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_GETXV2+DEF_GETYV2+DEF_LENV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_XYV3+DEF_XZV3+DEF_YZV3+DEF_ABSV3+DEF_NEGV3+DEF_SUBV3F+DEF_POWV3+DEF_MIXV3+DEF_MAXV3+DEF_MINV3+DEF_LENV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_SDXZPLANE+DEF_SDSPHERE+DEF_SDBOX+DEF_SDCAPPEDCYLINDER+DEF_SDCONE+DEF_OPUNION+DEF_OPSUBTRACTION+DEF_OPINTERSECTION+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CENTERUV+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_SCENEDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_RAYMARCHER
+const val OPS_DEF = DEF_ADDF+DEF_SUBF+DEF_MULF+DEF_DIVF+DEF_EQV2+DEF_EQIV2+DEF_EQV3+DEF_EQV4+DEF_SCHLICKF+DEF_REMAPF+DEF_FTOV2+DEF_V2ZERO+DEF_ADDV2+DEF_DIVV2+DEF_DIVV2F+DEF_GETXV2+DEF_GETYV2+DEF_LENV2+DEF_INDEXV3+DEF_V2TOV3+DEF_FTOV3+DEF_V3ZERO+DEF_V3ONE+DEF_V3FRONT+DEF_V3BACK+DEF_V3LEFT+DEF_V3RIGHT+DEF_V3UP+DEF_V3DOWN+DEF_V3WHITE+DEF_V3BLACK+DEF_V3LTGREY+DEF_V3GREY+DEF_V3DKGREY+DEF_V3RED+DEF_V3GREEN+DEF_V3BLUE+DEF_V3YELLOW+DEF_V3MAGENTA+DEF_V3CYAN+DEF_V3ORANGE+DEF_V3ROSE+DEF_V3VIOLET+DEF_V3AZURE+DEF_V3AQUAMARINE+DEF_V3CHARTREUSE+DEF_XYV3+DEF_XZV3+DEF_YZV3+DEF_ABSV3+DEF_NEGV3+DEF_SUBV3F+DEF_POWV3+DEF_MIXV3+DEF_MAXV3+DEF_MINV3+DEF_LENV3+DEF_SQRTV3+DEF_LENSQV3+DEF_NORMV3+DEF_LERPV3+DEF_REFLECTV3+DEF_REFRACTV3+DEF_V3TOV4+DEF_FTOV4+DEF_V4ZERO+DEF_V4ONE+DEF_ADDV4+DEF_SUBV4+DEF_MULV4+DEF_MULV4F+DEF_DIVV4+DEF_DIVV4F+DEF_GETXV4+DEF_GETYV4+DEF_GETZV4+DEF_GETWV4+DEF_GETRV4+DEF_GETGV4+DEF_GETBV4+DEF_GETAV4+DEF_SETXV4+DEF_SETYV4+DEF_SETZV4+DEF_SETWV4+DEF_SETRV4+DEF_SETGV4+DEF_SETBV4+DEF_SETAV4+DEF_IV2ZERO+DEF_IV2TOV2+DEF_IV2TOV4+DEF_GETXIV2+DEF_GETYIV2+DEF_GETUIV2+DEF_GETVIV2+DEF_TILE+DEF_RAYBACK+DEF_RAYPOINT+DEF_SDXZPLANE+DEF_SDSPHERE+DEF_SDBOX+DEF_SDCAPPEDCYLINDER+DEF_SDCONE+DEF_SDTRIPRISM+DEF_OPUNION+DEF_OPSUBTRACTION+DEF_OPINTERSECTION+DEF_RANDOMINUNITSPHERE+DEF_RANDOMINUNITDISK+DEF_CENTERUV+DEF_CAMERALOOKAT+DEF_RAYFROMCAMERA+DEF_BACKGROUND+DEF_RAYHITAABB+DEF_RAYHITSPHERERECORD+DEF_RAYHITSPHERE+DEF_RAYHITOBJECT+DEF_RAYHITBVH+DEF_RAYHITWORLD+DEF_SCATTERLAMBERTIAN+DEF_SCATTERMETALLIC+DEF_SCATTERDIELECTRIC+DEF_SCATTERMATERIAL+DEF_SAMPLECOLOR+DEF_FRAGMENTCOLORRT+DEF_GAMMASQRT+DEF_LUMINOSITY+DEF_DIFFUSECONTRIB+DEF_HALFVECTOR+DEF_SPECULARCONTRIB+DEF_LIGHTCONTRIB+DEF_POINTLIGHTCONTRIB+DEF_DIRLIGHTCONTRIB+DEF_SHADINGFLAT+DEF_SHADINGPHONG+DEF_DISTRIBUTIONGGX+DEF_GEOMETRYSCHLICKGGX+DEF_GEOMETRYSMITH+DEF_FRESNELSCHLICK+DEF_SHADINGPBR+DEF_SANDCONVERT+DEF_NEARBYCELLCOORDS+DEF_TRYDEPOSITPARTICLE+DEF_SIMTYPESAND+DEF_SIMTYPEWATER+DEF_SANDPHYSICS+DEF_SANDSOLVER+DEF_SANDDRAW+DEF_SCENEDIST+DEF_RAYMARCH+DEF_GETNORMAL+DEF_GETLIGHT+DEF_RAYMARCHER
 
 const val CONST_DEF = DEF_PI+DEF_BOUNCE_ERR+DEF_NO_HIT+DEF_NO_SCATTER+DEF_NO_REFRACT+DEF_TYPE_EMPTY+DEF_TYPE_SAND+DEF_TYPE_WATER+DEF_MAX_STEPS+DEF_MAX_DIST+DEF_SURF_DIST+DEF_RAYMARCH_AA
 
@@ -318,6 +325,11 @@ fun remapf(a: Expression<Float>, b: Expression<Float>, c: Expression<Float>, d: 
     override fun roots() = listOf(a, b, c, d, t)
 }
 
+fun v2(x: Expression<Float>, y: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "v2(${x.expr()}, ${y.expr()})"
+    override fun roots() = listOf(x, y)
+}
+
 fun ftov2(v: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "ftov2(${v.expr()})"
     override fun roots() = listOf(v)
@@ -326,6 +338,11 @@ fun ftov2(v: Expression<Float>) = object : Expression<vec2>() {
 fun v2zero() = object : Expression<vec2>() {
     override fun expr() = "v2zero()"
     override fun roots() = listOf<Expression<*>>()
+}
+
+fun addv2(l: Expression<vec2>, r: Expression<vec2>) = object : Expression<vec2>() {
+    override fun expr() = "addv2(${l.expr()}, ${r.expr()})"
+    override fun roots() = listOf(l, r)
 }
 
 fun subv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<vec2>() {
@@ -338,9 +355,19 @@ fun mulv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression
     override fun roots() = listOf(left, right)
 }
 
+fun divv2(left: Expression<vec2>, right: Expression<vec2>) = object : Expression<vec2>() {
+    override fun expr() = "divv2(${left.expr()}, ${right.expr()})"
+    override fun roots() = listOf(left, right)
+}
+
 fun mulv2f(vec: Expression<vec2>, v: Expression<Float>) = object : Expression<vec2>() {
     override fun expr() = "mulv2f(${vec.expr()}, ${v.expr()})"
     override fun roots() = listOf(vec, v)
+}
+
+fun divv2f(v: Expression<vec2>, f: Expression<Float>) = object : Expression<vec2>() {
+    override fun expr() = "divv2f(${v.expr()}, ${f.expr()})"
+    override fun roots() = listOf(v, f)
 }
 
 fun addv2f(left: Expression<vec2>, right: Expression<Float>) = object : Expression<vec2>() {
@@ -613,6 +640,11 @@ fun lenv3(v: Expression<vec3>) = object : Expression<Float>() {
     override fun roots() = listOf(v)
 }
 
+fun sqrtv3(v: Expression<vec3>) = object : Expression<vec3>() {
+    override fun expr() = "sqrtv3(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
 fun lensqv3(v: Expression<vec3>) = object : Expression<Float>() {
     override fun expr() = "lensqv3(${v.expr()})"
     override fun roots() = listOf(v)
@@ -778,6 +810,11 @@ fun iv2zero() = object : Expression<vec2i>() {
     override fun roots() = listOf<Expression<*>>()
 }
 
+fun iv2tov2(v: Expression<vec2i>) = object : Expression<vec2>() {
+    override fun expr() = "iv2tov2(${v.expr()})"
+    override fun roots() = listOf(v)
+}
+
 fun iv2tov4(vec: Expression<vec2i>, z: Expression<Float>, w: Expression<Float>) = object : Expression<vec4>() {
     override fun expr() = "iv2tov4(${vec.expr()}, ${z.expr()}, ${w.expr()})"
     override fun roots() = listOf(vec, z, w)
@@ -881,6 +918,11 @@ fun sdCappedCylinder(p: Expression<vec3>, a: Expression<vec3>, b: Expression<vec
 fun sdCone(p: Expression<vec3>, c: Expression<vec2>, h: Expression<Float>) = object : Expression<Float>() {
     override fun expr() = "sdCone(${p.expr()}, ${c.expr()}, ${h.expr()})"
     override fun roots() = listOf(p, c, h)
+}
+
+fun sdTriPrism(p: Expression<vec3>, h: Expression<vec2>) = object : Expression<Float>() {
+    override fun expr() = "sdTriPrism(${p.expr()}, ${h.expr()})"
+    override fun roots() = listOf(p, h)
 }
 
 fun opUnion(d1: Expression<Float>, d2: Expression<Float>) = object : Expression<Float>() {
@@ -1058,8 +1100,8 @@ fun sandDraw(orig: Expression<GlTexture>, uv: Expression<vec2>, wh: Expression<v
     override fun roots() = listOf(orig, uv, wh)
 }
 
-fun raymarcher(eye: Expression<vec3>, center: Expression<vec3>, uv: Expression<vec2>, fovy: Expression<Float>, aspect: Expression<Float>, wh: Expression<vec2i>) = object : Expression<vec4>() {
-    override fun expr() = "raymarcher(${eye.expr()}, ${center.expr()}, ${uv.expr()}, ${fovy.expr()}, ${aspect.expr()}, ${wh.expr()})"
-    override fun roots() = listOf(eye, center, uv, fovy, aspect, wh)
+fun raymarcher(eye: Expression<vec3>, center: Expression<vec3>, uv: Expression<vec2>, fovy: Expression<Float>, aspect: Expression<Float>, wh: Expression<vec2i>, sphereO: Expression<vec3>, sphereR: Expression<Float>, cylStart: Expression<vec3>, cylStop: Expression<vec3>, cylR: Expression<Float>, boxO: Expression<vec3>, boxR: Expression<vec3>, coneO: Expression<vec3>, coneS: Expression<vec2>, coneH: Expression<Float>, prismO: Expression<vec3>, prismS: Expression<vec2>) = object : Expression<vec4>() {
+    override fun expr() = "raymarcher(${eye.expr()}, ${center.expr()}, ${uv.expr()}, ${fovy.expr()}, ${aspect.expr()}, ${wh.expr()}, ${sphereO.expr()}, ${sphereR.expr()}, ${cylStart.expr()}, ${cylStop.expr()}, ${cylR.expr()}, ${boxO.expr()}, ${boxR.expr()}, ${coneO.expr()}, ${coneS.expr()}, ${coneH.expr()}, ${prismO.expr()}, ${prismS.expr()})"
+    override fun roots() = listOf(eye, center, uv, fovy, aspect, wh, sphereO, sphereR, cylStart, cylStop, cylR, boxO, boxR, coneO, coneS, coneH, prismO, prismS)
 }
 

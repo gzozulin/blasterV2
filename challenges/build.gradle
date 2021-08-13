@@ -10,6 +10,7 @@ application {
 
 dependencies {
     implementation(project(":minigl"))
+    implementation(project(":shadered"))
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

@@ -36,9 +36,9 @@ Camera cameraLookAt(const vec3 eye, const vec3 center, const vec3 up,
 }
 
 protected
-ray rayFromCamera(const Camera camera, const float u, const float v) {
-    const vec3 horShift = mulv3f(camera.horizontal, u);
-    const vec3 verShift = mulv3f(camera.vertical, v);
+ray rayFromCamera(const Camera camera, const vec2 uv) {
+    const vec3 horShift = mulv3f(camera.horizontal, uv.x);
+    const vec3 verShift = mulv3f(camera.vertical, uv.y);
 
     vec3 origin;
     vec3 direction;

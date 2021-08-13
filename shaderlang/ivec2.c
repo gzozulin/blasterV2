@@ -17,6 +17,11 @@ ivec2 iv2zero() {
 }
 
 public
+vec2 iv2tov2(const ivec2 v) {
+    return v2(itof(v.x), itof(v.y));
+}
+
+public
 vec4 iv2tov4(const ivec2 vec, float z, float w) {
     return v4(itof(vec.x), itof(vec.y), z, w);
 }
