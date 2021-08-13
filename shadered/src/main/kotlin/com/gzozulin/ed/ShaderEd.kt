@@ -64,15 +64,19 @@ internal fun <T> edParseExpression(lineNo: Int, expression: String,
         return edParseReference(expression, heap) as Expression<T>
     } catch (th: Throwable) {
         try {
-            return edParseFloat(expression) as Expression<T>
+            return edParseInt(expression) as Expression<T>
         } catch (th: Throwable) {
             try {
-                return edParseVector(expression) as Expression<T>
+                return edParseFloat(expression) as Expression<T>
             } catch (th: Throwable) {
                 try {
-                    return edParseOperation(lineNo, expression, heap) as Expression<T>
+                    return edParseVector(expression) as Expression<T>
                 } catch (th: Throwable) {
-                    throw EdParsingException("Cannot parse line #$lineNo")
+                    try {
+                        return edParseOperation(lineNo, expression, heap) as Expression<T>
+                    } catch (th: Throwable) {
+                        throw EdParsingException("Cannot parse line #$lineNo")
+                    }
                 }
             }
         }
@@ -94,8 +98,12 @@ private fun edParseVector(vector: String): Expression<*> {
     }
 }
 
-private fun edParseFloat(float: String): Expression<*> {
+private fun edParseFloat(float: String): Expression<Float> {
     return constf(float.toFloat())
+}
+
+private fun edParseInt(int: String): Expression<Int> {
+    return consti(int.toInt())
 }
 
 fun edRecipeUse(window: GlWindow, recipe: EdRecipe, callback: Callback) {

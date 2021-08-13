@@ -14,9 +14,6 @@ public
 const float SURF_DIST = 0.01f;
 
 public
-const int RAYMARCH_AA = 1;
-
-public
 typedef struct RaymarcherScene {
     vec3 sphereO;
     float sphereR;
@@ -87,6 +84,7 @@ float getLight(vec3 p, RaymarcherScene scene) {
 public
 vec4 raymarcher(
         const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh,
+        const int samplesAA,
         vec3 sphereO, float sphereR,
         vec3 cylStart, vec3 cylStop, float cylR,
         vec3 boxO, vec3 boxR,
@@ -97,21 +95,20 @@ vec4 raymarcher(
     Camera camera = cameraLookAt(eye, center, v3up(), fovy, aspect, 0.0f, 1.0f);
 
     vec3 col = v3zero();
-    for( int m = 0; m < RAYMARCH_AA; m++ ) {
-        for( int n = 0; n < RAYMARCH_AA; n++ ) {
+    for( int m = 0; m < samplesAA; m++ ) {
+        for( int n = 0; n < samplesAA; n++ ) {
 
-            const vec2 duv = divv2(subv2f(divv2f(v2(itof(m), itof(n)), itof(RAYMARCH_AA)), 0.5f), iv2tov2(wh));
+            const vec2 duv = divv2(subv2f(divv2f(v2(itof(m), itof(n)), itof(samplesAA)), 0.5f), iv2tov2(wh));
             const ray r = rayFromCamera(camera, addv2(uv, duv));
 
             const float d = rayMarch(r.origin, r.direction, scene);
             const vec3 p = addv3(r.origin, mulv3f(r.direction, d));
 
-            vec3 addition = ftov3(getLight(p, scene));
-            addition = sqrtv3(addition);
-            col = addv3(col, addition);
+            const vec3 addition = ftov3(getLight(p, scene));
+            col = addv3(col, sqrtv3(addition));
         }
     }
 
-    col = divv3f(col, itof(RAYMARCH_AA * RAYMARCH_AA));
+    col = divv3f(col, itof(samplesAA * samplesAA));
     return v3tov4(col, 1.0f);
 }

@@ -5,6 +5,7 @@
 // todo: glsl refract
 // todo: glsl reflect
 // todo: math library
+// todo: functions, which are redefined via recipes: sceneDist function for example
 
 #pragma once
 
@@ -450,39 +451,3 @@ vec4 texel(samplerBuffer sampler, int index);
 vec4 samplerq(samplerCube sampler, vec3 texCoords);
 
 // endregion ------------------- SAMPLER -------------------
-
-// region ------------------- RAYTRACING ---------------
-
-Camera cameraLookAt(vec3 eye, vec3 center, vec3 up, float fovy, float aspect, float aperture, float focusDist);
-ray rayFromCamera(Camera camera, vec2 uv);
-
-vec3 background(ray ray);
-
-bool rayHitAabb(ray ray, aabb aabb, float tMin, float tMax);
-HitRecord rayHitSphereRecord(ray ray, float t, Sphere sphere);
-HitRecord rayHitSphere(ray ray, float tMin, float tMax, Sphere sphere);
-HitRecord rayHitObject(ray ray, float tMin, float tMax, int type, int index);
-HitRecord rayHitBvh(ray ray, float tMin, float tMax, int index);
-HitRecord rayHitWorld(ray ray, float tMin, float tMax);
-
-ScatterResult scatterLambertian(HitRecord record, LambertianMaterial material);
-ScatterResult scatterMetallic(ray ray, HitRecord record, MetallicMaterial material);
-ScatterResult scatterDielectric(ray ray, HitRecord record, DielectricMaterial material);
-ScatterResult scatterMaterial(ray ray, HitRecord record);
-
-vec3 sampleColor(int rayBounces, Camera camera, vec2 uv);
-vec4 fragmentColorRt(int width, int height,float random, int sampleCnt, int rayBounces, vec3 eye, vec3 center, vec3 up,
-                     float fovy, float aspect, float aperture, float focusDist, vec2 texCoord);
-vec4 gammaSqrt(vec4 result);
-void raytracer();
-
-// endregion ------------------- RAYTRACING ---------------
-
-// region ------------------- SANDSIM ---------------
-
-vec4 sandConvert(vec4 pixel);
-vec4 sandPhysics(sampler2D orig, vec2 uv, ivec2 wh);
-vec4 sandSolver(sampler2D orig, sampler2D deltas, vec2 uv, ivec2 wh);
-vec4 sandDraw(sampler2D orig, vec2 uv, ivec2 wh);
-
-// endregion ------------------- SANDSIM ---------------
