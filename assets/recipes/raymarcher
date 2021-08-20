@@ -1,4 +1,4 @@
-samplesAA:  1
+samplesAA:      3
 
 pi:             3.1415
 piHalf:         divf pi 2f
@@ -22,12 +22,12 @@ boxDMat:        translatem4 (v3 0 0 -7)
 boxEShape:      v3 8 4.5 3.9
 boxEMat:        translatem4 (v3 0 0 -7)
 
-prismFShape:    v2 1 1
-prismFMat:      translatem4 (v3 0 0 0)
+prismFShape:    v2 2 5
+prismFMat:      mulm4 (rotatem4 (v3 0 1 0) piHalf) (translatem4 (v3 0 -5 -7))
 
-cylGLen:        1.0
-cylGRad:        1.0
-cylGMat:        translatem4 (v3 0 0 0)
+cylGLen:        9.0
+cylGRad:        3
+cylGMat:        mulm4 (rotatem4 (v3 1 0 0) piHalf) (translatem4 (v3 -7 0 -5.5))
 
-boxHShape:      v3 1 1 1
-boxHMat:        translatem4 (v3 0 0 0)
+boxHShape:      v3 10 10 2
+boxHMat:        mulm4 (rotatem4 (v3 0 1 0) piQuat) (translatem4 (v3 -11.5 -5 -8))

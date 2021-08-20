@@ -45,33 +45,47 @@ typedef struct RaymarcherScene {
 } RaymarcherScene;
 
 protected
-float simplidfiedCyl(vec3 p, float cylLen, float cylRad) {
+float simplifiedCyl(vec3 p, float cylLen, float cylRad) {
     return sdCappedCylinder(p, v3(0, 0, cylLen / 2.0f), v3(0, 0, -cylLen / 2.0f), cylRad);
 }
 
 protected
 float sceneDist(vec3 p, RaymarcherScene scene) {
-    const vec3 cylAP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.cylAMat));
-    const float cylA = simplidfiedCyl(cylAP, scene.cylALen, scene.cylARad);
+    const vec4 p4 = v3tov4(p, 1.0f);
 
-    const vec3 coneBP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.coneBMat));
+    const vec3 cylAP = v4tov3(transformv4(p4, scene.cylAMat));
+    const float cylA = simplifiedCyl(cylAP, scene.cylALen, scene.cylARad);
+
+    const vec3 coneBP = v4tov3(transformv4(p4, scene.coneBMat));
     const float coneB = sdCone(coneBP, scene.coneBShape, scene.coneBHeight);
 
-    const vec3 cylCP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.cylCMat));
-    const float cylC = simplidfiedCyl(cylCP, scene.cylCLen, scene.cylCRad);
+    const vec3 cylCP = v4tov3(transformv4(p4, scene.cylCMat));
+    const float cylC = simplifiedCyl(cylCP, scene.cylCLen, scene.cylCRad);
 
-    const vec3 boxDP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.boxDMat));
+    const vec3 boxDP = v4tov3(transformv4(p4, scene.boxDMat));
     const float boxD = sdBox(boxDP, scene.boxDShape);
 
-    const vec3 boxEP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.boxEMat));
+    const vec3 boxEP = v4tov3(transformv4(p4, scene.boxEMat));
     const float boxE = sdBox(boxEP, scene.boxEShape);
 
-    const float AB = opSubtraction(coneB, cylA);
-    const float ABC = opUnion(AB, cylC);
-    const float ABCD = opUnion(ABC, boxD);
-    const float ABCDE = opUnion(ABCD, boxE);
+    const vec3 prismFP = v4tov3(transformv4(p4, scene.prismFMat));
+    const float prismF = sdTriPrism(prismFP, scene.prismFShape);
 
-    return ABCDE;
+    const vec3 cylGP = v4tov3(transformv4(p4, scene.cylGMat));
+    const float cylG = simplifiedCyl(cylGP, scene.cylGLen, scene.cylGRad);
+
+    const vec3 boxHP = v4tov3(transformv4(p4, scene.boxHMat));
+    const float boxH = sdBox(boxHP, scene.boxHShape);
+
+    const float AB = opSubtraction(coneB, cylA);
+    const float AC = opUnion(AB, cylC);
+    const float AD = opUnion(AC, boxD);
+    const float AE = opUnion(AD, boxE);
+    const float AF = opUnion(AE, prismF);
+    const float AG = opUnion(AF, cylG);
+    const float AH = opSubtraction(boxH, AG);
+
+    return AH;
 }
 
 protected
