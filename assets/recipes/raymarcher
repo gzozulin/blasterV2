@@ -5,22 +5,22 @@ piHalf:         divf pi 2f
 piQuat:         divf piHalf 2f
 
 cylALen:        5.0
-cylARad:        3.0
+cylARad:        3.5
 cylAMat:        translatem4 (v3 0 0 0)
 
-coneBShape:     v2 7 10
+coneBShape:     v2 7 8
 coneBHeight:    4.0
 coneBMat:       mulm4 (rotatem4 (v3 1 0 0) piHalf) (translatem4 (v3 0 0 -1f))
 
-cylCLen:        1.0
-cylCRad:        1.0
+cylCLen:        4.0
+cylCRad:        4.0
 cylCMat:        translatem4 (v3 0 0 0)
 
-boxDShape:      v3 1 1 1
-boxDMat:        translatem4 (v3 0 0 0)
+boxDShape:      v3 5 5 4
+boxDMat:        translatem4 (v3 0 0 -7)
 
-boxEShape:      v3 1 1 1
-boxEMat:        translatem4 (v3 0 0 0)
+boxEShape:      v3 8 4.5 3.9
+boxEMat:        translatem4 (v3 0 0 -7)
 
 prismFShape:    v2 1 1
 prismFMat:      translatem4 (v3 0 0 0)

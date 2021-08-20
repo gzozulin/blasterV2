@@ -57,7 +57,21 @@ float sceneDist(vec3 p, RaymarcherScene scene) {
     const vec3 coneBP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.coneBMat));
     const float coneB = sdCone(coneBP, scene.coneBShape, scene.coneBHeight);
 
-    return opSubtraction(coneB, cylA);
+    const vec3 cylCP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.cylCMat));
+    const float cylC = simplidfiedCyl(cylCP, scene.cylCLen, scene.cylCRad);
+
+    const vec3 boxDP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.boxDMat));
+    const float boxD = sdBox(boxDP, scene.boxDShape);
+
+    const vec3 boxEP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.boxEMat));
+    const float boxE = sdBox(boxEP, scene.boxEShape);
+
+    const float AB = opSubtraction(coneB, cylA);
+    const float ABC = opUnion(AB, cylC);
+    const float ABCD = opUnion(ABC, boxD);
+    const float ABCDE = opUnion(ABCD, boxE);
+
+    return ABCDE;
 }
 
 protected

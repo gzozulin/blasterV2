@@ -17,7 +17,7 @@ private val window = GlWindow(isFullscreen = false)
 private val capturer = Capturer(window)
 
 private var mouseLook = false
-private val controller = ControllerFirstPerson(velocity = 0.5f, position = vec3(0f, 5f, 5f))
+private val controller = ControllerFirstPerson(velocity = 0.5f, position = vec3(0f, 6f, 5f))
 private val wasdInput = WasdInput(controller)
 
 /*private val controller = ControllerScenic(
