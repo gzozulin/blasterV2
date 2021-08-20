@@ -15,34 +15,49 @@ const float SURF_DIST = 0.01f;
 
 public
 typedef struct RaymarcherScene {
-    vec3 sphereO;
-    float sphereR;
+    float cylALen;
+    float cylARad;
+    mat4 cylAMat;
 
-    vec3 cylStart;
-    vec3 cylStop;
-    float cylR;
+    vec2 coneBShape;
+    float coneBHeight;
+    mat4 coneBMat;
 
-    vec3 boxO;
-    vec3 boxR;
+    float cylCLen;
+    float cylCRad;
+    mat4 cylCMat;
 
-    vec3 coneO;
-    vec2 coneS;
-    float coneH;
+    vec3 boxDShape;
+    mat4 boxDMat;
 
-    vec3 prismO;
-    vec2 prismS;
+    vec3 boxEShape;
+    mat4 boxEMat;
+
+    vec2 prismFShape;
+    mat4 prismFMat;
+
+    float cylGLen;
+    float cylGRad;
+    mat4 cylGMat;
+    
+    vec3 boxHShape;
+    mat4 boxHMat;
 } RaymarcherScene;
 
 protected
+float simplidfiedCyl(vec3 p, float cylLen, float cylRad) {
+    return sdCappedCylinder(p, v3(0, 0, cylLen / 2.0f), v3(0, 0, -cylLen / 2.0f), cylRad);
+}
+
+protected
 float sceneDist(vec3 p, RaymarcherScene scene) {
-    const float sphereDist = sdSphere(subv3(p, scene.sphereO), scene.sphereR);
-    const float cylDist = sdCappedCylinder(p, scene.cylStart, scene.cylStop, scene.cylR);
-    const float boxDist = sdBox(subv3(p, scene.boxO), scene.boxR);
-    const float coneDist = sdCone(subv3(p, scene.coneO), scene.coneS, scene.coneH);
-    const float prismDist = sdTriPrism(subv3(p, scene.prismO), scene.prismS);
-    const float planeDist = sdXZPlane(p);
-    return opUnion(opUnion(opUnion(opUnion(opUnion(
-            sphereDist, planeDist), cylDist), boxDist), coneDist), prismDist);
+    const vec3 cylAP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.cylAMat));
+    const float cylA = simplidfiedCyl(cylAP, scene.cylALen, scene.cylARad);
+
+    const vec3 coneBP = v4tov3(transformv4(v3tov4(p, 1.0f), scene.coneBMat));
+    const float coneB = sdCone(coneBP, scene.coneBShape, scene.coneBHeight);
+
+    return opSubtraction(coneB, cylA);
 }
 
 protected
@@ -68,15 +83,13 @@ vec3 getNormal(vec3 p, RaymarcherScene scene) {
 }
 
 protected
-float getLight(vec3 p, RaymarcherScene scene) {
-    vec3 lightPos = v3(0, 5, 6);
-
-    vec3 l = normv3(subv3(lightPos, p));
+float getLight(vec3 p, vec3 eye, RaymarcherScene scene) {
+    vec3 l = normv3(subv3(eye, p));
     vec3 n = getNormal(p, scene);
 
     float dif = clampf(dotv3(n, l), 0.0f, 1.0f);
     float d = rayMarch(addv3(p, mulv3f(n, SURF_DIST * 2.0f)), l, scene);
-    if(d < lenv3(subv3(lightPos, p))) dif *= 0.1f;
+    if(d < lenv3(subv3(eye, p))) dif *= 0.1f;
 
     return dif;
 }
@@ -85,13 +98,25 @@ public
 vec4 raymarcher(
         const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh,
         const int samplesAA,
-        vec3 sphereO, float sphereR,
-        vec3 cylStart, vec3 cylStop, float cylR,
-        vec3 boxO, vec3 boxR,
-        vec3 coneO, vec2 coneS, float coneH,
-        vec3 prismO, vec2 prismS ) {
+        
+        float cylALen, float cylARad, mat4 cylAMat,
+        vec2 coneBShape, float coneBHeight, mat4 coneBMat,
+        float cylCLen, float cylCRad, mat4 cylCMat,
+        vec3 boxDShape, mat4 boxDMat,
+        vec3 boxEShape, mat4 boxEMat,
+        vec2 prismFShape, mat4 prismFMat,
+        float cylGLen, float cylGRad, mat4 cylGMat,
+        vec3 boxHShape, mat4 boxHMat) {
 
-    const RaymarcherScene scene = { sphereO, sphereR, cylStart, cylStop, cylR, boxO, boxR, coneO, coneS, coneH, prismO, prismS };
+    const RaymarcherScene scene = { cylALen, cylARad, cylAMat,
+                                    coneBShape, coneBHeight, coneBMat,
+                                    cylCLen, cylCRad, cylCMat,
+                                    boxDShape, boxDMat,
+                                    boxEShape, boxEMat,
+                                    prismFShape, prismFMat,
+                                    cylGLen, cylGRad, cylGMat,
+                                    boxHShape, boxHMat };
+
     Camera camera = cameraLookAt(eye, center, v3up(), fovy, aspect, 0.0f, 1.0f);
 
     vec3 col = v3zero();
@@ -104,7 +129,7 @@ vec4 raymarcher(
             const float d = rayMarch(r.origin, r.direction, scene);
             const vec3 p = addv3(r.origin, mulv3f(r.direction, d));
 
-            const vec3 addition = ftov3(getLight(p, scene));
+            const vec3 addition = ftov3(getLight(p, eye, scene));
             col = addv3(col, sqrtv3(addition));
         }
     }

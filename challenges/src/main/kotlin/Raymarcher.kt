@@ -16,14 +16,18 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 private val window = GlWindow(isFullscreen = false)
 private val capturer = Capturer(window)
 
-private val controller = ControllerScenic(
+private var mouseLook = false
+private val controller = ControllerFirstPerson(velocity = 0.5f, position = vec3(0f, 5f, 5f))
+private val wasdInput = WasdInput(controller)
+
+/*private val controller = ControllerScenic(
     positions = listOf(
         vec3(-4f, 6f, -4f),
         vec3( 4f, 6f, -4f),
         vec3( 4f, 6f,  4f),
         vec3(-4f, 6f,  4f),
     ),
-    points = listOf(vec3(0f, 0f, 0f)))
+    points = listOf(vec3(0f, 0f, 0f)))*/
 
 private val unifPos = unifv3()
 private val unifCenter = unifv3()
@@ -37,11 +41,26 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/raymarcher", em
             color = raymarcher(
                 unifPos, unifCenter, namedTexCoordsV2(), fovyf(), aspectf(window), whf(window),
                 heap["samplesAA"] as Expression<Int>,
-                heap["sphereO"]  as Expression<vec3>, heap["sphereR"] as Expression<Float>,
-                heap["cylStart"] as Expression<vec3>, heap["cylStop"] as Expression<vec3>, heap["cylR"] as Expression<Float>,
-                heap["boxO"]     as Expression<vec3>, heap["boxR"]    as Expression<vec3>,
-                heap["coneO"]    as Expression<vec3>, heap["coneS"]   as Expression<vec2>, heap["coneH"] as Expression<Float>,
-                heap["prismO"]   as Expression<vec3>, heap["prismH"]  as Expression<vec2>
+                heap["cylALen"] as Expression<Float>,
+                heap["cylARad"] as Expression<Float>,
+                heap["cylAMat"] as Expression<mat4>,
+                heap["coneBShape"] as Expression<vec2>,
+                heap["coneBHeight"] as Expression<Float>,
+                heap["coneBMat"] as Expression<mat4>,
+                heap["cylCLen"] as Expression<Float>,
+                heap["cylCRad"] as Expression<Float>,
+                heap["cylCMat"] as Expression<mat4>,
+                heap["boxDShape"] as Expression<vec3>,
+                heap["boxDMat"] as Expression<mat4>,
+                heap["boxEShape"] as Expression<vec3>,
+                heap["boxEMat"] as Expression<mat4>,
+                heap["prismFShape"] as Expression<vec2>,
+                heap["prismFMat"] as Expression<mat4>,
+                heap["cylGLen"] as Expression<Float>,
+                heap["cylGRad"] as Expression<Float>,
+                heap["cylGMat"] as Expression<mat4>,
+                heap["boxHShape"] as Expression<vec3>,
+                heap["boxHMat"] as Expression<mat4>
             )
         )
     }
@@ -51,6 +70,19 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/raymarcher", em
 private val rect = glMeshCreateRect()
 
 fun main() = window.create {
+    window.buttonCallback = { button, pressed ->
+        if (button == MouseButton.LEFT) {
+            mouseLook = pressed
+        }
+    }
+    window.deltaCallback = { delta ->
+        if (mouseLook) {
+            wasdInput.onCursorDelta(delta)
+        }
+    }
+    window.keyCallback = { key, pressed ->
+        wasdInput.onKeyPressed(key, pressed)
+    }
     glMeshUse(rect) {
         edRecipeUse(window, recipe) {
             //capturer.capture {

@@ -1,18 +1,33 @@
 samplesAA:  1
 
-sphereO:    v3 -4 1 1
-sphereR:    1f
+pi:             3.1415
+piHalf:         divf pi 2f
+piQuat:         divf piHalf 2f
 
-cylStart:   v3 0 1 -2
-cylStop:    v3 3 1 -2
-cylR:       1f
+cylALen:        5.0
+cylARad:        3.0
+cylAMat:        translatem4 (v3 0 0 0)
 
-boxO:       v3 4 1 1
-boxR:       v3 1 1 1
+coneBShape:     v2 7 10
+coneBHeight:    4.0
+coneBMat:       mulm4 (rotatem4 (v3 1 0 0) piHalf) (translatem4 (v3 0 0 -1f))
 
-coneO:      v3 0 1 3
-coneS:      v2 4 2
-coneH:      2
+cylCLen:        1.0
+cylCRad:        1.0
+cylCMat:        translatem4 (v3 0 0 0)
 
-prismO:     v3 -2 1 -2
-prismH:     v2 1 1
+boxDShape:      v3 1 1 1
+boxDMat:        translatem4 (v3 0 0 0)
+
+boxEShape:      v3 1 1 1
+boxEMat:        translatem4 (v3 0 0 0)
+
+prismFShape:    v2 1 1
+prismFMat:      translatem4 (v3 0 0 0)
+
+cylGLen:        1.0
+cylGRad:        1.0
+cylGMat:        translatem4 (v3 0 0 0)
+
+boxHShape:      v3 1 1 1
+boxHMat:        translatem4 (v3 0 0 0)
