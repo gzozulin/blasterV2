@@ -48,6 +48,7 @@
       <w>moreexp</w>
       <w>mproj</w>
       <w>mulf</w>
+      <w>mulm</w>
       <w>multipage</w>
       <w>mulv</w>
       <w>mview</w>
@@ -57,6 +58,7 @@
       <w>phong</w>
       <w>postdeclare</w>
       <w>predeclare</w>
+      <w>quat</w>
       <w>randf</w>
       <w>raymarcher</w>
       <w>rects</w>

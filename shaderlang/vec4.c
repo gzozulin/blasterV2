@@ -22,6 +22,11 @@ vec4 ftov4(const float v) {
 }
 
 public
+vec3 v4tov3(const vec4 v) {
+    return v3(v.x, v.y, v.z);
+}
+
+public
 vec4 v4zero() {
     return ftov4(0.0f);
 }

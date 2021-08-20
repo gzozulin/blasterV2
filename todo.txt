@@ -87,3 +87,4 @@ x 2021-08-04 2021-07-12 Split the raytracer C code into multiple files +code @co
 2021-08-04 Videos in 4k resolution +video @complex
 2021-08-05 Make capturer.capture {  } add a frame and create other stuff lazily when needed +code @simple
 2021-08-05 ShaderGen extract defines +code @complex
+2021-08-17 Update repo description to point to channel +web @complex

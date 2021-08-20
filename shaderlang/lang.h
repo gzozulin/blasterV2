@@ -349,6 +349,7 @@ RefractResult refractv3(vec3 v, vec3 n, float niOverNt);
 vec4 v4(float x, float y, float z, float w);
 vec4 v3tov4(vec3 v, float f) ;
 vec4 ftov4(float v);
+vec3 v4tov3(vec4 v);
 vec4 v4zero();
 vec4 v4one();
 

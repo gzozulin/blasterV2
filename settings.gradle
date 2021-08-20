@@ -5,5 +5,5 @@ include ':challenges'
 include ':projector'
 include ':shadergen'
 include ':shadered'
-include 'antlr'
+include ':antlr'
 
