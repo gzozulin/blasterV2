@@ -13,21 +13,22 @@ import com.gzozulin.minigl.tech.glShadingFlatDraw
 import com.gzozulin.minigl.tech.glShadingFlatInstance
 import com.gzozulin.minigl.tech.glShadingFlatUse
 
-private val window = GlWindow(isFullscreen = false)
+private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
-private var mouseLook = false
-private val controller = ControllerFirstPerson(velocity = 0.5f, position = vec3(0f, 6f, 5f))
-private val wasdInput = WasdInput(controller)
+/*private var mouseLook = false
+private val controller = ControllerFirstPerson(velocity = 0.5f,
+    position = vec3(1.326e1f,8.673e0f, 6.289e-1f,), yaw = 2.44f, pitch = -0.70f, roll = 0f)
+private val wasdInput = WasdInput(controller)*/
 
-/*private val controller = ControllerScenic(
+private val controller = ControllerScenic(
     positions = listOf(
-        vec3(-4f, 6f, -4f),
-        vec3( 4f, 6f, -4f),
-        vec3( 4f, 6f,  4f),
-        vec3(-4f, 6f,  4f),
+        vec3(-13f, 8f, -13f),
+        vec3( 13f, 8f, -13f),
+        vec3( 13f, 8f,  13f),
+        vec3(-13f, 8f,  13f),
     ),
-    points = listOf(vec3(0f, 0f, 0f)))*/
+    points = listOf(vec3(0f, 0f, 0f)))
 
 private val unifPos = unifv3()
 private val unifCenter = unifv3()
@@ -70,7 +71,7 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/raymarcher", em
 private val rect = glMeshCreateRect()
 
 fun main() = window.create {
-    window.buttonCallback = { button, pressed ->
+    /*window.buttonCallback = { button, pressed ->
         if (button == MouseButton.LEFT) {
             mouseLook = pressed
         }
@@ -82,10 +83,10 @@ fun main() = window.create {
     }
     window.keyCallback = { key, pressed ->
         wasdInput.onKeyPressed(key, pressed)
-    }
+    }*/
     glMeshUse(rect) {
         edRecipeUse(window, recipe) {
-            //capturer.capture {
+            capturer.capture {
                 window.show {
                     edRecipeCheck(recipe)
                     controller.apply { position, direction ->
@@ -95,9 +96,9 @@ fun main() = window.create {
                     glShadingFlatDraw(shadingFlat) {
                         glShadingFlatInstance(shadingFlat, rect)
                     }
-                    //capturer.addFrame()
+                    capturer.addFrame()
                 }
-            //}
+            }
         }
     }
 }

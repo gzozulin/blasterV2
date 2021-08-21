@@ -8,22 +8,22 @@ cylALen:        5.0
 cylARad:        3.5
 cylAMat:        translatem4 (v3 0 0 0)
 
-coneBShape:     v2 7 8
+coneBShape:     v2 8 8
 coneBHeight:    4.0
 coneBMat:       mulm4 (rotatem4 (v3 1 0 0) piHalf) (translatem4 (v3 0 0 -1f))
 
-cylCLen:        4.0
+cylCLen:        3.5
 cylCRad:        4.0
-cylCMat:        translatem4 (v3 0 0 0)
+cylCMat:        translatem4 (v3 0 0 0.2)
 
 boxDShape:      v3 5 5 4
-boxDMat:        translatem4 (v3 0 0 -7)
+boxDMat:        translatem4 (v3 0 0 -6)
 
 boxEShape:      v3 8 4.5 3.9
-boxEMat:        translatem4 (v3 0 0 -7)
+boxEMat:        translatem4 (v3 0 0 -6)
 
 prismFShape:    v2 2 5
-prismFMat:      mulm4 (rotatem4 (v3 0 1 0) piHalf) (translatem4 (v3 0 -5 -7))
+prismFMat:      mulm4 (rotatem4 (v3 0 1 0) piHalf) (translatem4 (v3 0 -4.5 -6))
 
 cylGLen:        9.0
 cylGRad:        3

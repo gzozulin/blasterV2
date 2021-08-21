@@ -17,6 +17,10 @@ class WasdInput(private val controller: ControllerFirstPerson) {
             GLFW.GLFW_KEY_D -> controller.moveRight = pressed
             GLFW.GLFW_KEY_E -> controller.moveUp = pressed
             GLFW.GLFW_KEY_Q -> controller.moveDown = pressed
+            GLFW.GLFW_KEY_SPACE -> if (pressed) {
+                println("Position: %s, Yaw: %.2f, Pitch: %.2f, Roll: %.2f"
+                    .format(controller.position, controller.yaw, controller.pitch, controller.roll))
+            }
         }
     }
 }
