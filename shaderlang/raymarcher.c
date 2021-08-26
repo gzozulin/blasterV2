@@ -45,22 +45,17 @@ typedef struct RaymarcherScene {
 } RaymarcherScene;
 
 protected
-float simplifiedCyl(vec3 p, float cylLen, float cylRad) {
-    return sdCappedCylinder(p, v3(0, 0, cylLen / 2.0f), v3(0, 0, -cylLen / 2.0f), cylRad);
-}
-
-protected
 float sceneDist(vec3 p, RaymarcherScene scene) {
     const vec4 p4 = v3tov4(p, 1.0f);
 
     const vec3 cylAP = v4tov3(transformv4(p4, scene.cylAMat));
-    const float cylA = simplifiedCyl(cylAP, scene.cylALen, scene.cylARad);
+    const float cylA = sdSimplifiedCyl(cylAP, scene.cylALen, scene.cylARad);
 
     const vec3 coneBP = v4tov3(transformv4(p4, scene.coneBMat));
     const float coneB = sdCone(coneBP, scene.coneBShape, scene.coneBHeight);
 
     const vec3 cylCP = v4tov3(transformv4(p4, scene.cylCMat));
-    const float cylC = simplifiedCyl(cylCP, scene.cylCLen, scene.cylCRad);
+    const float cylC = sdSimplifiedCyl(cylCP, scene.cylCLen, scene.cylCRad);
 
     const vec3 boxDP = v4tov3(transformv4(p4, scene.boxDMat));
     const float boxD = sdBox(boxDP, scene.boxDShape);
@@ -72,7 +67,7 @@ float sceneDist(vec3 p, RaymarcherScene scene) {
     const float prismF = sdTriPrism(prismFP, scene.prismFShape);
 
     const vec3 cylGP = v4tov3(transformv4(p4, scene.cylGMat));
-    const float cylG = simplifiedCyl(cylGP, scene.cylGLen, scene.cylGRad);
+    const float cylG = sdSimplifiedCyl(cylGP, scene.cylGLen, scene.cylGRad);
 
     const vec3 boxHP = v4tov3(transformv4(p4, scene.boxHMat));
     const float boxH = sdBox(boxHP, scene.boxHShape);
@@ -148,11 +143,11 @@ vec4 raymarcher(
     Camera camera = cameraLookAt(eye, center, v3up(), fovy, aspect, 0.0f, 1.0f);
 
     vec3 col = v3zero();
-    for( int m = 0; m < samplesAA; m++ ) {
-        for( int n = 0; n < samplesAA; n++ ) {
-
-            const vec2 duv = divv2(subv2f(divv2f(v2(itof(m), itof(n)), itof(samplesAA)), 0.5f), iv2tov2(wh));
-            const ray r = rayFromCamera(camera, addv2(uv, duv));
+    for(int x = 0; x < samplesAA; x++) {
+        for(int y = 0; y < samplesAA; y++) {
+            const float du = (itof(x) / itof(samplesAA) - 0.5f) / itof(wh.x);
+            const float dv = (itof(y) / itof(samplesAA) - 0.5f) / itof(wh.y);
+            const ray r = rayFromCamera(camera, addv2(uv, v2(du, dv)));
 
             const float d = rayMarch(r.origin, r.direction, scene);
             const vec3 p = addv3(r.origin, mulv3f(r.direction, d));

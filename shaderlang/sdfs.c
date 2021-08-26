@@ -35,6 +35,11 @@ float sdCappedCylinder(vec3 p, vec3 a, vec3 b, float r) {
 }
 
 public
+float sdSimplifiedCyl(vec3 p, float cylLen, float cylRad) {
+    return sdCappedCylinder(p, v3(0, 0, cylLen / 2.0f), v3(0, 0, -cylLen / 2.0f), cylRad);
+}
+
+public
 float sdCone(vec3 p, vec2 c, float h) {
     vec2 q = mulv2f(v2(c.x / c.y, -1.0f), h);
     vec2 w = v2(lenv2(xzv3(p)), p.y);

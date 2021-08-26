@@ -406,6 +406,7 @@ float sdXZPlane(vec3 p);
 float sdSphere(vec3 p, float r);
 float sdBox(vec3 p, vec3 b);
 float sdCappedCylinder(vec3 p, vec3 a, vec3 b, float r);
+float sdSimplifiedCyl(vec3 p, float cylLen, float cylRad);
 float sdCone(vec3 p, vec2 c, float h);
 float sdTriPrism(vec3 p, vec2 h);
 

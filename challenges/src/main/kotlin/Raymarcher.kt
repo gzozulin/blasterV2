@@ -16,19 +16,19 @@ import com.gzozulin.minigl.tech.glShadingFlatUse
 private val window = GlWindow(isFullscreen = true)
 private val capturer = Capturer(window)
 
-/*private var mouseLook = false
+private var mouseLook = false
 private val controller = ControllerFirstPerson(velocity = 0.5f,
-    position = vec3(1.326e1f,8.673e0f, 6.289e-1f,), yaw = 2.44f, pitch = -0.70f, roll = 0f)
-private val wasdInput = WasdInput(controller)*/
+    position = vec3(13.26f, 8.67f, 0.63f), yaw = 2.57f, pitch = -0.63f, roll = 0.00f)
+private val wasdInput = WasdInput(controller)
 
-private val controller = ControllerScenic(
+/*private val controller = ControllerScenic(
     positions = listOf(
         vec3(-13f, 8f, -13f),
         vec3( 13f, 8f, -13f),
         vec3( 13f, 8f,  13f),
         vec3(-13f, 8f,  13f),
     ),
-    points = listOf(vec3(0f, 0f, 0f)))
+    points = listOf(vec3(0f, 0f, 0f)))*/
 
 private val unifPos = unifv3()
 private val unifCenter = unifv3()
@@ -71,7 +71,7 @@ private val recipe = EdRecipe("/home/greg/blaster/assets/recipes/raymarcher", em
 private val rect = glMeshCreateRect()
 
 fun main() = window.create {
-    /*window.buttonCallback = { button, pressed ->
+    window.buttonCallback = { button, pressed ->
         if (button == MouseButton.LEFT) {
             mouseLook = pressed
         }
@@ -83,7 +83,7 @@ fun main() = window.create {
     }
     window.keyCallback = { key, pressed ->
         wasdInput.onKeyPressed(key, pressed)
-    }*/
+    }
     glMeshUse(rect) {
         edRecipeUse(window, recipe) {
             capturer.capture {

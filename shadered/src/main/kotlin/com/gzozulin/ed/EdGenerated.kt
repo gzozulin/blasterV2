@@ -154,6 +154,7 @@ internal fun edParseOperation(lineNo: Int, operation: String, heap: MutableMap<S
 "sdSphere" -> sdSphere(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sdBox" -> sdBox(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sdCappedCylinder" -> sdCappedCylinder(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
+"sdSimplifiedCyl" -> sdSimplifiedCyl(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sdCone" -> sdCone(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "sdTriPrism" -> sdTriPrism(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
 "opUnion" -> opUnion(edParseExpression(lineNo, split.removeFirst(), heap),edParseExpression(lineNo, split.removeFirst(), heap))
