@@ -15,37 +15,18 @@ const float SURF_DIST = 0.01f;
 
 public
 typedef struct RaymarcherScene {
-    float cylALen;
-    float cylARad;
-    mat4 cylAMat;
-
-    vec2 coneBShape;
-    float coneBHeight;
-    mat4 coneBMat;
-
-    float cylCLen;
-    float cylCRad;
-    mat4 cylCMat;
-
-    vec3 boxDShape;
-    mat4 boxDMat;
-
-    vec3 boxEShape;
-    mat4 boxEMat;
-
-    vec2 prismFShape;
-    mat4 prismFMat;
-
-    float cylGLen;
-    float cylGRad;
-    mat4 cylGMat;
-    
-    vec3 boxHShape;
-    mat4 boxHMat;
+    float cylALen;      float cylARad;      mat4 cylAMat;
+    vec2 coneBShape;    float coneBHeight;  mat4 coneBMat;
+    float cylCLen;      float cylCRad;      mat4 cylCMat;
+    vec3 boxDShape;     mat4 boxDMat;
+    vec3 boxEShape;     mat4 boxEMat;
+    vec2 prismFShape;   mat4 prismFMat;
+    float cylGLen;      float cylGRad;      mat4 cylGMat;
+    vec3 boxHShape;     mat4 boxHMat;
 } RaymarcherScene;
 
 protected
-float sceneDist(vec3 p, RaymarcherScene scene) {
+float sceneDist(const vec3 p, const RaymarcherScene scene) {
     const vec4 p4 = v3tov4(p, 1.0f);
 
     const vec3 cylAP = v4tov3(transformv4(p4, scene.cylAMat));
@@ -84,11 +65,11 @@ float sceneDist(vec3 p, RaymarcherScene scene) {
 }
 
 protected
-float rayMarch(vec3 ro, vec3 rd, RaymarcherScene scene) {
+float rayMarch(const vec3 ro, const vec3 rd, const RaymarcherScene scene) {
     float dO = 0.0f;
     for(int i = 0; i < MAX_STEPS; i++) {
-        vec3 p = addv3(ro, mulv3f(rd, dO));
-        float dS = sceneDist(p, scene);
+        const vec3 p = addv3(ro, mulv3f(rd, dO));
+        const float dS = sceneDist(p, scene);
         dO += dS;
         if(dO > MAX_DIST || dS < SURF_DIST) break;
     }
@@ -96,40 +77,39 @@ float rayMarch(vec3 ro, vec3 rd, RaymarcherScene scene) {
 }
 
 protected
-vec3 getNormal(vec3 p, RaymarcherScene scene) {
-    float d = sceneDist(p, scene);
-    vec3 n = subv3(ftov3(d), v3(
-            sceneDist(subv3(p, v3(0.01f, 0.0f, 0.0f)), scene),
-            sceneDist(subv3(p, v3(0.0f, 0.01f, 0.0f)), scene),
-            sceneDist(subv3(p, v3(0.0f, 0.0f, 0.01f)), scene)));
+vec3 getNormal(const vec3 p, const RaymarcherScene scene) {
+    const float d = sceneDist(p, scene);
+    const vec3 n = subv3(ftov3(d), v3(
+            sceneDist(v3(p.x - 0.01f, p.y,         p.z),         scene),
+            sceneDist(v3(p.x,         p.y - 0.01f, p.z),         scene),
+            sceneDist(v3(p.x,         p.y,         p.z - 0.01f), scene)));
     return normv3(n);
 }
 
 protected
-float getLight(vec3 p, vec3 eye, RaymarcherScene scene) {
-    vec3 l = normv3(subv3(eye, p));
-    vec3 n = getNormal(p, scene);
+float getLight(const vec3 p, const vec3 eye, const RaymarcherScene scene) {
+    const vec3 l = normv3(subv3(eye, p));
+    const vec3 n = getNormal(p, scene);
 
-    float dif = clampf(dotv3(n, l), 0.0f, 1.0f);
+    float a = clampf(dotv3(n, l), 0.0f, 1.0f);
     float d = rayMarch(addv3(p, mulv3f(n, SURF_DIST * 2.0f)), l, scene);
-    if(d < lenv3(subv3(eye, p))) dif *= 0.1f;
+    if(d < lenv3(subv3(eye, p))) a *= 0.1f;
 
-    return dif;
+    return a;
 }
 
 public
 vec4 raymarcher(
-        const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, ivec2 wh,
-        const int samplesAA,
+        const vec3 eye, const vec3 center, vec2 uv, float fovy, float aspect, const ivec2 wh, const int samplesAA,
         
-        float cylALen, float cylARad, mat4 cylAMat,
-        vec2 coneBShape, float coneBHeight, mat4 coneBMat,
-        float cylCLen, float cylCRad, mat4 cylCMat,
-        vec3 boxDShape, mat4 boxDMat,
-        vec3 boxEShape, mat4 boxEMat,
-        vec2 prismFShape, mat4 prismFMat,
-        float cylGLen, float cylGRad, mat4 cylGMat,
-        vec3 boxHShape, mat4 boxHMat) {
+        float cylALen,      float cylARad,      mat4 cylAMat,
+        vec2 coneBShape,    float coneBHeight,  mat4 coneBMat,
+        float cylCLen,      float cylCRad,      mat4 cylCMat,
+        vec3 boxDShape,     mat4 boxDMat,
+        vec3 boxEShape,     mat4 boxEMat,
+        vec2 prismFShape,   mat4 prismFMat,
+        float cylGLen,      float cylGRad,      mat4 cylGMat,
+        vec3 boxHShape,     mat4 boxHMat) {
 
     const RaymarcherScene scene = { cylALen, cylARad, cylAMat,
                                     coneBShape, coneBHeight, coneBMat,
