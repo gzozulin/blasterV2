@@ -7,6 +7,7 @@ import com.gzozulin.minigl.tech.TextPage
 import com.gzozulin.minigl.tech.TextSpan
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.max
 
 const val LINES_TO_SHOW = 21
 const val FRAMES_TO_FINALIZE = 20000 / 16
@@ -15,7 +16,7 @@ data class OrderedSpan(override var text: String, val order: Int, override var c
                        override var visibility: SpanVisibility) : TextSpan
 
 enum class AnimationState {
-    FIND_KEY, SYNC_UP, SCROLLING, MAKE_SPACE, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
+    FIND_KEY, SCROLLING, PREPARE, SYNC_UP, NEXT_ORDER, ADVANCING, FINALIZING, FINISHED }
 
 class ProjectorModel(scenario: File) {
     private val projectScenario by lazy { ScenarioFile(text = scenario.readText()) }
@@ -61,8 +62,8 @@ class ProjectorModel(scenario: File) {
         currentFrame++
         when (animationState) {
             AnimationState.FIND_KEY   -> findKeyFrame()
+            AnimationState.PREPARE    -> prepareForOrder()
             AnimationState.SYNC_UP    -> syncWithKeyFrame()
-            AnimationState.MAKE_SPACE -> makeSpace()
             AnimationState.ADVANCING  -> advanceSpans()
             AnimationState.SCROLLING  -> scrollToPageCenter()
             AnimationState.NEXT_ORDER -> nextOrder()
@@ -73,21 +74,24 @@ class ProjectorModel(scenario: File) {
 
     private fun findKeyFrame() {
         findOrderKeyFrame()
+        animationState = AnimationState.PREPARE
+    }
+
+    private fun prepareForOrder() {
+        findCurrentPage()
+        currentPage.spans
+            .filter { it.order == currentOrder }
+            .forEach { it.visibility = SpanVisibility.INVISIBLE }
+        val frames = max(nextKeyFrame - currentFrame, 1)
+        val tokenCount = findInvisibleSpans().count()
+        wordsPerTick = max((tokenCount.toFloat() / frames.toFloat()).toInt(), 1)
         animationState = AnimationState.SYNC_UP
     }
 
     private fun syncWithKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.MAKE_SPACE
+            animationState = AnimationState.ADVANCING
         }
-    }
-
-    private fun makeSpace() {
-        findCurrentPage()
-        currentPage.spans
-            .filter { it.order == currentOrder }
-            .forEach { it.visibility = SpanVisibility.INVISIBLE }
-        animationState = AnimationState.ADVANCING
     }
 
     private fun advanceSpans() {
@@ -133,12 +137,15 @@ class ProjectorModel(scenario: File) {
         }
     }
 
-    private fun findNextInvisibleSpan() =
-        currentPage.spans.firstOrNull {
+    private fun findInvisibleSpans() =
+        currentPage.spans.filter {
             it.order == currentOrder &&
             it.visibility == SpanVisibility.INVISIBLE &&
             it.text.isNotBlank()
         }
+
+    private fun findNextInvisibleSpan() =
+        findInvisibleSpans().firstOrNull()
 
     private fun checkNeedToScroll(span: OrderedSpan): Boolean {
         val newCenter = currentPage.findLineNo(span)
