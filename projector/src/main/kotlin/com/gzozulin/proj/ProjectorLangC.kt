@@ -9,6 +9,9 @@ import com.gzozulin.minigl.tech.SpanVisibility
 import org.antlr.v4.runtime.*
 import java.io.File
 
+private const val KEYWORD_PUBLIC = "public"
+private const val KEYWORD_PROTECTED = "protected"
+
 // ------------------------ PARSING -----------------------
 
 private typealias CDeclCtx = CParser.ExternalDeclarationContext
@@ -56,29 +59,31 @@ private class CDeclVisitor(private val nodes: List<ScenarioNode>,
         nodes.filter { it.path[0] == decl.identifier() } // no inlays
 
     private fun define(decl: CDeclCtx, matching: List<ScenarioNode>) {
-        result.invoke(decl.define(tokens, CParser.Whitespace, CParser.Newline).withOrder(matching.first().order))
+        result.invoke(decl
+            .define(tokens, CParser.Whitespace, CParser.Newline)
+            .filterPrivateCKeywords()
+            .withOrder(matching.first().order))
         claimed.add(matching.first())
     }
 }
 
-private fun CDeclCtx.identifier(): String {
-    // struct
-    try {
-        return declaration()
-            .declarationSpecifiers()
-            .declarationSpecifier()[2]
-            .text
-    } catch (th: Throwable) { }
+private fun List<Token>.filterPrivateCKeywords(): List<Token> {
+    val result = mutableListOf<Token>()
+    var removeNextNL = false
+    for (token in this) {
+        if (token.text == KEYWORD_PUBLIC || token.text == KEYWORD_PROTECTED) {
+            removeNextNL = true
+        } else if (removeNextNL && token.text == "\n") {
+            removeNextNL = false
+        } else {
+            result.add(token)
+        }
+    }
+    return result
+}
 
-    // function
-    try {
-        return functionDefinition()
-            .declarator()
-            .directDeclarator()
-            .directDeclarator()
-            .Identifier()
-            .text
-    } catch (th: Throwable) { }
+//TODO: messy
+private fun CDeclCtx.identifier(): String {
 
     // constant
     try {
@@ -91,6 +96,36 @@ private fun CDeclCtx.identifier(): String {
             text = text.removeRange(text.indexOf('['), text.indexOf(']') + 1)
         }
         return text
+    } catch (th: Throwable) { }
+
+    // struct
+    try {
+        val typedef = declaration()
+            .declarationSpecifiers()
+            .declarationSpecifier()[1]
+            .text
+
+        if (typedef == "typedef") {
+            return declaration()
+                .declarationSpecifiers()
+                .declarationSpecifier()[3]
+                .text
+        } else {
+            return declaration()
+                .declarationSpecifiers()
+                .declarationSpecifier()[2]
+                .text
+        }
+    } catch (th: Throwable) { }
+
+    // function
+    try {
+        return functionDefinition()
+            .declarator()
+            .directDeclarator()
+            .directDeclarator()
+            .Identifier()
+            .text
     } catch (th: Throwable) { }
 
     error("Unknown declaration! $text")

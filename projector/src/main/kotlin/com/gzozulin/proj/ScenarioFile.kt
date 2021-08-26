@@ -38,9 +38,10 @@ class ScenarioFile(private val text: String) {
         val lines = text.lines().filter { it.isNotBlank() && !it.startsWith("#") }
         for (line in lines) {
             when {
+                line.startsWith("//")     -> continue
                 line.startsWith("offset") -> parseOffset(line)
                 line.startsWith("alias")  -> parseAlias(line)
-                else                      -> parseNode(line)
+                else                            -> parseNode(line)
             }
         }
         return
