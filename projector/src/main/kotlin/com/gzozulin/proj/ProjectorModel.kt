@@ -9,7 +9,6 @@ import java.io.File
 import kotlin.math.abs
 
 const val LINES_TO_SHOW = 21
-const val FRAMES_PER_UPDATE = 2
 const val FRAMES_TO_FINALIZE = 20000 / 16
 
 data class OrderedSpan(override var text: String, val order: Int, override var color: col3,
@@ -31,6 +30,7 @@ class ProjectorModel(scenario: File) {
     private var currentFrame = 0
     private var currentOrder = 0
     private var nextKeyFrame = 0
+    private var wordsPerTick = 100
     private var lastFrame    = 0
 
     var currentPageCenter = 0
@@ -71,8 +71,6 @@ class ProjectorModel(scenario: File) {
         }
     }
 
-    private fun isNextTick() = currentFrame % FRAMES_PER_UPDATE == 0
-
     private fun findKeyFrame() {
         findOrderKeyFrame()
         animationState = AnimationState.SYNC_UP
@@ -93,24 +91,27 @@ class ProjectorModel(scenario: File) {
     }
 
     private fun advanceSpans() {
-        if (isNextTick()) {
+        for(i in 0 until wordsPerTick) {
             val found = findNextInvisibleSpan()
-            if (found != null) {
-                showNextInvisibleSpan(found)
-                updateMinimapCenter(found)
-            } else {
+            if (found == null) {
                 animationState = AnimationState.NEXT_ORDER
+                break
+            }
+            updateMinimapCenter(found)
+            if (checkNeedToScroll(found)) {
+                animationState = AnimationState.SCROLLING
+                return
+            } else {
+                found.visibility = SpanVisibility.VISIBLE
             }
         }
     }
 
     private fun scrollToPageCenter() {
-        if (isNextTick()) {
-            when {
-                nextPageCenter > currentPageCenter -> currentPageCenter++
-                nextPageCenter < currentPageCenter -> currentPageCenter--
-                else -> animationState = AnimationState.ADVANCING
-            }
+        when {
+            nextPageCenter > currentPageCenter -> currentPageCenter++
+            nextPageCenter < currentPageCenter -> currentPageCenter--
+            else -> animationState = AnimationState.ADVANCING
         }
     }
 
@@ -139,17 +140,16 @@ class ProjectorModel(scenario: File) {
             it.text.isNotBlank()
         }
 
-    private fun showNextInvisibleSpan(span: OrderedSpan) {
+    private fun checkNeedToScroll(span: OrderedSpan): Boolean {
         val newCenter = currentPage.findLineNo(span)
         val delta = newCenter - currentPageCenter
         if (abs(delta) >= LINES_TO_SHOW) {
             nextPageCenter += delta - (LINES_TO_SHOW - 1)
             if (currentPageCenter != nextPageCenter) {
-                animationState = AnimationState.SCROLLING
-                return // need to scroll first
+                return true
             }
         }
-        span.visibility = SpanVisibility.VISIBLE
+        return false
     }
 
     private fun updateMinimapCenter(span: OrderedSpan) {

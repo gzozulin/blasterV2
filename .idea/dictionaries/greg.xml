@@ -12,6 +12,7 @@
       <w>capturer</w>
       <w>cfile</w>
       <w>cfiles</w>
+      <w>clampf</w>
       <w>compil</w>
       <w>constf</w>
       <w>consti</w>
@@ -25,6 +26,8 @@
       <w>decl</w>
       <w>defn</w>
       <w>divf</w>
+      <w>divv</w>
+      <w>dotv</w>
       <w>dtau</w>
       <w>eqexp</w>
       <w>ffactor</w>
@@ -40,9 +43,11 @@
       <w>hitables</w>
       <w>identificatior</w>
       <w>ifexp</w>
+      <w>itof</w>
       <w>ivec</w>
       <w>lambertian</w>
       <w>lambertians</w>
+      <w>lenv</w>
       <w>metallics</w>
       <w>mmodel</w>
       <w>moreexp</w>
@@ -73,6 +78,7 @@
       <w>shaderlang</w>
       <w>sinv</w>
       <w>smoothstep</w>
+      <w>sqrtv</w>
       <w>subf</w>
       <w>subv</w>
       <w>templ</w>
