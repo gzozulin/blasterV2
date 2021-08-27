@@ -63,8 +63,8 @@ class ProjectorModel(scenario: File) {
         when (animationState) {
             AnimationState.FIND_KEY   -> findKeyFrame()
             AnimationState.PREPARE    -> prepareForOrder()
-            AnimationState.SYNC_UP    -> syncWithKeyFrame()
             AnimationState.ADVANCING  -> advanceSpans()
+            AnimationState.SYNC_UP    -> syncWithKeyFrame()
             AnimationState.SCROLLING  -> scrollToPageCenter()
             AnimationState.NEXT_ORDER -> nextOrder()
             AnimationState.FINALIZING -> finalizingCapture()
@@ -85,12 +85,20 @@ class ProjectorModel(scenario: File) {
         val frames = max(nextKeyFrame - currentFrame, 1)
         val tokenCount = findInvisibleSpans().count()
         wordsPerTick = max((tokenCount.toFloat() / frames.toFloat()).toInt(), 1)
-        animationState = AnimationState.SYNC_UP
+        findNextPageCenter()
+        animationState = AnimationState.SCROLLING
+    }
+
+    private fun findNextPageCenter() {
+        val spans = findInvisibleSpans()
+        val firstLine = currentPage.findLineNo(spans.first())
+        val lastLine = currentPage.findLineNo(spans.last())
+        nextPageCenter = firstLine + (lastLine - firstLine) / 2
     }
 
     private fun syncWithKeyFrame() {
         if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.ADVANCING
+            animationState = AnimationState.NEXT_ORDER
         }
     }
 
@@ -98,16 +106,11 @@ class ProjectorModel(scenario: File) {
         for(i in 0 until wordsPerTick) {
             val found = findNextInvisibleSpan()
             if (found == null) {
-                animationState = AnimationState.NEXT_ORDER
+                animationState = AnimationState.SYNC_UP
                 break
             }
             updateMinimapCenter(found)
-            if (checkNeedToScroll(found)) {
-                animationState = AnimationState.SCROLLING
-                return
-            } else {
-                found.visibility = SpanVisibility.VISIBLE
-            }
+            found.visibility = SpanVisibility.VISIBLE
         }
     }
 
@@ -146,18 +149,6 @@ class ProjectorModel(scenario: File) {
 
     private fun findNextInvisibleSpan() =
         findInvisibleSpans().firstOrNull()
-
-    private fun checkNeedToScroll(span: OrderedSpan): Boolean {
-        val newCenter = currentPage.findLineNo(span)
-        val delta = newCenter - currentPageCenter
-        if (abs(delta) >= LINES_TO_SHOW) {
-            nextPageCenter += delta - (LINES_TO_SHOW - 1)
-            if (currentPageCenter != nextPageCenter) {
-                return true
-            }
-        }
-        return false
-    }
 
     private fun updateMinimapCenter(span: OrderedSpan) {
         currentMinimapCenter = minimapPage.findLineNo(span)
