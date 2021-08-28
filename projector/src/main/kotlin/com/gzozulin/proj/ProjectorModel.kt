@@ -6,7 +6,6 @@ import com.gzozulin.minigl.tech.SpanVisibility
 import com.gzozulin.minigl.tech.TextPage
 import com.gzozulin.minigl.tech.TextSpan
 import java.io.File
-import kotlin.math.abs
 import kotlin.math.max
 
 const val LINES_TO_SHOW = 21
@@ -30,7 +29,7 @@ class ProjectorModel(scenario: File) {
 
     private var currentFrame = 0
     private var currentOrder = 0
-    private var nextKeyFrame = 0
+    private var currentKeyFrame = 0
     private var wordsPerTick = 100
     private var lastFrame    = 0
 
@@ -62,10 +61,10 @@ class ProjectorModel(scenario: File) {
         currentFrame++
         when (animationState) {
             AnimationState.FIND_KEY   -> findKeyFrame()
-            AnimationState.PREPARE    -> prepareForOrder()
-            AnimationState.ADVANCING  -> advanceSpans()
             AnimationState.SYNC_UP    -> syncWithKeyFrame()
+            AnimationState.PREPARE    -> prepareForOrder()
             AnimationState.SCROLLING  -> scrollToPageCenter()
+            AnimationState.ADVANCING  -> advanceSpans()
             AnimationState.NEXT_ORDER -> nextOrder()
             AnimationState.FINALIZING -> finalizingCapture()
             AnimationState.FINISHED   -> {}
@@ -73,8 +72,8 @@ class ProjectorModel(scenario: File) {
     }
 
     private fun findKeyFrame() {
-        findOrderKeyFrame()
-        animationState = AnimationState.PREPARE
+        currentKeyFrame = findOrderKeyFrame(currentOrder)
+        animationState = AnimationState.SYNC_UP
     }
 
     private fun prepareForOrder() {
@@ -82,9 +81,19 @@ class ProjectorModel(scenario: File) {
         currentPage.spans
             .filter { it.order == currentOrder }
             .forEach { it.visibility = SpanVisibility.INVISIBLE }
-        val frames = max(nextKeyFrame - currentFrame, 1)
+
+        // todo: doesn't account for scrolling
+        val nextOrder = getNextOrder()
+        val haveFrames: Int
+        if (nextOrder != null) {
+            val nextKeyFrame = findOrderKeyFrame(nextOrder)
+            haveFrames = max(nextKeyFrame - currentKeyFrame, 1)
+        } else {
+            haveFrames = FRAMES_TO_FINALIZE
+        }
         val tokenCount = findInvisibleSpans().count()
-        wordsPerTick = max((tokenCount.toFloat() / frames.toFloat()).toInt(), 1)
+        wordsPerTick = max((tokenCount.toFloat() / haveFrames.toFloat()).toInt(), 1)
+
         findNextPageCenter()
         animationState = AnimationState.SCROLLING
     }
@@ -97,8 +106,8 @@ class ProjectorModel(scenario: File) {
     }
 
     private fun syncWithKeyFrame() {
-        if (currentFrame >= nextKeyFrame) {
-            animationState = AnimationState.NEXT_ORDER
+        if (currentFrame >= currentKeyFrame) {
+            animationState = AnimationState.PREPARE
         }
     }
 
@@ -106,7 +115,7 @@ class ProjectorModel(scenario: File) {
         for(i in 0 until wordsPerTick) {
             val found = findNextInvisibleSpan()
             if (found == null) {
-                animationState = AnimationState.SYNC_UP
+                animationState = AnimationState.NEXT_ORDER
                 break
             }
             updateMinimapCenter(found)
@@ -122,10 +131,20 @@ class ProjectorModel(scenario: File) {
         }
     }
 
+    private fun getNextOrder(): Int? {
+        val nextOrder = currentOrder + 1
+        if (nextOrder != projectScenario.scenario.size) {
+            return nextOrder
+        } else {
+            return null
+        }
+    }
+
     private fun nextOrder() {
-        currentOrder++
-        if (currentOrder != projectScenario.scenario.size) {
+        val nextOrder = getNextOrder()
+        if (nextOrder != null) {
             animationState = AnimationState.FIND_KEY
+            currentOrder = nextOrder
         } else {
             animationState = AnimationState.FINALIZING
         }
@@ -166,11 +185,10 @@ class ProjectorModel(scenario: File) {
         error("Next page not found!")
     }
 
-    private fun findOrderKeyFrame() {
+    private fun findOrderKeyFrame(order: Int): Int {
         for (scenarioNode in projectScenario.scenario) {
-            if (scenarioNode.order == currentOrder) {
-                nextKeyFrame = scenarioNode.frame
-                return
+            if (scenarioNode.order == order) {
+                return scenarioNode.frame
             }
         }
         error("Key frame not found!")
