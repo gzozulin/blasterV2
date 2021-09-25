@@ -128,7 +128,7 @@ private fun CDeclCtx.identifier(): String {
             .text
     } catch (th: Throwable) { }
 
-    error("Unknown declaration! $text")
+    return text
 }
 
 // ------------------------ HIGHLIGHTING -----------------------

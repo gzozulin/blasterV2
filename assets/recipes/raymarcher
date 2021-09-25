@@ -1,4 +1,4 @@
-samplesAA:      3
+samplesAA:      1
 
 pi:             3.1415
 piHalf:         divf pi 2f

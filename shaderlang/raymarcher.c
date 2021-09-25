@@ -11,7 +11,7 @@ public
 const float MAX_DIST = 100.0f;
 
 public
-const float SURF_DIST = 0.01f;
+const float MIN_DIST = 0.01f;
 
 public
 typedef struct RaymarcherScene {
@@ -71,7 +71,7 @@ float rayMarch(const vec3 ro, const vec3 rd, const RaymarcherScene scene) {
         const vec3 p = addv3(ro, mulv3f(rd, dO));
         const float dS = sceneDist(p, scene);
         dO += dS;
-        if(dO > MAX_DIST || dS < SURF_DIST) break;
+        if(dO > MAX_DIST || dS < MIN_DIST) break;
     }
     return dO;
 }
@@ -80,9 +80,9 @@ protected
 vec3 getNormal(const vec3 p, const RaymarcherScene scene) {
     const float d = sceneDist(p, scene);
     const vec3 n = subv3(ftov3(d), v3(
-            sceneDist(v3(p.x - 0.01f, p.y,         p.z),         scene),
-            sceneDist(v3(p.x,         p.y - 0.01f, p.z),         scene),
-            sceneDist(v3(p.x,         p.y,         p.z - 0.01f), scene)));
+            sceneDist(v3(p.x - MIN_DIST, p.y,            p.z),            scene),
+            sceneDist(v3(p.x,            p.y - MIN_DIST, p.z),            scene),
+            sceneDist(v3(p.x,            p.y,            p.z - MIN_DIST), scene)));
     return normv3(n);
 }
 
@@ -92,7 +92,7 @@ float getLight(const vec3 p, const vec3 eye, const RaymarcherScene scene) {
     const vec3 n = getNormal(p, scene);
 
     float a = clampf(dotv3(n, l), 0.0f, 1.0f);
-    float d = rayMarch(addv3(p, mulv3f(n, SURF_DIST * 2.0f)), l, scene);
+    float d = rayMarch(addv3(p, mulv3f(n, MIN_DIST * 2.0f)), l, scene);
     if(d < lenv3(subv3(eye, p))) a *= 0.1f;
 
     return a;
